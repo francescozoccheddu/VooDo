@@ -1,0 +1,199 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{D4B3D28F-7B0F-4A86-81D2-9D88C2CE3E5F}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>BS</RootNamespace>
+    <AssemblyName>BindScript</AssemblyName>
+    <DefaultLanguage>en-US</DefaultLanguage>
+    <TargetPlatformIdentifier>UAP</TargetPlatformIdentifier>
+    <TargetPlatformVersion Condition=" '$(TargetPlatformVersion)' == '' ">10.0.19041.0</TargetPlatformVersion>
+    <TargetPlatformMinVersion>10.0.19041.0</TargetPlatformMinVersion>
+    <MinimumVisualStudioVersion>14</MinimumVisualStudioVersion>
+    <FileAlignment>512</FileAlignment>
+    <ProjectTypeGuids>{A5A43C5B-DE2A-4C0C-9213-0A381AF9435A};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE;NETFX_CORE;WINDOWS_UWP</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE;NETFX_CORE;WINDOWS_UWP</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
+    <PlatformTarget>x86</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x86\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE;NETFX_CORE;WINDOWS_UWP</DefineConstants>
+    <NoWarn>;2008</NoWarn>
+    <DebugType>full</DebugType>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+    <ErrorReport>prompt</ErrorReport>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
+    <PlatformTarget>x86</PlatformTarget>
+    <OutputPath>bin\x86\Release\</OutputPath>
+    <DefineConstants>TRACE;NETFX_CORE;WINDOWS_UWP</DefineConstants>
+    <Optimize>true</Optimize>
+    <NoWarn>;2008</NoWarn>
+    <DebugType>pdbonly</DebugType>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+    <ErrorReport>prompt</ErrorReport>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|ARM'">
+    <PlatformTarget>ARM</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\ARM\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE;NETFX_CORE;WINDOWS_UWP</DefineConstants>
+    <NoWarn>;2008</NoWarn>
+    <DebugType>full</DebugType>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+    <ErrorReport>prompt</ErrorReport>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|ARM'">
+    <PlatformTarget>ARM</PlatformTarget>
+    <OutputPath>bin\ARM\Release\</OutputPath>
+    <DefineConstants>TRACE;NETFX_CORE;WINDOWS_UWP</DefineConstants>
+    <Optimize>true</Optimize>
+    <NoWarn>;2008</NoWarn>
+    <DebugType>pdbonly</DebugType>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+    <ErrorReport>prompt</ErrorReport>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|ARM64'">
+    <PlatformTarget>ARM64</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\ARM64\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE;NETFX_CORE;WINDOWS_UWP</DefineConstants>
+    <NoWarn>;2008</NoWarn>
+    <DebugType>full</DebugType>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+    <ErrorReport>prompt</ErrorReport>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|ARM64'">
+    <PlatformTarget>ARM64</PlatformTarget>
+    <OutputPath>bin\ARM64\Release\</OutputPath>
+    <DefineConstants>TRACE;NETFX_CORE;WINDOWS_UWP</DefineConstants>
+    <Optimize>true</Optimize>
+    <NoWarn>;2008</NoWarn>
+    <DebugType>pdbonly</DebugType>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+    <ErrorReport>prompt</ErrorReport>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+    <PlatformTarget>x64</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x64\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE;NETFX_CORE;WINDOWS_UWP</DefineConstants>
+    <NoWarn>;2008</NoWarn>
+    <DebugType>full</DebugType>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+    <ErrorReport>prompt</ErrorReport>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+    <PlatformTarget>x64</PlatformTarget>
+    <OutputPath>bin\x64\Release\</OutputPath>
+    <DefineConstants>TRACE;NETFX_CORE;WINDOWS_UWP</DefineConstants>
+    <Optimize>true</Optimize>
+    <NoWarn>;2008</NoWarn>
+    <DebugType>pdbonly</DebugType>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+    <ErrorReport>prompt</ErrorReport>
+  </PropertyGroup>
+  <PropertyGroup>
+    <RestoreProjectStyle>PackageReference</RestoreProjectStyle>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="BS\AST\Expressions\Literals\NullLitExpr.cs" />
+    <Compile Include="BS\AST\Expressions\QualifiedName.cs" />
+    <Compile Include="BS\AST\Expressions\Name.cs" />
+    <Compile Include="BS\AST\Expressions\ArgList.cs" />
+    <Compile Include="BS\AST\Expressions\Operators\Fundamentals\CallOpExpr.cs" />
+    <Compile Include="BS\AST\Expressions\Operators\Comparisons\LeOpExpr.cs" />
+    <Compile Include="BS\AST\Expressions\Operators\Comparisons\LtOpExpr.cs" />
+    <Compile Include="BS\AST\Expressions\Operators\Comparisons\GeOpExpr.cs" />
+    <Compile Include="BS\AST\Expressions\Operators\Comparisons\GtOpExpr.cs" />
+    <Compile Include="BS\AST\Expressions\Operators\Comparisons\NeqOpExpr.cs" />
+    <Compile Include="BS\AST\Expressions\Operators\Comparisons\EqOpExpr.cs" />
+    <Compile Include="BS\AST\Expressions\Operators\Operations\NotOpExpr.cs" />
+    <Compile Include="BS\AST\Expressions\Operators\Operations\NegOpExpr.cs" />
+    <Compile Include="BS\AST\Expressions\Operators\Fundamentals\MemberOpExpr.cs" />
+    <Compile Include="BS\AST\Expressions\Operators\Fundamentals\EaseOpExpr.cs" />
+    <Compile Include="BS\AST\Expressions\Operators\Operations\ProdOpExpr.cs" />
+    <Compile Include="BS\AST\Expressions\Operators\Operations\FractOpExpr.cs" />
+    <Compile Include="BS\AST\Expressions\Operators\Operations\AndOpExpr.cs" />
+    <Compile Include="BS\AST\Expressions\Operators\Operations\OrOpExpr.cs" />
+    <Compile Include="BS\AST\Expressions\Operators\Operations\DiffOpExpr.cs" />
+    <Compile Include="BS\AST\Expressions\Operators\Operations\SumOpExpr.cs" />
+    <Compile Include="BS\AST\Expressions\Operators\Fundamentals\SubscriptOpExpr.cs" />
+    <Compile Include="BS\AST\Expressions\Operators\Fundamentals\CastOpExpr.cs" />
+    <Compile Include="BS\AST\Expressions\Operators\BinaryOpExpr.cs" />
+    <Compile Include="BS\AST\Expressions\Operators\UnaryOpExpr.cs" />
+    <Compile Include="BS\AST\Expressions\VarExpr.cs" />
+    <Compile Include="BS\AST\Expressions\Expr.cs" />
+    <Compile Include="BS\AST\Expressions\Literals\BoolLitExpr.cs" />
+    <Compile Include="BS\AST\Expressions\Literals\StringLitExpr.cs" />
+    <Compile Include="BS\AST\Expressions\Literals\RealLitExpr.cs" />
+    <Compile Include="BS\AST\Expressions\Literals\LitExpr.cs" />
+    <Compile Include="BS\AST\Expressions\Literals\IntLitExpr.cs" />
+    <Compile Include="BS\AST\Statements\SequenceStat.cs" />
+    <Compile Include="BS\AST\Statements\ForStat.cs" />
+    <Compile Include="BS\AST\Statements\WhileStat.cs" />
+    <Compile Include="BS\AST\Statements\IfStat.cs" />
+    <Compile Include="BS\AST\Statements\AssignmentStat.cs" />
+    <Compile Include="BS\AST\Statements\Stat.cs" />
+    <Compile Include="BS\AST\Syntax.cs" />
+    <Compile Include="BS\Exceptions\Ensure.cs" />
+    <Compile Include="BS\Exceptions\Runtime\Expressions\Assignment\TypeError.cs" />
+    <Compile Include="BS\Exceptions\Runtime\Expressions\Assignment\ReadOnlyError.cs" />
+    <Compile Include="BS\Exceptions\Runtime\Expressions\Assignment\UnassignableError.cs" />
+    <Compile Include="BS\Exceptions\Runtime\Expressions\Assignment\AssignmentFailure.cs" />
+    <Compile Include="BS\Exceptions\Runtime\Expressions\EvaluationFailure.cs" />
+    <Compile Include="BS\Exceptions\Runtime\ProgramFailure.cs" />
+    <Compile Include="BS\Exceptions\Runtime\RuntimeFailure.cs" />
+    <Compile Include="BS\Exceptions\Runtime\StatementFailure.cs" />
+    <Compile Include="BS\Exceptions\SyntaxError.cs" />
+    <Compile Include="BS\Exceptions\BaseException.cs" />
+    <Compile Include="BS\Runtime\Env.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <EmbeddedResource Include="Properties\BindScript.rd.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NETCore.UniversalWindowsPlatform">
+      <Version>6.2.10</Version>
+    </PackageReference>
+    <PackageReference Include="sly">
+      <Version>2.6.2.2</Version>
+    </PackageReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="BS\Exceptions\Runtime\Statements\" />
+  </ItemGroup>
+  <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">
+    <VisualStudioVersion>14.0</VisualStudioVersion>
+  </PropertyGroup>
+  <Import Project="$(MSBuildExtensionsPath)\Microsoft\WindowsXaml\v$(VisualStudioVersion)\Microsoft.Windows.UI.Xaml.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
