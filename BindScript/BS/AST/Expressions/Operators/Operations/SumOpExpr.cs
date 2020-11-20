@@ -17,6 +17,8 @@ namespace BS.AST.Expressions.Operators.Operations
             throw new NotImplementedException();
         }
 
+        public sealed override int Priority => 4;
+        protected sealed override string m_OperatorSymbol => Syntax.Symbols.sumOp;
     }
 
 }

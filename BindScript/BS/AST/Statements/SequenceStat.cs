@@ -10,27 +10,25 @@ using System.Linq;
 
 namespace BS.AST.Statements
 {
-    public sealed class SequenceStat : Stat, IReadOnlyList<Stat>
+    public sealed class SequenceStat : Stat
     {
+
+        internal SequenceStat(params Stat[] _stats) : this((IEnumerable<Stat>) _stats)
+        {
+
+        }
 
         internal SequenceStat(IEnumerable<Stat> _stats)
         {
             Ensure.NonNull(_stats, nameof(_stats));
-            m_stats = _stats.ToArray();
+            Statements = new ReadOnlyCollection<Stat>(_stats.ToArray());
         }
 
-        private readonly Stat[] m_stats;
+        public IReadOnlyList<Stat> Statements { get; }
 
-        public int Count => m_stats.Length;
+        public sealed override string Code => Syntax.FormatSequenceStat(Statements.Select(_s => _s.Code));
 
-        public override string Code => Syntax.FormatGroupStat(m_stats.Select(_s => _s.Code));
-
-        public Stat this[int _index] => m_stats[_index];
-
-        public IEnumerator<Stat> GetEnumerator() => ((IEnumerable<Stat>) m_stats).GetEnumerator();
-        IEnumerator IEnumerable.GetEnumerator() => m_stats.GetEnumerator();
-
-        internal override void Run(Env _env) => throw new NotImplementedException();
+        internal sealed override void Run(Env _env) => throw new NotImplementedException();
 
     }
 }

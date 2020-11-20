@@ -21,6 +21,11 @@ namespace BS.AST.Expressions.Operators
 
         public Expr Argument { get; }
 
+        protected abstract string m_OperatorSymbol { get; }
+
+        public sealed override string Code
+            => Syntax.FormatUnaryOp(Argument.Priority > Priority ? Syntax.WrapExp(Argument.Code) : Argument.Code, m_OperatorSymbol);
+
     }
 
 }

@@ -24,10 +24,24 @@ namespace BS.AST.Statements
         public Stat ElseBody { get; }
         public bool HasElse => ElseBody != null;
 
-        public override string Code
-            => HasElse ? Syntax.FormatIfElseStat(Condition.Code, ThenBody.Code, ElseBody.Code) : Syntax.FormatIfStat(Condition.Code, ThenBody.Code);
+        public sealed override string Code
+        {
+            get
+            {
+                string thenBody = ThenBody is SequenceStat ? ThenBody.Code : Syntax.Indent(ThenBody.Code);
+                if (HasElse)
+                {
+                    string elseBody = ElseBody is SequenceStat ? ElseBody.Code : Syntax.Indent(ElseBody.Code);
+                    return Syntax.FormatIfElseStat(Condition.Code, thenBody, elseBody);
+                }
+                else
+                {
+                    return Syntax.FormatIfStat(Condition.Code, thenBody);
+                }
+            }
+        }
 
-        internal override void Run(Env _env) => throw new NotImplementedException();
+        internal sealed override void Run(Env _env) => throw new NotImplementedException();
 
     }
 }

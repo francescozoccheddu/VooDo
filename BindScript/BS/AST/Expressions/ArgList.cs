@@ -10,23 +10,16 @@ using System.Linq;
 namespace BS.AST.Expressions
 {
 
-    public sealed class ArgList : IReadOnlyList<Expr>
+    public sealed class ArgList : ReadOnlyCollection<Expr>, Syntax.ICode
     {
 
-        internal ArgList(IEnumerable<Expr> _arguments)
-        {
-            Ensure.NonNull(_arguments, nameof(_arguments));
-            m_arguments = _arguments.ToArray();
-        }
+        internal ArgList(params Expr[] _arguments) : this((IEnumerable<Expr>) _arguments)
+        { }
 
-        private readonly Expr[] m_arguments;
+        internal ArgList(IEnumerable<Expr> _arguments) : base(_arguments.ToArray())
+        { }
 
-        public int Count => m_arguments.Length;
-
-        public Expr this[int _index] => m_arguments[_index];
-
-        public IEnumerator<Expr> GetEnumerator() => ((IEnumerable<Expr>) m_arguments).GetEnumerator();
-        IEnumerator IEnumerable.GetEnumerator() => m_arguments.GetEnumerator();
+        public string Code => Syntax.FormatArgList(this.Select(_a => _a.Code));
 
     }
 

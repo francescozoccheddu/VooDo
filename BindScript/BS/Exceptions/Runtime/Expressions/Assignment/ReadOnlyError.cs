@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace BS.BS.Exceptions.Runtime.Expressions
 {
-    class AssignmentFailure
+    class ReadOnlyError
     {
     }
 }

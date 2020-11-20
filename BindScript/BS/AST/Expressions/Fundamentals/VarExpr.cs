@@ -1,13 +1,18 @@
 ﻿using System;
+using System.Linq;
 
 using BS.Exceptions;
 using BS.Runtime;
 
-namespace BS.AST.Expressions
+namespace BS.AST.Expressions.Fundamentals
 {
 
     public sealed class VarExpr : Expr
     {
+
+        internal VarExpr(Name _name) : this(new QualifiedName(_name))
+        {
+        }
 
         internal VarExpr(QualifiedName _name)
         {
@@ -27,6 +32,8 @@ namespace BS.AST.Expressions
             throw new NotImplementedException();
         }
 
+        public sealed override int Priority => 0;
+        public sealed override string Code => Name.Code;
     }
 
 }

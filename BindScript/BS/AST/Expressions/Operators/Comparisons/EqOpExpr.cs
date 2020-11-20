@@ -17,6 +17,9 @@ namespace BS.AST.Expressions.Operators.Comparisons
             throw new NotImplementedException();
         }
 
+        public sealed override int Priority => 6;
+
+        protected sealed override string m_OperatorSymbol => Syntax.Symbols.eqOp;
     }
 
 }

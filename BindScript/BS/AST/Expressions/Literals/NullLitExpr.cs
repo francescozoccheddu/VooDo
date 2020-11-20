@@ -9,6 +9,7 @@ namespace BS.AST.Expressions.Literals
         {
         }
 
+        public sealed override string Code => Syntax.Symbols.nullLit;
     }
 
 }

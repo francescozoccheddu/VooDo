@@ -21,9 +21,10 @@ namespace BS.AST.Statements
         public Expr Condition { get; }
         public Stat Body { get; }
 
-        public override string Code => Syntax.FormatWhileStat(Condition.Code, Body.Code);
+        public sealed override string Code
+            => Syntax.FormatWhileStat(Condition.Code, Body is SequenceStat ? Body.Code : Syntax.Indent(Body.Code));
 
-        internal override void Run(Env _env) => throw new NotImplementedException();
+        internal sealed override void Run(Env _env) => throw new NotImplementedException();
 
     }
 }

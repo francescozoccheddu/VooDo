@@ -40,7 +40,7 @@
     <PlatformTarget>x86</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <OutputPath>bin\x86\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE;NETFX_CORE;WINDOWS_UWP</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;NETFX_CORE;WINDOWS_UWP;BS_AST_EXPR_META</DefineConstants>
     <NoWarn>;2008</NoWarn>
     <DebugType>full</DebugType>
     <UseVSHostingProcess>false</UseVSHostingProcess>
@@ -124,7 +124,7 @@
     <Compile Include="BS\AST\Expressions\QualifiedName.cs" />
     <Compile Include="BS\AST\Expressions\Name.cs" />
     <Compile Include="BS\AST\Expressions\ArgList.cs" />
-    <Compile Include="BS\AST\Expressions\Operators\Fundamentals\CallOpExpr.cs" />
+    <Compile Include="BS\AST\Expressions\Fundamentals\CallOpExpr.cs" />
     <Compile Include="BS\AST\Expressions\Operators\Comparisons\LeOpExpr.cs" />
     <Compile Include="BS\AST\Expressions\Operators\Comparisons\LtOpExpr.cs" />
     <Compile Include="BS\AST\Expressions\Operators\Comparisons\GeOpExpr.cs" />
@@ -133,19 +133,19 @@
     <Compile Include="BS\AST\Expressions\Operators\Comparisons\EqOpExpr.cs" />
     <Compile Include="BS\AST\Expressions\Operators\Operations\NotOpExpr.cs" />
     <Compile Include="BS\AST\Expressions\Operators\Operations\NegOpExpr.cs" />
-    <Compile Include="BS\AST\Expressions\Operators\Fundamentals\MemberOpExpr.cs" />
-    <Compile Include="BS\AST\Expressions\Operators\Fundamentals\EaseOpExpr.cs" />
+    <Compile Include="BS\AST\Expressions\Fundamentals\MemberOpExpr.cs" />
+    <Compile Include="BS\AST\Expressions\Fundamentals\EaseOpExpr.cs" />
     <Compile Include="BS\AST\Expressions\Operators\Operations\ProdOpExpr.cs" />
     <Compile Include="BS\AST\Expressions\Operators\Operations\FractOpExpr.cs" />
     <Compile Include="BS\AST\Expressions\Operators\Operations\AndOpExpr.cs" />
     <Compile Include="BS\AST\Expressions\Operators\Operations\OrOpExpr.cs" />
     <Compile Include="BS\AST\Expressions\Operators\Operations\DiffOpExpr.cs" />
     <Compile Include="BS\AST\Expressions\Operators\Operations\SumOpExpr.cs" />
-    <Compile Include="BS\AST\Expressions\Operators\Fundamentals\SubscriptOpExpr.cs" />
-    <Compile Include="BS\AST\Expressions\Operators\Fundamentals\CastOpExpr.cs" />
+    <Compile Include="BS\AST\Expressions\Fundamentals\SubscriptExpr.cs" />
+    <Compile Include="BS\AST\Expressions\Fundamentals\CastOpExpr.cs" />
     <Compile Include="BS\AST\Expressions\Operators\BinaryOpExpr.cs" />
     <Compile Include="BS\AST\Expressions\Operators\UnaryOpExpr.cs" />
-    <Compile Include="BS\AST\Expressions\VarExpr.cs" />
+    <Compile Include="BS\AST\Expressions\Fundamentals\VarExpr.cs" />
     <Compile Include="BS\AST\Expressions\Expr.cs" />
     <Compile Include="BS\AST\Expressions\Literals\BoolLitExpr.cs" />
     <Compile Include="BS\AST\Expressions\Literals\StringLitExpr.cs" />

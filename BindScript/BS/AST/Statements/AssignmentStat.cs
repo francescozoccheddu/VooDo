@@ -21,9 +21,9 @@ namespace BS.AST.Statements
         public Expr Target { get; }
         public Expr Source { get; }
 
-        public override string Code => Syntax.FormatAssignStat(Target.Code, Source.Code);
+        public sealed override string Code => Syntax.FormatAssignStat(Target.Code, Source.Code);
 
-        internal override void Run(Env _env) => throw new NotImplementedException();
+        internal sealed override void Run(Env _env) => throw new NotImplementedException();
 
     }
 }

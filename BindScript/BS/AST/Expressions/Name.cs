@@ -6,7 +6,7 @@ using System;
 namespace BS.AST
 {
 
-    public sealed class Name
+    public sealed class Name : Syntax.ICode
     {
 
         public static implicit operator Name(string _name)
@@ -24,9 +24,11 @@ namespace BS.AST
 
         private readonly string m_name;
 
-        public override bool Equals(object _obj) => _obj is string other && other == m_name;
-        public override int GetHashCode() => m_name.GetHashCode();
-        public override string ToString() => m_name;
+        public string Code => this;
+
+        public sealed override bool Equals(object _obj) => _obj is string other && other == m_name;
+        public sealed override int GetHashCode() => m_name.GetHashCode();
+        public sealed override string ToString() => m_name;
 
     }
 

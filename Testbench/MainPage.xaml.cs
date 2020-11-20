@@ -1,4 +1,7 @@
-﻿using System;
+﻿using BS.AST;
+using BS.AST.Statements;
+
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -21,11 +24,8 @@ namespace BSTB
         public MainPage()
         {
             this.InitializeComponent();
+            m_outputBox.Text = Syntax.Test();
         }
 
-        private void inputBox_TextChanged(object _sender, TextChangedEventArgs _e)
-        {
-            m_outputBox.Text = m_inputBox.Text;
-        }
     }
 }

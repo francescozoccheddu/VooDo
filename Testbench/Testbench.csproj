@@ -155,6 +155,12 @@
       <Version>6.2.10</Version>
     </PackageReference>
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\BindScript\BindScript.csproj">
+      <Project>{d4b3d28f-7b0f-4a86-81d2-9d88c2ce3e5f}</Project>
+      <Name>BindScript</Name>
+    </ProjectReference>
+  </ItemGroup>
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">
     <VisualStudioVersion>14.0</VisualStudioVersion>
   </PropertyGroup>

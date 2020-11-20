@@ -14,6 +14,7 @@ namespace BS.AST.Expressions.Literals
             Ensure.NonNull(_value, nameof(_value));
         }
 
+        public sealed override string Code => Syntax.FormatLitExp(Literal);
     }
 
 }

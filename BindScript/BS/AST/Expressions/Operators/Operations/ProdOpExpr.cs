@@ -12,11 +12,15 @@ namespace BS.AST.Expressions.Operators.Operations
         {
         }
 
+
         internal sealed override object Evaluate(Env _env)
         {
             throw new NotImplementedException();
         }
 
+        public sealed override int Priority => 3;
+
+        protected sealed override string m_OperatorSymbol => Syntax.Symbols.prodOp;
     }
 
 }

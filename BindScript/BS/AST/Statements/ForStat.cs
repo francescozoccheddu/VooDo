@@ -10,23 +10,24 @@ namespace BS.AST.Statements
     public sealed class ForStat : Stat
     {
 
-        internal ForStat(Name _target, Expr _source, Stat _body)
+        internal ForStat(Expr _target, Expr _source, Stat _body)
         {
             Ensure.NonNull(_target, nameof(_target));
             Ensure.NonNull(_source, nameof(_source));
             Ensure.NonNull(_body, nameof(_body));
-            TargetName = _target;
+            Target = _target;
             Source = _source;
             Body = _body;
         }
 
-        public Name TargetName { get; }
+        public Expr Target { get; }
         public Expr Source { get; }
         public Stat Body { get; }
 
-        public override string Code => Syntax.FormatForStat(TargetName, Source.Code, Body.Code);
+        public sealed override string Code
+            => Syntax.FormatForStat(Target.Code, Source.Code, Body is SequenceStat ? Body.Code : Syntax.Indent(Body.Code));
 
-        internal override void Run(Env _env) => throw new NotImplementedException();
+        internal sealed override void Run(Env _env) => throw new NotImplementedException();
 
     }
 }

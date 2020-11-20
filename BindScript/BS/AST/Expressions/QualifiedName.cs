@@ -10,14 +10,20 @@ using System.Linq;
 namespace BS.AST
 {
 
-    public sealed class QualifiedName : IReadOnlyList<Name>
+    public sealed class QualifiedName : Syntax.ICode
     {
+
+        public static implicit operator QualifiedName(Name _base) => new QualifiedName(_base);
+
+        internal QualifiedName(Name _base) : this(new Name[] { _base }) { }
+
+        internal QualifiedName(params Name[] _path) : this((IEnumerable<Name>) _path) { }
 
         internal QualifiedName(IEnumerable<Name> _path)
         {
             Ensure.NonNull(_path, nameof(_path));
             m_path = _path.ToArray();
-            if (Count < 1)
+            if (m_path.Length < 1)
             {
                 throw new ArgumentException("Empty name list", nameof(_path));
             }
@@ -25,16 +31,12 @@ namespace BS.AST
 
         private readonly Name[] m_path;
 
-        public bool IsQualified => Count > 1;
-        public Name Final => this.Last();
-        public IEnumerable<Name> Path => this.SkipLast(1);
+        public bool IsQualified => m_path.Length > 1;
+        public Name BaseName => m_path.Last();
+        public IEnumerable<Name> NameSpace => m_path.SkipLast(1);
 
-        public int Count => m_path.Length;
+        public string Code => Syntax.FormatQualName(m_path.Select(_s => _s.Code));
 
-        public Name this[int _index] => m_path[_index];
-
-        public IEnumerator<Name> GetEnumerator() => ((IEnumerable<Name>) m_path).GetEnumerator();
-        IEnumerator IEnumerable.GetEnumerator() => m_path.GetEnumerator();
     }
 
 }

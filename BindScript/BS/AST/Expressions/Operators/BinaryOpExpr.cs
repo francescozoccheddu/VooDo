@@ -24,6 +24,14 @@ namespace BS.AST.Expressions.Operators
         public Expr LeftArgument { get; }
         public Expr RightArgument { get; }
 
+        protected abstract string m_OperatorSymbol { get; }
+
+        public sealed override string Code
+            => Syntax.FormatBinaryOp
+            (LeftArgument.Priority > Priority ? Syntax.WrapExp(LeftArgument.Code) : LeftArgument.Code,
+            RightArgument.Priority >= Priority ? Syntax.WrapExp(RightArgument.Code) : RightArgument.Code,
+                m_OperatorSymbol);
+
     }
 
 }

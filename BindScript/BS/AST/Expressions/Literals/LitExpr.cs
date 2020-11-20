@@ -14,6 +14,8 @@ namespace BS.AST.Expressions.Literals
 
         public T Literal { get; }
 
+        public sealed override int Priority => 0;
+
         internal sealed override object Evaluate(Env _env) => Literal;
 
     }
