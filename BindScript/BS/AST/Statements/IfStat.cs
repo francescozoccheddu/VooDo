@@ -2,6 +2,7 @@
 using BS.AST.Expressions;
 using BS.Exceptions;
 using BS.Runtime;
+using BS.Utils;
 
 using System;
 
@@ -24,6 +25,14 @@ namespace BS.AST.Statements
         public Stat ElseBody { get; }
         public bool HasElse => ElseBody != null;
 
+        #region Stat
+
+        internal sealed override void Run(Env _env) => throw new NotImplementedException();
+
+        #endregion
+
+        #region ASTBase
+
         public sealed override string Code
         {
             get
@@ -41,7 +50,13 @@ namespace BS.AST.Statements
             }
         }
 
-        internal sealed override void Run(Env _env) => throw new NotImplementedException();
+        public sealed override bool Equals(object _obj)
+            => _obj is IfStat stat && Condition.Equals(Condition) && ThenBody.Equals(stat.ThenBody) && Hash.AreEqual(ElseBody, stat.ElseBody);
+
+        public sealed override int GetHashCode()
+            => Hash.Combine(Condition, ThenBody, ElseBody);
+
+        #endregion
 
     }
 }

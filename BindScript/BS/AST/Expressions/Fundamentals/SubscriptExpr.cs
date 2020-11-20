@@ -2,6 +2,7 @@
 
 using BS.Exceptions;
 using BS.Runtime;
+using BS.Utils;
 
 namespace BS.AST.Expressions.Fundamentals
 {
@@ -20,6 +21,8 @@ namespace BS.AST.Expressions.Fundamentals
         public Expr Indexable { get; }
         public Expr Index { get; }
 
+        #region Expr
+
         internal sealed override object Evaluate(Env _env)
         {
             throw new NotImplementedException();
@@ -34,6 +37,19 @@ namespace BS.AST.Expressions.Fundamentals
 
         public sealed override string Code
             => Syntax.FormatSubsExp(Indexable.Priority > Priority ? Syntax.WrapExp(Indexable.Code) : Indexable.Code, Index.Code);
+
+        #endregion
+
+        #region ASTBase
+
+        public sealed override bool Equals(object _obj)
+            => _obj is SubscriptExpr expr && Indexable.Equals(expr.Indexable) && Index.Equals(expr.Index);
+
+        public sealed override int GetHashCode()
+            => Hash.Combine(Indexable, Index);
+
+        #endregion
+
     }
 
 }

@@ -9,7 +9,12 @@ namespace BS.AST.Expressions.Literals
         {
         }
 
+        #region Expr
+
         public sealed override string Code => Syntax.FormatLitExp(Literal);
+
+        #endregion
+
     }
 
 }

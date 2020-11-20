@@ -2,6 +2,7 @@
 
 using BS.Exceptions;
 using BS.Runtime;
+using BS.Utils;
 
 namespace BS.AST.Expressions.Fundamentals
 {
@@ -20,6 +21,8 @@ namespace BS.AST.Expressions.Fundamentals
         public Expr Target { get; }
         public Name Name { get; }
 
+        #region Expr
+
         internal sealed override object Evaluate(Env _env)
         {
             throw new NotImplementedException();
@@ -34,6 +37,19 @@ namespace BS.AST.Expressions.Fundamentals
 
         public sealed override string Code
             => Syntax.FormatMemberExp(Target.Priority > Priority ? Syntax.WrapExp(Target.Code) : Target.Code, Name.Code);
+
+        #endregion
+
+        #region ASTBase
+
+        public sealed override bool Equals(object _obj)
+            => _obj is MemberExpr expr && Target.Equals(expr.Target) && Name.Equals(expr.Name);
+
+        public sealed override int GetHashCode()
+            => Hash.Combine(Target, Name);
+
+        #endregion
+
     }
 
 }

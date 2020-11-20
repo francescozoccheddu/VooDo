@@ -5,20 +5,25 @@ using BS.AST.Expressions.Operators.Comparisons;
 using BS.AST.Expressions.Operators.Operations;
 using BS.Exceptions.Runtime.Expressions;
 using BS.Runtime;
+using BS.Utils;
 
 namespace BS.AST.Expressions
 {
 
-    public abstract class Expr : Syntax.IExpr
+    public abstract class Expr : ASTBase, Syntax.IExpr
     {
-
-        public abstract int Priority { get; }
-        public abstract string Code { get; }
 
         internal abstract object Evaluate(Env _env);
 
         internal virtual void Assign(Env _env, object _value) => new UnassignableError(this);
 
+        #region Syntax.IExpr
+
+        public abstract int Priority { get; }
+
+        #endregion
+
+        #region Meta AST
 #if BS_AST_EXPR_META
         public static implicit operator Expr(bool _value) => new BoolLitExpr(_value);
         public static implicit operator Expr(int _value) => new IntLitExpr(_value);
@@ -43,7 +48,10 @@ namespace BS.AST.Expressions
         public CastExpr Cast(Expr _type) => new CastExpr(this, _type);
         public EaseOpExpr Ease(Expr _ease) => new EaseOpExpr(this, _ease);
         public SubscriptExpr this[Expr _index] => new SubscriptExpr(this, _index);
+        public abstract override bool Equals(object _obj);
+        public abstract override int GetHashCode();
 #endif
+        #endregion
 
     }
 

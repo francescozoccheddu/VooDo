@@ -26,9 +26,24 @@ namespace BS.AST.Statements
 
         public IReadOnlyList<Stat> Statements { get; }
 
-        public sealed override string Code => Syntax.FormatSequenceStat(Statements.Select(_s => _s.Code));
+        #region Stat
 
         internal sealed override void Run(Env _env) => throw new NotImplementedException();
+
+        #endregion
+
+        #region ASTBase
+
+        public sealed override string Code => Syntax.FormatSequenceStat(Statements.Select(_s => _s.Code));
+
+
+        public sealed override bool Equals(object _obj)
+            => _obj is SequenceStat stat && Statements.Equals(stat.Statements);
+
+        public sealed override int GetHashCode()
+            => Statements.GetHashCode();
+
+        #endregion
 
     }
 }

@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 
 using BS.Exceptions;
 using BS.Runtime;
+using BS.Utils;
 
 namespace BS.AST.Expressions.Fundamentals
 {
@@ -9,16 +11,18 @@ namespace BS.AST.Expressions.Fundamentals
     public sealed class EaseOpExpr : Expr
     {
 
-        internal EaseOpExpr(Expr _easeable, Expr _ease)
+        internal EaseOpExpr(Expr _easeable, Expr _easer)
         {
             Ensure.NonNull(_easeable, nameof(_easeable));
-            Ensure.NonNull(_ease, nameof(_ease));
+            Ensure.NonNull(_easer, nameof(_easer));
             Easeable = _easeable;
-            Ease = _ease;
+            Easer = _easer;
         }
 
         public Expr Easeable { get; }
-        public Expr Ease { get; }
+        public Expr Easer { get; }
+
+        #region Expr
 
         internal sealed override object Evaluate(Env _env)
         {
@@ -30,7 +34,20 @@ namespace BS.AST.Expressions.Fundamentals
         public sealed override string Code
             => Syntax.FormatEaseExp
             (Easeable.Priority > Priority ? Syntax.WrapExp(Easeable.Code) : Easeable.Code,
-                Ease.Priority >= Priority ? Syntax.WrapExp(Ease.Code) : Ease.Code);
+                Easer.Priority >= Priority ? Syntax.WrapExp(Easer.Code) : Easer.Code);
+
+        #endregion
+
+        #region ASTBase
+
+        public sealed override bool Equals(object _obj)
+            => _obj is EaseOpExpr expr && Easeable.Equals(expr.Easeable) && Easer.Equals(expr.Easer);
+
+        public sealed override int GetHashCode()
+            => Hash.Combine(Easeable, Easer);
+
+        #endregion
+
     }
 
 }

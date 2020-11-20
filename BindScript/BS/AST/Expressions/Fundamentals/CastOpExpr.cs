@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 
 using BS.Exceptions;
 using BS.Runtime;
+using BS.Utils;
 
 namespace BS.AST.Expressions.Fundamentals
 {
@@ -20,14 +22,29 @@ namespace BS.AST.Expressions.Fundamentals
         public Expr Target { get; }
         public Expr TargetType { get; }
 
+        #region Expr
+
+        public sealed override int Priority => 2;
+
+        public sealed override string Code => Syntax.FormatCastExp(TargetType.Code, Target.Priority > Priority ? Syntax.WrapExp(Target.Code) : Target.Code);
+
         internal sealed override object Evaluate(Env _env)
         {
             throw new NotImplementedException();
         }
 
-        public sealed override int Priority => 2;
+        #endregion
 
-        public sealed override string Code => Syntax.FormatCastExp(TargetType.Code, Target.Priority > Priority ? Syntax.WrapExp(Target.Code) : Target.Code);
+        #region ASTBase
+
+        public sealed override bool Equals(object _obj)
+            => _obj is CastExpr expr && Target.Equals(expr.Target) && TargetType.Equals(expr.TargetType);
+
+        public sealed override int GetHashCode()
+            => Hash.Combine(Target, TargetType);
+
+        #endregion
+
     }
 
 }

@@ -22,6 +22,8 @@ namespace BS.AST.Expressions.Fundamentals
 
         public QualifiedName Name { get; }
 
+        #region Expr
+
         internal sealed override object Evaluate(Env _env)
         {
             throw new NotImplementedException();
@@ -33,7 +35,21 @@ namespace BS.AST.Expressions.Fundamentals
         }
 
         public sealed override int Priority => 0;
+
         public sealed override string Code => Name.Code;
+
+        #endregion
+
+        #region ASTBase
+
+        public sealed override bool Equals(object _obj)
+            => _obj is VarExpr expr && Name.Equals(expr.Name);
+
+        public sealed override int GetHashCode()
+            => Name.GetHashCode();
+
+        #endregion
+
     }
 
 }

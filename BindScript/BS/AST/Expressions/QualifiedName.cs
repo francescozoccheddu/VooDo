@@ -2,15 +2,13 @@
 using BS.Exceptions;
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
 
 namespace BS.AST
 {
 
-    public sealed class QualifiedName : Syntax.ICode
+    public sealed class QualifiedName : ASTBase
     {
 
         public static implicit operator QualifiedName(Name _base) => new QualifiedName(_base);
@@ -35,7 +33,14 @@ namespace BS.AST
         public Name BaseName => m_path.Last();
         public IEnumerable<Name> NameSpace => m_path.SkipLast(1);
 
-        public string Code => Syntax.FormatQualName(m_path.Select(_s => _s.Code));
+        #region ASTBase
+
+        public sealed override string Code => Syntax.FormatQualName(m_path.Select(_s => _s.Code));
+
+        public sealed override bool Equals(object _obj) => _obj is QualifiedName name && m_path.Equals(name.m_path);
+        public sealed override int GetHashCode() => m_path.GetHashCode();
+
+        #endregion
 
     }
 

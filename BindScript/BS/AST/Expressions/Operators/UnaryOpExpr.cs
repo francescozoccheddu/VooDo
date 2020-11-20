@@ -23,8 +23,17 @@ namespace BS.AST.Expressions.Operators
 
         protected abstract string m_OperatorSymbol { get; }
 
+        #region ASTBase
+
         public sealed override string Code
             => Syntax.FormatUnaryOp(Argument.Priority > Priority ? Syntax.WrapExp(Argument.Code) : Argument.Code, m_OperatorSymbol);
+
+        public sealed override bool Equals(object _obj)
+            => _obj is UnaryOpExpr expr && Argument.Equals(expr.Argument);
+
+        public sealed override int GetHashCode() => Argument.GetHashCode();
+
+        #endregion
 
     }
 

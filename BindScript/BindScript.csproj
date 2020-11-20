@@ -120,6 +120,7 @@
     <RestoreProjectStyle>PackageReference</RestoreProjectStyle>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="BS\AST\ASTBase.cs" />
     <Compile Include="BS\AST\Expressions\Literals\NullLitExpr.cs" />
     <Compile Include="BS\AST\Expressions\QualifiedName.cs" />
     <Compile Include="BS\AST\Expressions\Name.cs" />
@@ -171,6 +172,7 @@
     <Compile Include="BS\Exceptions\SyntaxError.cs" />
     <Compile Include="BS\Exceptions\BaseException.cs" />
     <Compile Include="BS\Runtime\Env.cs" />
+    <Compile Include="BS\Utils\Hash.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="Properties\BindScript.rd.xml" />
   </ItemGroup>

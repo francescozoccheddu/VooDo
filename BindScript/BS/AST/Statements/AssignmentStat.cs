@@ -2,6 +2,7 @@
 using BS.AST.Expressions;
 using BS.Exceptions;
 using BS.Runtime;
+using BS.Utils;
 
 using System;
 
@@ -21,9 +22,23 @@ namespace BS.AST.Statements
         public Expr Target { get; }
         public Expr Source { get; }
 
-        public sealed override string Code => Syntax.FormatAssignStat(Target.Code, Source.Code);
+        #region Stat
 
         internal sealed override void Run(Env _env) => throw new NotImplementedException();
+
+        #endregion
+
+        #region ASTBase
+
+        public sealed override string Code => Syntax.FormatAssignStat(Target.Code, Source.Code);
+
+        public sealed override bool Equals(object _obj)
+            => _obj is AssignmentStat stat && Target.Equals(Target) && Source.Equals(stat.Source);
+
+        public sealed override int GetHashCode()
+            => Hash.Combine(Target, Source);
+
+        #endregion
 
     }
 }
