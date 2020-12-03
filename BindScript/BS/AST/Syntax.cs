@@ -28,7 +28,7 @@ namespace BS.AST
             public const string sumOp = "+";
             public const string diffOp = "-";
             public const string prodOp = "*";
-            public const string fractOp = "/";
+            public const string divOp = "/";
             public const string andOp = "&";
             public const string orOp = "|";
             public const string notOp = "!";
@@ -52,12 +52,11 @@ namespace BS.AST
             public const string elseStat = "else";
             public const string whileStat = "while";
             public const string forStat = "for";
-            public const string forInSep = ":";
             public const string trueLit = "true";
             public const string falseLit = "false";
             public const string nullLit = "null";
-            public const string stringLitL = "\"";
-            public const string stringLitR = "\"";
+            public const string stringLitDelim = "\"";
+            public const string stringLitEscape = "\\";
             public const string qualNameSep = "::";
             public const string argListSep = ",";
             public const string memberOp = ".";
@@ -86,7 +85,7 @@ namespace BS.AST
             => $"{Symbols.whileStat} {WrapExp(_cond)}\n{_body}\n";
 
         public static string FormatForStat(string _target, string _source, string _body)
-            => $"{Symbols.forStat} {WrapExp($"{_target} {Symbols.forInSep} {_source}")}\n{_body}\n";
+            => $"{Symbols.forStat} {WrapExp($"{_target} {Symbols.assignOp} {_source}")}\n{_body}\n";
 
         public static string WrapExp(string _arg)
             => $"{Symbols.expGroupL}{_arg}{Symbols.expGroupR}";
@@ -115,8 +114,13 @@ namespace BS.AST
         public static string FormatUnaryOp(string _arg, string _op)
             => $"{_op} {_arg}";
 
+        public static string EscapeString(string _string)
+            => _string
+            .Replace(Symbols.stringLitEscape, Symbols.stringLitEscape + Symbols.stringLitEscape)
+            .Replace(Symbols.stringLitDelim, Symbols.stringLitEscape + Symbols.stringLitDelim);
+
         public static string FormatLitExp(string _string)
-            => $"{Symbols.stringLitL}{_string}{Symbols.stringLitR}";
+            => $"{Symbols.stringLitDelim}{EscapeString(_string)}{Symbols.stringLitDelim}";
 
         public static string FormatLitExp(int _int)
             => _int.ToString();

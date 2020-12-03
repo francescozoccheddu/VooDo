@@ -46,7 +46,7 @@ namespace BS.AST.Expressions.Fundamentals
             => _obj is MemberExpr expr && Target.Equals(expr.Target) && Name.Equals(expr.Name);
 
         public sealed override int GetHashCode()
-            => Hash.Combine(Target, Name);
+            => Identity.CombineHash(Target, Name);
 
         #endregion
 

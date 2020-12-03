@@ -137,7 +137,7 @@
     <Compile Include="BS\AST\Expressions\Fundamentals\MemberOpExpr.cs" />
     <Compile Include="BS\AST\Expressions\Fundamentals\EaseOpExpr.cs" />
     <Compile Include="BS\AST\Expressions\Operators\Operations\ProdOpExpr.cs" />
-    <Compile Include="BS\AST\Expressions\Operators\Operations\FractOpExpr.cs" />
+    <Compile Include="BS\AST\Expressions\Operators\Operations\DivOpExpr.cs" />
     <Compile Include="BS\AST\Expressions\Operators\Operations\AndOpExpr.cs" />
     <Compile Include="BS\AST\Expressions\Operators\Operations\OrOpExpr.cs" />
     <Compile Include="BS\AST\Expressions\Operators\Operations\DiffOpExpr.cs" />
@@ -172,7 +172,7 @@
     <Compile Include="BS\Exceptions\SyntaxError.cs" />
     <Compile Include="BS\Exceptions\BaseException.cs" />
     <Compile Include="BS\Runtime\Env.cs" />
-    <Compile Include="BS\Utils\Hash.cs" />
+    <Compile Include="BS\Utils\Identity.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="Properties\BindScript.rd.xml" />
   </ItemGroup>
@@ -186,6 +186,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="BS\Exceptions\Runtime\Statements\" />
+    <Folder Include="BS\Parser\" />
   </ItemGroup>
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">
     <VisualStudioVersion>14.0</VisualStudioVersion>

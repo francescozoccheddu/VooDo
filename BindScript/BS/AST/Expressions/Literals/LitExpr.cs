@@ -29,7 +29,7 @@ namespace BS.AST.Expressions.Literals
 
         public sealed override bool Equals(object _obj) => _obj is LitExpr<T> expr && Literal.Equals(expr.Literal);
 
-        public sealed override int GetHashCode() => Hash.Combine(Literal);
+        public sealed override int GetHashCode() => Identity.CombineHash(Literal);
 
         #endregion
 

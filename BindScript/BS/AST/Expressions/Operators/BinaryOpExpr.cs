@@ -40,7 +40,7 @@ namespace BS.AST.Expressions.Operators
             => _obj is BinaryOpExpr expr && LeftArgument.Equals(expr.LeftArgument) && RightArgument.Equals(expr.RightArgument);
 
         public sealed override int GetHashCode()
-            => Hash.Combine(LeftArgument, RightArgument);
+            => Identity.CombineHash(LeftArgument, RightArgument);
 
         #endregion
 

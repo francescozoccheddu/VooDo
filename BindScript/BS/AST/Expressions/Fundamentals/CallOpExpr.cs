@@ -43,7 +43,7 @@ namespace BS.AST.Expressions.Fundamentals
             => _obj is CallOpExpr expr && Callable.Equals(expr.Callable) && ArgumentList.Equals(expr.ArgumentList);
 
         public sealed override int GetHashCode()
-            => Hash.Combine(Callable, ArgumentList);
+            => Identity.CombineHash(Callable, ArgumentList);
 
         #endregion
 
