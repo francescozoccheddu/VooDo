@@ -5,10 +5,10 @@ using BS.Runtime;
 namespace BS.AST.Expressions.Operators.Operations
 {
 
-    public sealed class FractOpExpr : BinaryOpExpr
+    public sealed class DivOpExpr : BinaryOpExpr
     {
 
-        internal FractOpExpr(Expr _leftArgument, Expr _rightArgument) : base(_leftArgument, _rightArgument)
+        internal DivOpExpr(Expr _leftArgument, Expr _rightArgument) : base(_leftArgument, _rightArgument)
         {
         }
 
@@ -25,7 +25,7 @@ namespace BS.AST.Expressions.Operators.Operations
 
         #region Operator
 
-        protected sealed override string m_OperatorSymbol => Syntax.Symbols.fractOp;
+        protected sealed override string m_OperatorSymbol => Syntax.Symbols.divOp;
 
         #endregion
 

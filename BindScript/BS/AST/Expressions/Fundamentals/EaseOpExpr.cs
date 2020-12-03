@@ -44,7 +44,7 @@ namespace BS.AST.Expressions.Fundamentals
             => _obj is EaseOpExpr expr && Easeable.Equals(expr.Easeable) && Easer.Equals(expr.Easer);
 
         public sealed override int GetHashCode()
-            => Hash.Combine(Easeable, Easer);
+            => Identity.CombineHash(Easeable, Easer);
 
         #endregion
 

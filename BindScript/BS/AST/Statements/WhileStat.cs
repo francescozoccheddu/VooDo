@@ -38,7 +38,7 @@ namespace BS.AST.Statements
             => _obj is WhileStat stat && Condition.Equals(Condition) && Body.Equals(stat.Body);
 
         public sealed override int GetHashCode()
-            => Hash.Combine(Condition, Body);
+            => Identity.CombineHash(Condition, Body);
 
         #endregion
 

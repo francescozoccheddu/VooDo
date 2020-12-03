@@ -46,7 +46,7 @@ namespace BS.AST.Expressions.Fundamentals
             => _obj is SubscriptExpr expr && Indexable.Equals(expr.Indexable) && Index.Equals(expr.Index);
 
         public sealed override int GetHashCode()
-            => Hash.Combine(Indexable, Index);
+            => Identity.CombineHash(Indexable, Index);
 
         #endregion
 

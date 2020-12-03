@@ -32,7 +32,7 @@ namespace BS.AST.Expressions
         public static SumOpExpr operator +(Expr _left, Expr _right) => new SumOpExpr(_left, _right);
         public static DiffOpExpr operator -(Expr _left, Expr _right) => new DiffOpExpr(_left, _right);
         public static ProdOpExpr operator *(Expr _left, Expr _right) => new ProdOpExpr(_left, _right);
-        public static FractOpExpr operator /(Expr _left, Expr _right) => new FractOpExpr(_left, _right);
+        public static DivOpExpr operator /(Expr _left, Expr _right) => new DivOpExpr(_left, _right);
         public static AndOpExpr operator &(Expr _left, Expr _right) => new AndOpExpr(_left, _right);
         public static OrOpExpr operator |(Expr _left, Expr _right) => new OrOpExpr(_left, _right);
         public static Expr operator >(Expr _left, Expr _right) => new GtOpExpr(_left, _right);

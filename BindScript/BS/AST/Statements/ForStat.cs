@@ -40,7 +40,7 @@ namespace BS.AST.Statements
             => _obj is WhileStat stat && Target.Equals(Target) && Source.Equals(Source) && Body.Equals(stat.Body);
 
         public sealed override int GetHashCode()
-            => Hash.Combine(Target, Source, Body);
+            => Identity.CombineHash(Target, Source, Body);
 
         #endregion
     }

@@ -51,10 +51,10 @@ namespace BS.AST.Statements
         }
 
         public sealed override bool Equals(object _obj)
-            => _obj is IfStat stat && Condition.Equals(Condition) && ThenBody.Equals(stat.ThenBody) && Hash.AreEqual(ElseBody, stat.ElseBody);
+            => _obj is IfStat stat && Condition.Equals(Condition) && ThenBody.Equals(stat.ThenBody) && Identity.AreEqual(ElseBody, stat.ElseBody);
 
         public sealed override int GetHashCode()
-            => Hash.Combine(Condition, ThenBody, ElseBody);
+            => Identity.CombineHash(Condition, ThenBody, ElseBody);
 
         #endregion
 

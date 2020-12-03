@@ -6,10 +6,10 @@ using System.Threading.Tasks;
 
 namespace BS.Utils
 {
-    internal static class Hash
+    internal static class Identity
     {
 
-        internal static int Combine(params object[] _objs)
+        internal static int CombineHash(params object[] _objs)
         {
             int hashCode = 579313498;
             foreach (object obj in _objs)

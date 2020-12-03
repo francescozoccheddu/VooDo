@@ -41,7 +41,7 @@ namespace BS.AST.Expressions.Fundamentals
             => _obj is CastExpr expr && Target.Equals(expr.Target) && TargetType.Equals(expr.TargetType);
 
         public sealed override int GetHashCode()
-            => Hash.Combine(Target, TargetType);
+            => Identity.CombineHash(Target, TargetType);
 
         #endregion
 

@@ -36,7 +36,7 @@ namespace BS.AST.Statements
             => _obj is AssignmentStat stat && Target.Equals(Target) && Source.Equals(stat.Source);
 
         public sealed override int GetHashCode()
-            => Hash.Combine(Target, Source);
+            => Identity.CombineHash(Target, Source);
 
         #endregion
 
