@@ -171,6 +171,8 @@
     <Compile Include="BS\Exceptions\Runtime\StatementFailure.cs" />
     <Compile Include="BS\Exceptions\SyntaxError.cs" />
     <Compile Include="BS\Exceptions\BaseException.cs" />
+    <Compile Include="BS\Parser\EToken.cs" />
+    <Compile Include="BS\Parser\Parser.cs" />
     <Compile Include="BS\Runtime\Env.cs" />
     <Compile Include="BS\Utils\Identity.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
