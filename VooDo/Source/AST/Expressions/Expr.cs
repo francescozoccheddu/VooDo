@@ -17,7 +17,7 @@ namespace VooDo.AST.Expressions
 
         internal virtual void Assign(Env _env, object _value) => new UnassignableError(this);
 
-        public abstract int Priority { get; }
+        public abstract int Precedence { get; }
 
     }
 

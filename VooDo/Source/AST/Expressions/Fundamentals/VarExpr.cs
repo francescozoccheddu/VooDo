@@ -34,7 +34,7 @@ namespace VooDo.AST.Expressions.Fundamentals
             throw new NotImplementedException();
         }
 
-        public sealed override int Priority => 0;
+        public sealed override int Precedence => 0;
 
         public sealed override string Code => Name.Code;
 

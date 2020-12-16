@@ -3,6 +3,7 @@ grammar VooDo;
 // ---- Parser ----
 
 expr:
+	// Precedence 0
 	NULL																# NullLitExpr
 	| value=BOOL														# BoolLitExpr
 	| value=BIN_INT														# BinIntLitExpr
@@ -13,35 +14,50 @@ expr:
 	| value=STRING														# StringLitExpr
 	| path+=NAME ('@' path+=NAME)*										# NameExpr
 	| '(' srcExpr=expr ')'												# GroupExpr
-	| '(' typeExpr=expr ':' srcExpr=expr ')'							# CastExpr
-	| '!' srcExpr=expr													# LogNotExpr
-	| '+' srcExpr=expr													# PosOpExpr
-	| '-' srcExpr=expr													# NegOpExpr
-	| '~' srcExpr=expr													# BwNegExpr
-	| srcExpr=expr '[' (argsExpr+=expr ( ',' argsExpr+=expr)*)? ']'		# IndexExpr
-	| lExpr=expr '*' rExpr=expr											# MulOpExpr
-	| lExpr=expr '/' rExpr=expr											# DivOpExpr
-	| lExpr=expr '+' rExpr=expr											# SumOpExpr
-	| lExpr=expr '-' rExpr=expr											# SubOpExpr
-	| lExpr=expr '%' rExpr=expr											# ModOpExpr
-	| lExpr=expr '&' rExpr=expr											# BwAndOpExpr
-	| lExpr=expr '|' rExpr=expr											# BwOrOpExpr
-	| lExpr=expr '^' rExpr=expr											# BwXorOpExpr
-	| lExpr=expr '<<' rExpr=expr										# BwLstOpExpr
-	| lExpr=expr '>>' rExpr=expr										# BwRstOpExpr
-	| lExpr=expr '&&' rExpr=expr										# LogAndOpExpr
-	| lExpr=expr '||' rExpr=expr										# LogOrOpExpr
-	| lExpr=expr '<' rExpr=expr											# LtOpExpr
-	| lExpr=expr '>' rExpr=expr											# GtOpExpr
-	| lExpr=expr '<=' rExpr=expr										# LeOpExpr
-	| lExpr=expr '>=' rExpr=expr										# GeOpExpr
-	| lExpr=expr '==' rExpr=expr										# EqOpExpr
-	| lExpr=expr '!=' rExpr=expr										# NeqOpExpr
 	| srcExpr=expr '.' memberExpr=expr									# MemOpExpr
-	| srcExpr=expr '?.' memberExpr=expr									# NullableMemOpExpr
-	| srcExpr=expr '??' elseExpr=expr									# NullCoalOpExpr
-	| condExpr=expr '?' thenExpr=expr ':' elseExpr=expr					# IfElseOpExpr
 	| srcExpr=expr '(' ( argsExpr+=expr ( ',' argsExpr+=expr)*)? ')'	# CallOpExpr
+	| srcExpr=expr '[' (argsExpr+=expr ( ',' argsExpr+=expr)*)? ']'		# IndexExpr
+	| srcExpr=expr '?.' memberExpr=expr									# NullableMemOpExpr
+	| srcExpr=expr '?[' (argsExpr+=expr ( ',' argsExpr+=expr)*)? ']'	# NullableIndexExpr
+	// Precedence 1
+	| '+' srcExpr=expr	# PosOpExpr
+	| '-' srcExpr=expr	# NegOpExpr
+	| '!' srcExpr=expr	# LogNotExpr
+	| '~' srcExpr=expr	# BwNegExpr
+	// Precedence 2
+	| lExpr=expr '*' rExpr=expr	# MulOpExpr
+	| lExpr=expr '/' rExpr=expr	# DivOpExpr
+	| lExpr=expr '%' rExpr=expr	# ModOpExpr
+	// Precedence 3
+	| lExpr=expr '+' rExpr=expr	# SumOpExpr
+	| lExpr=expr '-' rExpr=expr	# SubOpExpr
+	// Precedence 4
+	| lExpr=expr '<<' rExpr=expr	# BwLstOpExpr
+	| lExpr=expr '>>' rExpr=expr	# BwRstOpExpr
+	// Precedence 5
+	| lExpr=expr '<' rExpr=expr			# LtOpExpr
+	| lExpr=expr '>' rExpr=expr			# GtOpExpr
+	| lExpr=expr '<=' rExpr=expr		# LeOpExpr
+	| lExpr=expr '>=' rExpr=expr		# GeOpExpr
+	| srcExpr=expr 'is' typeExpr=expr	# IsExpr
+	| srcExpr=expr 'as' typeExpr=expr	# CastExpr
+	// Precedence 6
+	| lExpr=expr '==' rExpr=expr	# EqOpExpr
+	| lExpr=expr '!=' rExpr=expr	# NeqOpExpr
+	// Precedence 7
+	| lExpr=expr '&' rExpr=expr # BwAndOpExpr
+	// Precedence 8
+	| lExpr=expr '^' rExpr=expr # BwXorOpExpr
+	// Precedence 9
+	| lExpr=expr '|' rExpr=expr # BwOrOpExpr
+	// Precedence 10
+	| lExpr=expr '&&' rExpr=expr # LogAndOpExpr
+	// Precedence 11
+	| lExpr=expr '||' rExpr=expr # LogOrOpExpr
+	// Precedence 12
+	| <assoc=right> srcExpr=expr '??' elseExpr=expr # NullCoalOpExpr
+	// Precedence 13
+	| <assoc=right> condExpr=expr '?' thenExpr=expr ':' elseExpr=expr # IfElseOpExpr
 ;
 
 stat:
@@ -82,12 +98,7 @@ NAME: [a-zA-Z_] [0-9a-zA-Z_]*;
 
 // Fragment rules
 
-fragment StringEscapeSequence: (
-		'\\' [btnfr"'\\]
-	)
-	| ('\\' ([0-3]? [0-7])? [0-7])
-	| ('\\' 'u'+ HexDigit HexDigit HexDigit HexDigit)
-;
+fragment StringEscapeSequence: ( '\\' [btnfr"'\\]) | ('\\' ([0-3]? [0-7])? [0-7]) | ('\\' 'u'+ HexDigit HexDigit HexDigit HexDigit);
 
 fragment RealExponent: [eE] [+-]? [0-9]+;
 

@@ -19,7 +19,7 @@ namespace VooDo.AST.Expressions.Operators.Comparisons
             throw new NotImplementedException();
         }
 
-        public sealed override int Priority => 5;
+        public sealed override int Precedence => 5;
 
         #endregion
 

@@ -26,10 +26,10 @@ namespace VooDo.AST.Expressions.Fundamentals
 
         #region Expr
 
-        public sealed override int Priority => 2;
+        public sealed override int Precedence => 13;
 
         public sealed override string Code =>
-            $"{Condition.LeftCode(Priority)} ? {Then.Code} : {Else.RightCode(Priority)}";
+            $"{Condition.LeftCode(Precedence)} ? {Then.Code} : {Else.RightCode(Precedence)}";
 
         internal sealed override object Evaluate(Env _env)
         {

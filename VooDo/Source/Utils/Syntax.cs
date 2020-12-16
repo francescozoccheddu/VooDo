@@ -17,9 +17,9 @@ namespace VooDo.Utils
 
         internal static string WrappedCodeIf(this Expr _expr, bool _condition) => _condition ? _expr.WrappedCode() : _expr.Code;
 
-        internal static string LeftCode(this Expr _expr, int _priority) => _expr.WrappedCodeIf(_expr.Priority > _priority);
+        internal static string LeftCode(this Expr _expr, int _precedence) => _expr.WrappedCodeIf(_expr.Precedence > _precedence);
 
-        internal static string RightCode(this Expr _expr, int _priority) => _expr.WrappedCodeIf(_expr.Priority >= _priority);
+        internal static string RightCode(this Expr _expr, int _precedence) => _expr.WrappedCodeIf(_expr.Precedence >= _precedence);
 
         internal static string ArgumentsListCode(this IEnumerable<Expr> _arguments) => string.Join(", ", _arguments.Select(_a => _a.Code));
 

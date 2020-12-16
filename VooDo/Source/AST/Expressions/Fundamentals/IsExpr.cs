@@ -7,26 +7,26 @@ using VooDo.Utils;
 namespace VooDo.AST.Expressions.Fundamentals
 {
 
-    public sealed class CastExpr : Expr
+    public sealed class IsExpr : Expr
     {
 
-        internal CastExpr(Expr _source, Expr _targetType)
+        internal IsExpr(Expr _source, Expr _testType)
         {
             Ensure.NonNull(_source, nameof(_source));
-            Ensure.NonNull(_targetType, nameof(_targetType));
+            Ensure.NonNull(_testType, nameof(_testType));
             Source = _source;
-            TargetType = _targetType;
+            TestType = _testType;
         }
 
         public Expr Source { get; }
-        public Expr TargetType { get; }
+        public Expr TestType { get; }
 
         #region Expr
 
         public sealed override int Precedence => 5;
 
         public sealed override string Code =>
-            $"{Source.LeftCode(Precedence)} as {TargetType.RightCode(Precedence)}";
+            $"{Source.LeftCode(Precedence)} is {TestType.RightCode(Precedence)}";
 
         internal sealed override object Evaluate(Env _env)
         {
@@ -38,10 +38,10 @@ namespace VooDo.AST.Expressions.Fundamentals
         #region ASTBase
 
         public sealed override bool Equals(object _obj)
-            => _obj is CastExpr expr && Source.Equals(expr.Source) && TargetType.Equals(expr.TargetType);
+            => _obj is CastExpr expr && Source.Equals(expr.Source) && TestType.Equals(expr.TargetType);
 
         public sealed override int GetHashCode()
-            => Identity.CombineHash(Source, TargetType);
+            => Identity.CombineHash(Source, TestType);
 
         #endregion
 

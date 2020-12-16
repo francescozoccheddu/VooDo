@@ -15,7 +15,7 @@
             AcceptsReturn="True"
             FontFamily="Consolas"
             ScrollViewer.VerticalScrollBarVisibility="Auto"
-            TextChanged="m_inputBox_TextChanged"
+            TextChanged="InputBox_TextChanged"
             TextWrapping="Wrap" />
         <TextBlock
             x:Name="m_outputBox"

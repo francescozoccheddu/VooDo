@@ -21,7 +21,7 @@ namespace VooDo.AST.Expressions.Literals
 
         internal sealed override object Evaluate(Env _env) => Literal;
 
-        public sealed override int Priority => 0;
+        public sealed override int Precedence => 0;
 
         #endregion
 

@@ -26,7 +26,7 @@ namespace VooDo.AST.Expressions.Operators
         #region ASTBase
 
         public sealed override string Code
-            => $"{m_OperatorSymbol}{Argument.LeftCode(Priority)}";
+            => $"{m_OperatorSymbol}{Argument.LeftCode(Precedence)}";
 
         public sealed override bool Equals(object _obj)
             => _obj is UnaryOpExpr expr && Argument.Equals(expr.Argument);

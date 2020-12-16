@@ -123,6 +123,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Source\AST\ASTBase.cs" />
+    <Compile Include="Source\AST\Expressions\Fundamentals\IsExpr.cs" />
     <Compile Include="Source\Parsing\Generated\VooDoBaseVisitor.cs" />
     <Compile Include="Source\Parsing\Generated\VooDoLexer.cs" />
     <Compile Include="Source\Parsing\Generated\VooDoParser.cs" />

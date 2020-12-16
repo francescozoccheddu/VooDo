@@ -27,7 +27,7 @@ namespace VooDoTB
             this.InitializeComponent();
         }
 
-        private void m_inputBox_TextChanged(object _sender, TextChangedEventArgs _e)
+        private void InputBox_TextChanged(object _sender, TextChangedEventArgs _e)
         {
             try
             {

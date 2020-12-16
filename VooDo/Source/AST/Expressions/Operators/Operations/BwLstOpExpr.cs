@@ -19,7 +19,7 @@ namespace VooDo.AST.Expressions.Operators.Operations
             throw new NotImplementedException();
         }
 
-        public sealed override int Priority => 1;
+        public sealed override int Precedence => 4;
 
         #endregion
 

@@ -11,7 +11,7 @@ namespace VooDo.AST.Expressions.Fundamentals
     public sealed class IndexExpr : Expr
     {
 
-        internal IndexExpr(Expr _indexable, IEnumerable<Expr> _index)
+        internal IndexExpr(Expr _indexable, IEnumerable<Expr> _index, bool _nullCoalesce)
         {
             Ensure.NonNull(_indexable, nameof(_indexable));
             Ensure.NonNull(_index, nameof(_index));
@@ -22,12 +22,14 @@ namespace VooDo.AST.Expressions.Fundamentals
             {
                 throw new ArgumentException("Empty index", nameof(_index));
             }
+            NullCoalesce = _nullCoalesce;
         }
 
         private readonly Expr[] m_index;
 
         public Expr Indexable { get; }
         public IEnumerable<Expr> Index { get; }
+        public bool NullCoalesce { get; }
 
         #region Expr
 
@@ -41,10 +43,10 @@ namespace VooDo.AST.Expressions.Fundamentals
             throw new NotImplementedException();
         }
 
-        public sealed override int Priority => 0;
+        public sealed override int Precedence => 0;
 
         public sealed override string Code
-            => $"{Indexable.LeftCode(Priority)}[{m_index.ArgumentsListCode()}]";
+            => $"{Indexable.LeftCode(Precedence)}{(NullCoalesce ? "?" : "")}[{m_index.ArgumentsListCode()}]";
 
         #endregion
 

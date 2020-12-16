@@ -29,7 +29,7 @@ namespace VooDo.AST.Expressions.Operators
             throw new NotImplementedException();
         }
 
-        public sealed override int Priority => 0;
+        public sealed override int Precedence => 12;
 
         #endregion
 

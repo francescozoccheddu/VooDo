@@ -22,7 +22,7 @@ namespace VooDo.Parsing
     internal sealed class Visitor : VooDoBaseVisitor<ASTBase>
     {
 
-        private T Get<T>(ParserRuleContext _context) where T : ASTBase => (T) (_context.IsEmpty ? null : Visit(_context));
+        private T Get<T>(ParserRuleContext _context) where T : ASTBase => (T) Visit(_context);
         private Expr Get(VooDoParser.ExprContext _context) => Get<Expr>(_context);
         private Expr[] Get(IEnumerable<VooDoParser.ExprContext> _context) => _context.Select(_c => Get<Expr>(_c)).ToArray();
         private Stat Get(VooDoParser.StatContext _context) => Get<Stat>(_context);
@@ -38,7 +38,7 @@ namespace VooDo.Parsing
         public override ASTBase VisitBwRstOpExpr([NotNull] VooDoParser.BwRstOpExprContext _context) => new BwRstOpExpr(Get(_context.lExpr), Get(_context.rExpr));
         public override ASTBase VisitBwXorOpExpr([NotNull] VooDoParser.BwXorOpExprContext _context) => new BwXorOpExpr(Get(_context.lExpr), Get(_context.rExpr));
         public override ASTBase VisitCallOpExpr([NotNull] VooDoParser.CallOpExprContext _context) => new CallExpr(Get(_context.srcExpr), Get(_context._argsExpr));
-        public override ASTBase VisitCastExpr([NotNull] VooDoParser.CastExprContext _context) => new CastExpr(Get(_context.typeExpr), Get(_context.srcExpr));
+        public override ASTBase VisitCastExpr([NotNull] VooDoParser.CastExprContext _context) => new CastExpr(Get(_context.srcExpr), Get(_context.typeExpr));
         public override ASTBase VisitDecIntLitExpr([NotNull] VooDoParser.DecIntLitExprContext _context) => new IntLitExpr(Convert.ToInt32(_context.value.Text, 10));
         public override ASTBase VisitDivOpExpr([NotNull] VooDoParser.DivOpExprContext _context) => new DivOpExpr(Get(_context.lExpr), Get(_context.rExpr));
         public override ASTBase VisitEqOpExpr([NotNull] VooDoParser.EqOpExprContext _context) => new EqOpExpr(Get(_context.lExpr), Get(_context.rExpr));
@@ -48,8 +48,9 @@ namespace VooDo.Parsing
         public override ASTBase VisitGtOpExpr([NotNull] VooDoParser.GtOpExprContext _context) => new GtOpExpr(Get(_context.lExpr), Get(_context.rExpr));
         public override ASTBase VisitHexIntLitExpr([NotNull] VooDoParser.HexIntLitExprContext _context) => new IntLitExpr(Convert.ToInt32(_context.value.Text.Substring(2), 16));
         public override ASTBase VisitIfElseOpExpr([NotNull] VooDoParser.IfElseOpExprContext _context) => new IfElseExpr(Get(_context.condExpr), Get(_context.thenExpr), Get(_context.elseExpr));
-        public override ASTBase VisitIfElseStat([NotNull] VooDoParser.IfElseStatContext _context) => new IfElseStat(Get(_context.condExpr), Get(_context.thenStat), Get(_context.elseStat));
-        public override ASTBase VisitIndexExpr([NotNull] VooDoParser.IndexExprContext _context) => new IndexExpr(Get(_context.srcExpr), Get(_context._argsExpr));
+        public override ASTBase VisitIfElseStat([NotNull] VooDoParser.IfElseStatContext _context)
+            => new IfElseStat(Get(_context.condExpr), Get(_context.thenStat), _context.elseStat != null ? Get(_context.elseStat) : null);
+        public override ASTBase VisitIndexExpr([NotNull] VooDoParser.IndexExprContext _context) => new IndexExpr(Get(_context.srcExpr), Get(_context._argsExpr), false);
         public override ASTBase VisitLeOpExpr([NotNull] VooDoParser.LeOpExprContext _context) => new LeOpExpr(Get(_context.lExpr), Get(_context.rExpr));
         public override ASTBase VisitLinkStat([NotNull] VooDoParser.LinkStatContext _context) => new LinkStat(Get(_context.tgtExpr), Get(_context.srcExpr));
         public override ASTBase VisitLogAndOpExpr([NotNull] VooDoParser.LogAndOpExprContext _context) => new LogAndOpExpr(Get(_context.lExpr), Get(_context.rExpr));
@@ -77,6 +78,8 @@ namespace VooDo.Parsing
         public override ASTBase VisitSubOpExpr([NotNull] VooDoParser.SubOpExprContext _context) => new SubOpExpr(Get(_context.lExpr), Get(_context.rExpr));
         public override ASTBase VisitSumOpExpr([NotNull] VooDoParser.SumOpExprContext _context) => new SumOpExpr(Get(_context.lExpr), Get(_context.rExpr));
         public override ASTBase VisitWhileStat([NotNull] VooDoParser.WhileStatContext _context) => new WhileStat(Get(_context.condExpr), Get(_context.doStat));
+        public override ASTBase VisitNullableIndexExpr([NotNull] VooDoParser.NullableIndexExprContext _context) => new IndexExpr(Get(_context.srcExpr), Get(_context._argsExpr), true);
+        public override ASTBase VisitIsExpr([NotNull] VooDoParser.IsExprContext _context) => new IsExpr(Get(_context.srcExpr), Get(_context.typeExpr));
     }
 
 }

@@ -31,7 +31,7 @@ namespace VooDo.AST.Expressions.Operators
         #region ASTBase
 
         public sealed override string Code
-            => LeftArgument.LeftCode(Priority) + (m_SpaceBetweenOperator ? $" {m_OperatorSymbol} " : m_OperatorSymbol) + RightArgument.RightCode(Priority);
+            => LeftArgument.LeftCode(Precedence) + (m_SpaceBetweenOperator ? $" {m_OperatorSymbol} " : m_OperatorSymbol) + RightArgument.RightCode(Precedence);
 
 
 
