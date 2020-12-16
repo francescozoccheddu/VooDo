@@ -1,5 +1,5 @@
-﻿using BS.AST;
-using BS.AST.Statements;
+﻿using VooDo.AST;
+using VooDo.AST.Statements;
 
 using System;
 using System.Collections.Generic;
@@ -16,16 +16,28 @@ using Windows.UI.Xaml.Data;
 using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
+using VooDo.Parsing;
 
-namespace BSTB
+namespace VooDoTB
 {
     public sealed partial class MainPage : Page
     {
         public MainPage()
         {
             this.InitializeComponent();
-            m_outputBox.Text = Syntax.Test();
         }
 
+        private void m_inputBox_TextChanged(object _sender, TextChangedEventArgs _e)
+        {
+            try
+            {
+                Stat stat = Parser.Parse(m_inputBox.Text);
+                m_outputBox.Text = stat?.Code ?? "";
+            }
+            catch (Exception err)
+            {
+                m_outputBox.Text = err.Message;
+            }
+        }
     }
 }

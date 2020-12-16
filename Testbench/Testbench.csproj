@@ -7,8 +7,8 @@
     <ProjectGuid>{E88D6A9A-5A9F-4B25-935A-B310F95A2ECE}</ProjectGuid>
     <OutputType>AppContainerExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>BSTB</RootNamespace>
-    <AssemblyName>BindScript Testbench</AssemblyName>
+    <RootNamespace>VooDoTB</RootNamespace>
+    <AssemblyName>VooDo Testbench</AssemblyName>
     <DefaultLanguage>en-US</DefaultLanguage>
     <TargetPlatformIdentifier>UAP</TargetPlatformIdentifier>
     <TargetPlatformVersion Condition=" '$(TargetPlatformVersion)' == '' ">10.0.19041.0</TargetPlatformVersion>
@@ -123,7 +123,6 @@
       <DependentUpon>MainPage.xaml</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SEP.cs" />
   </ItemGroup>
   <ItemGroup>
     <AppxManifest Include="Package.appxmanifest">
@@ -152,13 +151,13 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.NETCore.UniversalWindowsPlatform">
-      <Version>6.2.10</Version>
+      <Version>6.2.11</Version>
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\BindScript\BindScript.csproj">
+    <ProjectReference Include="..\VooDo\VooDo.csproj">
       <Project>{d4b3d28f-7b0f-4a86-81d2-9d88c2ce3e5f}</Project>
-      <Name>BindScript</Name>
+      <Name>VooDo</Name>
     </ProjectReference>
   </ItemGroup>
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">

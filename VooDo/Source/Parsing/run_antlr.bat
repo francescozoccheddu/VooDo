@@ -1,0 +1,1 @@
+antlr4 "%~dp0\VooDo.g4" -no-listener -visitor -o "%~dp0\Generated" -package "VooDo.Parsing.Generated" -Dlanguage=CSharp

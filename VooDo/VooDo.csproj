@@ -1,0 +1,224 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{D4B3D28F-7B0F-4A86-81D2-9D88C2CE3E5F}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>VooDo</RootNamespace>
+    <AssemblyName>VooDo</AssemblyName>
+    <DefaultLanguage>en-US</DefaultLanguage>
+    <TargetPlatformIdentifier>UAP</TargetPlatformIdentifier>
+    <TargetPlatformVersion Condition=" '$(TargetPlatformVersion)' == '' ">10.0.19041.0</TargetPlatformVersion>
+    <TargetPlatformMinVersion>10.0.19041.0</TargetPlatformMinVersion>
+    <MinimumVisualStudioVersion>14</MinimumVisualStudioVersion>
+    <FileAlignment>512</FileAlignment>
+    <ProjectTypeGuids>{A5A43C5B-DE2A-4C0C-9213-0A381AF9435A};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE;NETFX_CORE;WINDOWS_UWP</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <NoWarn>CS3021</NoWarn>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE;NETFX_CORE;WINDOWS_UWP</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <NoWarn>CS3021</NoWarn>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
+    <PlatformTarget>x86</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x86\Debug\</OutputPath>
+    <DefineConstants>TRACE;DEBUG;NETFX_CORE;WINDOWS_UWP</DefineConstants>
+    <NoWarn>CS3021</NoWarn>
+    <DebugType>full</DebugType>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+    <ErrorReport>prompt</ErrorReport>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
+    <PlatformTarget>x86</PlatformTarget>
+    <OutputPath>bin\x86\Release\</OutputPath>
+    <DefineConstants>TRACE;NETFX_CORE;WINDOWS_UWP</DefineConstants>
+    <Optimize>true</Optimize>
+    <NoWarn>CS3021</NoWarn>
+    <DebugType>pdbonly</DebugType>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+    <ErrorReport>prompt</ErrorReport>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|ARM'">
+    <PlatformTarget>ARM</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\ARM\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE;NETFX_CORE;WINDOWS_UWP</DefineConstants>
+    <NoWarn>CS3021</NoWarn>
+    <DebugType>full</DebugType>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+    <ErrorReport>prompt</ErrorReport>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|ARM'">
+    <PlatformTarget>ARM</PlatformTarget>
+    <OutputPath>bin\ARM\Release\</OutputPath>
+    <DefineConstants>TRACE;NETFX_CORE;WINDOWS_UWP</DefineConstants>
+    <Optimize>true</Optimize>
+    <NoWarn>CS3021</NoWarn>
+    <DebugType>pdbonly</DebugType>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+    <ErrorReport>prompt</ErrorReport>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|ARM64'">
+    <PlatformTarget>ARM64</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\ARM64\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE;NETFX_CORE;WINDOWS_UWP</DefineConstants>
+    <NoWarn>CS3021</NoWarn>
+    <DebugType>full</DebugType>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+    <ErrorReport>prompt</ErrorReport>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|ARM64'">
+    <PlatformTarget>ARM64</PlatformTarget>
+    <OutputPath>bin\ARM64\Release\</OutputPath>
+    <DefineConstants>TRACE;NETFX_CORE;WINDOWS_UWP</DefineConstants>
+    <Optimize>true</Optimize>
+    <NoWarn>CS3021</NoWarn>
+    <DebugType>pdbonly</DebugType>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+    <ErrorReport>prompt</ErrorReport>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+    <PlatformTarget>x64</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x64\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE;NETFX_CORE;WINDOWS_UWP</DefineConstants>
+    <NoWarn>CS3021</NoWarn>
+    <DebugType>full</DebugType>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+    <ErrorReport>prompt</ErrorReport>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+    <PlatformTarget>x64</PlatformTarget>
+    <OutputPath>bin\x64\Release\</OutputPath>
+    <DefineConstants>TRACE;NETFX_CORE;WINDOWS_UWP</DefineConstants>
+    <Optimize>true</Optimize>
+    <NoWarn>CS3021</NoWarn>
+    <DebugType>pdbonly</DebugType>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+    <ErrorReport>prompt</ErrorReport>
+  </PropertyGroup>
+  <PropertyGroup>
+    <RestoreProjectStyle>PackageReference</RestoreProjectStyle>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="Source\AST\ASTBase.cs" />
+    <Compile Include="Source\Parsing\Generated\VooDoBaseVisitor.cs" />
+    <Compile Include="Source\Parsing\Generated\VooDoLexer.cs" />
+    <Compile Include="Source\Parsing\Generated\VooDoParser.cs" />
+    <Compile Include="Source\Parsing\Generated\VooDoVisitor.cs" />
+    <Compile Include="Source\Parsing\Parser.cs" />
+    <Compile Include="Source\Parsing\Visitor.cs" />
+    <Compile Include="Source\Utils\Syntax.cs" />
+    <Compile Include="Source\AST\Expressions\Fundamentals\IfElseExpr.cs" />
+    <Compile Include="Source\AST\Expressions\Literals\NullLitExpr.cs" />
+    <Compile Include="Source\AST\Expressions\Operators\Operations\BwLstOpExpr.cs" />
+    <Compile Include="Source\AST\Expressions\Operators\Operations\BwNegOpExpr.cs" />
+    <Compile Include="Source\AST\Expressions\Operators\Operations\BwOrOpExpr.cs" />
+    <Compile Include="Source\AST\Expressions\Operators\Operations\BwXorOpExpr.cs" />
+    <Compile Include="Source\AST\Expressions\Operators\Operations\BwRstOpExpr.cs" />
+    <Compile Include="Source\AST\Expressions\Operators\Operations\BwAndOpExpr.cs" />
+    <Compile Include="Source\AST\Expressions\Operators\Operations\ModOpExpr.cs" />
+    <Compile Include="Source\AST\Expressions\Operators\Operations\PosOpExpr.cs" />
+    <Compile Include="Source\AST\Expressions\Operators\Operations\NullCoalesceOpExpr.cs" />
+    <Compile Include="Source\AST\Expressions\QualifiedName.cs" />
+    <Compile Include="Source\AST\Expressions\Name.cs" />
+    <Compile Include="Source\AST\Expressions\Fundamentals\CallExpr.cs" />
+    <Compile Include="Source\AST\Expressions\Operators\Comparisons\LeOpExpr.cs" />
+    <Compile Include="Source\AST\Expressions\Operators\Comparisons\LtOpExpr.cs" />
+    <Compile Include="Source\AST\Expressions\Operators\Comparisons\GeOpExpr.cs" />
+    <Compile Include="Source\AST\Expressions\Operators\Comparisons\GtOpExpr.cs" />
+    <Compile Include="Source\AST\Expressions\Operators\Comparisons\NeqOpExpr.cs" />
+    <Compile Include="Source\AST\Expressions\Operators\Comparisons\EqOpExpr.cs" />
+    <Compile Include="Source\AST\Expressions\Operators\Operations\LogNotOpExpr.cs" />
+    <Compile Include="Source\AST\Expressions\Operators\Operations\NegOpExpr.cs" />
+    <Compile Include="Source\AST\Expressions\Operators\Operations\MemberOpExpr.cs" />
+    <Compile Include="Source\AST\Expressions\Operators\Operations\MulOpExpr.cs" />
+    <Compile Include="Source\AST\Expressions\Operators\Operations\DivOpExpr.cs" />
+    <Compile Include="Source\AST\Expressions\Operators\Operations\LogAndOpExpr.cs" />
+    <Compile Include="Source\AST\Expressions\Operators\Operations\LogOrOpExpr.cs" />
+    <Compile Include="Source\AST\Expressions\Operators\Operations\SubOpExpr.cs" />
+    <Compile Include="Source\AST\Expressions\Operators\Operations\SumOpExpr.cs" />
+    <Compile Include="Source\AST\Expressions\Fundamentals\IndexExpr.cs" />
+    <Compile Include="Source\AST\Expressions\Fundamentals\CastExpr.cs" />
+    <Compile Include="Source\AST\Expressions\Operators\BinaryOpExpr.cs" />
+    <Compile Include="Source\AST\Expressions\Operators\UnaryOpExpr.cs" />
+    <Compile Include="Source\AST\Expressions\Fundamentals\VarExpr.cs" />
+    <Compile Include="Source\AST\Expressions\Expr.cs" />
+    <Compile Include="Source\AST\Expressions\Literals\BoolLitExpr.cs" />
+    <Compile Include="Source\AST\Expressions\Literals\StringLitExpr.cs" />
+    <Compile Include="Source\AST\Expressions\Literals\RealLitExpr.cs" />
+    <Compile Include="Source\AST\Expressions\Literals\LitExpr.cs" />
+    <Compile Include="Source\AST\Expressions\Literals\IntLitExpr.cs" />
+    <Compile Include="Source\AST\Statements\LinkStat.cs" />
+    <Compile Include="Source\AST\Statements\SequenceStat.cs" />
+    <Compile Include="Source\AST\Statements\ForeachStat.cs" />
+    <Compile Include="Source\AST\Statements\WhileStat.cs" />
+    <Compile Include="Source\AST\Statements\IfElseStat.cs" />
+    <Compile Include="Source\AST\Statements\AssignmentStat.cs" />
+    <Compile Include="Source\AST\Statements\Stat.cs" />
+    <Compile Include="Source\Utils\Ensure.cs" />
+    <Compile Include="Source\Exceptions\Runtime\Expressions\Assignment\TypeError.cs" />
+    <Compile Include="Source\Exceptions\Runtime\Expressions\Assignment\ReadOnlyError.cs" />
+    <Compile Include="Source\Exceptions\Runtime\Expressions\Assignment\UnassignableError.cs" />
+    <Compile Include="Source\Exceptions\Runtime\Expressions\Assignment\AssignmentFailure.cs" />
+    <Compile Include="Source\Exceptions\Runtime\Expressions\EvaluationFailure.cs" />
+    <Compile Include="Source\Exceptions\Runtime\ProgramFailure.cs" />
+    <Compile Include="Source\Exceptions\Runtime\RuntimeFailure.cs" />
+    <Compile Include="Source\Exceptions\Runtime\StatementFailure.cs" />
+    <Compile Include="Source\Exceptions\SyntaxError.cs" />
+    <Compile Include="Source\Exceptions\BaseException.cs" />
+    <Compile Include="Source\Runtime\Env.cs" />
+    <Compile Include="Source\Utils\Identity.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <EmbeddedResource Include="Properties\VooDo.rd.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Antlr4.Runtime.Standard">
+      <Version>4.9.0</Version>
+    </PackageReference>
+    <PackageReference Include="Microsoft.NETCore.UniversalWindowsPlatform">
+      <Version>6.2.11</Version>
+    </PackageReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Source\Exceptions\Runtime\Statements\" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Source\Parsing\VooDo.g4" />
+  </ItemGroup>
+  <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">
+    <VisualStudioVersion>14.0</VisualStudioVersion>
+  </PropertyGroup>
+  <Import Project="$(MSBuildExtensionsPath)\Microsoft\WindowsXaml\v$(VisualStudioVersion)\Microsoft.Windows.UI.Xaml.CSharp.targets" />
+  <PropertyGroup>
+    <PreBuildEvent>"$(ProjectDir)\Source\Parsing\run_antlr.bat"</PreBuildEvent>
+  </PropertyGroup>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
