@@ -28,7 +28,7 @@ namespace VooDo.AST.Expressions.Fundamentals
         public sealed override string Code =>
             $"{Source.LeftCode(Precedence)} as {TargetType.RightCode(Precedence)}";
 
-        internal sealed override object Evaluate(Env _env)
+        internal sealed override object Evaluate(Runtime.Env _env)
         {
             throw new NotImplementedException();
         }

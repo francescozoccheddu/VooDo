@@ -31,7 +31,7 @@ namespace VooDo.AST.Expressions.Fundamentals
         public sealed override string Code =>
             $"{Condition.LeftCode(Precedence)} ? {Then.Code} : {Else.RightCode(Precedence)}";
 
-        internal sealed override object Evaluate(Env _env)
+        internal sealed override object Evaluate(Runtime.Env _env)
         {
             throw new NotImplementedException();
         }

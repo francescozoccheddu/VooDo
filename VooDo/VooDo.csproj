@@ -130,6 +130,9 @@
     <Compile Include="Source\Parsing\Generated\VooDoVisitor.cs" />
     <Compile Include="Source\Parsing\Parser.cs" />
     <Compile Include="Source\Parsing\Visitor.cs" />
+    <Compile Include="Source\Runtime\IControllerFactory.cs" />
+    <Compile Include="Source\Runtime\IController.cs" />
+    <Compile Include="Source\Runtime\Program.cs" />
     <Compile Include="Source\Utils\Syntax.cs" />
     <Compile Include="Source\AST\Expressions\Fundamentals\IfElseExpr.cs" />
     <Compile Include="Source\AST\Expressions\Literals\NullLitExpr.cs" />
@@ -142,7 +145,6 @@
     <Compile Include="Source\AST\Expressions\Operators\Operations\ModOpExpr.cs" />
     <Compile Include="Source\AST\Expressions\Operators\Operations\PosOpExpr.cs" />
     <Compile Include="Source\AST\Expressions\Operators\Operations\NullCoalesceOpExpr.cs" />
-    <Compile Include="Source\AST\Expressions\QualifiedName.cs" />
     <Compile Include="Source\AST\Expressions\Name.cs" />
     <Compile Include="Source\AST\Expressions\Fundamentals\CallExpr.cs" />
     <Compile Include="Source\AST\Expressions\Operators\Comparisons\LeOpExpr.cs" />
@@ -153,7 +155,7 @@
     <Compile Include="Source\AST\Expressions\Operators\Comparisons\EqOpExpr.cs" />
     <Compile Include="Source\AST\Expressions\Operators\Operations\LogNotOpExpr.cs" />
     <Compile Include="Source\AST\Expressions\Operators\Operations\NegOpExpr.cs" />
-    <Compile Include="Source\AST\Expressions\Operators\Operations\MemberOpExpr.cs" />
+    <Compile Include="Source\AST\Expressions\Fundamentals\MemberExpr.cs" />
     <Compile Include="Source\AST\Expressions\Operators\Operations\MulOpExpr.cs" />
     <Compile Include="Source\AST\Expressions\Operators\Operations\DivOpExpr.cs" />
     <Compile Include="Source\AST\Expressions\Operators\Operations\LogAndOpExpr.cs" />
@@ -171,7 +173,6 @@
     <Compile Include="Source\AST\Expressions\Literals\RealLitExpr.cs" />
     <Compile Include="Source\AST\Expressions\Literals\LitExpr.cs" />
     <Compile Include="Source\AST\Expressions\Literals\IntLitExpr.cs" />
-    <Compile Include="Source\AST\Statements\LinkStat.cs" />
     <Compile Include="Source\AST\Statements\SequenceStat.cs" />
     <Compile Include="Source\AST\Statements\ForeachStat.cs" />
     <Compile Include="Source\AST\Statements\WhileStat.cs" />
@@ -204,6 +205,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Source\Exceptions\Runtime\Statements\" />
+    <Folder Include="Source\Runtime\Controllers\" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Source\Parsing\VooDo.g4" />

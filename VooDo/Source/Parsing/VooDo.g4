@@ -12,12 +12,13 @@ expr:
 	| value=HEX_INT														# HexIntLitExpr
 	| value=REAL														# RealLitExpr
 	| value=STRING														# StringLitExpr
-	| path+=NAME ('@' path+=NAME)*										# NameExpr
+	| name=NAME															# NameExpr
+	| '$' name=NAME														# ControllerNameExpr
 	| '(' srcExpr=expr ')'												# GroupExpr
-	| srcExpr=expr '.' memberExpr=expr									# MemOpExpr
+	| srcExpr=expr '.' memberName=NAME									# MemOpExpr
 	| srcExpr=expr '(' ( argsExpr+=expr ( ',' argsExpr+=expr)*)? ')'	# CallOpExpr
 	| srcExpr=expr '[' (argsExpr+=expr ( ',' argsExpr+=expr)*)? ']'		# IndexExpr
-	| srcExpr=expr '?.' memberExpr=expr									# NullableMemOpExpr
+	| srcExpr=expr '?.' memberName=NAME									# NullableMemOpExpr
 	| srcExpr=expr '?[' (argsExpr+=expr ( ',' argsExpr+=expr)*)? ']'	# NullableIndexExpr
 	// Precedence 1
 	| '+' srcExpr=expr	# PosOpExpr
@@ -66,7 +67,6 @@ stat:
 	| WHILE '(' condExpr=expr ')' doStat=stat						# WhileStat
 	| FOREACH '(' tgtExpr=expr IN srcExpr=expr ')' doStat=stat		# ForeachStat
 	| tgtExpr=expr '=' srcExpr=expr ';'								# AssignmentStat
-	| tgtExpr=expr ':=' srcExpr=expr ';'							# LinkStat
 ;
 
 // ---- Lexer -----

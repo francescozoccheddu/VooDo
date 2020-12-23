@@ -19,12 +19,12 @@ namespace VooDo.AST.Expressions.Operators
 
         #region Expr
 
-        internal sealed override object Evaluate(Env _env)
+        internal sealed override object Evaluate(Runtime.Env _env)
         {
             throw new NotImplementedException();
         }
 
-        internal sealed override void Assign(Env _env, object _value)
+        internal sealed override void Assign(Runtime.Env _env, object _value)
         {
             throw new NotImplementedException();
         }
