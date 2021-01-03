@@ -1,6 +1,4 @@
-﻿using VooDo.Runtime;
-
-namespace VooDo.Source.Runtime
+﻿namespace VooDo.Runtime
 {
     public interface IController
     {

@@ -3,9 +3,8 @@
 using System;
 
 using VooDo.AST.Statements;
-using VooDo.Runtime;
 
-namespace VooDo.Source.Runtime
+namespace VooDo.Runtime
 {
 
     public sealed class Program
@@ -13,12 +12,14 @@ namespace VooDo.Source.Runtime
 
         public Env Environment { get; }
         public Stat Statement { get; }
+        public HookManager HookManager { get; }
 
         public Program(Stat _stat)
         {
-            Environment = new Env();
+            Environment = new Env(this);
             Environment.OnValueChanged += (_b, _o) => RequestRun();
             Statement = _stat;
+            HookManager = new HookManager();
         }
 
         private bool m_runRequested;

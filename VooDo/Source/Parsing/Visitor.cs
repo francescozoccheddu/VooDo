@@ -32,8 +32,8 @@ namespace VooDo.Parsing
         public override ASTBase VisitBinIntLitExpr([NotNull] VooDoParser.BinIntLitExprContext _context) => new IntLitExpr(Convert.ToInt32(_context.value.Text.Substring(2), 2));
         public override ASTBase VisitBoolLitExpr([NotNull] VooDoParser.BoolLitExprContext _context) => new BoolLitExpr(_context.value.Text == "true");
         public override ASTBase VisitBwAndOpExpr([NotNull] VooDoParser.BwAndOpExprContext _context) => new BwAndOpExpr(Get(_context.lExpr), Get(_context.rExpr));
-        public override ASTBase VisitBwLstOpExpr([NotNull] VooDoParser.BwLstOpExprContext _context) => new BwAndOpExpr(Get(_context.lExpr), Get(_context.rExpr));
-        public override ASTBase VisitBwNegExpr([NotNull] VooDoParser.BwNegExprContext _context) => new BwLstOpExpr(Get(_context.srcExpr));
+        public override ASTBase VisitBwLstOpExpr([NotNull] VooDoParser.BwLstOpExprContext _context) => new BwLstOpExpr(Get(_context.lExpr), Get(_context.rExpr));
+        public override ASTBase VisitBwNegExpr([NotNull] VooDoParser.BwNegExprContext _context) => new BwNegOpExpr(Get(_context.srcExpr));
         public override ASTBase VisitBwOrOpExpr([NotNull] VooDoParser.BwOrOpExprContext _context) => new BwOrOpExpr(Get(_context.lExpr), Get(_context.rExpr));
         public override ASTBase VisitBwRstOpExpr([NotNull] VooDoParser.BwRstOpExprContext _context) => new BwRstOpExpr(Get(_context.lExpr), Get(_context.rExpr));
         public override ASTBase VisitBwXorOpExpr([NotNull] VooDoParser.BwXorOpExprContext _context) => new BwXorOpExpr(Get(_context.lExpr), Get(_context.rExpr));
@@ -80,6 +80,7 @@ namespace VooDo.Parsing
         public override ASTBase VisitNullableIndexExpr([NotNull] VooDoParser.NullableIndexExprContext _context) => new IndexExpr(Get(_context.srcExpr), Get(_context._argsExpr), true);
         public override ASTBase VisitIsExpr([NotNull] VooDoParser.IsExprContext _context) => new IsExpr(Get(_context.srcExpr), Get(_context.typeExpr));
         public override ASTBase VisitControllerNameExpr([NotNull] VooDoParser.ControllerNameExprContext _context) => new VarExpr(new Name(_context.name.Text), true);
+        public override ASTBase VisitSpecializationExpr([NotNull] VooDoParser.SpecializationExprContext _context) => new SpecializationExpr(Get(_context.srcExpr), Get(_context._argsExpr));
     }
 
 }

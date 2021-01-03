@@ -1,15 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections;
 
 namespace VooDo.Utils
 {
     internal static class Identity
     {
 
-        internal static int CombineHash(params object[] _objs)
+        internal static int CombineHash(params object[] _objs) => CombineHashes(_objs);
+
+        internal static int CombineHashes(IEnumerable _objs)
         {
             int hashCode = 579313498;
             foreach (object obj in _objs)

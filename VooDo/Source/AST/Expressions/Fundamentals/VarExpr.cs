@@ -1,5 +1,6 @@
 ﻿using System;
 
+using VooDo.Runtime;
 using VooDo.Source.Runtime;
 using VooDo.Utils;
 
@@ -21,7 +22,7 @@ namespace VooDo.AST.Expressions.Fundamentals
 
         #region Expr
 
-        internal sealed override object Evaluate(Runtime.Env _env) => _env[Name].Value;
+        internal sealed override object Evaluate(Runtime.Env _env) => Controller ? _env[Name].Controller : _env[Name].Value;
 
         internal sealed override void Assign(Runtime.Env _env, object _value)
         {
@@ -48,7 +49,7 @@ namespace VooDo.AST.Expressions.Fundamentals
 
         public sealed override int Precedence => 0;
 
-        public sealed override string Code => $"{(Controller ? "$" : "")}{Name.Code}";
+        public sealed override string Code => $"{(Controller ? "$" : "")}{Name}";
 
         #endregion
 

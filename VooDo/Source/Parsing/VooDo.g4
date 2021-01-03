@@ -18,6 +18,7 @@ expr:
 	| srcExpr=expr '.' memberName=NAME									# MemOpExpr
 	| srcExpr=expr '(' ( argsExpr+=expr ( ',' argsExpr+=expr)*)? ')'	# CallOpExpr
 	| srcExpr=expr '[' (argsExpr+=expr ( ',' argsExpr+=expr)*)? ']'		# IndexExpr
+	| srcExpr=expr '<' (argsExpr+=expr ( ',' argsExpr+=expr)*)? '>'		# SpecializationExpr
 	| srcExpr=expr '?.' memberName=NAME									# NullableMemOpExpr
 	| srcExpr=expr '?[' (argsExpr+=expr ( ',' argsExpr+=expr)*)? ']'	# NullableIndexExpr
 	// Precedence 1

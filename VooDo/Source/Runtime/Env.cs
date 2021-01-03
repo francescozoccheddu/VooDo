@@ -93,10 +93,18 @@ namespace VooDo.Runtime
 
         private readonly Dictionary<Name, Binding> m_dictionary = new Dictionary<Name, Binding>();
 
+        internal Env(Program _program)
+        {
+            Ensure.NonNull(_program, nameof(_program));
+            Program = _program;
+        }
+
         private void NotifyValueChanged(Binding _binding, object _oldValue) => OnValueChanged?.Invoke(_binding, _oldValue);
 
         public event ValueChanged OnValueChanged;
         public event BindingCreated OnBindingCreated;
+
+        public Program Program { get; }
 
         public Binding Add(Name _name)
         {

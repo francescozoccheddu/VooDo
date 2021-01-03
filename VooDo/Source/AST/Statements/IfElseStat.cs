@@ -1,9 +1,7 @@
 ﻿
 using VooDo.AST.Expressions;
-using VooDo.Runtime;
+using VooDo.Runtime.Engine;
 using VooDo.Utils;
-
-using System;
 
 namespace VooDo.AST.Statements
 {
@@ -26,7 +24,11 @@ namespace VooDo.AST.Statements
 
         #region Stat
 
-        internal sealed override void Run(Runtime.Env _env) => throw new NotImplementedException();
+        internal sealed override void Run(Runtime.Env _env)
+        {
+            bool condValue = RuntimeHelpers.Cast<bool>(Condition.Evaluate(_env));
+            (condValue ? ThenBody : ElseBody).Run(_env);
+        }
 
         #endregion
 

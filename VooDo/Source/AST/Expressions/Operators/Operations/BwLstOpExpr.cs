@@ -1,23 +1,16 @@
-﻿using System;
-
-using VooDo.Runtime;
-
-namespace VooDo.AST.Expressions.Operators.Operations
+﻿namespace VooDo.AST.Expressions.Operators.Operations
 {
 
-    public sealed class BwLstOpExpr : UnaryOpExpr
+    public sealed class BwLstOpExpr : BinaryOpExpr
     {
 
-        internal BwLstOpExpr(Expr _argument) : base(_argument)
+        internal BwLstOpExpr(Expr _leftArgument, Expr _rightArgument) : base(_leftArgument, _rightArgument)
         {
         }
 
         #region Expr
 
-        internal sealed override object Evaluate(Runtime.Env _env)
-        {
-            throw new NotImplementedException();
-        }
+        protected override object Evaluate(dynamic _left, dynamic _right) => _left << _right;
 
         public sealed override int Precedence => 4;
 

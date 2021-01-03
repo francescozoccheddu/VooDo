@@ -2,61 +2,48 @@
 using System.Collections.Generic;
 using System.Linq;
 
-using VooDo.Runtime;
+using VooDo.Runtime.Engine;
 using VooDo.Utils;
 
 namespace VooDo.AST.Expressions.Fundamentals
 {
 
-    public sealed class IndexExpr : Expr
+    public sealed class IndexExpr : ParametricExpr
     {
 
-        internal IndexExpr(Expr _indexable, IEnumerable<Expr> _index, bool _nullCoalesce)
+        internal IndexExpr(Expr _indexable, IEnumerable<Expr> _index, bool _nullCoalesce) : base(_indexable, _index)
         {
-            Ensure.NonNull(_indexable, nameof(_indexable));
-            Ensure.NonNull(_index, nameof(_index));
-            Ensure.NonNullItems(_index, nameof(_index));
-            Indexable = _indexable;
-            m_index = _index.ToArray();
-            if (m_index.Length == 0)
+            if (Arguments.Count == 0)
             {
                 throw new ArgumentException("Empty index", nameof(_index));
             }
             NullCoalesce = _nullCoalesce;
         }
 
-        private readonly Expr[] m_index;
-
-        public Expr Indexable { get; }
-        public IEnumerable<Expr> Index { get; }
         public bool NullCoalesce { get; }
 
         #region Expr
 
         internal sealed override object Evaluate(Runtime.Env _env)
-        {
-            throw new NotImplementedException();
-        }
+            => RuntimeHelpers.EvaluateIndexer(Source.Evaluate(_env), Arguments.Select(_a => _a.Evaluate(_env)).ToArray());
 
         internal sealed override void Assign(Runtime.Env _env, object _value)
-        {
-            throw new NotImplementedException();
-        }
+            => RuntimeHelpers.AssignIndexer(Source.Evaluate(_env), Arguments.Select(_a => _a.Evaluate(_env)).ToArray(), _value);
 
         public sealed override int Precedence => 0;
 
         public sealed override string Code
-            => $"{Indexable.LeftCode(Precedence)}{(NullCoalesce ? "?" : "")}[{m_index.ArgumentsListCode()}]";
+            => $"{Source.LeftCode(Precedence)}{(NullCoalesce ? "?" : "")}[{Arguments.ArgumentsListCode()}]";
 
         #endregion
 
         #region ASTBase
 
         public sealed override bool Equals(object _obj)
-            => _obj is IndexExpr expr && Indexable.Equals(expr.Indexable) && Index.Equals(expr.Index);
+            => _obj is IndexExpr expr && NullCoalesce == expr.NullCoalesce && base.Equals(expr);
 
         public sealed override int GetHashCode()
-            => Identity.CombineHash(Indexable, Index);
+            => Identity.CombineHash(base.GetHashCode(), NullCoalesce);
 
         #endregion
 

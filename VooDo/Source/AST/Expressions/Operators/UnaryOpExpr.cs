@@ -1,11 +1,6 @@
-﻿using VooDo.AST.Expressions;
+﻿
+using VooDo.Runtime;
 using VooDo.Utils;
-
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace VooDo.AST.Expressions.Operators
 {
@@ -23,6 +18,8 @@ namespace VooDo.AST.Expressions.Operators
 
         protected abstract string m_OperatorSymbol { get; }
 
+        protected abstract object Evaluate(dynamic _argument);
+
         #region ASTBase
 
         public sealed override string Code
@@ -32,6 +29,8 @@ namespace VooDo.AST.Expressions.Operators
             => _obj is UnaryOpExpr expr && Argument.Equals(expr.Argument);
 
         public sealed override int GetHashCode() => Argument.GetHashCode();
+
+        internal sealed override object Evaluate(Env _env) => Evaluate(Argument.Evaluate(_env));
 
         #endregion
 

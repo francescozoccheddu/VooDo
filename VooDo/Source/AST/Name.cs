@@ -1,18 +1,13 @@
 ﻿
-using System;
-
 using VooDo.Utils;
 
 namespace VooDo.AST
 {
 
-    public sealed class Name : ASTBase
+    public sealed class Name
     {
 
-        public static implicit operator Name(string _name)
-        {
-            return new Name(_name);
-        }
+        public static implicit operator Name(string _name) => new Name(_name);
 
         public static implicit operator string(Name _name) => _name.m_name;
 
@@ -24,14 +19,11 @@ namespace VooDo.AST
 
         private readonly string m_name;
 
-        #region ASTBase
-
-        public sealed override string Code => m_name;
-
         public sealed override bool Equals(object _obj) => _obj is Name other && other.m_name == m_name;
+
         public sealed override int GetHashCode() => m_name.GetHashCode();
 
-        #endregion
+        public sealed override string ToString() => m_name;
 
     }
 

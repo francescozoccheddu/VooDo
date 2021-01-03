@@ -1,7 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 
-using VooDo.Runtime;
+using VooDo.Runtime.Engine;
 using VooDo.Utils;
 
 namespace VooDo.AST.Expressions.Fundamentals
@@ -29,9 +28,7 @@ namespace VooDo.AST.Expressions.Fundamentals
             $"{Source.LeftCode(Precedence)} as {TargetType.RightCode(Precedence)}";
 
         internal sealed override object Evaluate(Runtime.Env _env)
-        {
-            throw new NotImplementedException();
-        }
+            => Convert.ChangeType(Source.Evaluate(_env), RuntimeHelpers.Cast<Type>(TargetType.Evaluate(_env)));
 
         #endregion
 

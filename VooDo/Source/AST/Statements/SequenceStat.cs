@@ -1,11 +1,8 @@
-﻿using VooDo.Runtime;
-using VooDo.Utils;
-
-using System;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+
+using VooDo.Utils;
 
 namespace VooDo.AST.Statements
 {
@@ -28,7 +25,13 @@ namespace VooDo.AST.Statements
 
         #region Stat
 
-        internal sealed override void Run(Runtime.Env _env) => throw new NotImplementedException();
+        internal sealed override void Run(Runtime.Env _env)
+        {
+            foreach (Stat stat in Statements)
+            {
+                stat.Run(_env);
+            }
+        }
 
         #endregion
 

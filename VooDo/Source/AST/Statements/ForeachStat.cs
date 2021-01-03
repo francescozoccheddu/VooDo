@@ -1,9 +1,9 @@
 ﻿
-using VooDo.AST.Expressions;
-using VooDo.Runtime;
-using VooDo.Utils;
+using System.Collections;
 
-using System;
+using VooDo.AST.Expressions;
+using VooDo.Runtime.Engine;
+using VooDo.Utils;
 
 namespace VooDo.AST.Statements
 {
@@ -26,7 +26,14 @@ namespace VooDo.AST.Statements
 
         #region Stat
 
-        internal sealed override void Run(Runtime.Env _env) => throw new NotImplementedException();
+        internal sealed override void Run(Runtime.Env _env)
+        {
+            foreach (object item in RuntimeHelpers.Cast<IEnumerable>(Source.Evaluate(_env)))
+            {
+                Target.Assign(_env, item);
+                Body.Run(_env);
+            }
+        }
 
         #endregion
 

@@ -1,8 +1,4 @@
-﻿using System;
-
-using VooDo.Runtime;
-
-namespace VooDo.AST.Expressions.Operators.Comparisons
+﻿namespace VooDo.AST.Expressions.Operators.Comparisons
 {
 
     public sealed class LtOpExpr : BinaryOpExpr
@@ -14,10 +10,7 @@ namespace VooDo.AST.Expressions.Operators.Comparisons
 
         #region Expr
 
-        internal sealed override object Evaluate(Runtime.Env _env)
-        {
-            throw new NotImplementedException();
-        }
+        protected sealed override object Evaluate(dynamic _left, dynamic _right) => _left < _right;
 
         public sealed override int Precedence => 5;
 

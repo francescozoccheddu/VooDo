@@ -1,7 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 
 using VooDo.Runtime;
+using VooDo.Runtime.Engine;
 using VooDo.Utils;
 
 namespace VooDo.AST.Expressions.Fundamentals
@@ -28,9 +28,11 @@ namespace VooDo.AST.Expressions.Fundamentals
         public sealed override string Code =>
             $"{Source.LeftCode(Precedence)} is {TestType.RightCode(Precedence)}";
 
-        internal sealed override object Evaluate(Runtime.Env _env)
+        internal sealed override object Evaluate(Env _env)
         {
-            throw new NotImplementedException();
+            Type sourceType = Source.Evaluate(_env)?.GetType();
+            Type testType = RuntimeHelpers.Cast<Type>(TestType.Evaluate(_env));
+            return sourceType != null && testType.IsInstanceOfType(sourceType);
         }
 
         #endregion

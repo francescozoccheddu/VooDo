@@ -1,8 +1,6 @@
 ﻿using System;
 
-using VooDo.AST.Expressions.Operators;
-using VooDo.Exceptions;
-using VooDo.Runtime;
+using VooDo.Runtime.Engine;
 using VooDo.Utils;
 
 namespace VooDo.AST.Expressions.Fundamentals
@@ -28,17 +26,27 @@ namespace VooDo.AST.Expressions.Fundamentals
 
         internal sealed override object Evaluate(Runtime.Env _env)
         {
-            throw new NotImplementedException();
+            object sourceValue = Source.Evaluate(_env);
+            if (sourceValue == null)
+            {
+                throw new NullReferenceException();
+            }
+            return RuntimeHelpers.EvaluateMember(_env.Program.HookManager, Member, sourceValue.GetType(), sourceValue);
         }
 
         internal sealed override void Assign(Runtime.Env _env, object _value)
         {
-            throw new NotImplementedException();
+            object sourceValue = Source.Evaluate(_env);
+            if (sourceValue == null)
+            {
+                throw new NullReferenceException();
+            }
+            RuntimeHelpers.AssignMember(Member, _value, sourceValue.GetType(), sourceValue);
         }
 
         public sealed override int Precedence => 0;
 
-        public override string Code => $"{Source.LeftCode(Precedence)}{(NullCoalesce ? "?." : ".")}{Member.Code}";
+        public override string Code => $"{Source.LeftCode(Precedence)}{(NullCoalesce ? "?." : ".")}{Member}";
 
         #endregion
 
