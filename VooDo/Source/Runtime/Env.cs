@@ -38,7 +38,7 @@ namespace VooDo.Runtime
                 object value = Value;
                 if (value != m_oldValue)
                 {
-                    OnValueChanged(this, m_oldValue);
+                    OnValueChanged?.Invoke(this, m_oldValue);
                     Environment.NotifyValueChanged(this, m_oldValue);
                     m_oldValue = value;
                 }

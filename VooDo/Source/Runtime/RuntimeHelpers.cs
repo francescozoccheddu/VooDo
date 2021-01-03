@@ -16,7 +16,7 @@ namespace VooDo.Runtime.Engine
 
         private static MemberInfo[] GetMembers(Type _type, Name _name)
         {
-            MemberInfo[] members = _type.GetMember(_name, BindingFlags.Public);
+            MemberInfo[] members = _type.GetMember(_name, BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static);
             if (members.Length == 0)
             {
                 throw new MissingMemberException();

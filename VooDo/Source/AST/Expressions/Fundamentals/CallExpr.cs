@@ -1,6 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.Linq;
 
+using VooDo.Runtime.Engine;
+using VooDo.Runtime.Meta;
 using VooDo.Utils;
 
 namespace VooDo.AST.Expressions.Fundamentals
@@ -15,7 +17,8 @@ namespace VooDo.AST.Expressions.Fundamentals
 
         #region Expr
 
-        internal sealed override object Evaluate(Runtime.Env _env) => throw new NotImplementedException();
+        internal sealed override object Evaluate(Runtime.Env _env)
+            => RuntimeHelpers.Cast<ICallable>(Source.Evaluate(_env)).Call(Arguments.Select(_a => _a.Evaluate(_env)).ToArray());
 
         public sealed override int Precedence => 0;
 
