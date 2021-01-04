@@ -1,6 +1,7 @@
 ﻿using System;
 
 using VooDo.Runtime.Engine;
+using VooDo.Source.Utils;
 using VooDo.Utils;
 
 namespace VooDo.AST.Expressions.Fundamentals
@@ -31,7 +32,8 @@ namespace VooDo.AST.Expressions.Fundamentals
             {
                 throw new NullReferenceException();
             }
-            return RuntimeHelpers.EvaluateMember(_env.Program.HookManager, Member, sourceValue.GetType(), sourceValue);
+            Type sourceType = Source is CastExpr expr ? expr.TargetType.AsType(_env) : sourceValue.GetType();
+            return RuntimeHelpers.EvaluateMember(_env.Program.HookManager, Member, sourceType, sourceValue);
         }
 
         internal sealed override void Assign(Runtime.Env _env, object _value)

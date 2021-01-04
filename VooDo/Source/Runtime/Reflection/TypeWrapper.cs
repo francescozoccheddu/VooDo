@@ -13,6 +13,8 @@ namespace VooDo.Runtime.Reflection
 
         public Type Type { get; }
 
+        public static implicit operator Type(TypeWrapper _wrapper) => _wrapper.Type;
+
         public override bool Equals(object _obj) => _obj is TypeWrapper wrapper && Type.Equals(wrapper.Type);
 
         public override int GetHashCode() => Type.GetHashCode();

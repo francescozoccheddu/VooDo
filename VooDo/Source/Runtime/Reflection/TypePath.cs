@@ -12,6 +12,9 @@ namespace VooDo.Runtime.Reflection
     public sealed class TypePath : IMemberProvider, IGeneric
     {
 
+        public TypePath(params Name[] _path) : this((IEnumerable<Name>) _path)
+        { }
+
         public TypePath(IEnumerable<Name> _path)
         {
             Ensure.NonNull(_path, nameof(_path));
@@ -70,7 +73,8 @@ namespace VooDo.Runtime.Reflection
         {
             Ensure.NonNull(_name, nameof(_name));
             TypePath path = Child(_name);
-            return (object) path.AsType ?? path;
+            Type type = path.AsType;
+            return type != null ? (object) new TypeWrapper(type) : path;
         }
 
         public Type AsType => Type.GetType(QualifiedName);

@@ -44,7 +44,7 @@ namespace VooDo.Runtime.Reflection
             {
                 throw new ArgumentException("Non-method member type", nameof(_methodInfos));
             }
-            if (Methods.Any(_m => _m.DeclaringType != DeclaringType || _m.Name != Name))
+            if (Methods.Any(_m => _m.DeclaringType != DeclaringType || _m.Name != Name || !_m.GetGenericArguments().SequenceEqual(GenericArguments)))
             {
                 throw new ArgumentException("Not a method group", nameof(_methodInfos));
             }
@@ -55,20 +55,22 @@ namespace VooDo.Runtime.Reflection
         public IReadOnlyList<MethodInfo> Methods { get; }
         public string Name => Methods[0].Name;
         public Type DeclaringType => Methods[0].DeclaringType;
+        public IReadOnlyList<Type> GenericArguments => Methods[0].GetGenericArguments();
 
         public sealed override bool Equals(object _obj)
             => _obj is MethodWrapper wrapper && Methods.Count == wrapper.Methods.Count && Methods.All(wrapper.Methods.Contains);
 
         public sealed override int GetHashCode() => Identity.CombineHash(Instance, Identity.CombineHashes(Methods));
 
-        public override string ToString() => $"{Methods[0].DeclaringType}.{Methods[0].Name}";
+        public override string ToString()
+            => $"{Methods[0].DeclaringType}.{Methods[0].Name}{(GenericArguments.Count > 0 ? $"<{string.Join(", ", GenericArguments)}>" : "")}";
 
-        object ICallable.Call(object[] _arguments) => Call(_arguments);
+        object ICallable.Call(object[] _arguments, Type[] _types) => Call(_arguments, _types);
 
-        public object Call(object[] _arguments)
+        public object Call(object[] _arguments, Type[] _types = null)
         {
             Ensure.NonNull(_arguments, nameof(_arguments));
-            return RuntimeHelpers.InvokeMethod(Methods, _arguments, Instance);
+            return RuntimeHelpers.InvokeMethod(Methods, _arguments, Instance, _types);
         }
 
         public MethodWrapper Specialize(Type[] _arguments)

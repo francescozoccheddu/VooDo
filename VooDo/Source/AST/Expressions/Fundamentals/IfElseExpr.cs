@@ -1,6 +1,6 @@
 ﻿
 using VooDo.Runtime;
-using VooDo.Runtime.Engine;
+using VooDo.Source.Utils;
 using VooDo.Utils;
 
 namespace VooDo.AST.Expressions.Fundamentals
@@ -31,10 +31,7 @@ namespace VooDo.AST.Expressions.Fundamentals
             $"{Condition.LeftCode(Precedence)} ? {Then.Code} : {Else.RightCode(Precedence)}";
 
         internal sealed override object Evaluate(Env _env)
-        {
-            bool condValue = RuntimeHelpers.Cast<bool>(Condition.Evaluate(_env));
-            return (condValue ? Then : Else).Evaluate(_env);
-        }
+            => (Condition.AsBool(_env) ? Then : Else).Evaluate(_env);
 
         #endregion
 

@@ -16,7 +16,7 @@ namespace VooDo.Source.Runtime.Reflection
 
         public Delegate Delegate { get; }
 
-        object ICallable.Call(object[] _arguments) => Delegate.DynamicInvoke(_arguments);
+        object ICallable.Call(object[] _arguments, Type[] _types) => Delegate.DynamicInvoke(_arguments);
 
         public override bool Equals(object _obj) => _obj is DelegateWrapper wrapper && Delegate.Equals(wrapper.Delegate);
 

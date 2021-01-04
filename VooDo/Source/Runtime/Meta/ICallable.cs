@@ -1,9 +1,11 @@
-﻿namespace VooDo.Runtime.Meta
+﻿using System;
+
+namespace VooDo.Runtime.Meta
 {
     public interface ICallable
     {
 
-        object Call(object[] _arguments);
+        object Call(object[] _arguments, Type[] _types = null);
 
     }
 

@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 
-using VooDo.Runtime.Engine;
 using VooDo.Runtime.Meta;
+using VooDo.Source.Utils;
 using VooDo.Utils;
 
 namespace VooDo.AST.Expressions.Fundamentals
@@ -23,7 +23,7 @@ namespace VooDo.AST.Expressions.Fundamentals
             object sourceValue = Source.Evaluate(_env);
             if (sourceValue is IGeneric generic)
             {
-                return generic.Specialize(Arguments.Select(_a => RuntimeHelpers.Cast<Type>(_a)).ToArray());
+                return generic.Specialize(Arguments.Select(_a => _a.AsType(_env)).ToArray());
             }
             else
             {

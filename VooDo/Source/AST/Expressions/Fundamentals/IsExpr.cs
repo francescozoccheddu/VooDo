@@ -1,7 +1,7 @@
 ﻿using System;
 
 using VooDo.Runtime;
-using VooDo.Runtime.Engine;
+using VooDo.Source.Utils;
 using VooDo.Utils;
 
 namespace VooDo.AST.Expressions.Fundamentals
@@ -31,7 +31,7 @@ namespace VooDo.AST.Expressions.Fundamentals
         internal sealed override object Evaluate(Env _env)
         {
             Type sourceType = Source.Evaluate(_env)?.GetType();
-            Type testType = RuntimeHelpers.Cast<Type>(TestType.Evaluate(_env));
+            Type testType = TestType.AsType(_env);
             return sourceType != null && testType.IsInstanceOfType(sourceType);
         }
 

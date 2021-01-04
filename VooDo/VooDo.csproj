@@ -145,6 +145,7 @@
     <Compile Include="Source\Runtime\Reflection\MethodWrapper.cs" />
     <Compile Include="Source\Runtime\Reflection\TypePath.cs" />
     <Compile Include="Source\Runtime\Reflection\TypeWrapper.cs" />
+    <Compile Include="Source\Utils\Expressions.cs" />
     <Compile Include="Source\Utils\Syntax.cs" />
     <Compile Include="Source\AST\Expressions\Fundamentals\IfElseExpr.cs" />
     <Compile Include="Source\AST\Expressions\Literals\NullLitExpr.cs" />
