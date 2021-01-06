@@ -1,6 +1,6 @@
 ﻿using System;
 
-using VooDo.Runtime.Engine;
+using VooDo.Runtime;
 using VooDo.Source.Utils;
 using VooDo.Utils;
 
@@ -28,20 +28,21 @@ namespace VooDo.AST.Expressions.Fundamentals
         public sealed override string Code =>
             $"{Source.LeftCode(Precedence)} as {TargetType.RightCode(Precedence)}";
 
-        internal sealed override object Evaluate(Runtime.Env _env)
+        internal object Evaluate(Env _env, out Type _type)
         {
-            Type targetType = TargetType.AsType(_env);
+            _type = TargetType.AsType(_env);
             object sourceValue = Source.Evaluate(_env);
             try
             {
-                return RuntimeHelpers.ConvertType(sourceValue, targetType);
+                return Reflection.ConvertType(sourceValue, _type);
             }
             catch
             {
                 return null;
             }
-
         }
+
+        internal sealed override object Evaluate(Runtime.Env _env) => Evaluate(_env, out Type _);
 
         #endregion
 

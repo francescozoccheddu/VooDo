@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 
-using VooDo.Runtime.Engine;
 using VooDo.Source.Utils;
 using VooDo.Utils;
 
@@ -26,10 +24,18 @@ namespace VooDo.AST.Expressions.Fundamentals
         #region Expr
 
         internal sealed override object Evaluate(Runtime.Env _env)
-            => RuntimeHelpers.EvaluateIndexer(Source.Evaluate(_env), Arguments.Select(_a => _a.Evaluate(_env)).ToArray(), this.ArgumentTypes(_env));
+        {
+            Arguments.Evaluate(_env, out object[] values, out Type[] types);
+            object sourceValue = Source.Evaluate(_env, out Type sourceType);
+            return Reflection.EvaluateIndexer(sourceValue, sourceType, values, types);
+        }
 
         internal sealed override void Assign(Runtime.Env _env, object _value)
-            => RuntimeHelpers.AssignIndexer(Source.Evaluate(_env), Arguments.Select(_a => _a.Evaluate(_env)).ToArray(), _value, this.ArgumentTypes(_env));
+        {
+            Arguments.Evaluate(_env, out object[] values, out Type[] types);
+            object sourceValue = Source.Evaluate(_env, out Type sourceType);
+            Reflection.AssignIndexer(sourceValue, sourceType, values, _value, types);
+        }
 
         public sealed override int Precedence => 0;
 

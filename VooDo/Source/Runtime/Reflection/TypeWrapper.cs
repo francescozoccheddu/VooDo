@@ -1,8 +1,8 @@
 ﻿using System;
 
 using VooDo.AST;
-using VooDo.Runtime.Engine;
 using VooDo.Runtime.Meta;
+using VooDo.Utils;
 
 namespace VooDo.Runtime.Reflection
 {
@@ -22,10 +22,10 @@ namespace VooDo.Runtime.Reflection
         public override string ToString() => Type.ToString();
 
         void IAssignableMemberProvider.AssignMember(Name _name, object _value)
-            => RuntimeHelpers.AssignMember(_name, _value, Type, null);
+            => Utils.Reflection.AssignMember(_name, _value, Type, null);
 
         object IMemberProvider.EvaluateMember(Name _name, HookManager _hookManager)
-            => RuntimeHelpers.EvaluateMember(_hookManager, _name, Type, null);
+            => Utils.Reflection.EvaluateMember(_hookManager, _name, Type, null);
 
         object IGeneric.Specialize(Type[] _arguments)
         {

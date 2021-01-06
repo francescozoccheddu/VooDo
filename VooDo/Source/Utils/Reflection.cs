@@ -4,17 +4,18 @@ using System.Linq;
 using System.Reflection;
 
 using VooDo.AST;
+using VooDo.Runtime;
 using VooDo.Runtime.Meta;
 using VooDo.Runtime.Reflection;
-using VooDo.Utils;
 
-namespace VooDo.Runtime.Engine
+namespace VooDo.Utils
 {
 
-    internal static class RuntimeHelpers
+    internal static class Reflection
     {
 
-        private const bool c_accessStaticMembersThroughInstance = false;
+        private const bool c_accessStaticMembersByInstance = false;
+        private const bool c_accessInstanceMembersByType = true;
 
         private static BindingFlags GetMemberFlags(bool _includeStatic, bool _includeInstance)
             => (_includeInstance ? BindingFlags.Instance : 0) | (_includeStatic ? BindingFlags.Static : 0) | BindingFlags.Public;
@@ -64,19 +65,20 @@ namespace VooDo.Runtime.Engine
 
         private static T ChooseOverload<T>(this IEnumerable<T> _overloads, Func<T, ParameterInfo[]> _mapper, object[] _arguments, Type[] _types) where T : MemberInfo
         {
+            // TODO Handle optional parameters
 
             bool HasOutParameters(ParameterInfo[] _parameters) => _parameters.Any(_p => _p.IsOut);
 
             bool DoesOverloadMatch(ParameterInfo[] _parameters)
                 => _parameters.Length == _arguments.Length &&
-                _parameters.Zip(_arguments, (_p, _a) => (_a == null && _p.ParameterType.IsClass) || _p.ParameterType.IsAssignableFrom(_a.GetType())).All(_t => _t);
+                _parameters.Zip(_arguments, (_p, _a) => _a == null && _p.ParameterType.IsClass || _p.ParameterType.IsAssignableFrom(_a.GetType())).All(_t => _t);
 
             IEnumerable<Type> actualTypes = _arguments.Select(_a => _a.GetType());
             IEnumerable<Type> matchTypes = _types?.Zip(actualTypes, (_t, _a) => _t ?? _a) ?? actualTypes;
 
             bool DoesOverloadMatchExactly(ParameterInfo[] _parameters)
                 => _parameters.Length == _arguments.Length &&
-                _parameters.Zip(_types, (_p, _a) => (_a == null && _p.ParameterType.IsClass) || _p.ParameterType.Equals(_a)).All(_x => _x);
+                _parameters.Zip(_types, (_p, _a) => _a == null && _p.ParameterType.IsClass || _p.ParameterType.Equals(_a)).All(_x => _x);
 
             T[] matches = _overloads.Where(_o => !HasOutParameters(_mapper(_o)) && DoesOverloadMatch(_mapper(_o))).ToArray();
             if (matches.Length == 1)
@@ -119,8 +121,8 @@ namespace VooDo.Runtime.Engine
             {
                 return provider.EvaluateMember(_name, _hookManager);
             }
-            bool includeInstance = _instance != null;
-            bool includeStatic = _instance == null || c_accessStaticMembersThroughInstance;
+            bool includeInstance = _instance != null || c_accessInstanceMembersByType;
+            bool includeStatic = _instance == null || c_accessStaticMembersByInstance;
             if (GetEvent(_type, _name, includeStatic, includeInstance) is EventInfo eventInfo)
             {
                 return eventInfo.Equals(_hookManager.CurrentEvent);
@@ -159,8 +161,8 @@ namespace VooDo.Runtime.Engine
             {
                 provider.AssignMember(_name, _value);
             }
-            bool includeInstance = _instance != null;
-            bool includeStatic = _instance == null || c_accessStaticMembersThroughInstance;
+            bool includeInstance = _instance != null || c_accessInstanceMembersByType;
+            bool includeStatic = _instance == null || c_accessStaticMembersByInstance;
             if (GetProperty(_type, _name, includeStatic, includeInstance) is PropertyInfo propertyInfo)
             {
                 propertyInfo.SetValue(_instance, _value);
@@ -175,15 +177,19 @@ namespace VooDo.Runtime.Engine
             }
         }
 
-        internal static object EvaluateIndexer(object _instance, object[] _arguments, Type[] _argumentTypes = null)
+        internal static object EvaluateIndexer(object _instance, Type _type, object[] _arguments, Type[] _argumentTypes = null)
         {
             Ensure.NonNull(_instance, nameof(_instance));
             Ensure.NonNull(_arguments, nameof(_arguments));
-            PropertyInfo[] properties = GetIndexers(_instance.GetType());
+            if (!_instance.GetType().IsInstanceOfType(_type))
+            {
+                throw new ArgumentException("Wrong instance type", nameof(_instance));
+            }
+            PropertyInfo[] properties = GetIndexers(_type);
             PropertyInfo property;
             try
             {
-                property = ChooseOverload(properties, _p => _p.GetIndexParameters(), _arguments, _argumentTypes);
+                property = properties.ChooseOverload(_p => _p.GetIndexParameters(), _arguments, _argumentTypes);
             }
             catch (Exception)
             {
@@ -199,15 +205,15 @@ namespace VooDo.Runtime.Engine
             return property.GetValue(_instance, _arguments);
         }
 
-        internal static void AssignIndexer(object _instance, object[] _arguments, object _value, Type[] _argumentTypes = null)
+        internal static void AssignIndexer(object _instance, Type _type, object[] _arguments, object _value, Type[] _argumentTypes = null)
         {
             Ensure.NonNull(_instance, nameof(_instance));
             Ensure.NonNull(_arguments, nameof(_arguments));
-            PropertyInfo[] properties = GetIndexers(_instance.GetType());
+            PropertyInfo[] properties = GetIndexers(_type);
             PropertyInfo property;
             try
             {
-                property = ChooseOverload(properties, _p => _p.GetIndexParameters(), _arguments, _argumentTypes);
+                property = properties.ChooseOverload(_p => _p.GetIndexParameters(), _arguments, _argumentTypes);
             }
             catch (Exception)
             {
@@ -228,7 +234,7 @@ namespace VooDo.Runtime.Engine
         {
             Ensure.NonNull(_methodGroup, nameof(_methodGroup));
             Ensure.NonNull(_arguments, nameof(_arguments));
-            MethodInfo method = ChooseOverload(_methodGroup, _m => _m.GetParameters(), _arguments, _argumentTypes);
+            MethodInfo method = _methodGroup.ChooseOverload(_m => _m.GetParameters(), _arguments, _argumentTypes);
             return method.Invoke(_instance, _arguments);
         }
 

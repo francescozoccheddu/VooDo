@@ -4,7 +4,6 @@ using System.Linq;
 using System.Reflection;
 
 using VooDo.AST;
-using VooDo.Runtime.Engine;
 using VooDo.Runtime.Meta;
 using VooDo.Utils;
 
@@ -56,6 +55,9 @@ namespace VooDo.Runtime.Reflection
         public string Name => Methods[0].Name;
         public Type DeclaringType => Methods[0].DeclaringType;
         public IReadOnlyList<Type> GenericArguments => Methods[0].GetGenericArguments();
+        public bool IsBound => Instance != null;
+
+        public MethodWrapper Bind(object _instance) => new MethodWrapper(Methods, _instance);
 
         public sealed override bool Equals(object _obj)
             => _obj is MethodWrapper wrapper && Methods.Count == wrapper.Methods.Count && Methods.All(wrapper.Methods.Contains);
@@ -70,7 +72,7 @@ namespace VooDo.Runtime.Reflection
         public object Call(object[] _arguments, Type[] _types = null)
         {
             Ensure.NonNull(_arguments, nameof(_arguments));
-            return RuntimeHelpers.InvokeMethod(Methods, _arguments, Instance, _types);
+            return Utils.Reflection.InvokeMethod(Methods, _arguments, Instance, _types);
         }
 
         public MethodWrapper Specialize(Type[] _arguments)

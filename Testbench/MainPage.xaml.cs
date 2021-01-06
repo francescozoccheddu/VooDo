@@ -29,7 +29,7 @@ namespace VooDoTB
             try
             {
                 Stat stat = Parser.Parse(m_inputBox.Text);
-                VooDo.Runtime.Program program = new VooDo.Runtime.Program(stat);
+                VooDo.Runtime.Script program = new VooDo.Runtime.Script(stat);
                 program.Environment["System", true].Value = new TypePath("System");
                 program.Environment["Test", true].Value = new Test();
                 program.Run();

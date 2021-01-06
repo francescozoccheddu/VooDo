@@ -2,7 +2,6 @@
 using System.Collections;
 
 using VooDo.AST.Expressions;
-using VooDo.Runtime.Engine;
 using VooDo.Utils;
 
 namespace VooDo.AST.Statements
@@ -28,7 +27,7 @@ namespace VooDo.AST.Statements
 
         internal sealed override void Run(Runtime.Env _env)
         {
-            foreach (object item in RuntimeHelpers.Cast<IEnumerable>(Source.Evaluate(_env)))
+            foreach (object item in Reflection.Cast<IEnumerable>(Source.Evaluate(_env)))
             {
                 Target.Assign(_env, item);
                 Body.Run(_env);

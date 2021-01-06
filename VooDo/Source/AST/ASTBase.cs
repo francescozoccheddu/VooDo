@@ -1,11 +1,5 @@
 ﻿using VooDo.Utils;
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 namespace VooDo.AST
 {
 
@@ -13,6 +7,8 @@ namespace VooDo.AST
     {
 
         public abstract string Code { get; }
+
+        public abstract void Unsubscribe();
 
         #region Object
 

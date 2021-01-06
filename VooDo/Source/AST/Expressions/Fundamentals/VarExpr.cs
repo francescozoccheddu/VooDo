@@ -51,6 +51,7 @@ namespace VooDo.AST.Expressions.Fundamentals
 
         public sealed override string Code => $"{(Controller ? "$" : "")}{Name}";
 
+
         #endregion
 
         #region ASTBase

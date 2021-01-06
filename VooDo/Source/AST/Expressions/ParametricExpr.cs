@@ -21,6 +21,15 @@ namespace VooDo.AST.Expressions
         public Expr Source { get; }
         public IReadOnlyList<Expr> Arguments { get; }
 
+        public override void Unsubscribe()
+        {
+            Source.Unsubscribe();
+            foreach (Expr arg in Arguments)
+            {
+                arg.Unsubscribe();
+            }
+        }
+
         public override bool Equals(object _obj)
             => _obj is ParametricExpr expr && Source.Equals(expr.Source) && Arguments.SequenceEqual(expr.Arguments);
 

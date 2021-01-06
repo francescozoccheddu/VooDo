@@ -1,6 +1,5 @@
 ﻿using System;
 
-using VooDo.Runtime.Engine;
 using VooDo.Source.Utils;
 using VooDo.Utils;
 
@@ -27,13 +26,8 @@ namespace VooDo.AST.Expressions.Fundamentals
 
         internal sealed override object Evaluate(Runtime.Env _env)
         {
-            object sourceValue = Source.Evaluate(_env);
-            if (sourceValue == null)
-            {
-                throw new NullReferenceException();
-            }
-            Type sourceType = Source is CastExpr expr ? expr.TargetType.AsType(_env) : sourceValue.GetType();
-            return RuntimeHelpers.EvaluateMember(_env.Program.HookManager, Member, sourceType, sourceValue);
+            object sourceValue = Source.Evaluate(_env, out Type sourceType);
+            return Reflection.EvaluateMember(_env.Script.HookManager, Member, sourceType, sourceValue);
         }
 
         internal sealed override void Assign(Runtime.Env _env, object _value)
@@ -43,7 +37,7 @@ namespace VooDo.AST.Expressions.Fundamentals
             {
                 throw new NullReferenceException();
             }
-            RuntimeHelpers.AssignMember(Member, _value, sourceValue.GetType(), sourceValue);
+            Reflection.AssignMember(Member, _value, sourceValue.GetType(), sourceValue);
         }
 
         public sealed override int Precedence => 0;
@@ -51,6 +45,7 @@ namespace VooDo.AST.Expressions.Fundamentals
         public override string Code => $"{Source.LeftCode(Precedence)}{(NullCoalesce ? "?." : ".")}{Member}";
 
         #endregion
+
 
         #region ASTBase
 

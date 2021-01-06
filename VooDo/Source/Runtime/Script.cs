@@ -7,16 +7,16 @@ using VooDo.AST.Statements;
 namespace VooDo.Runtime
 {
 
-    public sealed class Program
+    public sealed class Script
     {
 
         public Env Environment { get; }
         public Stat Statement { get; }
         public HookManager HookManager { get; }
 
-        public Program(Stat _stat)
+        public Script(Stat _stat)
         {
-            Environment = new Env(this);
+            Environment = new Env(this); // TODO Env should use only declared variables
             Statement = _stat;
             HookManager = new HookManager();
         }
@@ -39,16 +39,16 @@ namespace VooDo.Runtime
 
         private sealed class Locker : IDisposable
         {
-            private readonly Program m_program;
+            private readonly Script m_script;
             private bool m_disposed = false;
 
-            public Locker(Program _program) => m_program = _program;
+            public Locker(Script _program) => m_script = _program;
 
             public void Dispose()
             {
                 if (!m_disposed)
                 {
-                    m_program.m_locks--;
+                    m_script.m_locks--;
                     m_disposed = true;
                 }
             }

@@ -27,6 +27,7 @@ namespace VooDo.Parsing
         private Expr[] Get(IEnumerable<VooDoParser.ExprContext> _context) => _context.Select(_c => Get<Expr>(_c)).ToArray();
         private Stat Get(VooDoParser.StatContext _context) => Get<Stat>(_context);
         private Stat[] Get(IEnumerable<VooDoParser.StatContext> _context) => _context.Select(_c => Get<Stat>(_c)).ToArray();
+        private Name GetName(IToken _token) => _token.Text.TrimStart('@');
 
         public override ASTBase VisitAssignmentStat([NotNull] VooDoParser.AssignmentStatContext _context) => new AssignmentStat(Get(_context.tgtExpr), Get(_context.srcExpr));
         public override ASTBase VisitBinIntLitExpr([NotNull] VooDoParser.BinIntLitExprContext _context) => new IntLitExpr(Convert.ToInt32(_context.value.Text.Substring(2), 2));
@@ -37,7 +38,8 @@ namespace VooDo.Parsing
         public override ASTBase VisitBwOrOpExpr([NotNull] VooDoParser.BwOrOpExprContext _context) => new BwOrOpExpr(Get(_context.lExpr), Get(_context.rExpr));
         public override ASTBase VisitBwRstOpExpr([NotNull] VooDoParser.BwRstOpExprContext _context) => new BwRstOpExpr(Get(_context.lExpr), Get(_context.rExpr));
         public override ASTBase VisitBwXorOpExpr([NotNull] VooDoParser.BwXorOpExprContext _context) => new BwXorOpExpr(Get(_context.lExpr), Get(_context.rExpr));
-        public override ASTBase VisitCallOpExpr([NotNull] VooDoParser.CallOpExprContext _context) => new CallExpr(Get(_context.srcExpr), Get(_context._argsExpr));
+        public override ASTBase VisitCallOpExpr([NotNull] VooDoParser.CallOpExprContext _context) => new CallExpr(Get(_context.srcExpr), Get(_context._argsExpr), false);
+        public override ASTBase VisitNullableCallOpExpr([NotNull] VooDoParser.NullableCallOpExprContext _context) => new CallExpr(Get(_context.srcExpr), Get(_context._argsExpr), true);
         public override ASTBase VisitCastExpr([NotNull] VooDoParser.CastExprContext _context) => new CastExpr(Get(_context.srcExpr), Get(_context.typeExpr));
         public override ASTBase VisitDecIntLitExpr([NotNull] VooDoParser.DecIntLitExprContext _context) => new IntLitExpr(Convert.ToInt32(_context.value.Text, 10));
         public override ASTBase VisitDivOpExpr([NotNull] VooDoParser.DivOpExprContext _context) => new DivOpExpr(Get(_context.lExpr), Get(_context.rExpr));
@@ -56,13 +58,13 @@ namespace VooDo.Parsing
         public override ASTBase VisitLogNotExpr([NotNull] VooDoParser.LogNotExprContext _context) => new LogNotOpExpr(Get(_context.srcExpr));
         public override ASTBase VisitLogOrOpExpr([NotNull] VooDoParser.LogOrOpExprContext _context) => new LogOrOpExpr(Get(_context.lExpr), Get(_context.rExpr));
         public override ASTBase VisitLtOpExpr([NotNull] VooDoParser.LtOpExprContext _context) => new LtOpExpr(Get(_context.lExpr), Get(_context.rExpr));
-        public override ASTBase VisitMemOpExpr([NotNull] VooDoParser.MemOpExprContext _context) => new MemberExpr(Get(_context.srcExpr), new Name(_context.memberName.Text), false);
+        public override ASTBase VisitMemOpExpr([NotNull] VooDoParser.MemOpExprContext _context) => new MemberExpr(Get(_context.srcExpr), GetName(_context.memberName), false);
         public override ASTBase VisitModOpExpr([NotNull] VooDoParser.ModOpExprContext _context) => new ModOpExpr(Get(_context.lExpr), Get(_context.rExpr));
         public override ASTBase VisitMulOpExpr([NotNull] VooDoParser.MulOpExprContext _context) => new MulOpExpr(Get(_context.lExpr), Get(_context.rExpr));
-        public override ASTBase VisitNameExpr([NotNull] VooDoParser.NameExprContext _context) => new VarExpr(new Name(_context.name.Text), false);
+        public override ASTBase VisitNameExpr([NotNull] VooDoParser.NameExprContext _context) => new VarExpr(GetName(_context.name), false);
         public override ASTBase VisitNegOpExpr([NotNull] VooDoParser.NegOpExprContext _context) => new NegOpExpr(Get(_context.srcExpr));
         public override ASTBase VisitNeqOpExpr([NotNull] VooDoParser.NeqOpExprContext _context) => new NeqOpExpr(Get(_context.lExpr), Get(_context.rExpr));
-        public override ASTBase VisitNullableMemOpExpr([NotNull] VooDoParser.NullableMemOpExprContext _context) => new MemberExpr(Get(_context.srcExpr), new Name(_context.memberName.Text), true);
+        public override ASTBase VisitNullableMemOpExpr([NotNull] VooDoParser.NullableMemOpExprContext _context) => new MemberExpr(Get(_context.srcExpr), GetName(_context.memberName), true);
         public override ASTBase VisitNullCoalOpExpr([NotNull] VooDoParser.NullCoalOpExprContext _context) => new NullCoalesceOpExpr(Get(_context.srcExpr), Get(_context.elseExpr));
         public override ASTBase VisitNullLitExpr([NotNull] VooDoParser.NullLitExprContext _context) => new NullLitExpr();
         public override ASTBase VisitOctIntLitExpr([NotNull] VooDoParser.OctIntLitExprContext _context) => new IntLitExpr(Convert.ToInt32(_context.value.Text.Substring(1), 8));
@@ -79,7 +81,7 @@ namespace VooDo.Parsing
         public override ASTBase VisitWhileStat([NotNull] VooDoParser.WhileStatContext _context) => new WhileStat(Get(_context.condExpr), Get(_context.doStat));
         public override ASTBase VisitNullableIndexExpr([NotNull] VooDoParser.NullableIndexExprContext _context) => new IndexExpr(Get(_context.srcExpr), Get(_context._argsExpr), true);
         public override ASTBase VisitIsExpr([NotNull] VooDoParser.IsExprContext _context) => new IsExpr(Get(_context.srcExpr), Get(_context.typeExpr));
-        public override ASTBase VisitControllerNameExpr([NotNull] VooDoParser.ControllerNameExprContext _context) => new VarExpr(new Name(_context.name.Text), true);
+        public override ASTBase VisitControllerNameExpr([NotNull] VooDoParser.ControllerNameExprContext _context) => new VarExpr(GetName(_context.name), true);
         public override ASTBase VisitSpecializationExpr([NotNull] VooDoParser.SpecializationExprContext _context) => new SpecializationExpr(Get(_context.srcExpr), Get(_context._argsExpr));
     }
 
