@@ -1,8 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.Linq;
 
+using VooDo.Runtime;
 using VooDo.Runtime.Meta;
-using VooDo.Source.Utils;
 using VooDo.Utils;
 
 namespace VooDo.AST.Expressions.Fundamentals
@@ -17,17 +17,16 @@ namespace VooDo.AST.Expressions.Fundamentals
 
         #region Expr
 
-        internal sealed override object Evaluate(Runtime.Env _env)
+        internal sealed override Eval Evaluate(Env _env)
         {
             ICallable callable = Reflection.Cast<ICallable>(Source.Evaluate(_env));
             if (callable == null && NullCoalesce)
             {
-                return null;
+                return new Eval(null);
             }
             else
             {
-                Arguments.Evaluate(_env, out object[] values, out Type[] types);
-                return callable.Call(values, types);
+                return callable.Call(_env, Arguments.Select(_a => _a.Evaluate(_env)).ToArray());
             }
         }
 

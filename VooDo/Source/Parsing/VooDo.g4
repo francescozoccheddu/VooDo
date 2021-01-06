@@ -80,6 +80,7 @@ WHILE: 'while';
 FOREACH: 'foreach';
 IN: 'in';
 AS: 'as';
+IS: 'is';
 
 // Literals
 NULL: 'null';

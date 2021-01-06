@@ -17,6 +17,14 @@ namespace VooDo.Utils
         private const bool c_accessStaticMembersByInstance = false;
         private const bool c_accessInstanceMembersByType = true;
 
+        #region Utils
+
+        private static Type[] GetTypes(this IEnumerable<Eval> _evals)
+            => _evals.Select(_e => _e.Type).ToArray();
+
+        private static object[] GetValues(this IEnumerable<Eval> _evals)
+            => _evals.Select(_e => _e.Value).ToArray();
+
         private static BindingFlags GetMemberFlags(bool _includeStatic, bool _includeInstance)
             => (_includeInstance ? BindingFlags.Instance : 0) | (_includeStatic ? BindingFlags.Static : 0) | BindingFlags.Public;
 
@@ -32,60 +40,72 @@ namespace VooDo.Utils
         private static PropertyInfo GetProperty(Type _type, Name _name, bool _includeStatic, bool _includeInstance)
             => _type.GetProperty(_name, GetMemberFlags(_includeStatic, _includeInstance));
 
-        private static MethodInfo[] GetMethods(Type _type, Name _name, bool _includeStatic, bool _includeInstance)
+        private static MethodInfo[] GetMethods(Type _type, Name _name, bool _includeStatic, bool _includeInstance, bool _flattenHierarchy = false)
         {
-            IEnumerable<MethodInfo> methods = _type.GetMember(_name, MemberTypes.Method, GetMemberFlags(_includeStatic, _includeInstance)).Cast<MethodInfo>();
-            if (GetIndexers(_type).FirstOrDefault()?.Name is string indexerName)
-            {
-                methods = methods.Where(_m => _m.Name != $"get_{indexerName}" && _m.Name != $"set_{indexerName}");
-            }
+            BindingFlags flags = GetMemberFlags(_includeStatic, _includeInstance) | (_flattenHierarchy ? BindingFlags.FlattenHierarchy : 0);
+            IEnumerable<MethodInfo> methods = _type.GetMember(_name, MemberTypes.Method, flags).Cast<MethodInfo>();
             return methods.ToArray();
         }
 
-        private static PropertyInfo[] GetIndexers(Type _type)
+        private static Name GetIndexerName(Type _type)
             => _type.GetProperties(GetMemberFlags(false, true))
                 .Cast<PropertyInfo>()
-                .Where(_p => _p.GetIndexParameters().Any())
-                .ToArray();
+                .First(_p => _p.GetIndexParameters().Any())
+                .Name;
 
-        private static MethodInfo GetUserDefinedConversion(Type _type, Type _targetType)
+        private static MethodInfo GetOperator(Type _type, Name _name, IReadOnlyList<Type> _types)
+            => ChooseOverload(GetMethods(_type, _name, true, false, true), _types);
+
+        private static MethodInfo GetMethod(Type _type, Name _name, IReadOnlyList<Type> _types)
+            => ChooseOverload(GetMethods(_type, _name, true, false, false), _types);
+
+        private static MethodInfo GetIndexerSetter(Type _type, IReadOnlyList<Type> _types, out Name _indexer)
+            => ChooseOverload(GetMethods(_type, $"set_{_indexer = GetIndexerName(_type)}", false, true, false), _types);
+
+        private static MethodInfo GetIndexerGetter(Type _type, IReadOnlyList<Type> _types, out Name _indexer)
+            => ChooseOverload(GetMethods(_type, $"get_{_indexer = GetIndexerName(_type)}", false, true, false), _types);
+
+        private static IEnumerable<object> FillOptionalArguments(ParameterInfo[] _parameters, IEnumerable<object> _arguments)
+            => _arguments.Concat(_parameters.Skip(_arguments.Count()).Select(_a => _a.DefaultValue)).ToArray();
+
+        private static MethodInfo ChooseOverload(IEnumerable<MethodInfo> _methods, IEnumerable<Type> _types)
         {
 
-            bool HasRightSignature(MethodInfo _method)
+            int GetMandatoryParametersCount(IEnumerable<ParameterInfo> _parameters)
+                => _parameters.TakeWhile(_p => !_p.IsOptional).Count();
+
+            bool MatchParameters(IEnumerable<ParameterInfo> _parameters, int _argumentsCount, out IEnumerable<ParameterInfo> _match)
             {
-                ParameterInfo[] parameters = _method.GetParameters();
-                return parameters.Length == 1 && parameters[0].ParameterType.Equals(_type) && !parameters[0].IsOut && _method.ReturnType.Equals(_type);
+                if (_parameters.Count() < _argumentsCount)
+                {
+                    int mandatory = GetMandatoryParametersCount(_parameters);
+                    if (mandatory <= _argumentsCount)
+                    {
+                        _match = _parameters.Take(_argumentsCount);
+                        return true;
+                    }
+                }
+                _match = null;
+                return false;
             }
 
-            return GetMethods(_type, "op_Explicit", true, false)
-            .Concat(GetMethods(_type, "op_Implicit", true, false))
-            .Where(HasRightSignature)
-            .FirstOrDefault();
-        }
+            bool HasOutParameters(IEnumerable<ParameterInfo> _parameters) => _parameters.Any(_p => _p.IsOut);
 
-        private static T ChooseOverload<T>(this IEnumerable<T> _overloads, Func<T, ParameterInfo[]> _mapper, object[] _arguments, Type[] _types) where T : MemberInfo
-        {
-            // TODO Handle optional parameters
+            bool DoesOverloadMatch(IEnumerable<ParameterInfo> _parameters)
+                => MatchParameters(_parameters, _types.Count(), out IEnumerable<ParameterInfo> match) &&
+                match.Zip(_types, (_p, _a) => (_a == null && _p.ParameterType.IsClass) || _p.ParameterType.IsAssignableFrom(_a)).All(_t => _t);
 
-            bool HasOutParameters(ParameterInfo[] _parameters) => _parameters.Any(_p => _p.IsOut);
 
-            bool DoesOverloadMatch(ParameterInfo[] _parameters)
-                => _parameters.Length == _arguments.Length &&
-                _parameters.Zip(_arguments, (_p, _a) => _a == null && _p.ParameterType.IsClass || _p.ParameterType.IsAssignableFrom(_a.GetType())).All(_t => _t);
+            bool DoesOverloadMatchExactly(IEnumerable<ParameterInfo> _parameters)
+                => MatchParameters(_parameters, _types.Count(), out IEnumerable<ParameterInfo> match) &&
+                match.Zip(_types, (_p, _a) => (_a == null && _p.ParameterType.IsClass) || _p.ParameterType.Equals(_a)).All(_x => _x);
 
-            IEnumerable<Type> actualTypes = _arguments.Select(_a => _a.GetType());
-            IEnumerable<Type> matchTypes = _types?.Zip(actualTypes, (_t, _a) => _t ?? _a) ?? actualTypes;
-
-            bool DoesOverloadMatchExactly(ParameterInfo[] _parameters)
-                => _parameters.Length == _arguments.Length &&
-                _parameters.Zip(_types, (_p, _a) => _a == null && _p.ParameterType.IsClass || _p.ParameterType.Equals(_a)).All(_x => _x);
-
-            T[] matches = _overloads.Where(_o => !HasOutParameters(_mapper(_o)) && DoesOverloadMatch(_mapper(_o))).ToArray();
+            MethodInfo[] matches = _methods.Where(_o => !HasOutParameters(_o.GetParameters()) && DoesOverloadMatch(_o.GetParameters())).ToArray();
             if (matches.Length == 1)
             {
                 return matches[0];
             }
-            matches = _overloads.Where(_o => DoesOverloadMatchExactly(_mapper(_o))).ToArray();
+            matches = _methods.Where(_o => DoesOverloadMatchExactly(_o.GetParameters())).ToArray();
             if (matches.Length == 1)
             {
                 return matches[0];
@@ -108,40 +128,53 @@ namespace VooDo.Utils
             }
         }
 
-        internal static object EvaluateMember(HookManager _hookManager, Name _name, Type _type, object _instance = null)
+        private static Eval TypedInvoke(this MethodInfo _method, object _instance, object[] _arguments)
+            => new Eval(_method.Invoke(_instance, _arguments), _method.ReturnType);
+
+        #endregion
+
+        internal static Eval InvokeOperator(Name _operator, Eval _argument)
+            => GetOperator(_argument.Type, _operator, new Type[] { _argument.Type }).TypedInvoke(null, new object[] { _argument.Value });
+
+        internal static Eval InvokeOperator(Name _operator, Eval _leftArgument, Eval _rightArgument)
         {
-            Ensure.NonNull(_type, nameof(_type));
-            Ensure.NonNull(_name, nameof(_name));
-            Ensure.NonNull(_hookManager, nameof(_hookManager));
-            if (_instance != null && !_type.IsInstanceOfType(_instance))
+            Type[] argumentTypes = new Type[] { _leftArgument.Type, _rightArgument.Type };
+            object[] arguments = new object[] { _leftArgument.Value, _rightArgument.Value };
+            try
             {
-                throw new ArgumentException("Wrong instance type", nameof(_instance));
+                return GetOperator(_leftArgument.Type, _operator, argumentTypes).TypedInvoke(null, arguments);
             }
-            if (_instance is IMemberProvider provider)
+            catch { }
+            return GetOperator(_rightArgument.Type, _operator, argumentTypes).TypedInvoke(null, arguments);
+        }
+
+        internal static Eval EvaluateMember(Env _env, Eval _source, Name _name)
+        {
+            if (_source.Value is IMemberProvider provider)
             {
-                return provider.EvaluateMember(_name, _hookManager);
+                return provider.EvaluateMember(_env, _name);
             }
-            bool includeInstance = _instance != null || c_accessInstanceMembersByType;
-            bool includeStatic = _instance == null || c_accessStaticMembersByInstance;
-            if (GetEvent(_type, _name, includeStatic, includeInstance) is EventInfo eventInfo)
+            bool includeInstance = _source.Value != null || c_accessInstanceMembersByType;
+            bool includeStatic = _source.Value == null || c_accessStaticMembersByInstance;
+            if (GetEvent(_source.Type, _name, includeStatic, includeInstance) is EventInfo eventInfo)
             {
-                return eventInfo.Equals(_hookManager.CurrentEvent);
+                return new Eval(eventInfo.Equals(_env.Script.HookManager.CurrentEvent));
             }
-            else if (GetProperty(_type, _name, includeStatic, includeInstance) is PropertyInfo propertyInfo)
+            else if (GetProperty(_source.Type, _name, includeStatic, includeInstance) is PropertyInfo propertyInfo)
             {
-                return propertyInfo.GetValue(_instance);
+                return new Eval(propertyInfo.GetValue(_source.Value), propertyInfo.PropertyType);
             }
-            else if (GetField(_type, _name, includeStatic, includeInstance) is FieldInfo fieldInfo)
+            else if (GetField(_source.Type, _name, includeStatic, includeInstance) is FieldInfo fieldInfo)
             {
-                return fieldInfo.GetValue(_instance);
+                return new Eval(fieldInfo.GetValue(_source.Value), fieldInfo.FieldType);
             }
-            else if (GetNestedType(_type, _name) is Type typeInfo)
+            else if (GetNestedType(_source.Type, _name) is Type typeInfo)
             {
-                return new TypeWrapper(typeInfo);
+                return new Eval(new TypeWrapper(typeInfo));
             }
-            else if (GetMethods(_type, _name, includeStatic, includeInstance) is MethodInfo[] methodInfo)
+            else if (GetMethods(_source.Type, _name, includeStatic, includeInstance) is MethodInfo[] methodInfo)
             {
-                return new MethodWrapper(methodInfo, _instance);
+                return new Eval(new MethodWrapper(methodInfo, _source.Value));
             }
             else
             {
@@ -149,27 +182,21 @@ namespace VooDo.Utils
             }
         }
 
-        internal static void AssignMember(Name _name, object _value, Type _type, object _instance = null)
+        internal static void AssignMember(Env _env, Eval _source, Name _name, Eval _value)
         {
-            Ensure.NonNull(_type, nameof(_type));
-            Ensure.NonNull(_name, nameof(_name));
-            if (_instance != null && !_instance.GetType().IsInstanceOfType(_type))
+            if (_source.Value is IAssignableMemberProvider provider)
             {
-                throw new ArgumentException("Wrong instance type", nameof(_instance));
+                provider.AssignMember(_env, _name, _value);
             }
-            if (_instance is IAssignableMemberProvider provider)
+            bool includeInstance = _source.Value != null || c_accessInstanceMembersByType;
+            bool includeStatic = _source.Value == null || c_accessStaticMembersByInstance;
+            if (GetProperty(_source.Type, _name, includeStatic, includeInstance) is PropertyInfo propertyInfo)
             {
-                provider.AssignMember(_name, _value);
+                propertyInfo.SetValue(_source.Value, _value);
             }
-            bool includeInstance = _instance != null || c_accessInstanceMembersByType;
-            bool includeStatic = _instance == null || c_accessStaticMembersByInstance;
-            if (GetProperty(_type, _name, includeStatic, includeInstance) is PropertyInfo propertyInfo)
+            else if (GetField(_source.Type, _name, includeStatic, includeInstance) is FieldInfo fieldInfo)
             {
-                propertyInfo.SetValue(_instance, _value);
-            }
-            else if (GetField(_type, _name, includeStatic, includeInstance) is FieldInfo fieldInfo)
-            {
-                fieldInfo.SetValue(_instance, _value);
+                fieldInfo.SetValue(_source.Value, _value);
             }
             else
             {
@@ -177,73 +204,67 @@ namespace VooDo.Utils
             }
         }
 
-        internal static object EvaluateIndexer(object _instance, Type _type, object[] _arguments, Type[] _argumentTypes = null)
+        internal static Eval EvaluateIndexer(Eval _source, IEnumerable<Eval> _arguments, out Name _indexer)
         {
-            Ensure.NonNull(_instance, nameof(_instance));
-            Ensure.NonNull(_arguments, nameof(_arguments));
-            if (!_instance.GetType().IsInstanceOfType(_type))
-            {
-                throw new ArgumentException("Wrong instance type", nameof(_instance));
-            }
-            PropertyInfo[] properties = GetIndexers(_type);
-            PropertyInfo property;
             try
             {
-                property = properties.ChooseOverload(_p => _p.GetIndexParameters(), _arguments, _argumentTypes);
+                return GetIndexerGetter(_source.Type, _arguments.GetTypes(), out _indexer).TypedInvoke(_source.Value, _arguments.GetValues());
             }
-            catch (Exception)
+            catch
             {
-                if (_instance is Array array)
+                if (_source.Type.IsSubclassOf(typeof(Array)))
                 {
-                    return array.GetValue(_arguments.Select(_a => Convert.ToInt64(_a)).ToArray());
+                    _indexer = null;
+                    return new Eval(((Array) _source.Value).GetValue(_arguments.GetValues().Select(_a => Convert.ToInt64(_a)).ToArray()), _source.Type.GetElementType());
                 }
                 else
                 {
                     throw;
                 }
             }
-            return property.GetValue(_instance, _arguments);
         }
 
-        internal static void AssignIndexer(object _instance, Type _type, object[] _arguments, object _value, Type[] _argumentTypes = null)
+        internal static void AssignIndexer(Eval _source, IEnumerable<Eval> _arguments, object _value, out Name _indexer)
         {
-            Ensure.NonNull(_instance, nameof(_instance));
-            Ensure.NonNull(_arguments, nameof(_arguments));
-            PropertyInfo[] properties = GetIndexers(_type);
-            PropertyInfo property;
             try
             {
-                property = properties.ChooseOverload(_p => _p.GetIndexParameters(), _arguments, _argumentTypes);
+                object[] arguments = _arguments.GetValues().Concat(new object[] { _value }).ToArray();
+                GetIndexerSetter(_source.Type, _arguments.GetTypes(), out _indexer).TypedInvoke(_source.Value, arguments);
             }
             catch (Exception)
             {
-                if (_instance is Array array)
+                if (_source.Type.IsSubclassOf(typeof(Array)))
                 {
-                    array.SetValue(_value, _arguments.Select(_a => Convert.ToInt64(_a)).ToArray());
-                    return;
+                    _indexer = null;
+                    ((Array) _source.Value).SetValue(_value, _arguments.GetValues().Select(_a => Convert.ToInt64(_a)).ToArray());
                 }
                 else
                 {
                     throw;
                 }
             }
-            property.SetValue(_instance, _arguments, _arguments);
         }
 
-        internal static object InvokeMethod(IEnumerable<MethodInfo> _methodGroup, object[] _arguments, object _instance = null, Type[] _argumentTypes = null)
+        internal static Eval InvokeMethod(IEnumerable<MethodInfo> _methodGroup, object _instance, IEnumerable<Eval> _arguments)
         {
-            Ensure.NonNull(_methodGroup, nameof(_methodGroup));
-            Ensure.NonNull(_arguments, nameof(_arguments));
-            MethodInfo method = _methodGroup.ChooseOverload(_m => _m.GetParameters(), _arguments, _argumentTypes);
-            return method.Invoke(_instance, _arguments);
+            MethodInfo method = ChooseOverload(_methodGroup, _arguments.GetTypes());
+            return method.TypedInvoke(_instance, FillOptionalArguments(method.GetParameters(), _arguments.GetValues()).ToArray());
         }
 
-        internal static object ConvertType(object _source, Type _target)
+        private static object ConvertType(Eval _source, Type _target)
         {
             Ensure.NonNull(_target, nameof(_target));
+            Type[] argumentTypes = new Type[] { _source.Type };
+            object[] arguments = new object[] { _source.Value };
             try
             {
-                return GetUserDefinedConversion(_source.GetType(), _target).Invoke(null, new object[] { _source });
+                return GetOperator(_source.Type, "op_Explicit", argumentTypes).Invoke(null, arguments);
+            }
+            catch
+            { }
+            try
+            {
+                return GetOperator(_source.Type, "op_Implicit", argumentTypes).Invoke(null, arguments);
             }
             catch
             { }
@@ -254,6 +275,18 @@ namespace VooDo.Utils
             catch
             { }
             throw new InvalidCastException();
+        }
+
+        internal static Eval ChangeType(Eval _source, Type _target)
+        {
+            if (_target.IsInstanceOfType(_source.Type))
+            {
+                return new Eval(_source.Value, _target);
+            }
+            else
+            {
+                return new Eval(ConvertType(_source, _target), _target);
+            }
         }
 
         internal static T Cast<T>(dynamic _source)

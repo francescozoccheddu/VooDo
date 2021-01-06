@@ -20,6 +20,8 @@
 
         protected sealed override string m_OperatorSymbol => "!";
 
+        protected override Name m_OperatorMethod => "op_LogicalNot";
+
         #endregion
 
     }

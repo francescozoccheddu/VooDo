@@ -7,8 +7,8 @@ namespace VooDo.Runtime.Hooks
 
         protected abstract IHook Subscribe(T _instance, Name _property);
 
-        IHook IHookProvider.Subscribe(object _instance, Name _property)
-            => _instance is T t ? Subscribe(t, _property) : null;
+        IHook IHookProvider.Subscribe(Eval _instance, Name _property)
+            => _instance.Value is T t ? Subscribe(t, _property) : null;
 
     }
 }

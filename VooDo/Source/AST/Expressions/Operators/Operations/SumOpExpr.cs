@@ -10,13 +10,15 @@
 
         #region Expr
 
-        protected override object Evaluate(dynamic _left, dynamic _right) => _left + _right;
-
         public sealed override int Precedence => 3;
+
+        protected override object Evaluate(dynamic _left, dynamic _right) => _left + _right;
 
         #endregion
 
         #region Operator
+
+        protected override Name m_OperatorMethod => "op_Addition";
 
         protected sealed override string m_OperatorSymbol => "+";
 

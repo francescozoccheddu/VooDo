@@ -18,6 +18,8 @@ namespace VooDo.AST.Expressions.Operators
 
         protected abstract string m_OperatorSymbol { get; }
 
+        protected abstract Name m_OperatorMethod { get; }
+
         protected abstract object Evaluate(dynamic _argument);
 
         #region ASTBase
@@ -30,7 +32,21 @@ namespace VooDo.AST.Expressions.Operators
 
         public sealed override int GetHashCode() => Argument.GetHashCode();
 
-        internal sealed override object Evaluate(Env _env) => Evaluate(Argument.Evaluate(_env));
+        internal sealed override Eval Evaluate(Env _env)
+        {
+            Eval argument = Argument.Evaluate(_env);
+            try
+            {
+                return Reflection.InvokeOperator(m_OperatorMethod, argument);
+            }
+            catch
+            {
+                return Evaluate((dynamic) argument.Value);
+            }
+        }
+
+        public override void Unsubscribe(HookManager _hookManager)
+            => Argument.Unsubscribe(_hookManager);
 
         #endregion
 

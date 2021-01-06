@@ -18,6 +18,8 @@
 
         #region Operator
 
+        protected override Name m_OperatorMethod => "op_RightShift";
+
         protected sealed override string m_OperatorSymbol => ">>";
 
         #endregion

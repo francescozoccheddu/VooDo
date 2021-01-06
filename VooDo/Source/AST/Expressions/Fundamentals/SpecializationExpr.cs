@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
+using VooDo.Runtime;
 using VooDo.Runtime.Meta;
 using VooDo.Source.Utils;
 using VooDo.Utils;
@@ -18,12 +19,12 @@ namespace VooDo.AST.Expressions.Fundamentals
 
         #region Expr
 
-        internal sealed override object Evaluate(Runtime.Env _env)
+        internal sealed override Eval Evaluate(Env _env)
         {
-            object sourceValue = Source.Evaluate(_env);
-            if (sourceValue is IGeneric generic)
+            Eval source = Source.Evaluate(_env);
+            if (source.Value is IGeneric generic)
             {
-                return generic.Specialize(Arguments.Select(_a => _a.AsType(_env)).ToArray());
+                return generic.Specialize(_env, Arguments.Select(_a => _a.AsType(_env)).ToArray());
             }
             else
             {

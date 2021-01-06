@@ -2,6 +2,7 @@
 using System.Collections;
 
 using VooDo.AST.Expressions;
+using VooDo.Runtime;
 using VooDo.Utils;
 
 namespace VooDo.AST.Statements
@@ -27,11 +28,17 @@ namespace VooDo.AST.Statements
 
         internal sealed override void Run(Runtime.Env _env)
         {
-            foreach (object item in Reflection.Cast<IEnumerable>(Source.Evaluate(_env)))
+            foreach (Eval item in Reflection.Cast<IEnumerable>(Source.Evaluate(_env)))
             {
                 Target.Assign(_env, item);
                 Body.Run(_env);
             }
+        }
+
+        public override void Unsubscribe(HookManager _hookManager)
+        {
+            Source.Unsubscribe(_hookManager);
+            Body.Unsubscribe(_hookManager);
         }
 
         #endregion

@@ -139,9 +139,10 @@
     <Compile Include="Source\Runtime\Hooks\IHookProvider.cs" />
     <Compile Include="Source\Runtime\Meta\IGeneric.cs" />
     <Compile Include="Source\Runtime\Reflection\DelegateWrapper.cs" />
+    <Compile Include="Source\Runtime\Eval.cs" />
     <Compile Include="Source\Utils\Reflection.cs" />
-    <Compile Include="Source\Runtime\IControllerFactory.cs" />
-    <Compile Include="Source\Runtime\IController.cs" />
+    <Compile Include="Source\Runtime\Controllers\IControllerFactory.cs" />
+    <Compile Include="Source\Runtime\Controllers\IController.cs" />
     <Compile Include="Source\Runtime\Script.cs" />
     <Compile Include="Source\Runtime\Meta\ICallable.cs" />
     <Compile Include="Source\Runtime\Meta\IAssignableMemberProvider.cs" />
@@ -222,7 +223,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Source\Exceptions\Runtime\Statements\" />
-    <Folder Include="Source\Runtime\Controllers\" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Source\Parsing\VooDo.g4" />

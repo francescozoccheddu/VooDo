@@ -8,19 +8,19 @@ namespace VooDo.Runtime.Hooks
 
         private readonly HookManager m_manager;
         private Name m_property;
-        private object m_source;
+        private Eval m_source;
         private IHook m_hook;
 
         public HookHolder(HookManager _manager) => m_manager = _manager;
 
         private void NotifyChange() => m_manager.NotifyChange();
 
-        internal void Resubscribe(object _sourceValue, Name _property)
+        internal void Resubscribe(Eval _source, Name _property)
         {
-            if (m_hook == null || !ReferenceEquals(m_source, _sourceValue) || m_property != _property)
+            if (m_hook == null || m_source != _source || m_property != _property)
             {
                 m_property = _property;
-                m_source = _sourceValue;
+                m_source = _source;
                 Unsubscribe();
                 foreach (IHookProvider provider in m_manager.HookProviders)
                 {
@@ -41,8 +41,6 @@ namespace VooDo.Runtime.Hooks
                 m_hook.OnChange -= NotifyChange;
                 m_hook.Unsubscribe();
                 m_hook = null;
-                m_source = null;
-                m_property = null;
             }
         }
 

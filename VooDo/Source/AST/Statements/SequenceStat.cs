@@ -2,6 +2,7 @@
 using System.Collections.ObjectModel;
 using System.Linq;
 
+using VooDo.Runtime;
 using VooDo.Utils;
 
 namespace VooDo.AST.Statements
@@ -25,11 +26,19 @@ namespace VooDo.AST.Statements
 
         #region Stat
 
-        internal sealed override void Run(Runtime.Env _env)
+        internal sealed override void Run(Env _env)
         {
             foreach (Stat stat in Statements)
             {
                 stat.Run(_env);
+            }
+        }
+
+        public override void Unsubscribe(HookManager _hookManager)
+        {
+            foreach (Stat stat in Statements)
+            {
+                stat.Unsubscribe(_hookManager);
             }
         }
 

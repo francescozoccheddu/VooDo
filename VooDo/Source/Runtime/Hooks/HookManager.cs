@@ -45,7 +45,7 @@ namespace VooDo.Runtime
             return hook;
         }
 
-        internal void Subscribe(Expr _expr, object _source, Name _property) => GetHook(_expr).Resubscribe(_source, _property);
+        internal void Subscribe(Expr _expr, Eval _source, Name _property) => GetHook(_expr).Resubscribe(_source, _property);
 
         internal void Unsubscribe(Expr _expr) => GetHook(_expr).Unsubscribe();
 

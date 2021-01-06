@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 
+using VooDo.Runtime;
 using VooDo.Utils;
 
 namespace VooDo.AST.Expressions
@@ -21,12 +22,12 @@ namespace VooDo.AST.Expressions
         public Expr Source { get; }
         public IReadOnlyList<Expr> Arguments { get; }
 
-        public override void Unsubscribe()
+        public override void Unsubscribe(HookManager _hookManager)
         {
-            Source.Unsubscribe();
+            Source.Unsubscribe(_hookManager);
             foreach (Expr arg in Arguments)
             {
-                arg.Unsubscribe();
+                arg.Unsubscribe(_hookManager);
             }
         }
 

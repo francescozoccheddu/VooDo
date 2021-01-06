@@ -1,5 +1,6 @@
 ﻿
 using VooDo.AST.Expressions;
+using VooDo.Runtime;
 using VooDo.Utils;
 
 namespace VooDo.AST.Statements
@@ -27,6 +28,14 @@ namespace VooDo.AST.Statements
         {
             bool condValue = Reflection.Cast<bool>(Condition.Evaluate(_env));
             (condValue ? ThenBody : ElseBody).Run(_env);
+            (condValue ? ElseBody : ThenBody).Unsubscribe(_env.Script.HookManager);
+        }
+
+        public override void Unsubscribe(HookManager _hookManager)
+        {
+            Condition.Unsubscribe(_hookManager);
+            ThenBody.Unsubscribe(_hookManager);
+            ElseBody.Unsubscribe(_hookManager);
         }
 
         #endregion

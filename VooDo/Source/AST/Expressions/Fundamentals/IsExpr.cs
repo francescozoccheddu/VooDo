@@ -28,11 +28,17 @@ namespace VooDo.AST.Expressions.Fundamentals
         public sealed override string Code =>
             $"{Source.LeftCode(Precedence)} is {TestType.RightCode(Precedence)}";
 
-        internal sealed override object Evaluate(Env _env)
+        internal sealed override Eval Evaluate(Env _env)
         {
-            Type sourceType = Source.Evaluate(_env)?.GetType();
             Type testType = TestType.AsType(_env);
-            return sourceType != null && testType.IsInstanceOfType(sourceType);
+            object sourceValue = Source.Evaluate(_env).Value;
+            return new Eval(sourceValue != null && testType.IsInstanceOfType(sourceValue));
+        }
+
+        public override void Unsubscribe(HookManager _hookManager)
+        {
+            Source.Unsubscribe(_hookManager);
+            TestType.Unsubscribe(_hookManager);
         }
 
         #endregion

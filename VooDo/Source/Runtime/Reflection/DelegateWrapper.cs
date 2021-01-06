@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Linq;
 
+using VooDo.Runtime;
 using VooDo.Runtime.Meta;
 using VooDo.Utils;
 
@@ -16,7 +18,7 @@ namespace VooDo.Source.Runtime.Reflection
 
         public Delegate Delegate { get; }
 
-        object ICallable.Call(object[] _arguments, Type[] _types) => Delegate.DynamicInvoke(_arguments);
+        Eval ICallable.Call(Env _env, Eval[] _arguments) => new Eval(Delegate.DynamicInvoke(_arguments.Select(_a => _a.Value).ToArray())); //TODO Type
 
         public override bool Equals(object _obj) => _obj is DelegateWrapper wrapper && Delegate.Equals(wrapper.Delegate);
 

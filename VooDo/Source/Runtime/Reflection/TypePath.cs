@@ -62,19 +62,19 @@ namespace VooDo.Runtime.Reflection
             return definition.MakeGenericType(_arguments);
         }
 
-        object IGeneric.Specialize(Type[] _arguments)
+        Eval IGeneric.Specialize(Env _env, Type[] _arguments)
         {
             Ensure.NonNull(_arguments, nameof(_arguments));
             Ensure.NonNullItems(_arguments, nameof(_arguments));
-            return new TypeWrapper(AsGenericType(_arguments));
+            return new Eval(new TypeWrapper(AsGenericType(_arguments)));
         }
 
-        object IMemberProvider.EvaluateMember(Name _name, HookManager _hookManager)
+        Eval IMemberProvider.EvaluateMember(Env _env, Name _name)
         {
             Ensure.NonNull(_name, nameof(_name));
             TypePath path = Child(_name);
             Type type = path.AsType;
-            return type != null ? (object) new TypeWrapper(type) : path;
+            return new Eval(type != null ? (object) new TypeWrapper(type) : path);
         }
 
         public Type AsType => Type.GetType(QualifiedName);

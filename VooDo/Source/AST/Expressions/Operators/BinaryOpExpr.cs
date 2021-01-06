@@ -20,14 +20,14 @@ namespace VooDo.AST.Expressions.Operators
 
         protected abstract string m_OperatorSymbol { get; }
 
-        protected virtual bool m_SpaceBetweenOperator => true;
+        protected abstract Name m_OperatorMethod { get; }
 
         protected abstract object Evaluate(dynamic _left, dynamic _right);
 
         #region ASTBase
 
         public sealed override string Code
-            => LeftArgument.LeftCode(Precedence) + (m_SpaceBetweenOperator ? $" {m_OperatorSymbol} " : m_OperatorSymbol) + RightArgument.RightCode(Precedence);
+            => $"{LeftArgument.LeftCode(Precedence)} {m_OperatorSymbol} {RightArgument.RightCode(Precedence)}";
 
         public override bool Equals(object _obj)
             => _obj is BinaryOpExpr expr && LeftArgument.Equals(expr.LeftArgument) && RightArgument.Equals(expr.RightArgument);
@@ -35,7 +35,25 @@ namespace VooDo.AST.Expressions.Operators
         public override int GetHashCode()
             => Identity.CombineHash(LeftArgument, RightArgument);
 
-        internal sealed override object Evaluate(Env _env) => Evaluate(LeftArgument.Evaluate(_env), RightArgument.Evaluate(_env));
+        internal sealed override Eval Evaluate(Env _env)
+        {
+            Eval left = LeftArgument.Evaluate(_env);
+            Eval right = RightArgument.Evaluate(_env);
+            try
+            {
+                return Reflection.InvokeOperator(m_OperatorMethod, left, right);
+            }
+            catch
+            {
+                return Evaluate((dynamic) left.Value, (dynamic) right.Value);
+            }
+        }
+
+        public override void Unsubscribe(HookManager _hookManager)
+        {
+            LeftArgument.Unsubscribe(_hookManager);
+            RightArgument.Unsubscribe(_hookManager);
+        }
 
         #endregion
 

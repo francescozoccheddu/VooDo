@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
-using VooDo.Source.Utils;
+using VooDo.Runtime;
 using VooDo.Utils;
 
 namespace VooDo.AST.Expressions.Fundamentals
@@ -23,18 +24,25 @@ namespace VooDo.AST.Expressions.Fundamentals
 
         #region Expr
 
-        internal sealed override object Evaluate(Runtime.Env _env)
+        internal sealed override Eval Evaluate(Env _env)
         {
-            Arguments.Evaluate(_env, out object[] values, out Type[] types);
-            object sourceValue = Source.Evaluate(_env, out Type sourceType);
-            return Reflection.EvaluateIndexer(sourceValue, sourceType, values, types);
+            Eval source = Source.Evaluate(_env);
+            Eval eval = Reflection.EvaluateIndexer(source, Arguments.Select(_a => _a.Evaluate(_env)).ToArray(), out Name name);
+            _env.Script.HookManager.Subscribe(this, source, name);
+            return eval;
         }
 
-        internal sealed override void Assign(Runtime.Env _env, object _value)
+        internal sealed override void Assign(Env _env, Eval _value)
         {
-            Arguments.Evaluate(_env, out object[] values, out Type[] types);
-            object sourceValue = Source.Evaluate(_env, out Type sourceType);
-            Reflection.AssignIndexer(sourceValue, sourceType, values, _value, types);
+            Eval source = Source.Evaluate(_env);
+            Reflection.AssignIndexer(source, Arguments.Select(_a => _a.Evaluate(_env)).ToArray(), _value, out Name name);
+            _env.Script.HookManager.Subscribe(this, source, name);
+        }
+
+        public override void Unsubscribe(HookManager _hookManager)
+        {
+            _hookManager.Unsubscribe(this);
+            base.Unsubscribe(_hookManager);
         }
 
         public sealed override int Precedence => 0;

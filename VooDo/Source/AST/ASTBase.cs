@@ -1,4 +1,5 @@
-﻿using VooDo.Utils;
+﻿using VooDo.Runtime;
+using VooDo.Utils;
 
 namespace VooDo.AST
 {
@@ -8,7 +9,7 @@ namespace VooDo.AST
 
         public abstract string Code { get; }
 
-        public abstract void Unsubscribe();
+        public abstract void Unsubscribe(HookManager _hookManager);
 
         #region Object
 

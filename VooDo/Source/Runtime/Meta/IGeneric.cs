@@ -5,7 +5,7 @@ namespace VooDo.Runtime.Meta
     public interface IGeneric
     {
 
-        object Specialize(Type[] _arguments);
+        Eval Specialize(Env _env, Type[] _arguments);
 
     }
 

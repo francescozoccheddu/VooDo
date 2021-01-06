@@ -18,7 +18,7 @@ namespace VooDo.Runtime
         {
             Environment = new Env(this); // TODO Env should use only declared variables
             Statement = _stat;
-            HookManager = new HookManager();
+            HookManager = new HookManager(this);
         }
 
         private bool m_runRequested;

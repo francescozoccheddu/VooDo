@@ -1,6 +1,5 @@
-﻿using System;
-
-using VooDo.Source.Utils;
+﻿
+using VooDo.Runtime;
 using VooDo.Utils;
 
 namespace VooDo.AST.Expressions.Fundamentals
@@ -24,20 +23,25 @@ namespace VooDo.AST.Expressions.Fundamentals
 
         #region Expr
 
-        internal sealed override object Evaluate(Runtime.Env _env)
+        internal sealed override Eval Evaluate(Env _env)
         {
-            object sourceValue = Source.Evaluate(_env, out Type sourceType);
-            return Reflection.EvaluateMember(_env.Script.HookManager, Member, sourceType, sourceValue);
+            Eval source = Source.Evaluate(_env);
+            Eval eval = Reflection.EvaluateMember(_env, source, Member);
+            _env.Script.HookManager.Subscribe(this, source, Member);
+            return eval;
         }
 
-        internal sealed override void Assign(Runtime.Env _env, object _value)
+        internal sealed override void Assign(Env _env, Eval _value)
         {
-            object sourceValue = Source.Evaluate(_env);
-            if (sourceValue == null)
-            {
-                throw new NullReferenceException();
-            }
-            Reflection.AssignMember(Member, _value, sourceValue.GetType(), sourceValue);
+            Eval source = Source.Evaluate(_env);
+            Reflection.AssignMember(_env, source, Member, _value);
+            _env.Script.HookManager.Subscribe(this, source, Member);
+        }
+
+        public override void Unsubscribe(HookManager _hookManager)
+        {
+            _hookManager.Unsubscribe(this);
+            Source.Unsubscribe(_hookManager);
         }
 
         public sealed override int Precedence => 0;

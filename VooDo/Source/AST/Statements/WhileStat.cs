@@ -1,5 +1,6 @@
 ﻿
 using VooDo.AST.Expressions;
+using VooDo.Runtime;
 using VooDo.Utils;
 
 namespace VooDo.AST.Statements
@@ -26,6 +27,12 @@ namespace VooDo.AST.Statements
             {
                 Body.Run(_env);
             }
+        }
+
+        public override void Unsubscribe(HookManager _hookManager)
+        {
+            Condition.Unsubscribe(_hookManager);
+            Body.Unsubscribe(_hookManager);
         }
 
         #endregion

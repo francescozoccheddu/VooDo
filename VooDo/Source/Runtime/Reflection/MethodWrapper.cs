@@ -67,12 +67,12 @@ namespace VooDo.Runtime.Reflection
         public override string ToString()
             => $"{Methods[0].DeclaringType}.{Methods[0].Name}{(GenericArguments.Count > 0 ? $"<{string.Join(", ", GenericArguments)}>" : "")}";
 
-        object ICallable.Call(object[] _arguments, Type[] _types) => Call(_arguments, _types);
+        Eval ICallable.Call(Env _env, Eval[] _arguments) => Call(_arguments);
 
-        public object Call(object[] _arguments, Type[] _types = null)
+        public Eval Call(Eval[] _arguments)
         {
             Ensure.NonNull(_arguments, nameof(_arguments));
-            return Utils.Reflection.InvokeMethod(Methods, _arguments, Instance, _types);
+            return Utils.Reflection.InvokeMethod(Methods, Instance, _arguments);
         }
 
         public MethodWrapper Specialize(Type[] _arguments)
@@ -91,7 +91,7 @@ namespace VooDo.Runtime.Reflection
             return new MethodWrapper(Methods.Select(_m => GetSpecialized(_m)).Where(_m => _m != null), Instance);
         }
 
-        object IGeneric.Specialize(Type[] _arguments) => Specialize(_arguments);
+        Eval IGeneric.Specialize(Env _env, Type[] _arguments) => new Eval(Specialize(_arguments));
 
     }
 

@@ -16,6 +16,8 @@
 
         #endregion
 
+        protected override Name m_OperatorMethod => "op_Inequality";
+
         #region Operator
 
         protected sealed override string m_OperatorSymbol => "!=";

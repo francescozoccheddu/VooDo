@@ -6,7 +6,7 @@ namespace VooDo.Runtime.Meta
     public interface IMemberProvider
     {
 
-        object EvaluateMember(Name _name, HookManager _hookManager);
+        Eval EvaluateMember(Env _env, Name _name);
 
     }
 }

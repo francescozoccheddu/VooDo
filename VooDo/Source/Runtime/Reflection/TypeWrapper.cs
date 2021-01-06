@@ -2,7 +2,6 @@
 
 using VooDo.AST;
 using VooDo.Runtime.Meta;
-using VooDo.Utils;
 
 namespace VooDo.Runtime.Reflection
 {
@@ -21,17 +20,17 @@ namespace VooDo.Runtime.Reflection
 
         public override string ToString() => Type.ToString();
 
-        void IAssignableMemberProvider.AssignMember(Name _name, object _value)
-            => Utils.Reflection.AssignMember(_name, _value, Type, null);
+        void IAssignableMemberProvider.AssignMember(Env _env, Name _name, Eval _value)
+            => Utils.Reflection.AssignMember(_env, new Eval(null, Type), _name, _value);
 
-        object IMemberProvider.EvaluateMember(Name _name, HookManager _hookManager)
-            => Utils.Reflection.EvaluateMember(_hookManager, _name, Type, null);
+        Eval IMemberProvider.EvaluateMember(Env _env, Name _name)
+            => Utils.Reflection.EvaluateMember(_env, new Eval(null, Type), _name);
 
-        object IGeneric.Specialize(Type[] _arguments)
+        Eval IGeneric.Specialize(Env _env, Type[] _arguments)
         {
             if (Type.IsGenericTypeDefinition)
             {
-                return new TypeWrapper(Type.MakeGenericType(_arguments));
+                return new Eval(new TypeWrapper(Type.MakeGenericType(_arguments)));
             }
             else
             {

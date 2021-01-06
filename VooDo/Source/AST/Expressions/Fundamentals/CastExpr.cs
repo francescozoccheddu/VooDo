@@ -1,5 +1,4 @@
-﻿using System;
-
+﻿
 using VooDo.Runtime;
 using VooDo.Source.Utils;
 using VooDo.Utils;
@@ -28,21 +27,23 @@ namespace VooDo.AST.Expressions.Fundamentals
         public sealed override string Code =>
             $"{Source.LeftCode(Precedence)} as {TargetType.RightCode(Precedence)}";
 
-        internal object Evaluate(Env _env, out Type _type)
+        internal sealed override Eval Evaluate(Env _env)
         {
-            _type = TargetType.AsType(_env);
-            object sourceValue = Source.Evaluate(_env);
             try
             {
-                return Reflection.ConvertType(sourceValue, _type);
+                return Reflection.ChangeType(Source.Evaluate(_env), TargetType.AsType(_env));
             }
             catch
             {
-                return null;
+                return new Eval(null);
             }
         }
 
-        internal sealed override object Evaluate(Runtime.Env _env) => Evaluate(_env, out Type _);
+        public override void Unsubscribe(HookManager _hookManager)
+        {
+            Source.Unsubscribe(_hookManager);
+            TargetType.Unsubscribe(_hookManager);
+        }
 
         #endregion
 

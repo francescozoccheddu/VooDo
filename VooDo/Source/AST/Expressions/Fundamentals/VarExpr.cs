@@ -22,17 +22,23 @@ namespace VooDo.AST.Expressions.Fundamentals
 
         #region Expr
 
-        internal sealed override object Evaluate(Runtime.Env _env) => Controller ? _env[Name].Controller : _env[Name].Value;
-
-        internal sealed override void Assign(Runtime.Env _env, object _value)
+        internal sealed override Eval Evaluate(Env _env)
         {
+            Eval eval = new Eval(Controller ? _env[Name].Controller : _env[Name].Value); //TODO Type
+            _env.Script.HookManager.Subscribe(this, new Eval(_env), Name);
+            return eval;
+        }
+
+        internal sealed override void Assign(Env _env, Eval _value)
+        {
+            // TODO Type
             if (Controller)
             {
-                if (_value is IController controller)
+                if (_value.Value is IController controller)
                 {
                     _env[Name, true].Controller = controller;
                 }
-                else if (_value is IControllerFactory factory)
+                else if (_value.Value is IControllerFactory factory)
                 {
                     _env[Name, true].UpdateController(factory);
                 }
@@ -43,7 +49,7 @@ namespace VooDo.AST.Expressions.Fundamentals
             }
             else
             {
-                _env[Name, true].Value = _value;
+                _env[Name, true].Value = _value.Value;
             }
         }
 
@@ -51,6 +57,7 @@ namespace VooDo.AST.Expressions.Fundamentals
 
         public sealed override string Code => $"{(Controller ? "$" : "")}{Name}";
 
+        public override void Unsubscribe(HookManager _hookManager) => _hookManager.Unsubscribe(this);
 
         #endregion
 

@@ -19,6 +19,8 @@
 
         #region Operator
 
+        protected override Name m_OperatorMethod => "op_Modulus";
+
         protected sealed override string m_OperatorSymbol => "%";
 
         #endregion

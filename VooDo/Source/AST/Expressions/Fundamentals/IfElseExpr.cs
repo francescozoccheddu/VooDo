@@ -30,8 +30,19 @@ namespace VooDo.AST.Expressions.Fundamentals
         public sealed override string Code =>
             $"{Condition.LeftCode(Precedence)} ? {Then.Code} : {Else.RightCode(Precedence)}";
 
-        internal sealed override object Evaluate(Env _env)
-            => (Condition.AsBool(_env) ? Then : Else).Evaluate(_env);
+        internal sealed override Eval Evaluate(Env _env)
+        {
+            bool condition = Condition.AsBool(_env);
+            (condition ? Else : Then).Unsubscribe(_env.Script.HookManager);
+            return (condition ? Then : Else).Evaluate(_env);
+        }
+
+        public override void Unsubscribe(HookManager _hookManager)
+        {
+            Condition.Unsubscribe(_hookManager);
+            Then.Unsubscribe(_hookManager);
+            Else.Unsubscribe(_hookManager);
+        }
 
         #endregion
 

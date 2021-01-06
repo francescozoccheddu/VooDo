@@ -18,6 +18,8 @@
 
         #region Operator
 
+        protected override Name m_OperatorMethod => "op_ExclusiveOr";
+
         protected sealed override string m_OperatorSymbol => "^";
 
         #endregion

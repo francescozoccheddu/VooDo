@@ -1,8 +1,5 @@
-﻿using VooDo.Exceptions.Runtime.Expressions;
-using VooDo.Runtime;
+﻿using VooDo.Runtime;
 using VooDo.Utils;
-
-using System.Collections.Generic;
 
 namespace VooDo.AST.Expressions.Literals
 {
@@ -10,16 +7,15 @@ namespace VooDo.AST.Expressions.Literals
     public abstract class LitExpr<T> : Expr
     {
 
-        internal LitExpr(T _value)
-        {
-            Literal = _value;
-        }
+        internal LitExpr(T _value) => Literal = _value;
 
         public T Literal { get; }
 
         #region Expr
 
-        internal sealed override object Evaluate(Env _env) => Literal;
+        internal sealed override Eval Evaluate(Env _env) => new Eval(Literal, typeof(T));
+
+        public override void Unsubscribe(HookManager _hookManager) { }
 
         public sealed override int Precedence => 0;
 
