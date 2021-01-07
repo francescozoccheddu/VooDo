@@ -1,4 +1,7 @@
 ﻿
+using System.Collections.Generic;
+using System.Linq;
+
 using VooDo.AST.Expressions;
 using VooDo.Runtime;
 using VooDo.Source.Utils;
@@ -38,6 +41,9 @@ namespace VooDo.AST.Statements
             ThenBody.Unsubscribe(_hookManager);
             ElseBody.Unsubscribe(_hookManager);
         }
+
+        internal override HashSet<Name> GetVariables()
+            => Tree.GetVariables(Condition, ThenBody, ElseBody).ToHashSet();
 
         #endregion
 

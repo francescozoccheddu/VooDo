@@ -1,5 +1,9 @@
 ﻿
+using System.Collections.Generic;
+using System.Linq;
+
 using VooDo.Runtime;
+using VooDo.Source.Utils;
 using VooDo.Utils;
 
 namespace VooDo.AST.Expressions.Operators
@@ -46,6 +50,9 @@ namespace VooDo.AST.Expressions.Operators
                 return Else.Evaluate(_env);
             }
         }
+
+        internal override HashSet<Name> GetVariables()
+            => Tree.GetVariables(Source, Else).ToHashSet();
 
         public override bool Equals(object _obj)
             => _obj is NullCoalesceOpExpr expr && Source.Equals(expr.Source) && Else.Equals(expr.Else);

@@ -1,4 +1,6 @@
-﻿using VooDo.Runtime;
+﻿using System.Collections.Generic;
+
+using VooDo.Runtime;
 using VooDo.Utils;
 
 namespace VooDo.AST
@@ -10,6 +12,8 @@ namespace VooDo.AST
         public abstract string Code { get; }
 
         public abstract void Unsubscribe(HookManager _hookManager);
+
+        internal abstract HashSet<Name> GetVariables();
 
         #region Object
 

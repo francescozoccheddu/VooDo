@@ -1,9 +1,9 @@
-﻿namespace VooDo.Runtime
+﻿namespace VooDo.Runtime.Controllers
 {
-    public interface IController
+    public interface IController : IControllerFactory
     {
 
-        object Value { get; set; }
+        Eval Value { get; set; }
 
         void RegisterBinding(Env.Binding _binding);
 

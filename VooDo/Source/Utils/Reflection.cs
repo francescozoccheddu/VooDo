@@ -52,30 +52,30 @@ namespace VooDo.Utils
                 .First(_p => _p.GetIndexParameters().Any())
                 .Name;
 
-        private static MethodInfo GetOperator(Type _type, Name _name, Type[] _types)
+        private static MethodInfo GetOperator(Type _type, Name _name, IReadOnlyList<Type> _types)
             => ChooseOverload(GetMethods(_type, _name, true, false, true), _types);
 
-        private static MethodInfo GetMethod(Type _type, Name _name, Type[] _types)
+        private static MethodInfo GetMethod(Type _type, Name _name, IReadOnlyList<Type> _types)
             => ChooseOverload(GetMethods(_type, _name, true, false, false), _types);
 
-        private static MethodInfo GetIndexerSetter(Type _type, Type[] _types, out Name _indexer)
+        private static MethodInfo GetIndexerSetter(Type _type, IReadOnlyList<Type> _types, out Name _indexer)
             => ChooseOverload(GetMethods(_type, $"set_{_indexer = GetIndexerName(_type)}", false, true, false), _types);
 
-        private static MethodInfo GetIndexerGetter(Type _type, Type[] _types, out Name _indexer)
+        private static MethodInfo GetIndexerGetter(Type _type, IReadOnlyList<Type> _types, out Name _indexer)
             => ChooseOverload(GetMethods(_type, $"get_{_indexer = GetIndexerName(_type)}", false, true, false), _types);
 
-        private static object[] FillOptionalArguments(ParameterInfo[] _parameters, object[] _arguments)
-            => _arguments.Concat(_parameters.Skip(_arguments.Length).Select(_a => _a.DefaultValue)).ToArray();
+        private static object[] FillOptionalArguments(IReadOnlyList<ParameterInfo> _parameters, IReadOnlyList<object> _arguments)
+            => _arguments.Concat(_parameters.Skip(_arguments.Count).Select(_a => _a.DefaultValue)).ToArray();
 
-        private static MethodInfo ChooseOverload(MethodInfo[] _methods, Type[] _types)
+        private static MethodInfo ChooseOverload(IReadOnlyList<MethodInfo> _methods, IReadOnlyList<Type> _types)
         {
 
-            int GetMandatoryParametersCount(ParameterInfo[] _parameters)
+            int GetMandatoryParametersCount(IReadOnlyList<ParameterInfo> _parameters)
                 => _parameters.TakeWhile(_p => !_p.IsOptional).Count();
 
-            bool MatchParameters(ParameterInfo[] _parameters, int _argumentsCount, out IEnumerable<ParameterInfo> _match)
+            bool MatchParameters(IReadOnlyList<ParameterInfo> _parameters, int _argumentsCount, out IEnumerable<ParameterInfo> _match)
             {
-                if (_parameters.Length >= _argumentsCount)
+                if (_parameters.Count >= _argumentsCount)
                 {
                     int mandatory = GetMandatoryParametersCount(_parameters);
                     if (mandatory <= _argumentsCount)
@@ -90,13 +90,13 @@ namespace VooDo.Utils
 
             bool HasOutParameters(IEnumerable<ParameterInfo> _parameters) => _parameters.Any(_p => _p.IsOut);
 
-            bool DoesOverloadMatch(ParameterInfo[] _parameters)
-                => MatchParameters(_parameters, _types.Length, out IEnumerable<ParameterInfo> match) &&
+            bool DoesOverloadMatch(IReadOnlyList<ParameterInfo> _parameters)
+                => MatchParameters(_parameters, _types.Count, out IEnumerable<ParameterInfo> match) &&
                 match.Zip(_types, (_p, _a) => (_a == null && _p.ParameterType.IsClass) || _p.ParameterType.IsAssignableFrom(_a)).All(_t => _t);
 
 
-            bool DoesOverloadMatchExactly(ParameterInfo[] _parameters)
-                => MatchParameters(_parameters, _types.Length, out IEnumerable<ParameterInfo> match) &&
+            bool DoesOverloadMatchExactly(IReadOnlyList<ParameterInfo> _parameters)
+                => MatchParameters(_parameters, _types.Count, out IEnumerable<ParameterInfo> match) &&
                 match.Zip(_types, (_p, _a) => (_a == null && _p.ParameterType.IsClass) || _p.ParameterType.Equals(_a)).All(_x => _x);
 
             MethodInfo[] matches = _methods.Where(_o => !HasOutParameters(_o.GetParameters()) && DoesOverloadMatch(_o.GetParameters())).ToArray();
@@ -145,6 +145,13 @@ namespace VooDo.Utils
             }
             catch { }
             return GetOperator(_rightArgument.Type, _operator, argumentTypes).TypedInvoke(null, arguments);
+        }
+
+        internal static EventInfo GetEvent(Eval _source, Name _name)
+        {
+            bool includeInstance = _source.Value != null || c_accessInstanceMembersByType;
+            bool includeStatic = _source.Value == null || c_accessStaticMembersByInstance;
+            return GetEvent(_source.Type, _name, includeStatic, includeInstance);
         }
 
         internal static Eval EvaluateMember(Env _env, Eval _source, Name _name)
@@ -203,7 +210,7 @@ namespace VooDo.Utils
             }
         }
 
-        internal static Eval EvaluateIndexer(Eval _source, Eval[] _arguments, out Name _indexer)
+        internal static Eval EvaluateIndexer(Eval _source, IReadOnlyList<Eval> _arguments, out Name _indexer)
         {
             try
             {
@@ -223,7 +230,7 @@ namespace VooDo.Utils
             }
         }
 
-        internal static void AssignIndexer(Eval _source, Eval[] _arguments, object _value, out Name _indexer)
+        internal static void AssignIndexer(Eval _source, IReadOnlyList<Eval> _arguments, object _value, out Name _indexer)
         {
             try
             {
@@ -244,7 +251,7 @@ namespace VooDo.Utils
             }
         }
 
-        internal static Eval InvokeMethod(MethodInfo[] _methodGroup, object _instance, Eval[] _arguments)
+        internal static Eval InvokeMethod(IReadOnlyList<MethodInfo> _methodGroup, object _instance, IReadOnlyList<Eval> _arguments)
         {
             MethodInfo method = ChooseOverload(_methodGroup, _arguments.GetTypes());
             return method.TypedInvoke(_instance, FillOptionalArguments(method.GetParameters(), _arguments.GetValues()).ToArray());

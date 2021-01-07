@@ -16,8 +16,8 @@ namespace VooDo.Runtime
 
         public Script(Stat _stat)
         {
-            Environment = new Env(this); // TODO Env should use only declared variables
             Statement = _stat;
+            Environment = new Env(this, Statement.GetVariables());
             HookManager = new HookManager(this);
         }
 

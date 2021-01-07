@@ -3,6 +3,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 
 using VooDo.Runtime;
+using VooDo.Source.Utils;
 using VooDo.Utils;
 
 namespace VooDo.AST.Statements
@@ -41,6 +42,9 @@ namespace VooDo.AST.Statements
                 stat.Unsubscribe(_hookManager);
             }
         }
+
+        internal override HashSet<Name> GetVariables()
+            => Tree.GetVariables(Statements).ToHashSet();
 
         #endregion
 

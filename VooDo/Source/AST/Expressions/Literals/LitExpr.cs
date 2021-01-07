@@ -1,4 +1,6 @@
-﻿using VooDo.Runtime;
+﻿using System.Collections.Generic;
+
+using VooDo.Runtime;
 using VooDo.Utils;
 
 namespace VooDo.AST.Expressions.Literals
@@ -18,6 +20,8 @@ namespace VooDo.AST.Expressions.Literals
         public override void Unsubscribe(HookManager _hookManager) { }
 
         public sealed override int Precedence => 0;
+
+        internal override HashSet<Name> GetVariables() => new HashSet<Name>();
 
         #endregion
 

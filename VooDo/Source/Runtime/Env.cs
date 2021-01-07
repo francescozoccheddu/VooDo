@@ -1,198 +1,124 @@
-﻿using System;
+﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
 using VooDo.AST;
-using VooDo.Source.Runtime;
-using VooDo.Utils;
+using VooDo.Runtime.Controllers;
 
 namespace VooDo.Runtime
 {
-    public sealed class Env
+    public sealed class Env : IReadOnlyDictionary<Name, Env.Binding>
     {
 
-        public delegate void ValueChanged(Binding _binding, object _oldValue);
-        public delegate void BindingCreated(Binding _binding);
+        public delegate void EvalChanged(Binding _binding, Eval _old);
+
+        public Script Script { get; }
+
+        private readonly IReadOnlyDictionary<Name, Binding> m_dictionary;
 
         public sealed class Binding
         {
 
-            private object m_data;
-            private object m_oldValue;
+            public event EvalChanged OnEvalChange;
 
-            internal Binding(Env _environment, Name _name)
-            {
-                Environment = _environment;
-                Name = _name;
-                m_data = null;
-                HasController = false;
-            }
-
-            public event ValueChanged OnValueChanged;
+            private Eval m_eval;
+            private IController m_controller;
 
             public Name Name { get; }
-            public Env Environment { get; }
+            public Env Env { get; }
 
-            internal void NotifyValueChanged()
+            internal Binding(Env _env, Name _name)
             {
-                object value = Value;
-                if (value != m_oldValue)
-                {
-                    OnValueChanged?.Invoke(this, m_oldValue);
-                    Environment.NotifyValueChanged(this, m_oldValue);
-                    m_oldValue = value;
-                }
+                Env = _env;
+                Name = _name;
+                m_eval = new Eval(null);
+                m_controller = null;
             }
 
-            public IController Controller
+            public Eval Eval
             {
-                get => HasController ? (IController) m_data : null;
-                set
-                {
-                    if (value == null)
-                    {
-                        m_data = value;
-                        HasController = false;
-                    }
-                    else
-                    {
-                        m_data = value;
-                        HasController = true;
-                        NotifyValueChanged();
-                    }
-                }
-            }
-
-            public object Value
-            {
-                get => HasController ? Controller.Value : m_data;
-                set
+                get
                 {
                     if (HasController)
                     {
-                        Controller.Value = value;
+                        return m_eval = m_controller.Value;
                     }
                     else
                     {
-                        m_data = value;
-                        NotifyValueChanged();
+                        return m_eval;
                     }
                 }
-            }
-
-            public bool HasController { get; private set; }
-
-            public void UpdateController(IControllerFactory _factory)
-            {
-                Ensure.NonNull(_factory, nameof(_factory));
-                Controller = _factory.Create(Controller, Value);
-            }
-
-
-        }
-
-        private readonly Dictionary<Name, Binding> m_dictionary = new Dictionary<Name, Binding>();
-
-        internal Env(Script _script)
-        {
-            Ensure.NonNull(_script, nameof(_script));
-            Script = _script;
-        }
-
-        private void NotifyValueChanged(Binding _binding, object _oldValue) => OnValueChanged?.Invoke(_binding, _oldValue);
-
-        public event ValueChanged OnValueChanged;
-        public event BindingCreated OnBindingCreated;
-
-        public Script Script { get; }
-
-        public Binding Add(Name _name)
-        {
-            Binding binding = new Binding(this, _name);
-            m_dictionary.Add(_name, binding);
-            OnBindingCreated?.Invoke(binding);
-            return binding;
-        }
-
-        public bool TryAdd(Name _name, out Binding _binding)
-        {
-            if (ContainsName(_name))
-            {
-                _binding = null;
-                return false;
-            }
-            else
-            {
-                _binding = Add(_name);
-                return true;
-            }
-        }
-
-        public bool ContainsName(Name _name) => m_dictionary.ContainsKey(_name);
-
-        public bool TryGet(Name _name, out Binding _binding) => m_dictionary.TryGetValue(_name, out _binding);
-
-        public IReadOnlyCollection<Name> Names => m_dictionary.Keys;
-
-        public IReadOnlyCollection<Binding> Bindings => m_dictionary.Values;
-
-        public Dictionary<Name, object> FrozenDictionary => m_dictionary.ToDictionary(_e => _e.Key, _e => _e.Value.Value);
-
-        public enum EInjectReplaceMode
-        {
-            Replace,
-            Skip,
-            Throw
-        }
-
-        public void Inject(IEnumerable<KeyValuePair<Name, object>> _values, EInjectReplaceMode _mode = EInjectReplaceMode.Throw)
-        {
-            switch (_mode)
-            {
-                case EInjectReplaceMode.Replace:
-                foreach (KeyValuePair<Name, object> entry in _values)
+                set
                 {
-                    Binding binding = this[entry.Key, true];
-                    binding.Controller = null;
-                    binding.Value = entry.Value;
-                }
-                break;
-                case EInjectReplaceMode.Skip:
-                foreach (KeyValuePair<Name, object> entry in _values)
-                {
-                    if (TryAdd(entry.Key, out Binding binding))
+                    m_eval = Eval;
+                    if (HasController)
                     {
-                        binding.Value = entry.Value;
+                        m_controller.Value = value;
+                        NotifyEvalChange();
+                    }
+                    else if (value != m_eval)
+                    {
+                        Eval old = m_eval;
+                        m_eval = value;
+                        NotifyEvalChange(old);
                     }
                 }
-                break;
-                case EInjectReplaceMode.Throw:
-                foreach (KeyValuePair<Name, object> entry in _values)
-                {
-                    Add(entry.Key).Value = entry.Value;
-                }
-                break;
             }
+
+            public IController Controller => m_controller;
+
+            public bool HasController => m_controller != null;
+
+            public void SetController(IControllerFactory _factory)
+            {
+                if (m_controller != null)
+                {
+                    m_eval = Eval;
+                    m_controller.UnregisterBinding(this);
+                }
+                m_controller = _factory?.Create(m_controller, Eval);
+            }
+
+            private void NotifyEvalChange(Eval _old)
+            {
+                OnEvalChange?.Invoke(this, _old);
+                Env.NotifyEvalChange(this, _old);
+            }
+
+            public void NotifyEvalChange()
+            {
+                Eval eval = Eval;
+                if (m_eval != eval)
+                {
+                    Eval old = m_eval;
+                    m_eval = eval;
+                    NotifyEvalChange(old);
+                }
+            }
+
         }
 
-        public Binding this[Name _name, bool _createIfNotExists = false]
+        private void NotifyEvalChange(Binding _binding, Eval _old)
+            => OnEvalChange?.Invoke(_binding, _old);
+
+        internal Env(Script _script, IEnumerable<Name> _names)
         {
-            get
-            {
-                if (TryGet(_name, out Binding binding))
-                {
-                    return binding;
-                }
-                else if (_createIfNotExists)
-                {
-                    return Add(_name);
-                }
-                else
-                {
-                    throw new Exception("Missing key");
-                }
-            }
+            Script = _script;
+            m_dictionary = _names.ToDictionary(_n => _n, _n => new Binding(this, _n));
         }
+
+        public event EvalChanged OnEvalChange;
+
+        public Binding this[Name _key] => m_dictionary[_key];
+
+        public int Count => m_dictionary.Count;
+
+        public IEnumerable<Name> Keys => m_dictionary.Keys;
+        public IEnumerable<Binding> Values => m_dictionary.Values;
+        public bool ContainsKey(Name _key) => m_dictionary.ContainsKey(_key);
+        public bool TryGetValue(Name _key, out Binding _value) => m_dictionary.TryGetValue(_key, out _value);
+        public IEnumerator<KeyValuePair<Name, Binding>> GetEnumerator() => m_dictionary.GetEnumerator();
+        IEnumerator IEnumerable.GetEnumerator() => ((IEnumerable) m_dictionary).GetEnumerator();
 
     }
 

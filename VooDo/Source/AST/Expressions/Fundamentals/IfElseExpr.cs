@@ -1,4 +1,7 @@
 ﻿
+using System.Collections.Generic;
+using System.Linq;
+
 using VooDo.Runtime;
 using VooDo.Source.Utils;
 using VooDo.Utils;
@@ -36,6 +39,9 @@ namespace VooDo.AST.Expressions.Fundamentals
             (condition ? Else : Then).Unsubscribe(_env.Script.HookManager);
             return (condition ? Then : Else).Evaluate(_env);
         }
+
+        internal override HashSet<Name> GetVariables()
+         => Tree.GetVariables(Condition, Then, Else).ToHashSet();
 
         public override void Unsubscribe(HookManager _hookManager)
         {

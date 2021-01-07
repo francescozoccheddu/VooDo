@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
+using VooDo.AST;
 using VooDo.AST.Expressions;
 using VooDo.AST.Expressions.Fundamentals;
 using VooDo.Runtime;
@@ -9,8 +11,14 @@ using VooDo.Utils;
 namespace VooDo.Source.Utils
 {
 
-    internal static class Expressions
+    internal static class Tree
     {
+
+        internal static IEnumerable<Name> GetVariables(IEnumerable<ASTBase> _nodes)
+            => _nodes.SelectMany(_n => _n.GetVariables());
+
+        internal static IEnumerable<Name> GetVariables(params ASTBase[] _nodes)
+            => GetVariables((IEnumerable<ASTBase>) _nodes);
 
         internal static T As<T>(this Expr _expr, Env _env) => Reflection.Cast<T>(_expr.Evaluate(_env).Value);
 

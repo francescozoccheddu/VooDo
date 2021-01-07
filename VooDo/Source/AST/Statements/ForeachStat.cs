@@ -1,5 +1,7 @@
 ﻿
 using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 
 using VooDo.AST.Expressions;
 using VooDo.Runtime;
@@ -29,10 +31,16 @@ namespace VooDo.AST.Statements
 
         internal sealed override void Run(Runtime.Env _env)
         {
+            bool done = false;
             foreach (Eval item in Source.As<IEnumerable>(_env))
             {
+                done = true;
                 Target.Assign(_env, item);
                 Body.Run(_env);
+            }
+            if (!done)
+            {
+                Body.Unsubscribe(_env.Script.HookManager);
             }
         }
 
@@ -41,6 +49,9 @@ namespace VooDo.AST.Statements
             Source.Unsubscribe(_hookManager);
             Body.Unsubscribe(_hookManager);
         }
+
+        internal override HashSet<Name> GetVariables()
+            => Tree.GetVariables(Target, Source, Body).ToHashSet();
 
         #endregion
 

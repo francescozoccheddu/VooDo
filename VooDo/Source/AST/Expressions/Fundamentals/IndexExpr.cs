@@ -27,6 +27,14 @@ namespace VooDo.AST.Expressions.Fundamentals
         internal sealed override Eval Evaluate(Env _env)
         {
             Eval source = Source.Evaluate(_env);
+            if (source.Value == null && NullCoalesce)
+            {
+                foreach (Expr argument in Arguments)
+                {
+                    argument.Unsubscribe(_env.Script.HookManager);
+                }
+                return new Eval(null);
+            }
             Eval eval = Reflection.EvaluateIndexer(source, Arguments.Select(_a => _a.Evaluate(_env)).ToArray(), out Name name);
             _env.Script.HookManager.Subscribe(this, source, name);
             return eval;

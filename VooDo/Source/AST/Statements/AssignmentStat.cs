@@ -1,6 +1,10 @@
 ﻿
+using System.Collections.Generic;
+using System.Linq;
+
 using VooDo.AST.Expressions;
 using VooDo.Runtime;
+using VooDo.Source.Utils;
 using VooDo.Utils;
 
 namespace VooDo.AST.Statements
@@ -25,6 +29,9 @@ namespace VooDo.AST.Statements
             => Target.Assign(_env, Source.Evaluate(_env));
 
         public override void Unsubscribe(HookManager _hookManager) => Source.Unsubscribe(_hookManager);
+
+        internal override HashSet<Name> GetVariables()
+            => Tree.GetVariables(Target, Source).ToHashSet();
 
         #endregion
 

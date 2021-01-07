@@ -1,7 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 
 using VooDo.Runtime;
-using VooDo.Source.Runtime;
+using VooDo.Runtime.Controllers;
 using VooDo.Utils;
 
 namespace VooDo.AST.Expressions.Fundamentals
@@ -24,23 +25,18 @@ namespace VooDo.AST.Expressions.Fundamentals
 
         internal sealed override Eval Evaluate(Env _env)
         {
-            Eval eval = new Eval(Controller ? _env[Name].Controller : _env[Name].Value); //TODO Type
+            Eval eval = Controller ? new Eval(_env[Name].Controller) : _env[Name].Eval;
             _env.Script.HookManager.Subscribe(this, new Eval(_env), Name);
             return eval;
         }
 
         internal sealed override void Assign(Env _env, Eval _value)
         {
-            // TODO Type
             if (Controller)
             {
-                if (_value.Value is IController controller)
+                if (_value.Value is IControllerFactory factory)
                 {
-                    _env[Name, true].Controller = controller;
-                }
-                else if (_value.Value is IControllerFactory factory)
-                {
-                    _env[Name, true].UpdateController(factory);
+                    _env[Name].SetController(factory);
                 }
                 else
                 {
@@ -49,7 +45,7 @@ namespace VooDo.AST.Expressions.Fundamentals
             }
             else
             {
-                _env[Name, true].Value = _value.Value;
+                _env[Name].Eval = _value;
             }
         }
 
@@ -58,6 +54,8 @@ namespace VooDo.AST.Expressions.Fundamentals
         public sealed override string Code => $"{(Controller ? "$" : "")}{Name}";
 
         public override void Unsubscribe(HookManager _hookManager) => _hookManager.Unsubscribe(this);
+
+        internal override HashSet<Name> GetVariables() => new HashSet<Name>() { Name };
 
         #endregion
 

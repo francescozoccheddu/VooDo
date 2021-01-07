@@ -1,11 +1,9 @@
-﻿using VooDo.Runtime;
-
-namespace VooDo.Source.Runtime
+﻿namespace VooDo.Runtime.Controllers
 {
     public interface IControllerFactory
     {
 
-        IController Create(IController _oldController, object _value);
+        IController Create(IController _oldController, Eval _value);
 
     }
 }

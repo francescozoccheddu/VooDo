@@ -1,4 +1,8 @@
-﻿using VooDo.Runtime;
+﻿using System.Collections.Generic;
+using System.Linq;
+
+using VooDo.Runtime;
+using VooDo.Source.Utils;
 using VooDo.Utils;
 
 namespace VooDo.AST.Expressions.Operators
@@ -48,6 +52,9 @@ namespace VooDo.AST.Expressions.Operators
                 return new Eval(Evaluate((dynamic) left.Value, (dynamic) right.Value));
             }
         }
+
+        internal override HashSet<Name> GetVariables()
+         => Tree.GetVariables(LeftArgument, RightArgument).ToHashSet();
 
         public override void Unsubscribe(HookManager _hookManager)
         {

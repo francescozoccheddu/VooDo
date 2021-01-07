@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 
 using VooDo.Runtime;
 using VooDo.Source.Utils;
@@ -40,6 +42,8 @@ namespace VooDo.AST.Expressions.Fundamentals
             Source.Unsubscribe(_hookManager);
             TestType.Unsubscribe(_hookManager);
         }
+
+        internal override HashSet<Name> GetVariables() => Tree.GetVariables(Source, TestType).ToHashSet();
 
         #endregion
 

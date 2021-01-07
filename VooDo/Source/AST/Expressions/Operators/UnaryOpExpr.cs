@@ -1,4 +1,6 @@
 ﻿
+using System.Collections.Generic;
+
 using VooDo.Runtime;
 using VooDo.Utils;
 
@@ -44,6 +46,8 @@ namespace VooDo.AST.Expressions.Operators
                 return new Eval(Evaluate((dynamic) argument.Value));
             }
         }
+
+        internal override HashSet<Name> GetVariables() => Argument.GetVariables();
 
         public override void Unsubscribe(HookManager _hookManager)
             => Argument.Unsubscribe(_hookManager);

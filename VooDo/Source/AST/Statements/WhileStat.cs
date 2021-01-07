@@ -1,4 +1,7 @@
 ﻿
+using System.Collections.Generic;
+using System.Linq;
+
 using VooDo.AST.Expressions;
 using VooDo.Runtime;
 using VooDo.Source.Utils;
@@ -22,13 +25,22 @@ namespace VooDo.AST.Statements
 
         #region Stat
 
-        internal sealed override void Run(Runtime.Env _env)
+        internal sealed override void Run(Env _env)
         {
+            bool done = false;
             while (Condition.AsBool(_env))
             {
+                done = true;
                 Body.Run(_env);
             }
+            if (!done)
+            {
+                Body.Unsubscribe(_env.Script.HookManager);
+            }
         }
+
+        internal override HashSet<Name> GetVariables()
+            => Tree.GetVariables(Condition, Body).ToHashSet();
 
         public override void Unsubscribe(HookManager _hookManager)
         {

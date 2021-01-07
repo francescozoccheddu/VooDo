@@ -2,6 +2,7 @@
 using System.Linq;
 
 using VooDo.Runtime;
+using VooDo.Source.Utils;
 using VooDo.Utils;
 
 namespace VooDo.AST.Expressions
@@ -30,6 +31,9 @@ namespace VooDo.AST.Expressions
                 arg.Unsubscribe(_hookManager);
             }
         }
+
+        internal override HashSet<Name> GetVariables()
+            => Tree.GetVariables(Source).Union(Tree.GetVariables(Arguments)).ToHashSet();
 
         public override bool Equals(object _obj)
             => _obj is ParametricExpr expr && Source.Equals(expr.Source) && Arguments.SequenceEqual(expr.Arguments);

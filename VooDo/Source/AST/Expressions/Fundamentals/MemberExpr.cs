@@ -1,4 +1,6 @@
 ﻿
+using System.Collections.Generic;
+
 using VooDo.Runtime;
 using VooDo.Utils;
 
@@ -26,6 +28,10 @@ namespace VooDo.AST.Expressions.Fundamentals
         internal sealed override Eval Evaluate(Env _env)
         {
             Eval source = Source.Evaluate(_env);
+            if (source.Value == null && NullCoalesce)
+            {
+                return new Eval(null);
+            }
             Eval eval = Reflection.EvaluateMember(_env, source, Member);
             _env.Script.HookManager.Subscribe(this, source, Member);
             return eval;
@@ -37,6 +43,8 @@ namespace VooDo.AST.Expressions.Fundamentals
             Reflection.AssignMember(_env, source, Member, _value);
             _env.Script.HookManager.Subscribe(this, source, Member);
         }
+
+        internal override HashSet<Name> GetVariables() => Source.GetVariables();
 
         public override void Unsubscribe(HookManager _hookManager)
         {

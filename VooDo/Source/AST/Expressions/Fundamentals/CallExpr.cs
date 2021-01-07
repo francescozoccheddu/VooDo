@@ -23,6 +23,10 @@ namespace VooDo.AST.Expressions.Fundamentals
             ICallable callable = Source.As<ICallable>(_env);
             if (callable == null && NullCoalesce)
             {
+                foreach (Expr argument in Arguments)
+                {
+                    argument.Unsubscribe(_env.Script.HookManager);
+                }
                 return new Eval(null);
             }
             else
