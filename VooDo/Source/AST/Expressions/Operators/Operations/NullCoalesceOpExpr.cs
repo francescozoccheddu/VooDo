@@ -36,7 +36,15 @@ namespace VooDo.AST.Expressions.Operators
         internal override Eval Evaluate(Env _env)
         {
             Eval source = Source.Evaluate(_env);
-            return source.Value != null ? source : new Eval(null);
+            if (source.Value != null)
+            {
+                Else.Unsubscribe(_env.Script.HookManager);
+                return source;
+            }
+            else
+            {
+                return Else.Evaluate(_env);
+            }
         }
 
         public override bool Equals(object _obj)

@@ -1,6 +1,7 @@
 ﻿
 using VooDo.AST.Expressions;
 using VooDo.Runtime;
+using VooDo.Source.Utils;
 using VooDo.Utils;
 
 namespace VooDo.AST.Statements
@@ -26,7 +27,7 @@ namespace VooDo.AST.Statements
 
         internal sealed override void Run(Runtime.Env _env)
         {
-            bool condValue = Reflection.Cast<bool>(Condition.Evaluate(_env));
+            bool condValue = Condition.AsBool(_env);
             (condValue ? ThenBody : ElseBody).Run(_env);
             (condValue ? ElseBody : ThenBody).Unsubscribe(_env.Script.HookManager);
         }

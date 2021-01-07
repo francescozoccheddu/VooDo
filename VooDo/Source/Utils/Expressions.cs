@@ -12,7 +12,7 @@ namespace VooDo.Source.Utils
     internal static class Expressions
     {
 
-        internal static T As<T>(this Expr _expr, Env _env) => Reflection.Cast<T>(_expr.Evaluate(_env));
+        internal static T As<T>(this Expr _expr, Env _env) => Reflection.Cast<T>(_expr.Evaluate(_env).Value);
 
         internal static Type AsType(this Expr _expr, Env _env) => _expr.As<Type>(_env);
 

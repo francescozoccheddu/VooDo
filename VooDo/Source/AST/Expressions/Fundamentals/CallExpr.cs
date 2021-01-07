@@ -3,6 +3,7 @@ using System.Linq;
 
 using VooDo.Runtime;
 using VooDo.Runtime.Meta;
+using VooDo.Source.Utils;
 using VooDo.Utils;
 
 namespace VooDo.AST.Expressions.Fundamentals
@@ -19,7 +20,7 @@ namespace VooDo.AST.Expressions.Fundamentals
 
         internal sealed override Eval Evaluate(Env _env)
         {
-            ICallable callable = Reflection.Cast<ICallable>(Source.Evaluate(_env));
+            ICallable callable = Source.As<ICallable>(_env);
             if (callable == null && NullCoalesce)
             {
                 return new Eval(null);

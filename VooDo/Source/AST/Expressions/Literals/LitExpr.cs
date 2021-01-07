@@ -13,7 +13,7 @@ namespace VooDo.AST.Expressions.Literals
 
         #region Expr
 
-        internal sealed override Eval Evaluate(Env _env) => new Eval(Literal, typeof(T));
+        internal override Eval Evaluate(Env _env) => new Eval(Literal, typeof(T));
 
         public override void Unsubscribe(HookManager _hookManager) { }
 

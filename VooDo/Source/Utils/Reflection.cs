@@ -43,8 +43,7 @@ namespace VooDo.Utils
         private static MethodInfo[] GetMethods(Type _type, Name _name, bool _includeStatic, bool _includeInstance, bool _flattenHierarchy = false)
         {
             BindingFlags flags = GetMemberFlags(_includeStatic, _includeInstance) | (_flattenHierarchy ? BindingFlags.FlattenHierarchy : 0);
-            IEnumerable<MethodInfo> methods = _type.GetMember(_name, MemberTypes.Method, flags).Cast<MethodInfo>();
-            return methods.ToArray();
+            return _type.GetMember(_name, MemberTypes.Method, flags).Cast<MethodInfo>().ToArray();
         }
 
         private static Name GetIndexerName(Type _type)
@@ -53,30 +52,30 @@ namespace VooDo.Utils
                 .First(_p => _p.GetIndexParameters().Any())
                 .Name;
 
-        private static MethodInfo GetOperator(Type _type, Name _name, IReadOnlyList<Type> _types)
+        private static MethodInfo GetOperator(Type _type, Name _name, Type[] _types)
             => ChooseOverload(GetMethods(_type, _name, true, false, true), _types);
 
-        private static MethodInfo GetMethod(Type _type, Name _name, IReadOnlyList<Type> _types)
+        private static MethodInfo GetMethod(Type _type, Name _name, Type[] _types)
             => ChooseOverload(GetMethods(_type, _name, true, false, false), _types);
 
-        private static MethodInfo GetIndexerSetter(Type _type, IReadOnlyList<Type> _types, out Name _indexer)
+        private static MethodInfo GetIndexerSetter(Type _type, Type[] _types, out Name _indexer)
             => ChooseOverload(GetMethods(_type, $"set_{_indexer = GetIndexerName(_type)}", false, true, false), _types);
 
-        private static MethodInfo GetIndexerGetter(Type _type, IReadOnlyList<Type> _types, out Name _indexer)
+        private static MethodInfo GetIndexerGetter(Type _type, Type[] _types, out Name _indexer)
             => ChooseOverload(GetMethods(_type, $"get_{_indexer = GetIndexerName(_type)}", false, true, false), _types);
 
-        private static IEnumerable<object> FillOptionalArguments(ParameterInfo[] _parameters, IEnumerable<object> _arguments)
-            => _arguments.Concat(_parameters.Skip(_arguments.Count()).Select(_a => _a.DefaultValue)).ToArray();
+        private static object[] FillOptionalArguments(ParameterInfo[] _parameters, object[] _arguments)
+            => _arguments.Concat(_parameters.Skip(_arguments.Length).Select(_a => _a.DefaultValue)).ToArray();
 
-        private static MethodInfo ChooseOverload(IEnumerable<MethodInfo> _methods, IEnumerable<Type> _types)
+        private static MethodInfo ChooseOverload(MethodInfo[] _methods, Type[] _types)
         {
 
-            int GetMandatoryParametersCount(IEnumerable<ParameterInfo> _parameters)
+            int GetMandatoryParametersCount(ParameterInfo[] _parameters)
                 => _parameters.TakeWhile(_p => !_p.IsOptional).Count();
 
-            bool MatchParameters(IEnumerable<ParameterInfo> _parameters, int _argumentsCount, out IEnumerable<ParameterInfo> _match)
+            bool MatchParameters(ParameterInfo[] _parameters, int _argumentsCount, out IEnumerable<ParameterInfo> _match)
             {
-                if (_parameters.Count() < _argumentsCount)
+                if (_parameters.Length >= _argumentsCount)
                 {
                     int mandatory = GetMandatoryParametersCount(_parameters);
                     if (mandatory <= _argumentsCount)
@@ -91,13 +90,13 @@ namespace VooDo.Utils
 
             bool HasOutParameters(IEnumerable<ParameterInfo> _parameters) => _parameters.Any(_p => _p.IsOut);
 
-            bool DoesOverloadMatch(IEnumerable<ParameterInfo> _parameters)
-                => MatchParameters(_parameters, _types.Count(), out IEnumerable<ParameterInfo> match) &&
+            bool DoesOverloadMatch(ParameterInfo[] _parameters)
+                => MatchParameters(_parameters, _types.Length, out IEnumerable<ParameterInfo> match) &&
                 match.Zip(_types, (_p, _a) => (_a == null && _p.ParameterType.IsClass) || _p.ParameterType.IsAssignableFrom(_a)).All(_t => _t);
 
 
-            bool DoesOverloadMatchExactly(IEnumerable<ParameterInfo> _parameters)
-                => MatchParameters(_parameters, _types.Count(), out IEnumerable<ParameterInfo> match) &&
+            bool DoesOverloadMatchExactly(ParameterInfo[] _parameters)
+                => MatchParameters(_parameters, _types.Length, out IEnumerable<ParameterInfo> match) &&
                 match.Zip(_types, (_p, _a) => (_a == null && _p.ParameterType.IsClass) || _p.ParameterType.Equals(_a)).All(_x => _x);
 
             MethodInfo[] matches = _methods.Where(_o => !HasOutParameters(_o.GetParameters()) && DoesOverloadMatch(_o.GetParameters())).ToArray();
@@ -204,7 +203,7 @@ namespace VooDo.Utils
             }
         }
 
-        internal static Eval EvaluateIndexer(Eval _source, IEnumerable<Eval> _arguments, out Name _indexer)
+        internal static Eval EvaluateIndexer(Eval _source, Eval[] _arguments, out Name _indexer)
         {
             try
             {
@@ -224,7 +223,7 @@ namespace VooDo.Utils
             }
         }
 
-        internal static void AssignIndexer(Eval _source, IEnumerable<Eval> _arguments, object _value, out Name _indexer)
+        internal static void AssignIndexer(Eval _source, Eval[] _arguments, object _value, out Name _indexer)
         {
             try
             {
@@ -245,7 +244,7 @@ namespace VooDo.Utils
             }
         }
 
-        internal static Eval InvokeMethod(IEnumerable<MethodInfo> _methodGroup, object _instance, IEnumerable<Eval> _arguments)
+        internal static Eval InvokeMethod(MethodInfo[] _methodGroup, object _instance, Eval[] _arguments)
         {
             MethodInfo method = ChooseOverload(_methodGroup, _arguments.GetTypes());
             return method.TypedInvoke(_instance, FillOptionalArguments(method.GetParameters(), _arguments.GetValues()).ToArray());
@@ -270,7 +269,7 @@ namespace VooDo.Utils
             { }
             try
             {
-                return Convert.ChangeType(_source, _target);
+                return Convert.ChangeType(_source.Value, _target);
             }
             catch
             { }
@@ -279,7 +278,7 @@ namespace VooDo.Utils
 
         internal static Eval ChangeType(Eval _source, Type _target)
         {
-            if (_target.IsInstanceOfType(_source.Type))
+            if (_target.IsInstanceOfType(_source.Value))
             {
                 return new Eval(_source.Value, _target);
             }

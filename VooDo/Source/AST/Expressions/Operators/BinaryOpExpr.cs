@@ -45,7 +45,7 @@ namespace VooDo.AST.Expressions.Operators
             }
             catch
             {
-                return Evaluate((dynamic) left.Value, (dynamic) right.Value);
+                return new Eval(Evaluate((dynamic) left.Value, (dynamic) right.Value));
             }
         }
 

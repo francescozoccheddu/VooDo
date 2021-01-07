@@ -1,4 +1,6 @@
 ﻿
+using VooDo.Runtime;
+
 namespace VooDo.AST.Expressions.Literals
 {
 
@@ -12,6 +14,8 @@ namespace VooDo.AST.Expressions.Literals
         #region Expr
 
         public sealed override string Code => "null";
+
+        internal override Eval Evaluate(Env _env) => new Eval(null);
 
         #endregion
 
