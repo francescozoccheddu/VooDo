@@ -1,4 +1,6 @@
-﻿using VooDo.AST;
+﻿using System;
+
+using VooDo.AST;
 
 namespace VooDo.Runtime.Hooks
 {
@@ -6,6 +8,8 @@ namespace VooDo.Runtime.Hooks
     {
 
         protected abstract IHook Subscribe(T _instance, Name _property);
+
+        Type IHookProvider.Type => typeof(T);
 
         IHook IHookProvider.Subscribe(Eval _instance, Name _property)
             => _instance.Value is T t ? Subscribe(t, _property) : null;

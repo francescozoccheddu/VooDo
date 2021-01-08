@@ -7,46 +7,82 @@ using VooDo.Parsing;
 using VooDo.Runtime;
 using VooDo.Runtime.Reflection;
 
-using Windows.System;
-using Windows.UI.Core;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
-using Windows.UI.Xaml.Input;
 
 namespace VooDoTB
 {
 
+    public sealed class Test : DependencyObject
+    {
+
+        public string Var
+        {
+            get => (string) GetValue(VarProperty);
+            set => SetValue(VarProperty, value);
+        }
+
+        public static readonly DependencyProperty VarProperty =
+            DependencyProperty.Register("Var", typeof(string), typeof(Test), new PropertyMetadata(""));
+
+    }
+
     public sealed partial class MainPage : Page
     {
+
+        private readonly Test m_test = new Test();
+
         public MainPage() => InitializeComponent();
 
-        private void Run()
+        private Script m_script = null;
+
+        private void VarBox_TextChanged(object _sender, TextChangedEventArgs _e) => m_test.Var = m_varBox.Text;
+
+        private void RunButton_Click(object _sender, RoutedEventArgs _e)
         {
-            try
+            if (m_script != null)
             {
-                Stat stat = Parser.Parse(m_inputBox.Text);
-                Script program = new Script(stat);
                 try
                 {
-                    program.Environment["System"].Eval = new Eval(new TypePath("System"));
+                    m_script.Run();
                 }
-                catch { }
-                program.Run();
-                m_outputBox.Text = program.Environment.Aggregate("", (_o, _p) => $"{_o}{_p.Key}: {_p.Value.Eval}\n");
-            }
-            catch (Exception err)
-            {
-                m_outputBox.Text = err.Message;
+                catch (Exception error)
+                {
+                    SetError(error);
+                }
             }
         }
 
-        private void InputBox_PreviewKeyDown(object _sender, KeyRoutedEventArgs _e)
+        private void CompileButton_Click(object _sender, RoutedEventArgs _e)
         {
-            if (Window.Current.CoreWindow.GetKeyState(VirtualKey.Control).HasFlag(CoreVirtualKeyStates.Down) && _e.Key == VirtualKey.Enter)
+            m_script = null;
+            m_runButton.IsEnabled = false;
+            try
             {
-                _e.Handled = true;
-                Run();
+                Stat stat = Parser.Parse(m_scriptBox.Text);
+                m_script = new Script(stat);
+                m_script.Environment.OnEvalChange += (_b, _o) => UpdateEnv();
+                m_runButton.IsEnabled = true;
+                m_script.Environment["System", true].Eval = new Eval(new TypePath("System"));
+                m_script.Environment["var", true].Eval = new Eval(m_test);
+            }
+            catch (Exception error)
+            {
+                SetError(error);
             }
         }
+
+        private void SetError(Exception _error) => m_envGrid.ItemsSource = new Binding[] { new Binding(_error) };
+
+        private void UpdateEnv()
+        {
+            if (m_script != null)
+            {
+                m_envGrid.ItemsSource = m_script.Environment.Values.Select(_b => new Binding(_b));
+            }
+        }
+
+        private void ScriptBox_TextChanged(object _sender, TextChangedEventArgs _e) { m_script = null; m_runButton.IsEnabled = false; }
+
     }
 }

@@ -16,7 +16,53 @@ namespace VooDo.Runtime
 
         private readonly IReadOnlyDictionary<Name, Binding> m_dictionary;
 
-        public sealed class Binding
+        public interface IBinding
+        {
+
+            event EvalChanged OnEvalChange;
+
+            Name Name { get; }
+            Env Env { get; }
+            Eval Eval { get; set; }
+            IController Controller { get; }
+            bool HasController { get; }
+
+            void SetController(IControllerFactory _factory);
+
+            void NotifyEvalChange();
+
+        }
+
+        private sealed class SinkBinding : IBinding
+        {
+
+            public SinkBinding(Env _env, Name _name)
+            {
+                Name = _name;
+                Env = _env;
+            }
+
+            public Name Name { get; }
+
+            public Env Env { get; }
+
+            public Eval Eval { get => new Eval(null); set => new Eval(null); }
+
+            public IController Controller => null;
+
+            public bool HasController => false;
+
+            public event EvalChanged OnEvalChange
+            {
+                add { }
+                remove { }
+            }
+
+            public void NotifyEvalChange() { }
+            public void SetController(IControllerFactory _factory) { }
+        }
+
+        public sealed class Binding : IBinding
         {
 
             public event EvalChanged OnEvalChange;
@@ -110,6 +156,12 @@ namespace VooDo.Runtime
         public event EvalChanged OnEvalChange;
 
         public Binding this[Name _key] => m_dictionary[_key];
+
+        public IBinding this[Name _key, bool _sinkIfNotExists]
+            => _sinkIfNotExists ? GetOrSink(_key) : this[_key];
+
+        public IBinding GetOrSink(Name _key)
+            => m_dictionary.TryGetValue(_key, out Binding value) ? value : (IBinding) new SinkBinding(this, _key);
 
         public int Count => m_dictionary.Count;
 
