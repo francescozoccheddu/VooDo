@@ -39,7 +39,7 @@
                 TextWrapping="Wrap" />
 
             <!--
-            
+
             <controls:DataGrid
                 x:Name="m_envGrid"
                 Grid.Column="2"
@@ -58,7 +58,7 @@
             </controls:DataGrid>
 
             -->
-            
+
         </Grid>
 
         <Grid Grid.Row="1" ColumnSpacing="10">

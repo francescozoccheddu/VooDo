@@ -127,17 +127,11 @@ namespace VooDo.Transformation
                 throw new ArgumentException(nameof(_options), exception);
             }
             CompilationUnitSyntax unit = GenerateSyntax(_body, _options, Enumerable.Empty<IHookInitializer>());
-            SyntaxTree tree = CSharpSyntaxTree.Create(unit);
-            CSharpCompilation compilation = CSharpCompilation.Create(c_tempAssemblyName, new SyntaxTree[] { tree });
+            SemanticModel semantics = Compiler.GetSemantics(unit, Compiler.Options.Default);
 
-            MemberAccessExpressionSyntax method = SyntaxFactory.MemberAccessExpression(
-                SyntaxKind.SimpleMemberAccessExpression,
-                SyntaxFactory.BaseExpression(),
-                SyntaxFactory.IdentifierName(nameof(Script.SubscribeHook)));
+            ExpressionHookGluer expressionHookGluer = new ExpressionHookGluer(_options.HookInitializerProvider);
 
-            ExpressionHookGluer expressionHookGluer = new ExpressionHookGluer(_options.HookInitializerProvider, method);
-
-            BlockSyntax gluedBody = (BlockSyntax) expressionHookGluer.Glue(compilation.GetSemanticModel(tree), _body);
+            BlockSyntax gluedBody = (BlockSyntax) expressionHookGluer.Glue(semantics, _body);
 
             CompilationUnitSyntax gluedUnit = GenerateSyntax(gluedBody, _options, expressionHookGluer.HookInitializers);
 
@@ -150,7 +144,7 @@ namespace VooDo.Transformation
             {
                 throw new ArgumentNullException(nameof(_body));
             }
-            return Generate(SyntaxFactory.Block(SyntaxFactory.SingletonList(SyntaxFactory.ReturnStatement(_body.Expression))), _options);
+            return Generate(SyntaxFactory.Block(SyntaxFactory.SingletonList(SyntaxFactory.ExpressionStatement(_body.Expression))), _options);
         }
     }
 

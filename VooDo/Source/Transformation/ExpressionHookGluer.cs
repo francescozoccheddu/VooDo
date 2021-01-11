@@ -14,7 +14,11 @@ namespace VooDo.Transformation
 
         private readonly List<IHookInitializer> m_hookInitializers;
 
-        internal ExpressionSyntax HookSubscribeCallable { get; }
+        private static ExpressionSyntax s_HookSubscribeCallable { get; }
+            = SyntaxFactory.MemberAccessExpression(
+                SyntaxKind.SimpleMemberAccessExpression,
+                SyntaxFactory.BaseExpression(),
+                SyntaxFactory.IdentifierName(nameof(Script.SubscribeHook)));
 
         internal IReadOnlyList<IHookInitializer> HookInitializers { get; }
 
@@ -45,7 +49,7 @@ namespace VooDo.Transformation
             ArgumentSyntax sourceArgument = SyntaxFactory.Argument(_source);
             ArgumentSyntax hookIndexArgument = SyntaxFactory.Argument(SyntaxFactory.LiteralExpression(SyntaxKind.NumericLiteralExpression, SyntaxFactory.Literal(_hookIndex)));
             SyntaxNodeOrToken[] arguments = new SyntaxNodeOrToken[] { sourceArgument, SyntaxFactory.Token(SyntaxKind.CommaToken), hookIndexArgument };
-            return SyntaxFactory.InvocationExpression(HookSubscribeCallable, SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>(arguments)));
+            return SyntaxFactory.InvocationExpression(s_HookSubscribeCallable, SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>(arguments)));
         }
 
         private sealed class ExpressionRewriter : CSharpSyntaxRewriter
@@ -98,18 +102,13 @@ namespace VooDo.Transformation
 
         }
 
-        public ExpressionHookGluer(IHookInitializerProvider _initializerProvider, ExpressionSyntax _subscribeCallable)
+        public ExpressionHookGluer(IHookInitializerProvider _initializerProvider)
         {
             if (_initializerProvider == null)
             {
                 throw new ArgumentNullException(nameof(_initializerProvider));
             }
-            if (_subscribeCallable == null)
-            {
-                throw new ArgumentNullException(nameof(_subscribeCallable));
-            }
             HookInitializerProvider = _initializerProvider;
-            HookSubscribeCallable = _subscribeCallable;
             m_hookInitializers = new List<IHookInitializer>();
             HookInitializers = m_hookInitializers.AsReadOnly();
         }

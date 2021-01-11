@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.ComponentModel;
 using System.Linq;
 
@@ -15,21 +16,21 @@ namespace VooDo.Transformation
         {
             if (_hooks == null)
             {
-                throw new ArgumentNullException(nameof(_hooks));
+                _hooks = Enumerable.Empty<IHook>();
             }
-            m_hooks = _hooks.ToList().AsReadOnly();
+            m_hooks = ImmutableArray.Create(_hooks.ToArray());
             if (m_hooks.Any(_h => _h == null))
             {
                 throw new ArgumentException(nameof(_hooks), new NullReferenceException());
             }
-            m_hookSubscribed = new bool[m_hooks.Count];
+            m_hookSubscribed = new bool[m_hooks.Length];
             foreach (IHook hook in m_hooks)
             {
                 hook.Listener = this;
             }
         }
 
-        private readonly IReadOnlyList<IHook> m_hooks;
+        private readonly ImmutableArray<IHook> m_hooks;
         private readonly bool[] m_hookSubscribed;
         private bool m_running;
         private bool m_runRequested;
@@ -37,6 +38,10 @@ namespace VooDo.Transformation
 
         protected internal TSource SubscribeHook<TSource>(TSource _source, int _hookIndex)
         {
+            if (_hookIndex > m_hooks.Length || _hookIndex < 0)
+            {
+                throw new ArgumentException("Bad hook index", nameof(_hookIndex), new IndexOutOfRangeException());
+            }
             m_hookSubscribed[_hookIndex] = true;
             m_hooks[_hookIndex].Subscribe(_source);
             return _source;

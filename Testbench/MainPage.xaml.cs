@@ -4,7 +4,6 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 using System;
-using System.Linq;
 
 using VooDo.Transformation;
 using VooDo.Utils.Testing;
@@ -55,10 +54,11 @@ namespace VooDoTB
             try
             {
                 SyntaxTree tree = CSharpSyntaxTree.ParseText(m_scriptBox.Text);
-                BlockSyntax block = tree.GetRoot().DescendantNodes().OfType<BlockSyntax>().First();
-                ScriptGenerator.Options options = ScriptGenerator.Options.Default;
+                /*BlockSyntax block = tree.GetRoot().DescendantNodes().OfType<BlockSyntax>().First();
+                ScriptGenerator.Options options = ScriptGenerator.Options.Default;*/
+                ScriptTransformer.Options options;
                 options.HookInitializerProvider = new HookInitializerList { new TestHookInitializerProvider() };
-                CompilationUnitSyntax script = ScriptGenerator.Generate(block, options);
+                CompilationUnitSyntax script = ScriptTransformer.Transform((CompilationUnitSyntax) tree.GetRoot(), options);
                 m_outputBlock.Text = script.NormalizeWhitespace().ToFullString();
             }
             catch (Exception exception)
