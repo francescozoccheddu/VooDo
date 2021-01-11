@@ -20,7 +20,7 @@ namespace VooDo.Utils
             int hashCode = 579313498;
             foreach (object obj in _objs)
             {
-                hashCode = hashCode * -1521134295 + (obj?.GetHashCode() ?? 0);
+                hashCode = (hashCode * -1521134295) + (obj?.GetHashCode() ?? 0);
             }
             return hashCode;
         }

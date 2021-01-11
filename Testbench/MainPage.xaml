@@ -31,6 +31,15 @@
 
             <controls:GridSplitter Grid.Column="1" />
 
+            <TextBlock
+                x:Name="m_outputBlock"
+                Grid.Column="2"
+                FontFamily="Consolas"
+                ScrollViewer.VerticalScrollBarVisibility="Auto"
+                TextWrapping="Wrap" />
+
+            <!--
+            
             <controls:DataGrid
                 x:Name="m_envGrid"
                 Grid.Column="2"
@@ -48,6 +57,8 @@
 
             </controls:DataGrid>
 
+            -->
+            
         </Grid>
 
         <Grid Grid.Row="1" ColumnSpacing="10">
