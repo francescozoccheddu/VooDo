@@ -5,6 +5,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 
 using VooDo.Hooks;
 using VooDo.Utils;
@@ -15,8 +16,6 @@ namespace VooDo.Transformation
     public class ScriptGenerator
     {
 
-        private const string c_tempAssemblyName = "ScriptGenerator_VooDo_internal_";
-
         public struct Options
         {
 
@@ -24,12 +23,14 @@ namespace VooDo.Transformation
                 = new Options
                 {
                     HookInitializerProvider = new HookInitializerList(),
+                    AdditionalAssemblyReferences = null,
                     GlobalType = null,
                     Usings = Enumerable.Empty<UsingDirectiveSyntax>(),
                     ClassName = SyntaxFactory.IdentifierName("GeneratedScript"),
                 };
 
             public IHookInitializerProvider HookInitializerProvider { get; set; }
+            public IEnumerable<Assembly> AdditionalAssemblyReferences { get; set; }
             public Type GlobalType { get; set; }
             public IEnumerable<UsingDirectiveSyntax> Usings { get; set; }
             public SimpleNameSyntax ClassName { get; set; }

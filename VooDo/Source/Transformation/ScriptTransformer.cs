@@ -5,6 +5,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 
 using VooDo.Hooks;
 using VooDo.Utils;
@@ -135,7 +136,8 @@ namespace VooDo.Transformation
                 {
                     RunMethodRewriter runMethodRewriter = new RunMethodRewriter(m_semantics, m_hookInitializerProvider);
                     ClassDeclarationSyntax gluedNode = (ClassDeclarationSyntax) runMethodRewriter.Visit(_node);
-                    ConstructorDeclarationSyntax constructor = GetDefaultConstructor(symbol);
+                    INamedTypeSymbol gluedSymbol = m_semantics.GetDeclaredSymbol(gluedNode);
+                    ConstructorDeclarationSyntax constructor = GetDefaultConstructor(gluedSymbol);
                     ConstructorInitializerSyntax initializer = CreateConstructorInitializer(runMethodRewriter.ExpressionHookGluer.HookInitializers);
                     if (constructor == null)
                     {
@@ -157,18 +159,18 @@ namespace VooDo.Transformation
 
         }
 
-        private const string c_tempAssemblyName = "ScriptTransformer_VooDo_internal_";
-
         public struct Options
         {
 
             public static Options Default { get; }
                 = new Options
                 {
-                    HookInitializerProvider = new HookInitializerList()
+                    HookInitializerProvider = new HookInitializerList(),
+                    AdditionalAssemblyReferences = null
                 };
 
             public IHookInitializerProvider HookInitializerProvider { get; set; }
+            public IEnumerable<Assembly> AdditionalAssemblyReferences { get; set; }
 
             internal void EnsureValid()
             {

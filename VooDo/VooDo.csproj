@@ -135,6 +135,7 @@
     <Compile Include="Source\Transformation\IHookInitializer.cs" />
     <Compile Include="Source\Transformation\IHookInitializerProvider.cs" />
     <Compile Include="Source\Transformation\Script.cs" />
+    <Compile Include="Source\Transformation\ScriptFactory.cs" />
     <Compile Include="Source\Transformation\ScriptTransformer.cs" />
     <Compile Include="Source\Transformation\ScriptGenerator.cs" />
     <Compile Include="Source\Utils\Compiler.cs" />

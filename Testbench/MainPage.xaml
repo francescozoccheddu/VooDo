@@ -4,93 +4,109 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:controls="using:Microsoft.Toolkit.Uwp.UI.Controls">
 
+    <Grid 
+        Margin="10"
+        ColumnSpacing="10">
 
-    <Grid Margin="10" RowSpacing="10">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
 
-        <Grid.RowDefinitions>
-            <RowDefinition Height="*" />
-            <RowDefinition Height="Auto" />
-        </Grid.RowDefinitions>
+        <TextBox
+            x:Name="m_sourceBox"
+            Grid.Column="0"
+            AcceptsReturn="True"
+            FontFamily="Consolas"
+            ScrollViewer.VerticalScrollBarVisibility="Auto"
+            TextWrapping="Wrap" />
 
-        <Grid Grid.Row="0" ColumnSpacing="10">
+        <controls:GridSplitter Grid.Column="1" />
 
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="*" />
-            </Grid.ColumnDefinitions>
+        <TextBlock
+            x:Name="m_transformationBlock"
+            Grid.Column="2"
+            FontFamily="Consolas"
+            ScrollViewer.VerticalScrollBarVisibility="Auto"
+            TextWrapping="Wrap" />
 
-            <TextBox
-                x:Name="m_scriptBox"
-                Grid.Column="0"
-                AcceptsReturn="True"
-                FontFamily="Consolas"
-                ScrollViewer.VerticalScrollBarVisibility="Auto"
-                TextChanged="ScriptBox_TextChanged"
-                TextWrapping="Wrap" />
+        <controls:GridSplitter Grid.Column="3" />
 
-            <controls:GridSplitter Grid.Column="1" />
+        <Grid Grid.Column="4" RowSpacing="5">
 
-            <TextBlock
-                x:Name="m_outputBlock"
-                Grid.Column="2"
-                FontFamily="Consolas"
-                ScrollViewer.VerticalScrollBarVisibility="Auto"
-                TextWrapping="Wrap" />
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
 
-            <!--
+            <StackPanel 
+                Grid.Row="0"
+                Orientation="Vertical" 
+                Spacing="10">
 
-            <controls:DataGrid
-                x:Name="m_envGrid"
-                Grid.Column="2"
-                AutoGenerateColumns="False">
+                <TextBlock Text="VarA" Style="{StaticResource CaptionTextBlockStyle}"/>
 
-                <controls:DataGrid.Columns>
+                <TextBox 
+                    FontFamily="Consolas"
+                    Margin="0,0,0,10"
+                    Text="{x:Bind Script.Context.VarA}"/>
 
-                    <controls:DataGridTextColumn Binding="{Binding Name}" Header="Name" />
+                <TextBlock Text="VarB" Style="{StaticResource CaptionTextBlockStyle}"/>
 
-                    <controls:DataGridTextColumn Binding="{Binding Value}" Header="Value" />
+                <TextBox 
+                    FontFamily="Consolas"
+                    Margin="0,0,0,10"
+                    Text="{x:Bind Script.Context.VarB}"/>
 
-                    <controls:DataGridTextColumn Binding="{Binding Type}" Header="Type" />
+                <TextBlock Text="VarC" Style="{StaticResource CaptionTextBlockStyle}"/>
 
-                </controls:DataGrid.Columns>
+                <TextBox 
+                    FontFamily="Consolas"
+                    Margin="0,0,0,10"
+                    Text="{x:Bind Script.Context.VarC}"/>
 
-            </controls:DataGrid>
+                <TextBlock Text="Status" Style="{StaticResource CaptionTextBlockStyle}"/>
 
-            -->
+                <TextBlock
+                    x:Name="m_statusBlock"
+                    FontFamily="Consolas"
+                    />
 
-        </Grid>
+            </StackPanel>
 
-        <Grid Grid.Row="1" ColumnSpacing="10">
+            <Grid 
+                Grid.Row="1" 
+                ColumnSpacing="10">
 
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="Auto" />
-            </Grid.ColumnDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
 
-            <TextBox
-                x:Name="m_varBox"
-                Grid.Column="0"
-                FontFamily="Consolas"
-                TextChanged="VarBox_TextChanged" />
+                <Button
+                    x:Name="m_compileButton"
+                    HorizontalAlignment="Stretch"
+                    Grid.Column="0"
+                    AccessKey="C"
+                    Click="CompileButton_Click"
+                    Content="Compile" />
 
-            <Button
-                x:Name="m_compileButton"
-                Grid.Column="1"
-                AccessKey="C"
-                Click="CompileButton_Click"
-                Content="Compile" />
+                <Button
+                    x:Name="m_runButton"
+                    HorizontalAlignment="Stretch"
+                    Grid.Column="1"
+                    AccessKey="R"
+                    Click="RunButton_Click"
+                    Content="Run"
+                    IsEnabled="False" />
 
-            <Button
-                x:Name="m_runButton"
-                Grid.Column="2"
-                AccessKey="R"
-                Click="RunButton_Click"
-                Content="Run"
-                IsEnabled="False" />
+            </Grid>
 
         </Grid>
 
     </Grid>
+
 </Page>
