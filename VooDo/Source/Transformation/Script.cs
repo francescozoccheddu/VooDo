@@ -11,9 +11,6 @@ namespace VooDo.Transformation
     public abstract class Script : IHookListener
     {
 
-        internal const string subscribeMethodName = nameof(SubscribeHook_VooDo_internal_);
-        internal const string runMethodName = nameof(Run_VooDo_internal_);
-
         protected Script(IEnumerable<IHook> _hooks)
         {
             if (_hooks == null)
@@ -38,16 +35,16 @@ namespace VooDo.Transformation
         private bool m_runRequested;
         private int m_locks;
 
-        protected TSource SubscribeHook_VooDo_internal_<TSource>(TSource _source, int _hookIndex)
+        protected internal TSource SubscribeHook<TSource>(TSource _source, int _hookIndex)
         {
             m_hookSubscribed[_hookIndex] = true;
             m_hooks[_hookIndex].Subscribe(_source);
             return _source;
         }
 
-        protected abstract void Run_VooDo_internal_();
+        protected internal abstract void Run();
 
-        private void Run()
+        private void PrepareAndRun()
         {
             if (m_running)
             {
@@ -57,7 +54,7 @@ namespace VooDo.Transformation
             {
                 m_running = true;
                 Array.Fill(m_hookSubscribed, false);
-                Run_VooDo_internal_();
+                Run();
                 for (int i = 0; i < m_hookSubscribed.Length; i++)
                 {
                     if (!m_hookSubscribed[i])
@@ -103,7 +100,7 @@ namespace VooDo.Transformation
         {
             if (IsRunRequested && !IsLocked)
             {
-                Run();
+                PrepareAndRun();
             }
         }
 

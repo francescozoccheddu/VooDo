@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 
 using VooDo.Hooks;
+using VooDo.Utils;
 
 namespace VooDo.Transformation
 {
@@ -25,13 +26,13 @@ namespace VooDo.Transformation
                     HookInitializerProvider = new HookInitializerList(),
                     GlobalType = null,
                     Usings = Enumerable.Empty<UsingDirectiveSyntax>(),
-                    ClassName = SyntaxFactory.Identifier("GeneratedScript"),
+                    ClassName = SyntaxFactory.IdentifierName("GeneratedScript"),
                 };
 
             public IHookInitializerProvider HookInitializerProvider { get; set; }
-            public TypeSyntax GlobalType { get; set; }
+            public Type GlobalType { get; set; }
             public IEnumerable<UsingDirectiveSyntax> Usings { get; set; }
-            public SyntaxToken ClassName { get; set; }
+            public SimpleNameSyntax ClassName { get; set; }
 
             internal void EnsureValid()
             {
@@ -54,30 +55,14 @@ namespace VooDo.Transformation
         private static CompilationUnitSyntax GenerateSyntax(BlockSyntax _body, Options _options, IEnumerable<IHookInitializer> _hookInitializers)
         {
 
-            NameSyntax hookType = typeof(IHook).FullName
-                .Split(SyntaxFactory.Token(SyntaxKind.DotToken).ValueText)
-                .Select(SyntaxFactory.IdentifierName)
-                .Aggregate<NameSyntax>((_a, _n) => SyntaxFactory.QualifiedName(_a, (SimpleNameSyntax) _n));
-
-            NameSyntax[] scriptNamespace = typeof(Script<object>).Namespace
-                .Split(SyntaxFactory.Token(SyntaxKind.DotToken).ValueText)
-                .Select(SyntaxFactory.IdentifierName)
-                .ToArray();
-
-            SimpleNameSyntax scriptName = _options.GlobalType == null
-                ? SyntaxFactory.IdentifierName(nameof(Script))
-                : (SimpleNameSyntax) SyntaxFactory.GenericName(nameof(Script))
-                    .WithTypeArgumentList(SyntaxFactory.TypeArgumentList(
-                    SyntaxFactory.SingletonSeparatedList(_options.GlobalType)));
-
-            NameSyntax scriptType = scriptNamespace.Length > 0
-                ? SyntaxFactory.QualifiedName(scriptNamespace.Aggregate((_a, _n) => SyntaxFactory.QualifiedName(_a, (SimpleNameSyntax) _n)), scriptName)
-                : (NameSyntax) scriptName;
+            TypeSyntax baseType = _options.GlobalType != null
+                ? SyntaxFactoryHelper.Type(typeof(Script<>).MakeGenericType(_options.GlobalType))
+                : SyntaxFactoryHelper.Type(typeof(Script));
 
             MethodDeclarationSyntax runMethod =
                 SyntaxFactory.MethodDeclaration(
                     SyntaxFactory.PredefinedType(SyntaxFactory.Token(SyntaxKind.VoidKeyword)),
-                    SyntaxFactory.Identifier(Script.runMethodName))
+                    SyntaxFactory.Identifier(nameof(Script.Run)))
                 .WithModifiers(SyntaxFactory.TokenList(new[]{
                     SyntaxFactory.Token(SyntaxKind.ProtectedKeyword),
                     SyntaxFactory.Token(SyntaxKind.OverrideKeyword)}))
@@ -86,7 +71,7 @@ namespace VooDo.Transformation
             ArgumentSyntax baseArgument =
                 SyntaxFactory.Argument(
                     SyntaxFactory.ArrayCreationExpression(
-                        SyntaxFactory.ArrayType(hookType)
+                        SyntaxFactory.ArrayType(SyntaxFactoryHelper.Type(typeof(IHook)))
                         .WithRankSpecifiers(
                             SyntaxFactory.SingletonList(
                                 SyntaxFactory.ArrayRankSpecifier(
@@ -99,7 +84,7 @@ namespace VooDo.Transformation
                                 _hookInitializers.Select(_i => _i.GetHookInitializerSyntax())))));
 
             ConstructorDeclarationSyntax constructor =
-                SyntaxFactory.ConstructorDeclaration(_options.ClassName)
+                SyntaxFactory.ConstructorDeclaration(_options.ClassName.Identifier)
                     .WithModifiers(SyntaxFactory.TokenList(
                         SyntaxFactory.Token(SyntaxKind.PublicKeyword)))
                     .WithInitializer(
@@ -110,13 +95,13 @@ namespace VooDo.Transformation
                     .WithBody(SyntaxFactory.Block());
 
             ClassDeclarationSyntax classDeclaration =
-                SyntaxFactory.ClassDeclaration(_options.ClassName)
+                SyntaxFactory.ClassDeclaration(_options.ClassName.Identifier)
                     .WithModifiers(SyntaxFactory.TokenList(new[]{
                                 SyntaxFactory.Token(SyntaxKind.PublicKeyword),
                                 SyntaxFactory.Token(SyntaxKind.SealedKeyword)}))
                     .WithBaseList(SyntaxFactory.BaseList(
                             SyntaxFactory.SingletonSeparatedList<BaseTypeSyntax>(
-                                SyntaxFactory.SimpleBaseType(scriptType))))
+                                SyntaxFactory.SimpleBaseType(baseType))))
                     .WithMembers(SyntaxFactory.List(new MemberDeclarationSyntax[] { constructor, runMethod }));
 
             CompilationUnitSyntax unit =
@@ -148,7 +133,7 @@ namespace VooDo.Transformation
             MemberAccessExpressionSyntax method = SyntaxFactory.MemberAccessExpression(
                 SyntaxKind.SimpleMemberAccessExpression,
                 SyntaxFactory.BaseExpression(),
-                SyntaxFactory.IdentifierName(Script.subscribeMethodName));
+                SyntaxFactory.IdentifierName(nameof(Script.SubscribeHook)));
 
             ExpressionHookGluer expressionHookGluer = new ExpressionHookGluer(_options.HookInitializerProvider, method);
 

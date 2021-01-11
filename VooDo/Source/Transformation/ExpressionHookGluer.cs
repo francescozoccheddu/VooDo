@@ -64,7 +64,7 @@ namespace VooDo.Transformation
             {
                 if (m_gluer.TryGlue(_node, m_semantics, out int hookIndex))
                 {
-                    return _node.WithExpression(m_gluer.CreateHookSubscribeExpressionSyntax(_node.Expression, hookIndex));
+                    return _node.WithExpression(m_gluer.CreateHookSubscribeExpressionSyntax((ExpressionSyntax) Visit(_node.Expression), hookIndex));
                 }
                 else
                 {
@@ -76,7 +76,7 @@ namespace VooDo.Transformation
             {
                 if (m_gluer.TryGlue(_node, m_semantics, out int hookIndex))
                 {
-                    return _node.WithExpression(m_gluer.CreateHookSubscribeExpressionSyntax(_node.Expression, hookIndex));
+                    return _node.WithExpression(m_gluer.CreateHookSubscribeExpressionSyntax((ExpressionSyntax) Visit(_node.Expression), hookIndex));
                 }
                 else
                 {
