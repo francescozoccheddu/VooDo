@@ -9,6 +9,8 @@ using System.Collections.Generic;
 namespace VooDo.Transformation
 {
 
+    //TODO Skip lambdas, local functions, loops,  
+
     internal sealed class ExpressionHookGluer
     {
 
@@ -90,18 +92,6 @@ namespace VooDo.Transformation
 
         }
 
-        private sealed class RValueRewriter : CSharpSyntaxRewriter
-        {
-
-            private readonly ExpressionRewriter m_exprRewriter;
-
-            internal RValueRewriter(ExpressionHookGluer _gluer, SemanticModel _semantics) => m_exprRewriter = new ExpressionRewriter(_gluer, _semantics);
-
-            public override SyntaxNode VisitAssignmentExpression(AssignmentExpressionSyntax _node) => _node.WithRight((ExpressionSyntax) m_exprRewriter.Visit(_node.Right));
-            public override SyntaxNode VisitEqualsValueClause(EqualsValueClauseSyntax _node) => _node.WithValue((ExpressionSyntax) m_exprRewriter.Visit(_node.Value));
-
-        }
-
         public ExpressionHookGluer(IHookInitializerProvider _initializerProvider)
         {
             if (_initializerProvider == null)
@@ -132,7 +122,8 @@ namespace VooDo.Transformation
             {
                 throw new ArgumentNullException(nameof(_root));
             }
-            return new RValueRewriter(this, _semantics).Visit(_root);
+            throw new Exception();
+            //return new RValueRewriter(this, _semantics).Visit(_root);
         }
     }
 

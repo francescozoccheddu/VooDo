@@ -122,6 +122,7 @@
     <RestoreProjectStyle>PackageReference</RestoreProjectStyle>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="Source\AST\Node.cs" />
     <Compile Include="Source\Hooks\IHookListener.cs" />
     <Compile Include="Source\Parsing\Generated\VooDoBaseVisitor.cs" />
     <Compile Include="Source\Parsing\Generated\VooDoLexer.cs" />
@@ -129,6 +130,12 @@
     <Compile Include="Source\Parsing\Generated\VooDoVisitor.cs" />
     <Compile Include="Source\Parsing\Parser.cs" />
     <Compile Include="Source\Parsing\Visitor.cs" />
+    <Compile Include="Source\Transformation\BodyValidator.cs" />
+    <Compile Include="Source\Transformation\Controller.cs" />
+    <Compile Include="Source\Transformation\IControllerFactory.cs" />
+    <Compile Include="Source\Transformation\TextSpanExtensions.cs" />
+    <Compile Include="Source\Transformation\SpanTransformer.cs" />
+    <Compile Include="Source\Transformation\Variable.cs" />
     <Compile Include="Source\Transformation\ExpressionHookGluer.cs" />
     <Compile Include="Source\Hooks\IHook.cs" />
     <Compile Include="Source\Transformation\HookInitializerList.cs" />
@@ -136,8 +143,9 @@
     <Compile Include="Source\Transformation\IHookInitializerProvider.cs" />
     <Compile Include="Source\Transformation\Script.cs" />
     <Compile Include="Source\Transformation\ScriptFactory.cs" />
-    <Compile Include="Source\Transformation\ScriptTransformer.cs" />
-    <Compile Include="Source\Transformation\ScriptGenerator.cs" />
+    <Compile Include="Source\Transformation\ScriptTransformer_old.cs" />
+    <Compile Include="Source\Transformation\ScriptGenerator_old.cs" />
+    <Compile Include="Source\Transformation\GlobalVariableAccessTransformer.cs" />
     <Compile Include="Source\Utils\Compiler.cs" />
     <Compile Include="Source\Utils\Identity.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -165,9 +173,10 @@
       <Version>5.0.0</Version>
     </PackageReference>
   </ItemGroup>
-  <ItemGroup />
   <ItemGroup>
-    <None Include="Source\Parsing\VooDo.g4" />
+    <None Include="Source\Parsing\run_antlr.bat" />
+    <None Include="Source\Parsing\VooDoLexer.g4" />
+    <None Include="Source\Parsing\VooDoParser.g4" />
   </ItemGroup>
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">
     <VisualStudioVersion>14.0</VisualStudioVersion>

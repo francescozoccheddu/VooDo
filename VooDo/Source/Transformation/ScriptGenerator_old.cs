@@ -57,7 +57,7 @@ namespace VooDo.Transformation
         {
 
             TypeSyntax baseType = _options.GlobalType != null
-                ? SyntaxFactoryHelper.Type(typeof(Script<>).MakeGenericType(_options.GlobalType))
+                ? SyntaxFactoryHelper.Type(typeof(Script).MakeGenericType(_options.GlobalType))
                 : SyntaxFactoryHelper.Type(typeof(Script));
 
             MethodDeclarationSyntax runMethod =

@@ -1,8 +1,10 @@
-﻿using System;
+﻿using Microsoft.CodeAnalysis;
+
+using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.ComponentModel;
+using System.Collections.ObjectModel;
 using System.Linq;
+using System.Reflection;
 
 using VooDo.Hooks;
 
@@ -12,33 +14,46 @@ namespace VooDo.Transformation
     public abstract class Script : IHookListener
     {
 
-        protected Script(IEnumerable<IHook> _hooks)
+        protected Script(IEnumerable<Variable> _variables, IEnumerable<IHook> _hooks)
         {
+            if (_variables == null)
+            {
+                throw new ArgumentNullException(nameof(_variables));
+            }
             if (_hooks == null)
             {
-                _hooks = Enumerable.Empty<IHook>();
+                throw new ArgumentNullException(nameof(_hooks));
             }
-            m_hooks = ImmutableArray.Create(_hooks.ToArray());
+            Variables = new ReadOnlyDictionary<string, Variable>(_variables.ToDictionary(_v => _v.Name, _v => _v));
+            m_hooks = _hooks.ToList();
             if (m_hooks.Any(_h => _h == null))
             {
                 throw new ArgumentException(nameof(_hooks), new NullReferenceException());
             }
-            m_hookSubscribed = new bool[m_hooks.Length];
+            m_hookSubscribed = new bool[m_hooks.Count];
             foreach (IHook hook in m_hooks)
             {
                 hook.Listener = this;
             }
+            m_eventQueue = new Queue<EventInfo>();
         }
 
-        private readonly ImmutableArray<IHook> m_hooks;
+        public IReadOnlyDictionary<string, Variable> Variables { get; }
+
+        private readonly IReadOnlyList<IHook> m_hooks;
         private readonly bool[] m_hookSubscribed;
         private bool m_running;
         private bool m_runRequested;
         private int m_locks;
+        private readonly Queue<EventInfo> m_eventQueue;
+
+        protected internal EventInfo m_CurrentEvent { get; private set; }
+
+        protected internal bool IsEventFired(object _instance, int _eventIndex) => false;
 
         protected internal TSource SubscribeHook<TSource>(TSource _source, int _hookIndex)
         {
-            if (_hookIndex > m_hooks.Length || _hookIndex < 0)
+            if (_hookIndex > m_hooks.Count || _hookIndex < 0)
             {
                 throw new ArgumentException("Bad hook index", nameof(_hookIndex), new IndexOutOfRangeException());
             }
@@ -124,38 +139,6 @@ namespace VooDo.Transformation
         public void CancelRunRequest() => m_runRequested = false;
 
         void IHookListener.NotifyChange() => RequestRun();
-
-    }
-
-    public abstract class Script<TContext> : Script, INotifyPropertyChanged
-    {
-
-        protected Script(IEnumerable<IHook> _hooks) : base(_hooks)
-        {
-        }
-
-        private TContext m_context;
-
-        public TContext Context
-        {
-            get => m_context;
-            set
-            {
-                if (!EqualityComparer<TContext>.Default.Equals(m_context, value))
-                {
-                    m_context = value;
-                    OnPropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Context)));
-                }
-            }
-        }
-
-        private event PropertyChangedEventHandler OnPropertyChanged;
-
-        event PropertyChangedEventHandler INotifyPropertyChanged.PropertyChanged
-        {
-            add => OnPropertyChanged += value;
-            remove => OnPropertyChanged -= value;
-        }
 
     }
 
