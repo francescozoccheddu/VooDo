@@ -132,9 +132,12 @@
     <Compile Include="Source\Parsing\Visitor.cs" />
     <Compile Include="Source\Transformation\BodyValidator.cs" />
     <Compile Include="Source\Transformation\Controller.cs" />
+    <Compile Include="Source\Transformation\EventAccessRewriter.cs" />
+    <Compile Include="Source\Transformation\GetEventOverload.cs" />
     <Compile Include="Source\Transformation\IControllerFactory.cs" />
+    <Compile Include="Source\Transformation\Identifiers.cs" />
     <Compile Include="Source\Transformation\TextSpanExtensions.cs" />
-    <Compile Include="Source\Transformation\SpanTransformer.cs" />
+    <Compile Include="Source\Transformation\OriginalSpanRewriter.cs" />
     <Compile Include="Source\Transformation\Variable.cs" />
     <Compile Include="Source\Transformation\ExpressionHookGluer.cs" />
     <Compile Include="Source\Hooks\IHook.cs" />
@@ -145,7 +148,7 @@
     <Compile Include="Source\Transformation\ScriptFactory.cs" />
     <Compile Include="Source\Transformation\ScriptTransformer_old.cs" />
     <Compile Include="Source\Transformation\ScriptGenerator_old.cs" />
-    <Compile Include="Source\Transformation\GlobalVariableAccessTransformer.cs" />
+    <Compile Include="Source\Transformation\GlobalVariableAccessRewriter.cs" />
     <Compile Include="Source\Utils\Compiler.cs" />
     <Compile Include="Source\Utils\Identity.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -10,40 +10,43 @@ namespace VooDo.Transformation
     public static class TextSpanExtensions
     {
 
-        public const string annotationKind = "VooDo: " + nameof(TextSpanExtensions) + " Annotation";
+        public const string annotationKind = "VooDo: " + nameof(TextSpanExtensions) + " Annotation - OriginalSpan";
 
-        public static TNode WithSpan<TNode>(this TNode _node, TextSpan? _span) where TNode : SyntaxNode
+        public static TNode WithOriginalSpan<TNode>(this TNode _node, TextSpan? _span) where TNode : SyntaxNode
         {
             if (_node == null)
             {
                 throw new ArgumentNullException(nameof(_node));
             }
-            SyntaxAnnotation annotation = _node.GetSpanAnnotation();
+            SyntaxAnnotation annotation = _node.GetOriginalSpanAnnotation();
             if (annotation != null)
             {
                 _node = _node.WithoutAnnotations(annotation);
             }
             if (_span != null)
             {
-                _node = _node.WithAdditionalAnnotations(_span.Value.CreateAnnotation());
+                _node = _node.WithAdditionalAnnotations(_span.Value.CreateOriginalSpanAnnotation());
             }
             return _node;
         }
 
-        public static TextSpan GetSpan(this SyntaxNode _node)
-            => _node.TryGetSpan().Value;
+        public static TextSpan GetOriginalOrFullSpan(this SyntaxNode _node)
+            => _node.TryGetOriginalSpan() ?? _node.FullSpan;
 
-        public static TextSpan? TryGetSpan(this SyntaxNode _node)
+        public static TextSpan GetOriginalSpan(this SyntaxNode _node)
+            => _node.TryGetOriginalSpan().Value;
+
+        public static TextSpan? TryGetOriginalSpan(this SyntaxNode _node)
         {
             if (_node == null)
             {
                 throw new ArgumentNullException(nameof(_node));
             }
-            SyntaxAnnotation annotation = _node.GetSpanAnnotation();
-            return annotation != null ? FromAnnotation(annotation) : (TextSpan?) null;
+            SyntaxAnnotation annotation = _node.GetOriginalSpanAnnotation();
+            return annotation != null ? FromOriginalSpanAnnotation(annotation) : (TextSpan?) null;
         }
 
-        public static SyntaxAnnotation GetSpanAnnotation(this SyntaxNode _node)
+        public static SyntaxAnnotation GetOriginalSpanAnnotation(this SyntaxNode _node)
         {
             if (_node == null)
             {
@@ -61,7 +64,7 @@ namespace VooDo.Transformation
             return annotations[0];
         }
 
-        public static TextSpan FromAnnotation(SyntaxAnnotation _annotation)
+        public static TextSpan FromOriginalSpanAnnotation(SyntaxAnnotation _annotation)
         {
             if (_annotation == null)
             {
@@ -74,7 +77,7 @@ namespace VooDo.Transformation
             return Deserialize(_annotation.Data);
         }
 
-        public static SyntaxAnnotation CreateAnnotation(this TextSpan _span)
+        public static SyntaxAnnotation CreateOriginalSpanAnnotation(this TextSpan _span)
             => new SyntaxAnnotation(annotationKind, _span.Serialize());
 
         public static string Serialize(this TextSpan _span)
