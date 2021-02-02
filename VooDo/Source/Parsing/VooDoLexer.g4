@@ -26,63 +26,23 @@ DELIMITED_COMMENT
 ;
 
 WHITESPACES
-	: ( Whitespace | NewLine)+ -> channel(HIDDEN)
-;
-
-ABSTRACT
-	: 'abstract'
-;
-
-ADD
-	: 'add'
+	: (Whitespace | NewLine)+ -> channel(HIDDEN)
 ;
 
 ALIAS
 	: 'alias'
 ;
 
-ARGLIST
-	: '__arglist'
-;
-
 AS
 	: 'as'
-;
-
-ASCENDING
-	: 'ascending'
-;
-
-ASYNC
-	: 'async'
-;
-
-AWAIT
-	: 'await'
-;
-
-BASE
-	: 'base'
 ;
 
 BOOL
 	: 'bool'
 ;
 
-BREAK
-	: 'break'
-;
-
-BY
-	: 'by'
-;
-
 BYTE
 	: 'byte'
-;
-
-CASE
-	: 'case'
 ;
 
 CATCH
@@ -93,20 +53,8 @@ CHAR
 	: 'char'
 ;
 
-CHECKED
-	: 'checked'
-;
-
-CLASS
-	: 'class'
-;
-
 CONST
 	: 'const'
-;
-
-CONTINUE
-	: 'continue'
 ;
 
 DECIMAL
@@ -117,44 +65,12 @@ DEFAULT
 	: 'default'
 ;
 
-DELEGATE
-	: 'delegate'
-;
-
-DESCENDING
-	: 'descending'
-;
-
-DO
-	: 'do'
-;
-
 DOUBLE
 	: 'double'
 ;
 
-DYNAMIC
-	: 'dynamic'
-;
-
 ELSE
 	: 'else'
-;
-
-ENUM
-	: 'enum'
-;
-
-EQUALS
-	: 'equals'
-;
-
-EVENT
-	: 'event'
-;
-
-EXPLICIT
-	: 'explicit'
 ;
 
 EXTERN
@@ -169,48 +85,20 @@ FINALLY
 	: 'finally'
 ;
 
-FIXED
-	: 'fixed'
-;
-
 FLOAT
 	: 'float'
 ;
 
-FOR
-	: 'for'
-;
-
-FOREACH
-	: 'foreach'
-;
-
-FROM
-	: 'from'
-;
-
-GET
-	: 'get'
+GLOBAL
+	: 'global'
 ;
 
 GLOBALS
 	: 'globals'
 ;
 
-GOTO
-	: 'goto'
-;
-
-GROUP
-	: 'group'
-;
-
 IF
 	: 'if'
-;
-
-IMPLICIT
-	: 'implicit'
 ;
 
 IN
@@ -221,32 +109,8 @@ INT
 	: 'int'
 ;
 
-INTERFACE
-	: 'interface'
-;
-
-INTERNAL
-	: 'internal'
-;
-
-INTO
-	: 'into'
-;
-
 IS
 	: 'is'
-;
-
-JOIN
-	: 'join'
-;
-
-LET
-	: 'let'
-;
-
-LOCK
-	: 'lock'
 ;
 
 LONG
@@ -255,10 +119,6 @@ LONG
 
 NAMEOF
 	: 'nameof'
-;
-
-NAMESPACE
-	: 'namespace'
 ;
 
 NEW
@@ -273,44 +133,8 @@ OBJECT
 	: 'object'
 ;
 
-ON
-	: 'on'
-;
-
-OPERATOR
-	: 'operator'
-;
-
-ORDERBY
-	: 'orderby'
-;
-
 OUT
 	: 'out'
-;
-
-OVERRIDE
-	: 'override'
-;
-
-PARAMS
-	: 'params'
-;
-
-PARTIAL
-	: 'partial'
-;
-
-PRIVATE
-	: 'private'
-;
-
-PROTECTED
-	: 'protected'
-;
-
-PUBLIC
-	: 'public'
 ;
 
 READONLY
@@ -321,10 +145,6 @@ REF
 	: 'ref'
 ;
 
-REMOVE
-	: 'remove'
-;
-
 RETURN
 	: 'return'
 ;
@@ -333,28 +153,8 @@ SBYTE
 	: 'sbyte'
 ;
 
-SEALED
-	: 'sealed'
-;
-
-SELECT
-	: 'select'
-;
-
-SET
-	: 'set'
-;
-
 SHORT
 	: 'short'
-;
-
-SIZEOF
-	: 'sizeof'
-;
-
-STACKALLOC
-	: 'stackalloc'
 ;
 
 STATIC
@@ -363,18 +163,6 @@ STATIC
 
 STRING
 	: 'string'
-;
-
-STRUCT
-	: 'struct'
-;
-
-SWITCH
-	: 'switch'
-;
-
-THIS
-	: 'this'
 ;
 
 THROW
@@ -401,18 +189,6 @@ ULONG
 	: 'ulong'
 ;
 
-UNCHECKED
-	: 'unchecked'
-;
-
-UNMANAGED
-	: 'unmanaged'
-;
-
-UNSAFE
-	: 'unsafe'
-;
-
 USHORT
 	: 'ushort'
 ;
@@ -425,43 +201,15 @@ VAR
 	: 'var'
 ;
 
-VIRTUAL
-	: 'virtual'
-;
-
 VOID
 	: 'void'
-;
-
-VOLATILE
-	: 'volatile'
-;
-
-WHEN
-	: 'when'
-;
-
-WHERE
-	: 'where'
-;
-
-WHILE
-	: 'while'
-;
-
-YIELD
-	: 'yield'
 ;
 
 IDENTIFIER
 	: '@'? IdentifierOrKeyword
 ;
 
-LITERAL_ACCESS
-	: [0-9] ( '_'* [0-9])* IntegerTypeSuffix? '.' '@'? IdentifierOrKeyword
-;
-
-INTEGER_LITERAL
+DEC_INTEGER_LITERAL
 	: [0-9] ( '_'* [0-9])* IntegerTypeSuffix?
 ;
 
@@ -478,7 +226,7 @@ REAL_LITERAL
 	| [0-9] ('_'* [0-9])* ([FfDdMm] | ExponentPart [FfDdMm]?)
 ;
 
-CHARACTER_LITERAL
+CHAR_LITERAL
 	: '\'' ( ~['\\\r\n\u0085\u2028\u2029] | CommonCharacter) '\''
 ;
 
@@ -577,6 +325,10 @@ SEMICOLON
 	: ';'
 ;
 
+CONTROLLEROF
+	: '$'
+;
+
 PLUS
 	: '+'
 ;
@@ -585,7 +337,7 @@ MINUS
 	: '-'
 ;
 
-STAR
+MUL
 	: '*'
 ;
 
@@ -593,31 +345,31 @@ DIV
 	: '/'
 ;
 
-PERCENT
+MOD
 	: '%'
 ;
 
-AMP
+AND
 	: '&'
 ;
 
-BITWISE_OR
+OR
 	: '|'
 ;
 
-CARET
+XOR
 	: '^'
 ;
 
-BANG
+NOT
 	: '!'
 ;
 
-TILDE
+BCOMPL
 	: '~'
 ;
 
-ASSIGNMENT
+ASSIGN
 	: '='
 ;
 
@@ -633,96 +385,88 @@ INTERR
 	: '?'
 ;
 
-DOUBLE_COLON
+DCOLON
 	: '::'
 ;
 
-OP_COALESCING
+NULLC
 	: '??'
 ;
 
-OP_INC
-	: '++'
-;
-
-OP_DEC
-	: '--'
-;
-
-OP_AND
+LAND
 	: '&&'
 ;
 
-OP_OR
+LOR
 	: '||'
 ;
 
-OP_PTR
-	: '->'
-;
-
-OP_EQ
+EQ
 	: '=='
 ;
 
-OP_NE
+NEQ
 	: '!='
 ;
 
-OP_LE
+LE
 	: '<='
 ;
 
-OP_GE
+GE
 	: '>='
 ;
 
-OP_ADD_ASSIGNMENT
+ASSIGN_ADD
 	: '+='
 ;
 
-OP_SUB_ASSIGNMENT
+ASSIGN_SUB
 	: '-='
 ;
 
-OP_MULT_ASSIGNMENT
+ASSIGN_MUL
 	: '*='
 ;
 
-OP_DIV_ASSIGNMENT
+ASSIGN_DIV
 	: '/='
 ;
 
-OP_MOD_ASSIGNMENT
+ASSIGN_MOD
 	: '%='
 ;
 
-OP_AND_ASSIGNMENT
+ASSIGN_AND
 	: '&='
 ;
 
-OP_OR_ASSIGNMENT
+ASSIGN_OR
 	: '|='
 ;
 
-OP_XOR_ASSIGNMENT
+ASSIGN_XOR
 	: '^='
 ;
 
-OP_LEFT_SHIFT
+LSH
 	: '<<'
 ;
 
-OP_LEFT_SHIFT_ASSIGNMENT
+RSH
+	: '>>'
+;
+
+ASSIGN_LSH
 	: '<<='
 ;
 
-OP_COALESCING_ASSIGNMENT
-	: '??='
+ASSIGN_RSH
+	: '>>='
 ;
 
-OP_RANGE
-	: '..'
+ASSIGN_NULLC
+	: '??='
 ;
 
 mode INTERPOLATION_STRING
