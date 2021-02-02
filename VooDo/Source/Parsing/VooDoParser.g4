@@ -9,221 +9,151 @@ options
 // Entry point
 
 script
-	: extern_alias_directive* using_directive* globals_block? statement* EOF
+	: mExterns = externAliasDirective* mUsings = usingDirective* mGlobals = globalsBlock? mStatements += statement* EOF
+; 
+
+inlineScript
+	: externAliasDirective* mUsings = usingDirective* mGlobals = globalsBlock? mStatements += statement* mReturn = expression EOF
 ;
 
-globals_block
-	: GLOBALS OPEN_BRACE implicit_global_declaration_statement* CLOSE_BRACE
+globalsBlock
+	: GLOBALS OPEN_BRACE statements = implicitGlobalDeclarationStatement* CLOSE_BRACE
 ;
 
 // Basic concepts
 
-namespace_or_type_name
-	: ( identifier type_argument_list? | qualified_alias_member) ( DOT identifier type_argument_list?)*
+genericName
+	: mName = name mTypeArguments = typeArgumentList?
+;
+
+aliasGenericName
+	: (mAlias = name DCOLON)? mName = genericName
+;
+
+qualifiedAliasGenericName
+	: mPrimary = aliasGenericName (DOT mParts += genericName)*
 ;
 
 // Types
 
 type
-	: base_type (rank_specifier)*
+	: mType = nonArrayType mRanks += arrayRankSpecifier* mNullable = INTERR?
 ;
 
-base_type
-	: simple_or_class_type | tuple_type
+nonArrayType
+	: mType1 = predefinedStructType | mType2 = classType | mType3 = tupleType
 ;
 
-simple_or_class_type
-	: predefined_struct_type | class_type
+tupleType
+	: OPEN_PARENS mElement += tupleTypeElement (COMMA mElement += tupleTypeElement)+ CLOSE_PARENS
 ;
 
-tuple_type
-	: OPEN_PARENS tuple_element ( COMMA tuple_element)+ CLOSE_PARENS
+tupleTypeElement
+	: mType = type mName = name?
 ;
 
-tuple_element
-	: type identifier?
+predefinedStructType
+	: mType = (SBYTE | BYTE | SHORT | USHORT | INT | UINT | LONG | ULONG | CHAR | DECIMAL | FLOAT | DOUBLE | BOOL)
 ;
 
-predefined_struct_type
-	: SBYTE | BYTE | SHORT | USHORT | INT | UINT | LONG | ULONG | CHAR | DECIMAL | FLOAT | DOUBLE | BOOL
+predefinedClassType
+	: mType = (OBJECT | STRING)
 ;
 
-predefined_class_type
-	: OBJECT | STRING
+predefinedType
+	: mType1 = predefinedClassType | mType2 = predefinedStructType
 ;
 
-predefined_type
-	: predefined_class_type | predefined_struct_type
+classType
+	: mType1 = qualifiedAliasGenericName | mType2 = predefinedClassType
 ;
 
-class_type
-	: namespace_or_type_name | predefined_class_type
-;
-
-type_argument_list
-	: LT type ( COMMA type)* GT
+typeArgumentList
+	: LT mTypes += type (COMMA mTypes += type)* GT
 ;
 
 // Expressions
 
-argument_list
-	: argument ( COMMA argument)*
+argumentList
+	: mArguments += argument (COMMA mArguments += argument)*
 ;
 
 argument
-	: (identifier COLON)? kind = (REF | IN)? expression | (identifier COLON)? kind = OUT type_or_var? expression
+	: (mParam = name COLON)? mKind = (REF | IN)? mExpr = expression
+	| (mParam = name COLON)? mKind = OUT mType = typeOrVar? mExpr = expression
 ;
 
-unbound_type_name
-	: identifier (generic_dimension_specifier? | DCOLON identifier generic_dimension_specifier?)
-	(
-		DOT identifier generic_dimension_specifier?
-	)*
+bracketExpressionSuffix
+	: mNullable = INTERR? mExpr = nonnullBracketExpressionSuffix
 ;
 
-generic_dimension_specifier
-	: LT COMMA* GT
+nonnullBracketExpressionSuffix
+	: OPEN_BRACKET mArguments += indexerArgument ( COMMA mArguments += indexerArgument)* CLOSE_BRACKET
 ;
 
-anonymous_object_initializer
-	: OPEN_BRACE (member_declarator_list COMMA?)? CLOSE_BRACE
-;
-
-member_declarator_list
-	: member_declarator ( COMMA member_declarator)*
-;
-
-member_declarator
-	: member_access_expression | identifier | identifier ASSIGN value_expression
+indexerArgument
+	: (mParam = name COLON)? mExpr = expression
 ;
 
 expression
-	: ref = REF? value_expression
+	: mLiteral = literal																	# literalExpression
+	| CONTROLLEROF mName = name																# controllerofExpression
+	| mName = name																			# nameExpression
+	| OPEN_PARENS mExpr = expression CLOSE_PARENS											# parensExpression
+	| OPEN_PARENS mElements += expression ( COMMA mElements += expression)+ CLOSE_PARENS	# tupleExpression
+	| DEFAULT (OPEN_PARENS mType = type CLOSE_PARENS)?										# defaultExpression
+	| NAMEOF OPEN_PARENS (mParts += name DOT)* mParts += name CLOSE_PARENS					# nameofExpression
+	| mSrc = expression mNullable = INTERR? DOT mMemb = genericName							# memberAccessExpression
+	| mSrc = typeMemberAccessExpressionSource DOT mMemb = genericName						# typeMemberAccessExpression
+	| mSrc = expression mIndexers += bracketExpressionSuffix+								# bracketExpression
+	| PLUS mSrc = expression																# unaryPlusExpression
+	| MINUS mSrc = expression																# unaryMinusExpression
+	| NOT mSrc = expression																	# notExpression
+	| BCOMPL mSrc = expression																# bcomplExpression
+	| OPEN_PARENS mType = type CLOSE_PARENS mSrc = expression								# castExpression
+	| mLeft = expression mOp = (MUL | DIV | MOD) mRight = expression						# multiplicativeExpressionGroup
+	| mLeft = expression mOp = (PLUS | MINUS) mRight = expression							# additiveExpressionGroup
+	| mLeft = expression mOp = (LSH | RSH) mRight = expression								# shiftExpressionGroup
+	| mLeft = expression mOp = (LT | GT | LE | GE) mRight = expression						# comparisonExpressionGroup
+	| mLeft = expression mOp = (EQ | NEQ) mRight = expression								# equalityExpressionGroup
+	| mLeft = expression AND mRight = expression											# andExpression
+	| mLeft = expression XOR mRight = expression											# xorExpression
+	| mLeft = expression OR mRight = expression												# orExpression
+	| mLeft = expression LAND mRight = expression											# landExpression
+	| mLeft = expression LOR mRight = expression											# lorExpression
+	| mSrc = expression NULLC mElse = expressionOrThrow										# nullcExpression
+	| mCond = expression INTERR mThen = expressionOrThrow COLON mElse = expressionOrThrow	# conditionalExpression
 ;
 
-bracket_expression
-	: INTERR? OPEN_BRACKET indexer_argument ( COMMA indexer_argument)* CLOSE_BRACKET
+typeMemberAccessExpressionSource
+	: mType1 = predefinedType | mType2 = aliasGenericName
 ;
 
-indexer_argument
-	: (identifier COLON)? expression
+expressionOrThrow
+	: mExpr1 = expression | mExpr2 = throwExpression
 ;
 
-value_expression
-	: literal
-	| CONTROLLEROF identifier
-	| identifier type_argument_list?
-	| OPEN_PARENS value_expression CLOSE_PARENS
-	| NEW
-	(
-		type
-		(
-			object_creation_expression
-			| object_or_collection_initializer
-			| OPEN_BRACKET value_expression (COMMA value_expression)* CLOSE_BRACKET rank_specifier* array_initializer?
-			| rank_specifier+ array_initializer
-		)
-		| anonymous_object_initializer
-		| rank_specifier array_initializer
-	)
-	| OPEN_PARENS expression ( COMMA expression)+ CLOSE_PARENS
-	| TYPEOF OPEN_PARENS (unbound_type_name | type | VOID) CLOSE_PARENS
-	| DEFAULT (OPEN_PARENS type CLOSE_PARENS)?
-	| NAMEOF OPEN_PARENS (identifier DOT)* identifier CLOSE_PARENS
-	| value_expression INTERR? DOT identifier type_argument_list?
-	| predefined_type INTERR? DOT identifier type_argument_list?
-	| qualified_alias_member INTERR? DOT identifier type_argument_list?
-	| value_expression OPEN_PARENS argument_list? CLOSE_PARENS
-	| value_expression bracket_expression+
-	| PLUS value_expression
-	| MINUS value_expression
-	| NOT value_expression
-	| BCOMPL value_expression
-	| OPEN_PARENS type CLOSE_PARENS value_expression
-	| AND value_expression
-	| OR value_expression
-	| value_expression (MUL | DIV | MOD) value_expression
-	| value_expression (PLUS | MINUS) value_expression
-	| value_expression (LSH | RSH) value_expression
-	| value_expression (LT | GT | LE | GE) value_expression
-	| value_expression (EQ | NEQ) value_expression
-	| value_expression AND value_expression
-	| value_expression XOR value_expression
-	| value_expression OR value_expression
-	| value_expression LAND value_expression
-	| value_expression LOR value_expression
-	| value_expression NULLC value_expression_or_throw
-	| value_expression INTERR expression_or_throw COLON expression_or_throw
-;
-
-member_access_expression
-	:  value_expression INTERR? DOT identifier type_argument_list?
-	| predefined_type INTERR? DOT identifier type_argument_list?
-	| qualified_alias_member INTERR? DOT identifier type_argument_list?
-;
-
-expression_or_throw
-	: expression | throw_expression
-;
-
-value_expression_or_throw
-	: value_expression | throw_expression
-;
-
-throw_expression
-	: THROW value_expression
-;
-
-object_or_collection_initializer
-	: object_initializer | collection_initializer
-;
-
-object_initializer
-	: OPEN_BRACE (member_initializer_list COMMA?)? CLOSE_BRACE
-;
-
-member_initializer_list
-	: member_initializer (COMMA member_initializer)*
-;
-
-member_initializer
-	: (identifier | OPEN_BRACKET expression CLOSE_BRACKET) ASSIGN initializer_value // C# 6
-;
-
-initializer_value
-	: expression | object_or_collection_initializer
-;
-
-collection_initializer
-	: OPEN_BRACE element_initializer (COMMA element_initializer)* COMMA? CLOSE_BRACE
-;
-
-element_initializer
-	: value_expression | OPEN_BRACE value_expression (COMMA value_expression)* CLOSE_BRACE
-;
-
-object_creation_expression
-	: OPEN_PARENS argument_list? CLOSE_PARENS object_or_collection_initializer?
+throwExpression
+	: THROW mSrc = expression
 ;
 
 // Arrays
-rank_specifier
-	: OPEN_BRACKET COMMA* CLOSE_BRACKET
+arrayRankSpecifier
+	: OPEN_BRACKET mCommas += COMMA* CLOSE_BRACKET
 ;
 
-array_initializer
-	: OPEN_BRACE (variable_initializer (COMMA variable_initializer)* COMMA?)? CLOSE_BRACE
+arrayInitializer
+	: OPEN_BRACE (mElements += variableInitializer (COMMA mElements += variableInitializer)* COMMA?)? CLOSE_BRACE
 ;
 
 // Statements
 
 block
-	: OPEN_BRACE statement* CLOSE_BRACE
+	: OPEN_BRACE mStatements += statement* CLOSE_BRACE
 ;
 
 statement
-	: value_expression SEMICOLON
-	| value_expression
+	: mTgt = expression mOp =
 	(
 		ASSIGN
 		| ASSIGN_ADD
@@ -237,136 +167,84 @@ statement
 		| ASSIGN_RSH
 		| ASSIGN_SUB
 		| ASSIGN_XOR
-	) expression
-	| declaration_statement
-	| IF OPEN_PARENS expression CLOSE_PARENS statement (ELSE statement)?
-	| RETURN expression SEMICOLON
-	| THROW value_expression? SEMICOLON
-	| TRY block (catch_clauses finally_clause? | finally_clause)
-	| USING OPEN_PARENS (variable_declaration | value_expression) CLOSE_PARENS statement
+	) mSrc = expression																						# assignmentStatement
+	| mExpr = expression SEMICOLON																			# expressionStatement
+	| mSrc = variableDeclaration SEMICOLON																	# variableDeclarationStatement
+	| GLOBAL mSrc = variableDeclaration SEMICOLON															# globalDeclarationStatement
+	| CONST mSrc = constantDeclaration SEMICOLON															# constantDeclarationStatement
+	| IF OPEN_PARENS expression CLOSE_PARENS statement (ELSE statement)?									# ifStatement
+	| RETURN expression SEMICOLON																			# returnStatement
+	| THROW expression? SEMICOLON																			# throwStatement
+	| TRY mBlock = block (mCatches = catchClauseList mFinally = finallyClause? | mFinally = finallyClause)	# tryStatement
 ;
 
-catch_clauses
-	: specific_catch_clause (specific_catch_clause)* general_catch_clause? | general_catch_clause
+catchClauseList
+	: mClauses += specificCatchClause (mClauses += specificCatchClause)* mLastClause = generalCatchClause?	# multiCatch
+	| mClause += generalCatchClause																			# allCatch
 ;
 
-specific_catch_clause
-	: CATCH OPEN_PARENS class_type identifier? CLOSE_PARENS block
+specificCatchClause
+	: CATCH OPEN_PARENS mType = classType mName = name? CLOSE_PARENS mBlock = block
 ;
 
-general_catch_clause
-	: CATCH block
+generalCatchClause
+	: CATCH mBlock = block
 ;
 
-finally_clause
-	: FINALLY block
+finallyClause
+	: FINALLY mBlock = block
 ;
 
-declaration_statement
-	: variable_declaration SEMICOLON | global_declaration SEMICOLON | constant_declaration SEMICOLON
+implicitGlobalDeclarationStatement
+	: mSrc = variableDeclaration SEMICOLON
 ;
 
-implicit_global_declaration_statement
-	: implicit_global_declaration SEMICOLON
+typeOrVar
+	: mType = type # explicityVariableType | VAR # inferredVariableType
 ;
 
-type_or_var
-	: type | VAR
+constantDeclarator
+	: mTgt = name ASSIGN mSrc = expression
 ;
 
-constant_declarator
-	: identifier ASSIGN expression
+variableDeclarator
+	: mTgt = name (ASSIGN mSrc = variableInitializer)?
 ;
 
-variable_declarator
-	: identifier (ASSIGN REF? variable_initializer)?
+variableInitializer
+	: mSrc = expression # expressionVariableInitializer | mSrc = arrayInitializer # arrayVariableInitializer
 ;
 
-global_declarator
-	: identifier (ASSIGN variable_initializer)?
+constantDeclaration
+	: mType = typeOrVar mDeclarators += constantDeclarator (COMMA mDeclarators += constantDeclarator)*
 ;
 
-variable_initializer
-	: expression | array_initializer
-;
-
-constant_declaration
-	: CONST type_or_var constant_declarator (COMMA constant_declarator)*
-;
-
-variable_declaration
-	: (USING | REF | REF READONLY)? type_or_var variable_declarator ( COMMA variable_declarator)*
-;
-
-global_declaration
-	: GLOBAL implicit_global_declaration
-;
-
-implicit_global_declaration
-	: type_or_var global_declarator ( COMMA global_declarator)*
+variableDeclaration
+	: mType = typeOrVar mDeclarators += variableDeclarator ( COMMA mDeclarators += variableDeclarator)*
 ;
 
 // Namespaces
 
-extern_alias_directive
-	: EXTERN ALIAS identifier SEMICOLON
+externAliasDirective
+	: EXTERN ALIAS mName = name SEMICOLON
 ;
 
-using_directive
-	: USING identifier SEMICOLON					# UsingAlias
-	| USING namespace_or_type_name SEMICOLON		# UsingNamespace
-	| USING STATIC namespace_or_type_name SEMICOLON	# UsingStatic
-;
-
-qualified_alias_member
-	: identifier DCOLON identifier type_argument_list?
+usingDirective
+	: USING mName = name SEMICOLON											# UsingAlias
+	| USING mStatic = STATIC? mName = qualifiedAliasGenericName SEMICOLON	# Using
 ;
 
 literal
-	: boolean_literal
-	| string_literal
-	| DEC_INTEGER_LITERAL
-	| HEX_INTEGER_LITERAL
-	| BIN_INTEGER_LITERAL
-	| REAL_LITERAL
-	| CHAR_LITERAL
-	| NULL
+	: mSrc = (TRUE | FALSE)							# boolLiteral
+	| mSrc = (REGULAR_STRING | VERBATIUM_STRING)	# stringLiteral
+	| mSrc = DEC_INTEGER_LITERAL					# decIntegerLiteral
+	| mSrc = HEX_INTEGER_LITERAL					# hexIntegerLiteral
+	| mSrc = BIN_INTEGER_LITERAL					# binIntegerLiteral
+	| mSrc = REAL_LITERAL							# realLiteral
+	| mSrc = CHAR_LITERAL							# charLiteral
+	| NULL											# nullLiteral
 ;
 
-boolean_literal
-	: TRUE | FALSE
-;
-
-string_literal
-	: interpolated_regular_string | interpolated_verbatium_string | REGULAR_STRING | VERBATIUM_STRING
-;
-
-interpolated_regular_string
-	: INTERPOLATED_REGULAR_STRING_START interpolated_regular_string_part* DOUBLE_QUOTE_INSIDE
-;
-
-interpolated_verbatium_string
-	: INTERPOLATED_REGULAR_STRING_START interpolated_verbatium_string_part* DOUBLE_QUOTE_INSIDE
-;
-
-interpolated_regular_string_part
-	: interpolated_string_expression
-	| DOUBLE_CURLY_INSIDE
-	| REGULAR_CHAR_INSIDE
-	| REGULAR_STRING_INSIDE
-;
-
-interpolated_verbatium_string_part
-	: interpolated_string_expression
-	| DOUBLE_CURLY_INSIDE
-	| VERBATIUM_DOUBLE_QUOTE_INSIDE
-	| VERBATIUM_INSIDE_STRING
-;
-
-interpolated_string_expression
-	: expression (COMMA expression)* (COLON FORMAT_STRING+)?
-;
-
-identifier
-	: IDENTIFIER | ALIAS | EXTERN | GLOBAL | GLOBALS | STATIC | VAR
+name
+	: IDENTIFIER | ALIAS | EXTERN | GLOBAL | GLOBALS | STATIC
 ;

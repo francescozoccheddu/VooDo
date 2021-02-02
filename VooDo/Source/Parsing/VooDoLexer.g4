@@ -1,20 +1,9 @@
 lexer grammar VooDoLexer
 ;
 
-@lexer::header {
-	import java.util.Stack;
-}
-
 channels
 {
 	COMMENTS_CHANNEL
-}
-
-@lexer::members {
-	private int interpolatedStringLevel;
-	private Stack<Boolean> interpolatedVerbatiums = new Stack<Boolean>();
-	private Stack<Integer> curlyLevels = new Stack<Integer>();
-	private boolean verbatium;
 }
 
 SINGLE_LINE_COMMENT
@@ -121,10 +110,6 @@ NAMEOF
 	: 'nameof'
 ;
 
-NEW
-	: 'new'
-;
-
 NULL
 	: 'null'
 ;
@@ -135,10 +120,6 @@ OBJECT
 
 OUT
 	: 'out'
-;
-
-READONLY
-	: 'readonly'
 ;
 
 REF
@@ -177,10 +158,6 @@ TRY
 	: 'try'
 ;
 
-TYPEOF
-	: 'typeof'
-;
-
 UINT
 	: 'uint'
 ;
@@ -199,10 +176,6 @@ USING
 
 VAR
 	: 'var'
-;
-
-VOID
-	: 'void'
 ;
 
 IDENTIFIER
@@ -238,40 +211,12 @@ VERBATIUM_STRING
 	: '@"' ( ~'"' | '""')* '"'
 ;
 
-INTERPOLATED_REGULAR_STRING_START
-	: '$"' { 
-	interpolatedStringLevel++; interpolatedVerbatiums.push(false); verbatium = false; 
-} -> pushMode(INTERPOLATION_STRING)
-;
-
-INTERPOLATED_VERBATIUM_STRING_START
-	: '$@"' { 
-	interpolatedStringLevel++; interpolatedVerbatiums.push(true); verbatium = true; 
-} -> pushMode(INTERPOLATION_STRING)
-;
-
 OPEN_BRACE
-	: '{' {
-	if (interpolatedStringLevel > 0)
-	{
-		curlyLevels.push(curlyLevels.pop() + 1);
-	}
-}
+	: '{' 
 ;
 
 CLOSE_BRACE
-	: '}' {
-	if (interpolatedStringLevel > 0)
-	{
-		curlyLevels.push(curlyLevels.pop() - 1);
-		if (curlyLevels.peek() == 0)
-		{
-			curlyLevels.pop();
-			skip();
-			popMode();
-		}
-	}
-}
+	: '}' 
 ;
 
 OPEN_BRACKET
@@ -299,26 +244,7 @@ COMMA
 ;
 
 COLON
-	: ':' {
-if (interpolatedStringLevel > 0)
-{
-	int ind = 1;
-	boolean switchToFormatString = true;
-	while ((char)_input.LA(ind) != '}')
-	{
-		if (_input.LA(ind) == ':' || _input.LA(ind) == ')')
-		{
-			switchToFormatString = false;
-			break;
-		}
-		ind++;
-	}
-	if (switchToFormatString)
-	{
-		mode(INTERPOLATION_FORMAT);
-	}
-}
-}
+	: ':' 
 ;
 
 SEMICOLON
@@ -467,55 +393,6 @@ ASSIGN_RSH
 
 ASSIGN_NULLC
 	: '??='
-;
-
-mode INTERPOLATION_STRING
-;
-
-DOUBLE_CURLY_INSIDE
-	: '{{'
-;
-
-OPEN_BRACE_INSIDE
-	: '{' { curlyLevels.push(1); } -> skip, pushMode(DEFAULT_MODE)
-;
-
-REGULAR_CHAR_INSIDE
-	: { !verbatium }? SimpleEscapeSequence
-;
-
-VERBATIUM_DOUBLE_QUOTE_INSIDE
-	: {  verbatium }? '""'
-;
-
-DOUBLE_QUOTE_INSIDE
-	: '"' { 
-		interpolatedStringLevel--; interpolatedVerbatiums.pop();
-		verbatium = (interpolatedVerbatiums.size() > 0 ? interpolatedVerbatiums.peek() : false); 
-	} -> popMode
-;
-
-REGULAR_STRING_INSIDE
-	: { !verbatium }? ~ ( '{' | '\\' | '"')+
-;
-
-VERBATIUM_INSIDE_STRING
-	: {  verbatium }? ~ ( '{' | '"')+
-;
-
-mode INTERPOLATION_FORMAT
-;
-
-DOUBLE_CURLY_CLOSE_INSIDE
-	: '}}' -> type(FORMAT_STRING)
-;
-
-CLOSE_BRACE_INSIDE
-	: '}' { curlyLevels.pop(); } -> skip, popMode
-;
-
-FORMAT_STRING
-	: ~'}'+
 ;
 
 // Fragments
