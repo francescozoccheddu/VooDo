@@ -36,6 +36,28 @@ namespace VooDo.Utils
             return SyntaxFactory.ParseTypeName(CodeDomProvider.GetTypeOutput(reference));
         }
 
+        public static TypeSyntax GenericType(NameSyntax _type, IEnumerable<TypeSyntax> _typeArguments)
+        {
+            SimpleNameSyntax node;
+            if (_type is QualifiedNameSyntax qualifiedName)
+            {
+                node = qualifiedName.Right;
+            }
+            else if (_type is AliasQualifiedNameSyntax aliasQualifiedName)
+            {
+                node = aliasQualifiedName.Name;
+            }
+            else if (_type is SimpleNameSyntax simpleNameSyntax)
+            {
+                node = simpleNameSyntax;
+            }
+            else
+            {
+                throw new ArgumentException("Unexpected NameSyntax type", nameof(_type));
+            }
+            return SyntaxFactory.GenericName(node.Identifier, SyntaxFactory.TypeArgumentList(SyntaxFactory.SeparatedList(_typeArguments)));
+        }
+
         public static ObjectCreationExpressionSyntax NewObject(Type _type, params object[] _literalArguments)
             => NewObject(_type, (IEnumerable<object>) _literalArguments);
 
@@ -76,7 +98,6 @@ namespace VooDo.Utils
             IEnumerable<SyntaxNode> arguments = _literalArguments?.Select(Generator.LiteralExpression) ?? Enumerable.Empty<SyntaxNode>();
             return (InvocationExpressionSyntax) Generator.InvocationExpression(method, arguments);
         }
-
 
     }
 

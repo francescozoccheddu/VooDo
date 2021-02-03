@@ -12,6 +12,23 @@ namespace VooDo.Transformation
 
         public const string annotationKind = "VooDo: " + nameof(TextSpanExtensions) + " Annotation - OriginalSpan";
 
+        public static SyntaxToken WithOriginalSpan(this SyntaxToken _node, TextSpan? _span)
+        {
+            SyntaxAnnotation annotation = _node.GetOriginalSpanAnnotation();
+            if (annotation != null)
+            {
+                _node = _node.WithoutAnnotations(annotation);
+            }
+            if (_span != null)
+            {
+                _node = _node.WithAdditionalAnnotations(_span.Value.CreateOriginalSpanAnnotation());
+            }
+            return _node;
+        }
+
+        public static TNode WithOriginalSpan<TNode>(this TNode _node, TextSpan? _span, bool _recursive) where TNode : SyntaxNode
+            => _recursive ? OriginalSpanRewriter.RewriteAbsolute(_node, _span) : _node.WithOriginalSpan(_span);
+
         public static TNode WithOriginalSpan<TNode>(this TNode _node, TextSpan? _span) where TNode : SyntaxNode
         {
             if (_node == null)
@@ -30,6 +47,18 @@ namespace VooDo.Transformation
             return _node;
         }
 
+        public static TextSpan GetOriginalOrFullSpan(this SyntaxToken _token)
+            => _token.TryGetOriginalSpan() ?? _token.FullSpan;
+
+        public static TextSpan GetOriginalSpan(this SyntaxToken _token)
+            => _token.TryGetOriginalSpan().Value;
+
+        public static TextSpan? TryGetOriginalSpan(this SyntaxToken _token)
+        {
+            SyntaxAnnotation annotation = _token.GetOriginalSpanAnnotation();
+            return annotation != null ? FromOriginalSpanAnnotation(annotation) : (TextSpan?) null;
+        }
+
         public static TextSpan GetOriginalOrFullSpan(this SyntaxNode _node)
             => _node.TryGetOriginalSpan() ?? _node.FullSpan;
 
@@ -44,6 +73,20 @@ namespace VooDo.Transformation
             }
             SyntaxAnnotation annotation = _node.GetOriginalSpanAnnotation();
             return annotation != null ? FromOriginalSpanAnnotation(annotation) : (TextSpan?) null;
+        }
+
+        public static SyntaxAnnotation GetOriginalSpanAnnotation(this SyntaxToken _node)
+        {
+            SyntaxAnnotation[] annotations = _node.GetAnnotations(annotationKind).ToArray();
+            if (annotations.Length == 0)
+            {
+                return null;
+            }
+            if (annotations.Length > 1)
+            {
+                throw new ArgumentException("Node has multiple annotations", nameof(_node));
+            }
+            return annotations[0];
         }
 
         public static SyntaxAnnotation GetOriginalSpanAnnotation(this SyntaxNode _node)

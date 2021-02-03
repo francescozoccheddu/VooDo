@@ -18,14 +18,17 @@ namespace VooDoTB
         {
             string code = @"
 public static class TestClass {
-    public event System.Action MyEvent1;
-    public event System.Action MyEvent2;
+    public event System.Action<int> MyEvent1;
+    public event System.Action<int, float> MyEvent2;
     public static void TestMethod() {
-        var y = this.MyEvent1;
-        var z = this.MyEvent2;
-        var q = this.MyEvent2(out int p1, ref p2);
-        z = this.MyEvent1(out int p1);
-        q = this.MyEvent1(out int p1, ref p2);
+        int vi;
+        float vf;
+        _ = this.MyEvent1;
+        _ = this.MyEvent2;
+        _ = this.MyEvent2(out int p1, ref vf);
+        _ = this.MyEvent2(out vi);
+        _ = this.MyEvent1();
+        _ = this.MyEvent1(out var p1);
     }
 }
             ";
@@ -36,10 +39,11 @@ public static class TestClass {
             root = root.ReplaceNode(block, OriginalSpanRewriter.RewriteRelative(block, -block.FullSpan.Start));
             tree = CSharpSyntaxTree.Create(root);
             root = (CompilationUnitSyntax) tree.GetRoot();
-            CSharpCompilation compilation = CSharpCompilation.Create(null, new[] { tree });
+            PortableExecutableReference[] references = new[] { MetadataReference.CreateFromFile(typeof(object).Assembly.Location) };
+            CSharpCompilation compilation = CSharpCompilation.Create(null, new[] { tree }, references);
             SemanticModel semantics = compilation.GetSemanticModel(tree);
             block = root.DescendantNodes().OfType<BlockSyntax>().First();
-            block = EventAccessRewriter.Rewrite(block, semantics, out ImmutableArray<IEventSymbol> symbols, out ImmutableHashSet<GetEventOverload> overloads);
+            block = EventCatcherRewriter.Rewrite(block, semantics, out ImmutableArray<IEventSymbol> symbols, out ImmutableHashSet<GetEventOverload> overloads);
             //VariableDeclaratorSyntax[] variableDeclarators = tree.GetRoot().DescendantNodes().OfType<VariableDeclaratorSyntax>().Take(2).ToArray();
             //block = GlobalVariableAccessRewriter.Rewrite(block, semantics, variableDeclarators);
             Console.WriteLine(block.ToFullString());

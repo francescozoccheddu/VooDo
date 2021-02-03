@@ -4,6 +4,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 
 namespace VooDo.Transformation
@@ -19,11 +20,27 @@ namespace VooDo.Transformation
 
             private readonly IReadOnlyCollection<ISymbol> m_symbols;
             private readonly SemanticModel m_semantics;
+            private readonly List<Diagnostic> m_diagnostics = new List<Diagnostic>();
+
+            internal ImmutableArray<Diagnostic> Diagnostics => m_diagnostics.ToImmutableArray();
 
             internal Rewriter(SemanticModel _semantics, IReadOnlyCollection<ISymbol> _symbols)
             {
                 m_symbols = _symbols;
                 m_semantics = _semantics;
+            }
+
+            private string GetSymbolName(ExpressionSyntax _node)
+            {
+                SymbolInfo symbol = m_semantics.GetSymbolInfo(_node);
+                if (symbol.Symbol != null && m_symbols.Contains(symbol.Symbol))
+                {
+                    return symbol.Symbol.Name;
+                }
+                else
+                {
+                    return null;
+                }
             }
 
             private string GetTargetSymbolName(ExpressionSyntax _node)
@@ -54,24 +71,25 @@ namespace VooDo.Transformation
                     ArgumentSyntax argument = _node.ArgumentList.Arguments[0];
                     if (argument.RefKindKeyword.IsKind(SyntaxKind.None))
                     {
-                        string variableName = GetTargetSymbolName(argument.Expression);
-                        if (variableName != null)
+                        SymbolInfo symbolInfo = m_semantics.GetSymbolInfo(_node);
+                        if (symbolInfo.Symbol is ISymbol symbol && m_symbols.Contains(symbol))
                         {
-                            return CreateAccessSyntax(variableName, true);
+                            return CreateAccessSyntax(symbol.Name, true);
                         }
                         else
                         {
-                            throw new Exception("controllerof can be only applied to global variables"); //TODO Emit diagnostic
+                            string name = symbolInfo.Symbol?.ToMinimalDisplayString(m_semantics, argument.FullSpan.Start);
+                            throw DiagnosticFactory.ControllerOfNonGlobalVariable(argument.Expression, name).AsThrowable();
                         }
                     }
                     else
                     {
-                        throw new Exception("controllerof does not take ref or out arguments"); //TODO Emit diagnostic
+                        throw DiagnosticFactory.ControllerOfRefKindArgument(argument.RefKindKeyword).AsThrowable();
                     }
                 }
                 else
                 {
-                    throw new Exception("controllerof takes 1 argument"); //TODO Emit diagnostic
+                    throw DiagnosticFactory.ControllerOfZeroOrMultipleArguments(_node).AsThrowable();
                 }
             }
 
@@ -82,10 +100,10 @@ namespace VooDo.Transformation
                     ArgumentSyntax argument = _node.ArgumentList.Arguments[0];
                     if (argument.RefKindKeyword.IsKind(SyntaxKind.None))
                     {
-                        string variableName = GetTargetSymbolName(argument.Expression);
-                        if (variableName != null)
+                        SymbolInfo symbolInfo = m_semantics.GetSymbolInfo(_node);
+                        if (symbolInfo.Symbol is ISymbol symbol && m_symbols.Contains(symbol))
                         {
-                            return CreateStringLiteralSyntax(variableName);
+                            return CreateStringLiteralSyntax(symbol.Name);
                         }
                     }
                 }
@@ -99,7 +117,14 @@ namespace VooDo.Transformation
                     ExpressionSyntax expression = null;
                     if (name.Identifier.Text == Identifiers.controllerOfMacro)
                     {
-                        expression = TryCreateControllerOfSyntax(_node);
+                        try
+                        {
+                            expression = TryCreateControllerOfSyntax(_node);
+                        }
+                        catch (TransformationException exception)
+                        {
+                            m_diagnostics.Add(exception.Diagnostic);
+                        }
                     }
                     else if (name.Identifier.Text == s_nameOfKeyword)
                     {
@@ -146,7 +171,7 @@ namespace VooDo.Transformation
 
         }
 
-        public static TNode Rewrite<TNode>(TNode _syntax, SemanticModel _semantics, IEnumerable<VariableDeclaratorSyntax> _globalDeclarations) where TNode : SyntaxNode
+        public static TNode Rewrite<TNode>(TNode _syntax, SemanticModel _semantics, IEnumerable<VariableDeclaratorSyntax> _globalDeclarations, out ImmutableArray<Diagnostic> _diagnostics) where TNode : SyntaxNode
         {
             if (_semantics == null)
             {
@@ -156,10 +181,10 @@ namespace VooDo.Transformation
             {
                 throw new ArgumentNullException(nameof(_globalDeclarations));
             }
-            return Rewrite(_syntax, _semantics, _globalDeclarations.Select(_d => _semantics.GetDeclaredSymbol(_d)));
+            return Rewrite(_syntax, _semantics, _globalDeclarations.Select(_d => _semantics.GetDeclaredSymbol(_d)), out _diagnostics);
         }
 
-        public static TNode Rewrite<TNode>(TNode _syntax, SemanticModel _semantics, IEnumerable<ISymbol> _globalSymbols) where TNode : SyntaxNode
+        public static TNode Rewrite<TNode>(TNode _syntax, SemanticModel _semantics, IEnumerable<ISymbol> _globalSymbols, out ImmutableArray<Diagnostic> _diagnostics) where TNode : SyntaxNode
         {
             if (_syntax == null)
             {
@@ -179,7 +204,9 @@ namespace VooDo.Transformation
                 throw new ArgumentException("Null symbol", nameof(_globalSymbols));
             }
             Rewriter rewriter = new Rewriter(_semantics, symbolSet);
-            return (TNode) rewriter.Visit(_syntax);
+            TNode newNode = (TNode) rewriter.Visit(_syntax);
+            _diagnostics = rewriter.Diagnostics;
+            return newNode;
         }
 
     }

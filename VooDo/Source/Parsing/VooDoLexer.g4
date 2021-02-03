@@ -182,7 +182,7 @@ IDENTIFIER
 	: '@'? IdentifierOrKeyword
 ;
 
-DEC_INTEGER_LITERAL
+INTEGER_LITERAL
 	: [0-9] ( '_'* [0-9])* IntegerTypeSuffix?
 ;
 

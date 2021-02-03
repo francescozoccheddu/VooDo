@@ -122,22 +122,25 @@
     <RestoreProjectStyle>PackageReference</RestoreProjectStyle>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="Source\AST\Node.cs" />
     <Compile Include="Source\Hooks\IHookListener.cs" />
-    <Compile Include="Source\Parsing\Generated\VooDoBaseVisitor.cs" />
     <Compile Include="Source\Parsing\Generated\VooDoLexer.cs" />
     <Compile Include="Source\Parsing\Generated\VooDoParser.cs" />
-    <Compile Include="Source\Parsing\Generated\VooDoVisitor.cs" />
+    <Compile Include="Source\Parsing\Generated\VooDoParserBaseVisitor.cs" />
+    <Compile Include="Source\Parsing\Generated\VooDoParserVisitor.cs" />
     <Compile Include="Source\Parsing\Parser.cs" />
+    <Compile Include="Source\Parsing\ParserHelper.cs" />
     <Compile Include="Source\Parsing\Visitor.cs" />
     <Compile Include="Source\Transformation\BodyValidator.cs" />
     <Compile Include="Source\Transformation\Controller.cs" />
-    <Compile Include="Source\Transformation\EventAccessRewriter.cs" />
+    <Compile Include="Source\Transformation\DiagnosticFactory.cs" />
+    <Compile Include="Source\Transformation\EventCatcherRewriter.cs" />
     <Compile Include="Source\Transformation\GetEventOverload.cs" />
     <Compile Include="Source\Transformation\IControllerFactory.cs" />
     <Compile Include="Source\Transformation\Identifiers.cs" />
+    <Compile Include="Source\Transformation\Meta.cs" />
     <Compile Include="Source\Transformation\TextSpanExtensions.cs" />
     <Compile Include="Source\Transformation\OriginalSpanRewriter.cs" />
+    <Compile Include="Source\Transformation\TransformationException.cs" />
     <Compile Include="Source\Transformation\Variable.cs" />
     <Compile Include="Source\Transformation\ExpressionHookGluer.cs" />
     <Compile Include="Source\Hooks\IHook.cs" />
@@ -181,6 +184,7 @@
     <None Include="Source\Parsing\VooDoLexer.g4" />
     <None Include="Source\Parsing\VooDoParser.g4" />
   </ItemGroup>
+  <ItemGroup />
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">
     <VisualStudioVersion>14.0</VisualStudioVersion>
   </PropertyGroup>

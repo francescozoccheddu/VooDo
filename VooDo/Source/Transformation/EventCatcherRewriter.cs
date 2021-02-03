@@ -10,7 +10,7 @@ using System.Linq;
 namespace VooDo.Transformation
 {
     // TODO Set original spans correctly (keep original span for event arguments and source and replace for others)
-    public static class EventAccessRewriter
+    public static class EventCatcherRewriter
     {
 
         private sealed class Rewriter : CSharpSyntaxRewriter
@@ -67,6 +67,50 @@ namespace VooDo.Transformation
                 return key;
             }
 
+            private ExpressionSyntax[] LinkArguments(IReadOnlyList<ArgumentSyntax> _arguments, IReadOnlyList<IParameterSymbol> _parameters)
+            {
+                ExpressionSyntax[] argumentExpressions = _arguments.Select(_a => _a.Expression).ToArray();
+                if (argumentExpressions.Length > _parameters.Count)
+                {
+                    throw new Exception("Event catcher has more parameters than event handler"); // TODO emit diagnostic
+                }
+                if (_parameters.Any(_p => _p.RefKind != RefKind.None))
+                {
+                    throw new Exception("Event handlers with non by-value parameters are not supported"); // TODO emit diagnostic
+                }
+                for (int i = 0; i < argumentExpressions.Length; i++)
+                {
+                    ITypeSymbol parameterType = _parameters[i].Type;
+                    if (parameterType is IErrorTypeSymbol)
+                    {
+                        string typeName = parameterType.ToMinimalDisplayString(m_semantics, _arguments[i].FullSpan.Start);
+                        throw DiagnosticFactory.EventCatcherEventHandlerParameterErrorType(_arguments[i], _parameters[i].Name, typeName).AsThrowable();
+                    }
+                    ExpressionSyntax expression = argumentExpressions[i];
+                    DeclarationExpressionSyntax[] declarations = expression.DescendantNodesAndSelf().OfType<DeclarationExpressionSyntax>().ToArray();
+                    if (declarations.Length > 1)
+                    {
+                        throw DiagnosticFactory.EventCatcherArgumentWithMultipleDeclarations(_arguments[i]).AsThrowable();
+                    }
+                    if (declarations.Length == 1 && declarations[0].Type.IsVar)
+                    {
+                        string typeName = parameterType.ToMinimalDisplayString(m_semantics, declarations[0].FullSpan.Start);
+                        argumentExpressions[i] = expression.ReplaceNode(declarations[0], declarations[0].WithType(SyntaxFactory.ParseTypeName(typeName)));
+                    }
+                    else
+                    {
+                        ITypeSymbol argumentType = m_semantics.GetTypeInfo(expression).Type;
+                        if (!argumentType.Equals(parameterType, SymbolEqualityComparer.IncludeNullability))
+                        {
+                            string parameterTypeName = parameterType.ToMinimalDisplayString(m_semantics, _arguments[i].FullSpan.Start);
+                            string argumentTypeName = argumentType.ToMinimalDisplayString(m_semantics, _arguments[i].FullSpan.Start);
+                            throw DiagnosticFactory.EventCatcherArgumentTypeMismatch(_arguments[i], _parameters[i].Name, parameterTypeName, argumentTypeName).AsThrowable();
+                        }
+                    }
+                }
+                return argumentExpressions;
+            }
+
             private ExpressionSyntax TryCreateEventAccess(ExpressionSyntax _access, IReadOnlyList<ArgumentSyntax> _arguments)
             {
                 IEventSymbol symbol = GetEventSymbol(_access);
@@ -75,13 +119,18 @@ namespace VooDo.Transformation
                     MemberAccessExpressionSyntax memberAccess = _access.DescendantNodesAndSelf().OfType<MemberAccessExpressionSyntax>().FirstOrDefault();
                     if (memberAccess == null)
                     {
-                        throw new Exception("Event access without member access syntax"); // TODO emit diagnostic
+                        throw DiagnosticFactory.EventCatcherWithoutMemberAccess(_access).AsThrowable();
                     }
                     GetEventOverload overload = new GetEventOverload(_arguments.Select(GetArgumentType));
                     int key = AddSymbol(symbol);
                     m_overloads.Add(overload);
-                    ExpressionSyntax[] argumentExpressions = _arguments.Select(_a => _a.Expression).ToArray(); // TODO Replace var declarations
-                    // TODO Check for type correctness
+                    IMethodSymbol delegateMethod = ((INamedTypeSymbol) symbol.Type)?.DelegateInvokeMethod;
+                    if (delegateMethod == null)
+                    {
+                        string eventTypeName = symbol.Type?.ToMinimalDisplayString(m_semantics, _access.FullSpan.Start);
+                        throw DiagnosticFactory.EventCatcherEventHandlerErrorType(_access, eventTypeName).AsThrowable();
+                    }
+                    ExpressionSyntax[] argumentExpressions = LinkArguments(_arguments, delegateMethod.Parameters);
                     return CreateEventAccess(memberAccess.Expression, overload, key, argumentExpressions);
                 }
                 return null;

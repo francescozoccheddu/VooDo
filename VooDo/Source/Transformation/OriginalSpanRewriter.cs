@@ -21,18 +21,26 @@ namespace VooDo.Transformation
                 => base.Visit(_node)
                 ?.WithOriginalSpan(_node.GetOriginalOrFullSpan().Offset(m_offset));
 
+            public override SyntaxToken VisitToken(SyntaxToken _token)
+                => base.VisitToken(_token)
+                .WithOriginalSpan(_token.GetOriginalOrFullSpan().Offset(m_offset));
+
         }
 
         private sealed class AbsoluteRewriter : CSharpSyntaxRewriter
         {
 
-            private readonly TextSpan m_span;
+            private readonly TextSpan? m_span;
 
-            public AbsoluteRewriter(TextSpan _span) => m_span = _span;
+            public AbsoluteRewriter(TextSpan? _span) => m_span = _span;
 
             public override SyntaxNode Visit(SyntaxNode _node)
                 => base.Visit(_node)
                 ?.WithOriginalSpan(m_span);
+
+            public override SyntaxToken VisitToken(SyntaxToken _token)
+                => base.VisitToken(_token)
+                .WithOriginalSpan(m_span);
 
         }
 
@@ -46,7 +54,7 @@ namespace VooDo.Transformation
             return (TNode) rewriter.Visit(_node);
         }
 
-        public static TNode RewriteAbsolute<TNode>(TNode _node, TextSpan _span) where TNode : SyntaxNode
+        public static TNode RewriteAbsolute<TNode>(TNode _node, TextSpan? _span) where TNode : SyntaxNode
         {
             if (_node == null)
             {

@@ -6,6 +6,7 @@
 
         private const string c_prefix = "VooDo_";
         public const string controllerOfMacro = c_prefix + "controllerof";
+        public const string globalVariableType = c_prefix + "global";
         public const string globalsClass = c_prefix + "Globals";
         public const string globalsField = c_prefix + "globals";
         public const string globalVariableFormat = c_prefix + "variable_{0}";

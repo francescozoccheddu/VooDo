@@ -15,23 +15,11 @@ namespace VooDo.Transformation
         private sealed class Walker : CSharpSyntaxWalker
         {
 
-            private static readonly DiagnosticDescriptor s_diagnosticDescriptor = new DiagnosticDescriptor(
-                "VDBV",
-                "VooDo BodyValidator forbidden syntax",
-                "Forbidden {0} syntax encountered",
-                "Validation",
-                DiagnosticSeverity.Error,
-                true);
-
             private readonly List<Diagnostic> m_diagnostics = new List<Diagnostic>();
             public ImmutableArray<Diagnostic> Diagnostics => m_diagnostics.ToImmutableArray();
 
             private void EmitDiagnostic(SyntaxNode _node)
-            {
-                string kindName = Enum.GetName(typeof(SyntaxKind), _node.Kind());
-                Diagnostic diagnostic = Diagnostic.Create(s_diagnosticDescriptor, _node.GetLocation(), kindName);
-                m_diagnostics.Add(diagnostic);
-            }
+                => m_diagnostics.Add(DiagnosticFactory.ForbiddenSyntax(_node));
 
             public override void VisitAccessorDeclaration(AccessorDeclarationSyntax _node) => EmitDiagnostic(_node);
             public override void VisitAccessorList(AccessorListSyntax _node) => EmitDiagnostic(_node);
