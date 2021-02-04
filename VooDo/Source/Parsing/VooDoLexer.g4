@@ -18,10 +18,6 @@ WHITESPACES
 	: (Whitespace | NewLine)+ -> channel(HIDDEN)
 ;
 
-ALIAS
-	: 'alias'
-;
-
 AS
 	: 'as'
 ;
@@ -34,16 +30,8 @@ BYTE
 	: 'byte'
 ;
 
-CATCH
-	: 'catch'
-;
-
 CHAR
 	: 'char'
-;
-
-CONST
-	: 'const'
 ;
 
 DECIMAL
@@ -62,16 +50,8 @@ ELSE
 	: 'else'
 ;
 
-EXTERN
-	: 'extern'
-;
-
 FALSE
 	: 'false'
-;
-
-FINALLY
-	: 'finally'
 ;
 
 FLOAT
@@ -106,8 +86,8 @@ LONG
 	: 'long'
 ;
 
-NAMEOF
-	: 'nameof'
+NEW
+	: 'new'
 ;
 
 NULL
@@ -146,16 +126,8 @@ STRING
 	: 'string'
 ;
 
-THROW
-	: 'throw'
-;
-
 TRUE
 	: 'true'
-;
-
-TRY
-	: 'try'
 ;
 
 UINT

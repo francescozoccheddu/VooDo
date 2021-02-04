@@ -1,10 +1,12 @@
-﻿namespace VooDo.Transformation
+﻿
+namespace VooDo.Transformation
 {
 
     public static class Identifiers
     {
 
         private const string c_prefix = "VooDo_";
+        public const string referenceAlias = c_prefix + "VooDo";
         public const string controllerOfMacro = c_prefix + "controllerof";
         public const string globalVariableType = c_prefix + "global";
         public const string globalsClass = c_prefix + "Globals";
