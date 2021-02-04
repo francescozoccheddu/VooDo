@@ -23,13 +23,13 @@ namespace VooDo.Parsing
         internal static TextSpan GetSpan(this IToken _token)
             => new TextSpan(_token.StartIndex, _token.StopIndex);
 
-        internal static TNode Mark<TNode>(this TNode _node, ParserRuleContext _context, bool _recursive = false) where TNode : SyntaxNode
-            => _node.WithOriginalSpan(_context.GetSpan(), _recursive);
-        internal static SyntaxToken Mark(this SyntaxToken _node, ParserRuleContext _context)
+        internal static TNode From<TNode>(this TNode _node, ParserRuleContext _context, bool _applyToDescendants = false) where TNode : SyntaxNode
+            => _node.WithOriginalSpan(_context.GetSpan(), _applyToDescendants);
+        internal static SyntaxToken From(this SyntaxToken _node, ParserRuleContext _context)
             => _node.WithOriginalSpan(_context.GetSpan());
-        internal static TNode Mark<TNode>(this TNode _node, IToken _token, bool _recursive = false) where TNode : SyntaxNode
-            => _node.WithOriginalSpan(_token.GetSpan(), _recursive);
-        internal static SyntaxToken Mark(this SyntaxToken _node, IToken _token)
+        internal static TNode From<TNode>(this TNode _node, IToken _token, bool _applyToDescendants = false) where TNode : SyntaxNode
+            => _node.WithOriginalSpan(_token.GetSpan(), _applyToDescendants);
+        internal static SyntaxToken From(this SyntaxToken _node, IToken _token)
             => _node.WithOriginalSpan(_token.GetSpan());
 
         private static object Literal(string _literal)
@@ -55,7 +55,7 @@ namespace VooDo.Parsing
 
         internal static SyntaxKind TokenKind(IToken _token)
         {
-            switch (_token.TokenIndex)
+            switch (_token.Type)
             {
                 case VooDoParser.BOOL:
                 return SyntaxKind.BoolKeyword;
@@ -101,6 +101,14 @@ namespace VooDo.Parsing
                 return SyntaxKind.ULongKeyword;
                 case VooDoParser.DEFAULT:
                 return SyntaxKind.DefaultKeyword;
+                case VooDoParser.PLUS:
+                return SyntaxKind.PlusToken;
+                case VooDoParser.MINUS:
+                return SyntaxKind.MinusToken;
+                case VooDoParser.NOT:
+                return SyntaxKind.ExclamationToken;
+                case VooDoParser.BCOMPL:
+                return SyntaxKind.TildeToken;
                 case VooDoParser.MUL:
                 return SyntaxKind.AsteriskToken;
                 case VooDoParser.DIV:
@@ -208,7 +216,7 @@ namespace VooDo.Parsing
 
         internal static SyntaxKind LiteralExpressionKind(IToken _token)
         {
-            switch (_token.TokenIndex)
+            switch (_token.Type)
             {
                 case VooDoParser.TRUE:
                 return SyntaxKind.TrueLiteralExpression;
@@ -225,7 +233,7 @@ namespace VooDo.Parsing
 
         internal static SyntaxKind UnaryExpressionKind(IToken _token)
         {
-            switch (_token.TokenIndex)
+            switch (_token.Type)
             {
                 case VooDoParser.PLUS:
                 return SyntaxKind.UnaryPlusExpression;
@@ -242,7 +250,7 @@ namespace VooDo.Parsing
 
         internal static SyntaxKind BinaryExpressionKind(IToken _token)
         {
-            switch (_token.TokenIndex)
+            switch (_token.Type)
             {
                 case VooDoParser.MUL:
                 return SyntaxKind.MultiplyExpression;
@@ -282,6 +290,10 @@ namespace VooDo.Parsing
                 return SyntaxKind.IsExpression;
                 case VooDoParser.AS:
                 return SyntaxKind.AsExpression;
+                case VooDoParser.PLUS:
+                return SyntaxKind.AddExpression;
+                case VooDoParser.MINUS:
+                return SyntaxKind.SubtractExpression;
                 default:
                 throw new ArgumentException("Unexpected token", nameof(_token));
             }
@@ -289,7 +301,7 @@ namespace VooDo.Parsing
 
         internal static SyntaxKind AssignmentExpressionKind(IToken _token)
         {
-            switch (_token.TokenIndex)
+            switch (_token.Type)
             {
                 case VooDoParser.ASSIGN:
                 return SyntaxKind.SimpleAssignmentExpression;

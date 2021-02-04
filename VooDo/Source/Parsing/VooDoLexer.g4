@@ -58,6 +58,10 @@ FLOAT
 	: 'float'
 ;
 
+GLOB
+	: 'glob'
+;
+
 GLOBAL
 	: 'global'
 ;
@@ -76,6 +80,10 @@ IN
 
 INT
 	: 'int'
+;
+
+INIT
+	: 'init'
 ;
 
 IS

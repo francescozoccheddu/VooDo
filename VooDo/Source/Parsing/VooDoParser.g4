@@ -114,6 +114,7 @@ expression
 	: mSrc = (REGULAR_STRING | VERBATIUM_STRING | INTEGER_LITERAL | HEX_INTEGER_LITERAL | BIN_INTEGER_LITERAL | REAL_LITERAL | CHAR_LITERAL)	# literalExpression
 	| mKeyword = (NULL | TRUE | FALSE | DEFAULT)																								# keywordLiteralExpression
 	| mOp = CONTROLLEROF mName = name																											# controllerofExpression
+	| mGlob = GLOB mContr = expression (mInit = INIT mInitializer = expression)?																# globExpression
 	| mName = name																																# nameExpression
 	| mNew = NEW mType = nonArrayType mArgumentList = argumentList																				# objectCreationExpression
 	| mNew = NEW mArgumentList = argumentList																									# implicitObjectCreationExpression

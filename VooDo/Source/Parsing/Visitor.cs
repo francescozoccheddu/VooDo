@@ -12,7 +12,6 @@ using System.Linq;
 
 using VooDo.Parsing.Generated;
 using VooDo.Transformation;
-using VooDo.Transformation.Meta;
 using VooDo.Utils;
 
 namespace VooDo.Parsing
@@ -32,7 +31,7 @@ namespace VooDo.Parsing
             => _context.Select(Get<TNode>);
 
         private TNode TryGet<TNode>(ParserRuleContext _context) where TNode : class
-            => _context != null ? (TNode) Visit(_context) : null;
+            => _context != null ? Get<TNode>(_context) : null;
 
         public override object Visit(IParseTree _tree)
         {
@@ -41,11 +40,11 @@ namespace VooDo.Parsing
             {
                 if (result is SyntaxNode node)
                 {
-                    result = node.Mark(context);
+                    result = node.From(context);
                 }
                 else if (result is SyntaxToken token)
                 {
-                    result = token.Mark(context);
+                    result = token.From(context);
                 }
             }
             return result;
@@ -67,12 +66,12 @@ namespace VooDo.Parsing
 
         #region Marked
 
-        private static SyntaxToken Tk(SK _kind, IToken _token) => SF.Token(_kind).Mark(_token);
-        private static SyntaxToken Tk(SK _kind, ParserRuleContext _token) => SF.Token(_kind).Mark(_token);
+        private static SyntaxToken Tk(SK _kind, IToken _token) => SF.Token(_kind).From(_token);
+        private static SyntaxToken Tk(SK _kind, ParserRuleContext _token) => SF.Token(_kind).From(_token);
         private static SyntaxToken Tk(IToken _token) => Tk(PH.TokenKind(_token), _token);
         private static SyntaxToken NoTk(IToken _token) => Tk(SK.None, _token);
         private static SyntaxToken NoTk(ParserRuleContext _token) => Tk(SK.None, _token);
-        private IdentifierNameSyntax IdentifierName(VooDoParser.NameContext _token) => SF.IdentifierName(Get<SyntaxToken>(_token)).Mark(_token);
+        private IdentifierNameSyntax IdentifierName(VooDoParser.NameContext _token) => SF.IdentifierName(Get<SyntaxToken>(_token)).From(_token);
 
 
         #endregion
@@ -100,7 +99,7 @@ namespace VooDo.Parsing
         private ExpressionStatementSyntax AssignmentStatement(IToken _op, VooDoParser.ExpressionContext _left, VooDoParser.ExpressionContext _right, ParserRuleContext _assignment, IToken _semicolon)
         {
             SK kind = PH.AssignmentExpressionKind(_op);
-            AssignmentExpressionSyntax assignment = SF.AssignmentExpression(kind, Get<ExpressionSyntax>(_left), Tk(_op), Get<ExpressionSyntax>(_right)).Mark(_assignment);
+            AssignmentExpressionSyntax assignment = SF.AssignmentExpression(kind, Get<ExpressionSyntax>(_left), Tk(_op), Get<ExpressionSyntax>(_right)).From(_assignment);
             return SF.ExpressionStatement(assignment, Tk(_semicolon));
         }
 
@@ -108,7 +107,7 @@ namespace VooDo.Parsing
             => SF.VariableDeclaration(Get<TypeSyntax>(_type), CommaSeparatedList(Get<VariableDeclaratorSyntax>(_declarators), _commas));
 
         private VariableDeclaratorSyntax VariableDeclarator(VooDoParser.NameContext _name, IToken _assign, ParserRuleContext _initializer, ParserRuleContext _declarator)
-            => SF.VariableDeclarator(Get<SyntaxToken>(_name), null, SF.EqualsValueClause(Tk(_assign), TryGet<ExpressionSyntax>(_initializer)).Mark(_declarator));
+            => SF.VariableDeclarator(Get<SyntaxToken>(_name), null, SF.EqualsValueClause(Tk(_assign), TryGet<ExpressionSyntax>(_initializer)).From(_declarator));
 
         private object Variant(params ParserRuleContext[] _rules)
             => Visit(_rules.Where(_r => _r != null).Single());
@@ -120,7 +119,7 @@ namespace VooDo.Parsing
         public override object VisitKeywordLiteralExpression([NotNull] VooDoParser.KeywordLiteralExpressionContext _c)
             => SF.LiteralExpression(PH.LiteralExpressionKind(_c.mKeyword), Tk(_c.mKeyword));
         public override object VisitLiteralExpression([NotNull] VooDoParser.LiteralExpressionContext _c)
-            => (LiteralExpressionSyntax) SF.ParseExpression(_c.mSrc.Text).Mark(_c, true);
+            => (LiteralExpressionSyntax) SF.ParseExpression(_c.mSrc.Text).From(_c, true);
         public override object VisitAdditiveExpressionGroup([NotNull] VooDoParser.AdditiveExpressionGroupContext _c)
             => BinaryExpression(_c.mOp, _c.mLeft, _c.mRight);
         public override object VisitAliasGenericName([NotNull] VooDoParser.AliasGenericNameContext _c)
@@ -137,7 +136,7 @@ namespace VooDo.Parsing
         public override object VisitNameColon([NotNull] VooDoParser.NameColonContext _c)
             => SF.NameColon(IdentifierName(_c.mName), Tk(_c.mColon));
         public override object VisitDeclarationExpression([NotNull] VooDoParser.DeclarationExpressionContext _c)
-            => SF.DeclarationExpression(Get<TypeSyntax>(_c.mType), SF.SingleVariableDesignation(Get<SyntaxToken>(_c.mName)).Mark(_c.mName));
+            => SF.DeclarationExpression(Get<TypeSyntax>(_c.mType), SF.SingleVariableDesignation(Get<SyntaxToken>(_c.mName)).From(_c.mName));
         public override object VisitArgumentList([NotNull] VooDoParser.ArgumentListContext _c)
             => SF.ArgumentList(CommaSeparatedList(Get<ArgumentSyntax>(_c._mArguments), _c._mCommas));
         public override object VisitArrayInitializer([NotNull] VooDoParser.ArrayInitializerContext _c)
@@ -147,9 +146,9 @@ namespace VooDo.Parsing
             OmittedArraySizeExpressionSyntax[] sizes = _c._mCommas.Count > 0
                 ? _c._mCommas
                         .Concat(_c._mCommas.TakeLast(1))
-                        .Select(_t => SF.OmittedArraySizeExpression(Tk(SK.OmittedArraySizeExpressionToken, _t)).Mark(_t))
+                        .Select(_t => SF.OmittedArraySizeExpression(Tk(SK.OmittedArraySizeExpressionToken, _t)).From(_t))
                         .ToArray()
-                : (new[] { SF.OmittedArraySizeExpression(Tk(SK.OmittedArraySizeExpressionToken, _c)).Mark(_c) });
+                : (new[] { SF.OmittedArraySizeExpression(Tk(SK.OmittedArraySizeExpressionToken, _c)).From(_c) });
             return SF.ArrayRankSpecifier(Tk(_c.mBracketO), CommaSeparatedList<ExpressionSyntax>(sizes, _c._mCommas), Tk(_c.mBracketC));
         }
         public override object VisitArrayVariableInitializer([NotNull] VooDoParser.ArrayVariableInitializerContext _c)
@@ -165,7 +164,7 @@ namespace VooDo.Parsing
             ExpressionSyntax source = Get<ExpressionSyntax>(_c.mSrc);
             BracketedArgumentListSyntax arguments = Get<BracketedArgumentListSyntax>(_c.mArgList);
             return _c.mNullable != null
-            ? SF.ConditionalAccessExpression(source, Tk(_c.mNullable), SF.ElementBindingExpression(arguments).Mark(_c))
+            ? SF.ConditionalAccessExpression(source, Tk(_c.mNullable), SF.ElementBindingExpression(arguments).From(_c))
             : (object) SF.ElementAccessExpression(source, arguments);
         }
         public override object VisitBracketedArgumentList([NotNull] VooDoParser.BracketedArgumentListContext _c)
@@ -180,12 +179,16 @@ namespace VooDo.Parsing
             => SF.ConditionalExpression(Get<ExpressionSyntax>(_c.mCond), Tk(_c.mInterr), Get<ExpressionSyntax>(_c.mThen), Tk(_c.mCol), Get<ExpressionSyntax>(_c.mElse));
         public override object VisitControllerofExpression([NotNull] VooDoParser.ControllerofExpressionContext _c)
         {
-            ArgumentSyntax argument = SF.Argument(IdentifierName(_c.mName)).Mark(_c.mName);
-            TypeSyntax globalType = SyntaxFactoryHelper.Type(typeof(Glob), Identifiers.referenceAlias);
-            MemberAccessExpressionSyntax method = (MemberAccessExpressionSyntax) SyntaxFactoryHelper.Generator.MemberAccessExpression(globalType, nameof(Glob.cof));
+            ArgumentSyntax argument = SF.Argument(IdentifierName(_c.mName)).From(_c.mName);
+            TypeSyntax globalType = SyntaxFactoryHelper.Type(typeof(Meta), Identifiers.referenceAlias);
+            MemberAccessExpressionSyntax method = (MemberAccessExpressionSyntax) SyntaxFactoryHelper.Generator.MemberAccessExpression(globalType, nameof(Meta.cof));
             return SF.InvocationExpression(
-                    method.Mark(_c.mOp, true),
-                    SF.ArgumentList(SF.SingletonSeparatedList(argument)).Mark(_c.mName));
+                    method.From(_c.mOp, true),
+                    SF.ArgumentList(
+                        Tk(SK.OpenParenToken, _c),
+                        SF.SingletonSeparatedList(argument),
+                        Tk(SK.CloseParenToken, _c)
+                    ).From(_c.mName));
         }
         public override object VisitDefaultExpression([NotNull] VooDoParser.DefaultExpressionContext _c)
             => SF.DefaultExpression(Tk(_c.mDefault), Tk(_c.mParenO), Get<TypeSyntax>(_c.mType), Tk(_c.mParenC));
@@ -198,7 +201,9 @@ namespace VooDo.Parsing
         public override object VisitExpressionVariableInitializer([NotNull] VooDoParser.ExpressionVariableInitializerContext _c)
             => Visit(_c.mSrc);
         public override object VisitGenericName([NotNull] VooDoParser.GenericNameContext _c)
-            => SF.GenericName(Get<SyntaxToken>(_c.mName), Get<TypeArgumentListSyntax>(_c.mTypeArguments));
+            => _c.mTypeArguments != null
+            ? SF.GenericName(Get<SyntaxToken>(_c.mName), Get<TypeArgumentListSyntax>(_c.mTypeArguments))
+            : (object) IdentifierName(_c.mName);
         public override object VisitGlobalDeclarationStatement([NotNull] VooDoParser.GlobalDeclarationStatementContext _c)
             => SF.LocalDeclarationStatement(SF.TokenList(), Get<VariableDeclarationSyntax>(_c.mSrc), Tk(_c.mSCol));
         public override object VisitGlobalsBlock([NotNull] VooDoParser.GlobalsBlockContext _c)
@@ -207,24 +212,12 @@ namespace VooDo.Parsing
             => SF.IfStatement(Tk(_c.mIf), Tk(_c.mParenO), Get<ExpressionSyntax>(_c.mCond), Tk(_c.mParenC), Get<StatementSyntax>(_c.mThenBody), Get<ElseClauseSyntax>(_c.mElse));
         public override object VisitGlobalDeclaration([NotNull] VooDoParser.GlobalDeclarationContext _c)
         {
-            RuleContext parent = _c.Parent;
-            IToken globalToken = null;
-            while (parent != null)
+            NameSyntax globalUnboundType = (NameSyntax) SyntaxFactoryHelper.Type(typeof(Meta.Glob<>), Identifiers.referenceAlias).From(_c);
+            if (_c.Parent is VooDoParser.GlobalDeclarationStatementContext declaration)
             {
-                if (parent is VooDoParser.GlobalsBlockContext globalsBlock)
-                {
-                    globalToken = globalsBlock.mGlobals;
-                    break;
-                }
-                else if (parent is VooDoParser.GlobalDeclarationStatementContext globalDeclarationStatement)
-                {
-                    globalToken = globalDeclarationStatement.mGlobal;
-                    break;
-                }
-                parent = _c.Parent;
+                globalUnboundType = globalUnboundType.From(declaration.mGlobal);
             }
-            NameSyntax globalUnboundType = (NameSyntax) SyntaxFactoryHelper.Type(typeof(Glob<>), Identifiers.referenceAlias).Mark(globalToken);
-            GenericNameSyntax globalType = SyntaxFactoryHelper.GenericType(globalUnboundType, new[] { Get<TypeSyntax>(_c.mType) }).Mark(_c);
+            NameSyntax globalType = SyntaxFactoryHelper.GenericType(globalUnboundType, new[] { Get<TypeSyntax>(_c.mType) }).From(_c);
             return SF.VariableDeclaration(globalType, CommaSeparatedList(Get<VariableDeclaratorSyntax>(_c._mDeclarators), _c._mCommas));
         }
         public override object VisitElseClause([NotNull] VooDoParser.ElseClauseContext _c)
@@ -234,7 +227,7 @@ namespace VooDo.Parsing
         public override object VisitIndexerArgument([NotNull] VooDoParser.IndexerArgumentContext _c)
             => SF.Argument(TryGet<NameColonSyntax>(_c.mParam), _c.mIn != null ? Tk(_c.mIn) : NoTk(_c), Get<ExpressionSyntax>(_c.mExpr));
         public override object VisitInferredVariableType([NotNull] VooDoParser.InferredVariableTypeContext _c)
-            => SF.IdentifierName(Tk(_c.mVar));
+            => SF.IdentifierName(SF.Identifier(SF.TriviaList(), SK.VarKeyword, "var", "var", SF.TriviaList()).From(_c.mVar));
         public override object VisitLandExpression([NotNull] VooDoParser.LandExpressionContext _c)
             => BinaryExpression(_c.mOp, _c.mLeft, _c.mRight);
         public override object VisitLorExpression([NotNull] VooDoParser.LorExpressionContext _c)
@@ -244,7 +237,7 @@ namespace VooDo.Parsing
         public override object VisitMultiplicativeExpressionGroup([NotNull] VooDoParser.MultiplicativeExpressionGroupContext _c)
             => BinaryExpression(_c.mOp, _c.mLeft, _c.mRight);
         public override object VisitNameExpression([NotNull] VooDoParser.NameExpressionContext _c)
-            => SF.Identifier(_c.mName.GetText());
+            => IdentifierName(_c.mName);
         public override object VisitNonArrayType([NotNull] VooDoParser.NonArrayTypeContext _c)
             => Variant(_c.mType1, _c.mType2, _c.mType3);
         public override object VisitNotExpression([NotNull] VooDoParser.NotExpressionContext _c)
@@ -305,13 +298,13 @@ namespace VooDo.Parsing
                             Tk(SK.ReturnKeyword, _c),
                             Get<ExpressionSyntax>(_c.mSrc),
                             SF.Token(SK.SemicolonToken)
-                            .Mark(_c)).Mark(_c)).Mark(_c)));
+                            .From(_c)).From(_c)).From(_c)));
         public override object VisitScriptBody([NotNull] VooDoParser.ScriptBodyContext _c)
             => SF.GlobalStatement(SF.Block(
                 Tk(SK.OpenBraceToken, _c),
-                SF.List(Get<IEnumerable<StatementSyntax>>(_c.mGlobals).Concat(Get<StatementSyntax>(_c._mStatements))),
+                SF.List((TryGet<IEnumerable<StatementSyntax>>(_c.mGlobals) ?? Enumerable.Empty<StatementSyntax>()).Concat(Get<StatementSyntax>(_c._mStatements))),
                 Tk(SK.CloseBraceToken, _c)
-                ).Mark(_c));
+                ).From(_c));
         public override object VisitQualifiedName([NotNull] VooDoParser.QualifiedNameContext _c)
             => SF.QualifiedName(Get<NameSyntax>(_c.mLeft), Get<SimpleNameSyntax>(_c.mRight));
         public override object VisitQualifiedGenericNamePass([NotNull] VooDoParser.QualifiedGenericNamePassContext _c)
@@ -322,8 +315,8 @@ namespace VooDo.Parsing
             => _c.mName != null
             ? SF.IsPatternExpression(Get<ExpressionSyntax>(_c.mSrc), Tk(_c.mOp), SF.DeclarationPattern(
                 Get<TypeSyntax>(_c.mType),
-                SF.SingleVariableDesignation(Get<SyntaxToken>(_c.mName)).Mark(_c.mName))
-                .Mark(_c))
+                SF.SingleVariableDesignation(Get<SyntaxToken>(_c.mName)).From(_c.mName))
+                .From(_c))
             : (object) BinaryExpression(_c.mOp, _c.mSrc, _c.mType);
         public override object VisitAsExpression([NotNull] VooDoParser.AsExpressionContext _c)
             => BinaryExpression(_c.mOp, _c.mSrc, _c.mType);
@@ -339,6 +332,21 @@ namespace VooDo.Parsing
             => SF.ArrayType(Get<TypeSyntax>(_c.mType), SF.List(Get<ArrayRankSpecifierSyntax>(new ParserRuleContext[] { _c.mType }.Concat(_c._mRanks))));
         public override object VisitImplicitObjectCreationExpression([NotNull] VooDoParser.ImplicitObjectCreationExpressionContext _c)
             => SF.ImplicitObjectCreationExpression(Tk(_c.mNew), Get<ArgumentListSyntax>(_c.mArgumentList), null);
+        public override object VisitGlobExpression([NotNull] VooDoParser.GlobExpressionContext _c)
+        {
+            List<SyntaxNodeOrToken> argList = new List<SyntaxNodeOrToken>
+            {
+                SF.Argument(Get<ExpressionSyntax>(_c.mContr))
+            };
+            if (_c.mInitializer != null)
+            {
+                argList.Add(Tk(SK.CommaToken, _c.mInit));
+                argList.Add(SF.Argument(Get<ExpressionSyntax>(_c.mInitializer)));
+            }
+            TypeSyntax globalType = SyntaxFactoryHelper.Type(typeof(Meta), Identifiers.referenceAlias);
+            MemberAccessExpressionSyntax method = (MemberAccessExpressionSyntax) SyntaxFactoryHelper.Generator.MemberAccessExpression(globalType, nameof(Meta.gexpr));
+            return SF.InvocationExpression(method.From(_c, true), SF.ArgumentList(Tk(SK.OpenParenToken, _c), SF.SeparatedList<ArgumentSyntax>(argList), Tk(SK.CloseParenToken, _c)).From(_c));
+        }
 
     }
 
