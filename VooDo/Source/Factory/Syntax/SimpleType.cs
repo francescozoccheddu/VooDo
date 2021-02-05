@@ -2,7 +2,6 @@
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 using System;
-using System.CodeDom;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -15,13 +14,53 @@ namespace VooDo.Factory.Syntax
     public sealed class SimpleType : IEquatable<SimpleType>
     {
 
+        private static readonly Dictionary<Type, string> s_typenames =
+                new Dictionary<Type, string>()
+            {
+                { typeof(byte), "byte" },
+                { typeof(sbyte), "sbyte" },
+                { typeof(short), "short" },
+                { typeof(ushort), "ushort" },
+                { typeof(int), "int" },
+                { typeof(uint), "uint" },
+                { typeof(long), "long" },
+                { typeof(ulong), "ulong" },
+                { typeof(float), "float" },
+                { typeof(double), "double" },
+                { typeof(decimal), "decimal" },
+                { typeof(object), "object" },
+                { typeof(bool), "bool" },
+                { typeof(char), "char" },
+                { typeof(string), "string" },
+            };
+
+        public static SimpleType FromSyntax(TypeSyntax _syntax)
+        {
+            if (_syntax == null)
+            {
+                throw new ArgumentNullException(nameof(_syntax));
+            }
+            if (_syntax is SimpleNameSyntax simple)
+            {
+                return FromSyntax(simple);
+            }
+            else if (_syntax is PredefinedTypeSyntax predefined)
+            {
+                return FromSyntax(predefined);
+            }
+            else
+            {
+                throw new ArgumentException("Not a simple type", nameof(_syntax));
+            }
+        }
+
         public static SimpleType FromSyntax(PredefinedTypeSyntax _syntax)
         {
             if (_syntax == null)
             {
                 throw new ArgumentNullException(nameof(_syntax));
             }
-            return new SimpleType(_syntax.Keyword.ValueText);
+            return new SimpleType(Identifier.FromSyntax(_syntax.Keyword));
         }
 
         public static SimpleType FromSyntax(SimpleNameSyntax _syntax)
@@ -32,12 +71,12 @@ namespace VooDo.Factory.Syntax
             }
             if (_syntax is IdentifierNameSyntax name)
             {
-                return new SimpleType(name.Identifier.ValueText);
+                return new SimpleType(Identifier.FromSyntax(name.Identifier));
             }
             else if (_syntax is GenericNameSyntax genericName)
             {
                 return new SimpleType(
-                    genericName.Identifier.ValueText,
+                    Identifier.FromSyntax(genericName.Identifier),
                     genericName.TypeArgumentList.Arguments.Select(QualifiedType.FromSyntax));
             }
             else
@@ -102,8 +141,7 @@ namespace VooDo.Factory.Syntax
             }
             if (_type.IsPrimitive)
             {
-                string name = SyntaxFactoryHelper.CodeDomProvider.GetTypeOutput(new CodeTypeReference(_type));
-                return new SimpleType(name);
+                return new SimpleType(s_typenames[_type]);
             }
             else
             {

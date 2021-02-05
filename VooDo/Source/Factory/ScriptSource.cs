@@ -23,8 +23,9 @@ namespace VooDo.Factory
             throw new NotImplementedException();
         }
 
-        public void Compile()
+        public CompiledScript Compile()
         {
+            throw new NotImplementedException();
         }
 
 

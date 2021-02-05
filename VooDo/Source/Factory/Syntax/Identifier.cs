@@ -1,5 +1,4 @@
 ﻿using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 using System;
 using System.Collections.Generic;
@@ -12,23 +11,6 @@ namespace VooDo.Factory
     {
 
         public static Identifier FromSyntax(SyntaxToken _token) => _token.ValueText;
-        public static Identifier FromSyntax(PredefinedTypeSyntax _type)
-        {
-            if (_type == null)
-            {
-                throw new ArgumentNullException(nameof(_type));
-            }
-            return FromSyntax(_type.Keyword);
-        }
-
-        public static Identifier FromSyntax(IdentifierNameSyntax _name)
-        {
-            if (_name == null)
-            {
-                throw new ArgumentNullException(nameof(_name));
-            }
-            return FromSyntax(_name.Identifier);
-        }
 
         public Identifier(string _identifier)
         {

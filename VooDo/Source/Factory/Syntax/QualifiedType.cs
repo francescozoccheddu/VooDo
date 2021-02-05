@@ -39,19 +39,11 @@ namespace VooDo.Factory.Syntax
             }
             else if (_type is AliasQualifiedNameSyntax aliasQualifiedNameSyntax)
             {
-                return new QualifiedType(Identifier.FromSyntax(aliasQualifiedNameSyntax.Alias), SimpleType.FromSyntax(aliasQualifiedNameSyntax.Name));
-            }
-            else if (_type is SimpleNameSyntax simpleNameSyntax)
-            {
-                return SimpleType.FromSyntax(simpleNameSyntax);
-            }
-            else if (_type is PredefinedTypeSyntax predefinedTypeSyntax)
-            {
-                return SimpleType.FromSyntax(predefinedTypeSyntax);
+                return new QualifiedType(Identifier.FromSyntax(aliasQualifiedNameSyntax.Alias.Identifier), SimpleType.FromSyntax(aliasQualifiedNameSyntax.Name));
             }
             else
             {
-                throw new ArgumentException("Unsupported type syntax", nameof(_type));
+                return SimpleType.FromSyntax(_type);
             }
         }
 
@@ -120,7 +112,7 @@ namespace VooDo.Factory.Syntax
                 }
                 path.Reverse();
                 ranks.Reverse();
-                return new QualifiedType(null, type.Namespace, path, nullable, ranks);
+                return new QualifiedType((Namespace) type.Namespace, path, nullable, ranks);
             }
         }
 
@@ -133,47 +125,41 @@ namespace VooDo.Factory.Syntax
         public static implicit operator QualifiedType(Type _type) => FromType(_type);
 
         public QualifiedType(params SimpleType[] _path)
-            : this(null, null, _path, false, null) { }
+            : this((Namespace) null, _path) { }
 
         public QualifiedType(Namespace _namespace, params SimpleType[] _path)
-            : this(null, _namespace, _path, false, null) { }
+            : this(_namespace, (IEnumerable<SimpleType>) _path) { }
 
         public QualifiedType(Identifier _alias, params SimpleType[] _path)
-            : this(_alias, null, _path, false, null) { }
+            : this(_alias, (IEnumerable<SimpleType>) _path) { }
 
-        public QualifiedType(Identifier _alias, Namespace _namespace, params SimpleType[] _path)
-            : this(null, _namespace, _path, false, null) { }
-
-        public QualifiedType(Identifier _alias, IEnumerable<SimpleType> _path, bool _nullable = false, IEnumerable<int> _ranks = null)
-            : this(_alias, null, _path, _nullable, _ranks) { }
+        public QualifiedType(IEnumerable<SimpleType> _path, bool _nullable, IEnumerable<int> _ranks = null)
+            : this((Namespace) null, _path, _nullable, _ranks) { }
 
         public QualifiedType(Namespace _namespace, IEnumerable<SimpleType> _path, bool _nullable = false, IEnumerable<int> _ranks = null)
-            : this(null, _namespace, _path, _nullable, _ranks) { }
+            : this(_namespace?.Alias, ((IEnumerable<Identifier>) _namespace?.Path).EmptyIfNull().Select(_p => new SimpleType(_p)).Concat(_path), false, null) { }
 
-        public QualifiedType(IEnumerable<SimpleType> _typePath, bool _nullable, IEnumerable<int> _ranks = null)
-            : this(null, null, _typePath, _nullable, _ranks) { }
-
-        public QualifiedType(Identifier _alias, Namespace _namespace, IEnumerable<SimpleType> _typePath, bool _nullable = false, IEnumerable<int> _ranks = null)
+        public QualifiedType(Identifier _alias, IEnumerable<SimpleType> _path, bool _nullable = false, IEnumerable<int> _ranks = null)
         {
             Alias = _alias;
-            if (_typePath == null)
+            if (_path == null)
             {
-                throw new ArgumentNullException(nameof(_typePath));
+                throw new ArgumentNullException(nameof(_path));
             }
-            Path = _namespace.EmptyIfNull().Select(_i => new SimpleType(_i)).Concat(_typePath).ToImmutableArray();
+            Path = _path.ToImmutableArray();
             if (!Path.Any())
             {
-                throw new ArgumentException("Empty path", nameof(_typePath));
+                throw new ArgumentException("Empty path", nameof(_path));
             }
             if (Path.AnyNull())
             {
-                throw new ArgumentException("Null path item", nameof(_typePath));
+                throw new ArgumentException("Null path item", nameof(_path));
             }
             IsNullable = _nullable;
             Ranks = _ranks.EmptyIfNull().ToImmutableArray();
             if (Ranks.Any(_i => _i < 1))
             {
-                throw new ArgumentException("Non positive rank", nameof(_typePath));
+                throw new ArgumentException("Non positive rank", nameof(_path));
             }
         }
 
@@ -185,7 +171,8 @@ namespace VooDo.Factory.Syntax
         public bool IsAliasQualified => Alias != null;
         public bool IsArray => Ranks.Any();
         public bool IsSimple => !IsQualified && !IsArray && !IsNullable;
-        public bool IsQualified => IsAliasQualified || Path.Length > 1;
+        public bool IsQualified => IsAliasQualified || IsNamespaceQualified;
+        public bool IsNamespaceQualified => Path.Length > 1;
 
         public SimpleType AsSimpleType()
         {

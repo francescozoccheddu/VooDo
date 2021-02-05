@@ -96,7 +96,8 @@ namespace VooDo.Factory
         public override int GetHashCode() => m_metadata.GetHashCode();
         public static bool operator ==(Reference _left, Reference _right) => Identity.AreEqual(_left, _right);
         public static bool operator !=(Reference _left, Reference _right) => !(_left == _right);
-        public override string ToString() => $"{{Reference: {DisplayName}}}";
+        public override string ToString()
+            => $"{{{nameof(Reference)}: {DisplayName ?? FilePath ?? m_metadata.GetMetadataId().ToString()}}}";
 
     }
 

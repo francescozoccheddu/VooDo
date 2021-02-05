@@ -1,6 +1,5 @@
 ﻿using Antlr4.Runtime;
 
-using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 using VooDo.Parsing.Generated;
@@ -17,15 +16,14 @@ namespace VooDo.Parsing
             return new VooDoParser(new CommonTokenStream(lexer));
         }
 
-        private static CSharpSyntaxTree Parse(ParserRuleContext _rule)
-        {
-            CompilationUnitSyntax root = (CompilationUnitSyntax) new Visitor().Visit(_rule);
-            return (CSharpSyntaxTree) CSharpSyntaxTree.Create(root);
-        }
+        private static CompilationUnitSyntax Parse(ParserRuleContext _rule)
+            => (CompilationUnitSyntax) new Visitor().Visit(_rule);
 
-        public static CSharpSyntaxTree ParseScript(string _script) => Parse(MakeParser(_script).script());
+        public static CompilationUnitSyntax ParseScript(string _script) => Parse(MakeParser(_script).script());
 
-        public static CSharpSyntaxTree ParseInlineScript(string _script) => Parse(MakeParser(_script).inlineScript());
+        public static CompilationUnitSyntax ParseInlineScript(string _script) => Parse(MakeParser(_script).inlineScript());
+
+        public static CompilationUnitSyntax ParseAnyScript(string _script) => Parse(MakeParser(_script).anyScript());
 
     }
 

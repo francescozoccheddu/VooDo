@@ -129,9 +129,6 @@
     <Compile Include="Source\Factory\Reference.cs" />
     <Compile Include="Source\Factory\Syntax\SimpleType.cs" />
     <Compile Include="Source\Factory\Syntax\QualifiedType.cs" />
-    <Compile Include="Source\Factory\UsingStaticDirective.cs" />
-    <Compile Include="Source\Factory\UsingAliasDirective.cs" />
-    <Compile Include="Source\Factory\UsingDirective.cs" />
     <Compile Include="Source\Factory\Global.cs" />
     <Compile Include="Source\Factory\ScriptSource.cs" />
     <Compile Include="Source\Hooks\IHookListener.cs" />

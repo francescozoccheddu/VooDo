@@ -1,8 +1,8 @@
 ﻿
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -11,46 +11,66 @@ using VooDo.Utils;
 
 namespace VooDo.Factory
 {
-    public sealed class Namespace : IReadOnlyList<Identifier>, IEquatable<Namespace>
+    public sealed class Namespace : IEquatable<Namespace>
     {
 
-        public static Namespace FromSyntax(IdentifierNameSyntax _name)
-            => Identifier.FromSyntax(_name);
-
-        public static Namespace FromSyntax(QualifiedNameSyntax _name)
+        public static Namespace FromSyntax(AliasQualifiedNameSyntax _syntax)
         {
-            if (_name == null)
+            if (_syntax == null)
             {
-                throw new ArgumentNullException(nameof(_name));
+                throw new ArgumentNullException(nameof(_syntax));
             }
-            List<Identifier> path = new List<Identifier>();
-            QualifiedNameSyntax qualifiedName = _name;
-            while (true)
+            return new Namespace(Identifier.FromSyntax(_syntax.Alias.Identifier), new Identifier[] { Identifier.FromSyntax(_syntax.Name.Identifier) });
+        }
+
+        public static Namespace FromSyntax(IdentifierNameSyntax _syntax)
+        {
+            if (_syntax == null)
             {
-                if (qualifiedName.Right is IdentifierNameSyntax rightName)
-                {
-                    path.Add(Identifier.FromSyntax(rightName));
-                }
-                else
-                {
-                    throw new ArgumentException("Non identifier element", nameof(_name));
-                }
-                if (qualifiedName.Left is QualifiedNameSyntax leftQualifiedName)
-                {
-                    qualifiedName = leftQualifiedName;
-                }
-                else if (qualifiedName.Left is IdentifierNameSyntax leftName)
-                {
-                    path.Add(Identifier.FromSyntax(leftName));
-                    break;
-                }
-                else
-                {
-                    throw new ArgumentException("Non identifier element", nameof(_name));
-                }
+                throw new ArgumentNullException(nameof(_syntax));
             }
-            path.Reverse();
-            return path;
+            return new Namespace(null, new Identifier[] { Identifier.FromSyntax(_syntax.Identifier) });
+        }
+
+        public static Namespace FromSyntax(QualifiedNameSyntax _syntax)
+        {
+            if (_syntax == null)
+            {
+                throw new ArgumentNullException(nameof(_syntax));
+            }
+            if (_syntax.Right is IdentifierNameSyntax name)
+            {
+                Namespace left = FromSyntax(_syntax.Left);
+                return left.WithPath(left.Path.Add(Identifier.FromSyntax(name.Identifier)));
+            }
+            else
+            {
+                throw new ArgumentException("Not a namespace type", nameof(_syntax));
+            }
+        }
+
+        public static Namespace FromSyntax(TypeSyntax _syntax)
+        {
+            if (_syntax == null)
+            {
+                throw new ArgumentNullException(nameof(_syntax));
+            }
+            if (_syntax is IdentifierNameSyntax name)
+            {
+                return FromSyntax(name);
+            }
+            else if (_syntax is QualifiedNameSyntax qualified)
+            {
+                return FromSyntax(qualified);
+            }
+            else if (_syntax is AliasQualifiedNameSyntax aliased)
+            {
+                return FromSyntax(aliased);
+            }
+            else
+            {
+                throw new ArgumentException("Not a namespace type", nameof(_syntax));
+            }
         }
 
         public static Namespace Parse(string _namespace)
@@ -59,48 +79,55 @@ namespace VooDo.Factory
             {
                 throw new ArgumentNullException(_namespace);
             }
-            return new Namespace(_namespace.Split('.').Select(_i => new Identifier(_i)));
+            return FromSyntax(SyntaxFactory.ParseTypeName(_namespace));
         }
 
         public static implicit operator Namespace(string _namespace) => Parse(_namespace);
-        public static implicit operator Namespace(Identifier _identifier) => new Namespace(_identifier);
+        public static implicit operator Namespace(Identifier _path) => new Namespace(new[] { _path });
         public static implicit operator Namespace(Identifier[] _path) => new Namespace(_path);
         public static implicit operator Namespace(List<Identifier> _path) => new Namespace(_path);
         public static implicit operator Namespace(ImmutableArray<Identifier> _path) => new Namespace(_path);
 
         public Namespace(params Identifier[] _path)
-            : this((IEnumerable<Identifier>) _path) { }
+            : this(null, _path) { }
 
         public Namespace(IEnumerable<Identifier> _path)
+            : this(null, _path) { }
+
+        public Namespace(Identifier _alias, IEnumerable<Identifier> _path)
         {
             if (_path == null)
             {
                 throw new ArgumentNullException(nameof(_path));
             }
-            m_path = _path.ToImmutableArray();
-            if (m_path.IsEmpty)
-            {
-                throw new ArgumentException("Empty path", nameof(_path));
-            }
-            if (m_path.AnyNull())
+            Path = _path.ToImmutableArray();
+            Alias = _alias;
+            if (Path.AnyNull())
             {
                 throw new ArgumentException("Null identifier", nameof(_path));
             }
+            if (Path.IsEmpty)
+            {
+                throw new ArgumentException("Empty path", nameof(_path));
+            }
         }
 
-        private readonly ImmutableArray<Identifier> m_path;
-
-        public int Count => ((IReadOnlyCollection<Identifier>) m_path).Count;
-        public Identifier this[int _index] => ((IReadOnlyList<Identifier>) m_path)[_index];
-        public IEnumerator<Identifier> GetEnumerator() => ((IEnumerable<Identifier>) m_path).GetEnumerator();
-        IEnumerator IEnumerable.GetEnumerator() => ((IEnumerable) m_path).GetEnumerator();
+        public Identifier Alias { get; }
+        public ImmutableArray<Identifier> Path { get; }
+        public bool IsAliasQualified => Alias != null;
 
         public override bool Equals(object _obj) => Equals(_obj as Namespace);
-        public bool Equals(Namespace _other) => _other != null && m_path.SequenceEqual(_other.m_path);
-        public static bool operator ==(Namespace _left, Namespace _right) => EqualityComparer<Namespace>.Default.Equals(_left, _right);
+        public bool Equals(Namespace _other) => _other != null && Alias == _other.Alias && Path.SequenceEqual(_other.Path);
+        public static bool operator ==(Namespace _left, Namespace _right) => Identity.AreEqual(_left, _right);
         public static bool operator !=(Namespace _left, Namespace _right) => !(_left == _right);
-        public override int GetHashCode() => Identity.CombineHashes(m_path);
-        public override string ToString() => string.Join('.', m_path);
+        public override int GetHashCode() => Identity.CombineHash(Alias, Identity.CombineHashes(Path));
+        public override string ToString() => (IsAliasQualified ? $"{Alias}::" : "") + string.Join('.', Path);
+
+        public Namespace WithAlias(Identifier _alias)
+            => new Namespace(_alias, Path);
+
+        public Namespace WithPath(IEnumerable<Identifier> _path)
+            => new Namespace(Alias, _path);
 
     }
 }

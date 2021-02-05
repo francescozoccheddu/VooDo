@@ -8,6 +8,10 @@ options
 
 // Entry point
 
+anyScript
+	: mScript1 = script | mScript2 = inlineScript
+;
+
 script
 	: mUsings += usingDirective* mBody = scriptBody EOF
 ;
@@ -176,6 +180,7 @@ statement
 	| mGlobal = GLOBAL mSrc = globalDeclaration mSCol = SEMICOLON																																							# globalDeclarationStatement
 	| mIf = IF mParenO = OPEN_PARENS mCond = expression mParenC = CLOSE_PARENS mThenBody = statement mElse = elseClause?																									# ifStatement
 	| mReturn = RETURN mSrc = expression mSCol = SEMICOLON																																									# returnStatement
+	| mBlock = block																																																		# blockStatement
 ;
 
 elseClause
@@ -217,5 +222,5 @@ nameEquals
 ;
 
 name
-	: mName = (IDENTIFIER | GLOBALS | STATIC | USING )
+	: mName = (IDENTIFIER | GLOBALS | STATIC | USING)
 ;

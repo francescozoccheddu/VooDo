@@ -1,4 +1,10 @@
-﻿using System;
+﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+
+using System;
+
+using VooDo.Parsing;
 
 namespace VooDoTB
 {
@@ -7,14 +13,16 @@ namespace VooDoTB
 
         private static void Main(string[] _args)
         {
-            /*
             string code = @"
-x = glob 2 init 5;
+if (x is int x)
+{}
+if (x is int _)
+{}
+x.ciao(out int a, out int _);
             ";
-            Microsoft.CodeAnalysis.CSharp.CSharpSyntaxTree script = Parser.ParseScript(code);
-            Console.WriteLine(script.GetRoot().NormalizeWhitespace().ToFullString());
+            CompilationUnitSyntax script = Parser.ParseAnyScript(code);
+            Console.WriteLine(script.NormalizeWhitespace().ToFullString());
             Console.WriteLine("Press any key to exit");
-            */
             Console.ReadLine();
         }
     }
