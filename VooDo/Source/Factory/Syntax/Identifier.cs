@@ -12,6 +12,15 @@ namespace VooDo.Factory
     {
 
         public static Identifier FromSyntax(SyntaxToken _token) => _token.ValueText;
+        public static Identifier FromSyntax(PredefinedTypeSyntax _type)
+        {
+            if (_type == null)
+            {
+                throw new ArgumentNullException(nameof(_type));
+            }
+            return FromSyntax(_type.Keyword);
+        }
+
         public static Identifier FromSyntax(IdentifierNameSyntax _name)
         {
             if (_name == null)
@@ -27,7 +36,7 @@ namespace VooDo.Factory
             {
                 throw new ArgumentNullException(nameof(_identifier));
             }
-            if (_identifier.Any(_c => _c == '_' || char.IsLetterOrDigit(_c)))
+            if (!_identifier.All(_c => _c == '_' || char.IsLetterOrDigit(_c)))
             {
                 throw new ArgumentException("Non alphanumeric or underscore character", nameof(_identifier));
             }
@@ -47,11 +56,10 @@ namespace VooDo.Factory
         public static implicit operator string(Identifier _identifier) => _identifier.m_identifier;
         public static implicit operator Identifier(string _identifier) => new Identifier(_identifier);
 
-        public static bool operator ==(Identifier _left, Identifier _right) => EqualityComparer<Identifier>.Default.Equals(_left, _right);
-        public static bool operator !=(Identifier _left, Identifier _right) => !(_left == _right);
-
         public override bool Equals(object _obj) => Equals(_obj as Identifier);
         public bool Equals(Identifier _other) => _other != null && m_identifier == _other.m_identifier;
+        public static bool operator ==(Identifier _left, Identifier _right) => EqualityComparer<Identifier>.Default.Equals(_left, _right);
+        public static bool operator !=(Identifier _left, Identifier _right) => !(_left == _right);
         public override int GetHashCode() => m_identifier.GetHashCode();
         public override string ToString() => this;
 

@@ -15,10 +15,44 @@ namespace VooDo.Factory.Syntax
 
         public static QualifiedType FromSyntax(TypeSyntax _type)
         {
+            if (_type == null)
+            {
+                throw new ArgumentNullException(nameof(_type));
+            }
             if (_type is ArrayTypeSyntax arraytype)
             {
+                if (arraytype.RankSpecifiers.Any(_r => _r.Sizes.Any(_s => !(_s is OmittedArraySizeExpressionSyntax))))
+                {
+                    throw new ArgumentException("Explicit array size expression", nameof(_type));
+                }
+                IEnumerable<int> ranks = arraytype.RankSpecifiers.Select(_r => _r.Rank);
+                return FromSyntax(arraytype.ElementType).WithRanks(ranks);
             }
-            return null;
+            else if (_type is NullableTypeSyntax nullableType)
+            {
+                return FromSyntax(nullableType.ElementType).WithIsNullable(true);
+            }
+            else if (_type is QualifiedNameSyntax qualifiedNameSyntax)
+            {
+                QualifiedType left = FromSyntax(qualifiedNameSyntax.Left);
+                return left.WithPath(left.Path.Add(SimpleType.FromSyntax(qualifiedNameSyntax.Right)));
+            }
+            else if (_type is AliasQualifiedNameSyntax aliasQualifiedNameSyntax)
+            {
+                return new QualifiedType(Identifier.FromSyntax(aliasQualifiedNameSyntax.Alias), SimpleType.FromSyntax(aliasQualifiedNameSyntax.Name));
+            }
+            else if (_type is SimpleNameSyntax simpleNameSyntax)
+            {
+                return SimpleType.FromSyntax(simpleNameSyntax);
+            }
+            else if (_type is PredefinedTypeSyntax predefinedTypeSyntax)
+            {
+                return SimpleType.FromSyntax(predefinedTypeSyntax);
+            }
+            else
+            {
+                throw new ArgumentException("Unsupported type syntax", nameof(_type));
+            }
         }
 
         public static QualifiedType Parse(string _type)
@@ -67,7 +101,7 @@ namespace VooDo.Factory.Syntax
                 while (type.IsArray)
                 {
                     ranks.Add(type.GetArrayRank());
-                    type = type.GetType();
+                    type = type.GetElementType();
                 }
                 Type nullableUnderlyingType = Nullable.GetUnderlyingType(type);
                 bool nullable = nullableUnderlyingType != null;
@@ -75,16 +109,18 @@ namespace VooDo.Factory.Syntax
                 {
                     type = nullableUnderlyingType;
                 }
-                List<SimpleType> path = new List<SimpleType>();
+                List<SimpleType> path = new List<SimpleType>
+                {
+                    SimpleType.FromType(type)
+                };
                 while (type.IsNested)
                 {
-                    path.Add(SimpleType.FromType(type));
                     type = type.DeclaringType;
+                    path.Add(SimpleType.FromType(type));
                 }
-                path.AddRange(type.Namespace.Split('.').Cast<SimpleType>());
                 path.Reverse();
                 ranks.Reverse();
-                return new QualifiedType(null, path, nullable, ranks);
+                return new QualifiedType(null, type.Namespace, path, nullable, ranks);
             }
         }
 
@@ -124,7 +160,7 @@ namespace VooDo.Factory.Syntax
             {
                 throw new ArgumentNullException(nameof(_typePath));
             }
-            Path = _namespace.EmptyIfNull().Cast<SimpleType>().Concat(_typePath).ToImmutableArray();
+            Path = _namespace.EmptyIfNull().Select(_i => new SimpleType(_i)).Concat(_typePath).ToImmutableArray();
             if (!Path.Any())
             {
                 throw new ArgumentException("Empty path", nameof(_typePath));

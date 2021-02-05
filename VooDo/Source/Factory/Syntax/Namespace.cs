@@ -59,7 +59,7 @@ namespace VooDo.Factory
             {
                 throw new ArgumentNullException(_namespace);
             }
-            return new Namespace(_namespace.Split('.').Cast<Identifier>());
+            return new Namespace(_namespace.Split('.').Select(_i => new Identifier(_i)));
         }
 
         public static implicit operator Namespace(string _namespace) => Parse(_namespace);

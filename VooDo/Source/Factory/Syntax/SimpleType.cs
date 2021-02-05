@@ -15,8 +15,21 @@ namespace VooDo.Factory.Syntax
     public sealed class SimpleType : IEquatable<SimpleType>
     {
 
+        public static SimpleType FromSyntax(PredefinedTypeSyntax _syntax)
+        {
+            if (_syntax == null)
+            {
+                throw new ArgumentNullException(nameof(_syntax));
+            }
+            return new SimpleType(_syntax.Keyword.ValueText);
+        }
+
         public static SimpleType FromSyntax(SimpleNameSyntax _syntax)
         {
+            if (_syntax == null)
+            {
+                throw new ArgumentNullException(nameof(_syntax));
+            }
             if (_syntax is IdentifierNameSyntax name)
             {
                 return new SimpleType(name.Identifier.ValueText);
@@ -43,6 +56,10 @@ namespace VooDo.Factory.Syntax
             if (syntax is SimpleNameSyntax simpleSyntax)
             {
                 return FromSyntax(simpleSyntax);
+            }
+            else if (syntax is PredefinedTypeSyntax predefinedSyntax)
+            {
+                return FromSyntax(predefinedSyntax);
             }
             else
             {

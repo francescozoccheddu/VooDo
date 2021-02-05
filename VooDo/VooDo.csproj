@@ -192,24 +192,12 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Source\Parsing\run_antlr.bat" />
-    <None Include="Source\Parsing\VooDoLexer.g4" />
-    <None Include="Source\Parsing\VooDoParser.g4" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Source\Parsing\Generated\" />
     <Folder Include="Source\Runtime\" />
   </ItemGroup>
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">
     <VisualStudioVersion>14.0</VisualStudioVersion>
   </PropertyGroup>
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\WindowsXaml\v$(VisualStudioVersion)\Microsoft.Windows.UI.Xaml.CSharp.targets" />
-  <!-- 
-    <Import Project="$(MSBuildExtensionsPath)\Microsoft\WindowsXaml\v$(VisualStudioVersion)\Microsoft.Windows.UI.Xaml.CSharp.targets" />
-    <Target Name="BeforeBuild" Inputs="$(ProjectDir)Source\Parsing\VooDoLexer.g4" Outputs="$(ProjectDir)Source\Parsing\Generated\VooDoLexer.cs;$(ProjectDir)Source\Parsing\Generated\VooDoParserBaseVisitor.cs;$(ProjectDir)Source\Parsing\Generated\VooDoParser.cs;$(ProjectDir)Source\Parsing\Generated\VooDoParserVisitor.cs">
-      <Exec Command="&quot;$(ProjectDir)Source\Parsing\run_antlr.bat&quot;" ConsoleToMsBuild="true" IgnoreStandardErrorWarningFormat="true" />
-    </Target>
-  -->
   <ItemGroup>
     <Antlr4 Include="$(ProjectDir)Source\Parsing\VooDoLexer.g4">
       <Listener>false</Listener>
