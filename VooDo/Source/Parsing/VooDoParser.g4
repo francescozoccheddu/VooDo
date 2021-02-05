@@ -217,5 +217,5 @@ nameEquals
 ;
 
 name
-	: mName = (IDENTIFIER | GLOBALS | STATIC | USING)
+	: mName = (IDENTIFIER | GLOBALS | STATIC | USING )
 ;

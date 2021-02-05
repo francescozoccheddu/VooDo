@@ -14,10 +14,7 @@ namespace VooDoTB
         private static void Main(string[] _args)
         {
             string code = @"
-globals {
-int x = 8;
-}
-y = x;
+x = glob 2 init 5;
             ";
             Microsoft.CodeAnalysis.CSharp.CSharpSyntaxTree script = Parser.ParseScript(code);
             Console.WriteLine(script.GetRoot().NormalizeWhitespace().ToFullString());

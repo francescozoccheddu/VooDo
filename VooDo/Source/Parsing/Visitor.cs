@@ -302,7 +302,7 @@ namespace VooDo.Parsing
         public override object VisitScriptBody([NotNull] VooDoParser.ScriptBodyContext _c)
             => SF.GlobalStatement(SF.Block(
                 Tk(SK.OpenBraceToken, _c),
-                SF.List((TryGet<IEnumerable<StatementSyntax>>(_c.mGlobals) ?? Enumerable.Empty<StatementSyntax>()).Concat(Get<StatementSyntax>(_c._mStatements))),
+                SF.List(TryGet<IEnumerable<StatementSyntax>>(_c.mGlobals).EmptyIfNull().Concat(Get<StatementSyntax>(_c._mStatements))),
                 Tk(SK.CloseBraceToken, _c)
                 ).From(_c));
         public override object VisitQualifiedName([NotNull] VooDoParser.QualifiedNameContext _c)
