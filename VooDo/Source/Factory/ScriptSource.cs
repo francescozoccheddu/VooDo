@@ -1,4 +1,4 @@
-﻿#nullable enable
+﻿
 
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -115,13 +115,17 @@ namespace VooDo.Factory
                 .Except(originalSource.Aliases)
                 .Select(_a => SyntaxFactory.ExternAliasDirective(_a))
                 .Select(_a => _a.WithOrigin(Origin.Transformation, true));
+            QualifiedType globalType = QualifiedType.FromType<Meta.Glob<object>>().WithAlias(Identifiers.referenceAlias);
             IEnumerable<GlobalStatementSyntax>? newGlobals = ExtraGlobals
                 .Select(_g => SyntaxFactory.GlobalStatement(
                     SyntaxFactory.LocalDeclarationStatement(
                         SyntaxFactory.VariableDeclaration(
-                            SyntaxFactoryHelper.GenericType(
-                                (NameSyntax) SyntaxFactoryHelper.Type(typeof(Meta.Glob<>), Identifiers.referenceAlias),
-                                new NameSyntax[] { SyntaxFactory.ParseName(_g.Type.ToString()) }),
+                            SyntaxFactory.ParseTypeName(
+                                globalType.WithPath(
+                                    globalType.Path
+                                    .SkipLast(1)
+                                    .Append(globalType.Path.Last()
+                                    .WithTypeArguments(_g.Type.Type ?? QualifiedType.Parse("var")))).ToString()),
                             SyntaxFactory.SingletonSeparatedList(
                                 SyntaxFactory.VariableDeclarator(_g.Name))))))
                 .Select(_g => _g.WithOrigin(Origin.Transformation, true));

@@ -1,4 +1,4 @@
-﻿#nullable enable
+﻿
 
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -15,7 +15,7 @@ namespace VooDo.Factory.Syntax
     public sealed class QualifiedType : IEquatable<QualifiedType>
     {
 
-        public static QualifiedType FromSyntax(TypeSyntax _type)
+        public static QualifiedType FromSyntax(TypeSyntax _type, bool _ignoreUnboundGenerics = false)
         {
             switch (_type)
             {
@@ -34,22 +34,22 @@ namespace VooDo.Factory.Syntax
                 case QualifiedNameSyntax qualifiedNameSyntax:
                 {
                     QualifiedType left = FromSyntax(qualifiedNameSyntax.Left);
-                    return left.WithPath(left.Path.Add(SimpleType.FromSyntax(qualifiedNameSyntax.Right)));
+                    return left.WithPath(left.Path.Add(SimpleType.FromSyntax(qualifiedNameSyntax.Right, _ignoreUnboundGenerics)));
                 }
 
                 case AliasQualifiedNameSyntax aliasQualifiedNameSyntax:
-                return new QualifiedType(Identifier.FromSyntax(aliasQualifiedNameSyntax.Alias.Identifier), SimpleType.FromSyntax(aliasQualifiedNameSyntax.Name));
+                return new QualifiedType(Identifier.FromSyntax(aliasQualifiedNameSyntax.Alias.Identifier), SimpleType.FromSyntax(aliasQualifiedNameSyntax.Name, _ignoreUnboundGenerics));
                 default:
-                return SimpleType.FromSyntax(_type);
+                return SimpleType.FromSyntax(_type, _ignoreUnboundGenerics);
             }
         }
 
-        public static QualifiedType Parse(string _type)
-            => FromSyntax(SyntaxFactory.ParseTypeName(_type));
+        public static QualifiedType Parse(string _type, bool _ignoreUnboundGenerics = false)
+            => FromSyntax(SyntaxFactory.ParseTypeName(_type), _ignoreUnboundGenerics);
 
-        public static QualifiedType FromType(Type _type)
+        public static QualifiedType FromType(Type _type, bool _ignoreUnboundGenerics = false)
         {
-            if (_type.IsGenericTypeDefinition)
+            if (_type.IsGenericTypeDefinition && !_ignoreUnboundGenerics)
             {
                 throw new ArgumentException("Unbound type", nameof(_type));
             }
@@ -71,7 +71,7 @@ namespace VooDo.Factory.Syntax
             }
             if (_type.IsPrimitive)
             {
-                return new QualifiedType(SimpleType.FromType(_type));
+                return new QualifiedType(SimpleType.FromType(_type, _ignoreUnboundGenerics));
             }
             else
             {
@@ -90,12 +90,12 @@ namespace VooDo.Factory.Syntax
                 }
                 List<SimpleType> path = new List<SimpleType>
                 {
-                    SimpleType.FromType(type)
+                    SimpleType.FromType(type, _ignoreUnboundGenerics)
                 };
                 while (type.IsNested)
                 {
                     type = type.DeclaringType;
-                    path.Add(SimpleType.FromType(type));
+                    path.Add(SimpleType.FromType(type, _ignoreUnboundGenerics));
                 }
                 path.Reverse();
                 ranks.Reverse();
@@ -103,8 +103,8 @@ namespace VooDo.Factory.Syntax
             }
         }
 
-        public static QualifiedType FromType<TType>()
-            => FromType(typeof(TType));
+        public static QualifiedType FromType<TType>(bool _ignoreUnboundGenerics = false)
+            => FromType(typeof(TType), _ignoreUnboundGenerics);
 
         public static implicit operator QualifiedType(Identifier _identifier) => new QualifiedType(_identifier);
         public static implicit operator QualifiedType(SimpleType _simpleType) => new QualifiedType(_simpleType);

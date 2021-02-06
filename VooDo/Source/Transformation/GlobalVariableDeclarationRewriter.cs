@@ -39,6 +39,7 @@ namespace VooDo.Transformation
             }
             Rewriter rewriter = new Rewriter(_semantics);
             SyntaxNode newRoot = rewriter.Visit(_semantics.SyntaxTree.GetRoot());
+            _globals = default;
             return (CompilationUnitSyntax) newRoot;
         }
 

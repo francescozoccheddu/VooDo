@@ -1,4 +1,4 @@
-﻿#nullable enable
+﻿
 
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -36,66 +36,38 @@ namespace VooDo.Factory.Syntax
                 { typeof(string), "string" },
             };
 
-        public static SimpleType FromSyntax(TypeSyntax _syntax)
+        public static SimpleType FromSyntax(TypeSyntax _syntax, bool _ignoreUnboundGenerics = false) => _syntax switch
         {
-            if (_syntax is SimpleNameSyntax simple)
-            {
-                return FromSyntax(simple);
-            }
-            else if (_syntax is PredefinedTypeSyntax predefined)
-            {
-                return FromSyntax(predefined);
-            }
-            else
-            {
-                throw new ArgumentException("Not a simple type", nameof(_syntax));
-            }
-        }
+            SimpleNameSyntax simple => FromSyntax(simple, _ignoreUnboundGenerics),
+            PredefinedTypeSyntax predefined => FromSyntax(predefined),
+            _ => throw new ArgumentException("Not a simple type", nameof(_syntax)),
+        };
 
         public static SimpleType FromSyntax(PredefinedTypeSyntax _syntax)
             => new SimpleType(Identifier.FromSyntax(_syntax.Keyword));
 
-        public static SimpleType FromSyntax(SimpleNameSyntax _syntax)
+        public static SimpleType FromSyntax(SimpleNameSyntax _syntax, bool _ignoreUnboundGenerics = false) => _syntax switch
         {
-            if (_syntax is IdentifierNameSyntax name)
-            {
-                return new SimpleType(Identifier.FromSyntax(name.Identifier));
-            }
-            else if (_syntax is GenericNameSyntax genericName)
-            {
-                return new SimpleType(
+            IdentifierNameSyntax name
+                => new SimpleType(Identifier.FromSyntax(name.Identifier)),
+            GenericNameSyntax genericName when genericName.IsUnboundGenericName && _ignoreUnboundGenerics
+                => new SimpleType(Identifier.FromSyntax(genericName.Identifier)),
+            GenericNameSyntax genericName when !genericName.IsUnboundGenericName
+                => new SimpleType(
                     Identifier.FromSyntax(genericName.Identifier),
-                    genericName.TypeArgumentList.Arguments.Select(QualifiedType.FromSyntax));
-            }
-            else
-            {
-                throw new ArgumentException("Not a simple type", nameof(_syntax));
-            }
-        }
+                    genericName.TypeArgumentList.Arguments.Select(_a => QualifiedType.FromSyntax(_a, _ignoreUnboundGenerics))),
+            _ => throw new ArgumentException("Not a simple type", nameof(_syntax))
+        };
 
-        public static SimpleType Parse(string _type)
+        public static SimpleType Parse(string _type, bool _ignoreUnboundGenerics = false)
+            => FromSyntax(SyntaxFactory.ParseTypeName(_type), _ignoreUnboundGenerics);
+
+        public static SimpleType FromType<TType>(bool _ignoreUnboundGenerics = false)
+            => FromType(typeof(TType), _ignoreUnboundGenerics);
+
+        public static SimpleType FromType(Type _type, bool _ignoreUnboundGenerics = false)
         {
-            TypeSyntax syntax = SyntaxFactory.ParseTypeName(_type);
-            if (syntax is SimpleNameSyntax simpleSyntax)
-            {
-                return FromSyntax(simpleSyntax);
-            }
-            else if (syntax is PredefinedTypeSyntax predefinedSyntax)
-            {
-                return FromSyntax(predefinedSyntax);
-            }
-            else
-            {
-                throw new ArgumentException("Not a simple type", nameof(_type));
-            }
-        }
-
-        public static SimpleType FromType<TType>()
-            => FromType(typeof(TType));
-
-        public static SimpleType FromType(Type _type)
-        {
-            if (_type.IsGenericTypeDefinition)
+            if (_type.IsGenericTypeDefinition && !_ignoreUnboundGenerics)
             {
                 throw new ArgumentException("Unbound type", nameof(_type));
             }
@@ -125,8 +97,13 @@ namespace VooDo.Factory.Syntax
             }
             else
             {
-                string name = _type.Name.Substring(0, _type.Name.IndexOf('`'));
-                return new SimpleType(name, _type.GenericTypeArguments.Select(QualifiedType.FromType));
+                string? name = _type.Name;
+                int length = _type.Name.IndexOf('`');
+                if (length > 0)
+                {
+                    name = _type.Name.Substring(0, length);
+                }
+                return new SimpleType(name, _type.GenericTypeArguments.Select(_a => QualifiedType.FromType(_a, _ignoreUnboundGenerics)));
             }
         }
 

@@ -1,4 +1,4 @@
-﻿#nullable enable
+﻿
 
 using Microsoft.CodeAnalysis;
 
@@ -8,7 +8,6 @@ using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.InteropServices;
 
 using VooDo.Transformation;
 using VooDo.Utils;
@@ -24,30 +23,24 @@ namespace VooDo.Factory
 
         private sealed class MetadataEqualityComparerImpl : IEqualityComparer<Reference>
         {
-            public bool Equals(Reference _x, Reference _y) => AreSameMetadata(_x, _y);
+            public bool Equals(Reference? _x, Reference? _y) => AreSameMetadata(_x, _y);
             public int GetHashCode(Reference _obj) => _obj.GetHashCode();
         }
 
         public static IEqualityComparer<Reference> MetadataEqualityComparer { get; } = new MetadataEqualityComparerImpl();
 
-        public static IEnumerable<Reference> GetDotNetReferences()
+        public static IEnumerable<Reference> GetSystemReferences()
         {
-            yield break;
-            string parent = RuntimeEnvironment.GetRuntimeDirectory();
-            HashSet<string> names = new()
+            HashSet<string> paths = new()
             {
-                @"mscorlib",
-                @"netstandard",
-                @"System",
-                @"System.Runtime",
-                @"System.Core",
+                typeof(object).Assembly.Location
             };
-            foreach (string name in names)
+            foreach (string path in paths)
             {
                 Reference? reference = null;
                 try
                 {
-                    reference = FromFile(Path.Combine(parent, name + ".dll"));
+                    reference = FromFile(path);
                 }
                 catch (Exception error)
                 {
@@ -74,46 +67,26 @@ namespace VooDo.Factory
 
         public static Reference FromStream(Stream _stream, IEnumerable<Identifier>? _aliases = null)
         {
-            if (_stream == null)
-            {
-                throw new ArgumentNullException(nameof(_stream));
-            }
             return new Reference(MetadataReference.CreateFromStream(_stream), _aliases);
         }
 
         public static Reference FromFile(string _path, IEnumerable<Identifier>? _aliases = null)
         {
-            if (_path == null)
-            {
-                throw new ArgumentNullException(nameof(_path));
-            }
             return new Reference(MetadataReference.CreateFromFile(_path), _aliases);
         }
 
         public static Reference FromImage(IEnumerable<byte> _bytes, IEnumerable<Identifier>? _aliases = null)
         {
-            if (_bytes == null)
-            {
-                throw new ArgumentNullException(nameof(_bytes));
-            }
             return new Reference(MetadataReference.CreateFromImage(_bytes), _aliases);
         }
 
         public static Reference FromAssembly(Assembly _assembly, IEnumerable<Identifier>? _aliases = null)
         {
-            if (_assembly == null)
-            {
-                throw new ArgumentNullException(nameof(_assembly));
-            }
             return FromFile(_assembly.Location, _aliases ?? Enumerable.Empty<Identifier>());
         }
 
         private Reference(PortableExecutableReference _metadata, IEnumerable<Identifier>? _aliases = null)
         {
-            if (_metadata == null)
-            {
-                throw new ArgumentNullException(nameof(_metadata));
-            }
             Aliases = _aliases.EmptyIfNull().ToImmutableHashSet();
             if (Aliases.AnyNull())
             {
@@ -133,7 +106,7 @@ namespace VooDo.Factory
             => WithAliases((IEnumerable<Identifier>) _aliases);
 
         public Reference WithAliases(IEnumerable<Identifier>? _aliases = null)
-            => Aliases.SetEquals(_aliases) ? this : new Reference(m_metadata, _aliases);
+            => Aliases.SetEquals(_aliases.EmptyIfNull()) ? this : new Reference(m_metadata, _aliases);
 
         internal MetadataReference GetMetadataReference() => m_metadata.WithAliases(Aliases.Select(_a => _a.ToString()));
 

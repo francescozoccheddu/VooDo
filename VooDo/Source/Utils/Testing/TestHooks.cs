@@ -42,7 +42,7 @@ namespace VooDo.Utils.Testing
         public TestHookInitializer(string _humanReadableId) => m_humanReadableId = _humanReadableId;
 
         public ExpressionSyntax GetHookInitializerSyntax()
-            => SyntaxFactoryHelper.NewObject(SyntaxFactoryHelper.Type(typeof(TestHook)), m_humanReadableId);
+            => null;
 
     }
 

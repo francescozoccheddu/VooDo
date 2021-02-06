@@ -1,4 +1,4 @@
-﻿#nullable enable
+﻿
 
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;

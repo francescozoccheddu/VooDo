@@ -4,8 +4,6 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Editing;
 
 using System;
-using System.CodeDom;
-using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -15,27 +13,11 @@ namespace VooDo.Utils
     public static class SyntaxFactoryHelper
     {
 
-        private static CodeDomProvider s_codeDomProvider = null;
         private static SyntaxGenerator s_generator = null;
-
-        public static CodeDomProvider CodeDomProvider => s_codeDomProvider == null
-            ? s_codeDomProvider = CodeDomProvider.CreateProvider("CSharp")
-            : s_codeDomProvider;
 
         public static SyntaxGenerator Generator => s_generator == null
             ? s_generator = SyntaxGenerator.GetGenerator(new AdhocWorkspace(), LanguageNames.CSharp)
             : s_generator;
-
-        public static TypeSyntax Type(Type _type, string _alias = null)
-        {
-            string prefix = _alias != null ? $"{_alias}::" : "";
-            if (_type == null)
-            {
-                throw new ArgumentNullException(nameof(_type));
-            }
-            CodeTypeReference reference = new CodeTypeReference(_type);
-            return SyntaxFactory.ParseTypeName(prefix + CodeDomProvider.GetTypeOutput(reference));
-        }
 
         public static NameSyntax GenericType(NameSyntax _type, IEnumerable<TypeSyntax> _typeArguments)
         {

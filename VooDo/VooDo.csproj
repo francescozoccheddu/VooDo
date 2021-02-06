@@ -1,209 +1,21 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <NullableContextOptions>enable</NullableContextOptions>
-    <Nullable>enable</Nullable>
-    <NullableReferenceTypes>true</NullableReferenceTypes>
+    <TargetFramework>net5.0-windows10.0.18362</TargetFramework>
+    <TargetPlatformMinVersion>10.0.17134.0</TargetPlatformMinVersion>
     <LangVersion>9.0</LangVersion>
-  </PropertyGroup>
-  <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{D4B3D28F-7B0F-4A86-81D2-9D88C2CE3E5F}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <Nullable>enable</Nullable>
     <RootNamespace>VooDo</RootNamespace>
-    <AssemblyName>VooDo</AssemblyName>
-    <DefaultLanguage>en-US</DefaultLanguage>
-    <TargetPlatformIdentifier>UAP</TargetPlatformIdentifier>
-    <TargetPlatformVersion Condition=" '$(TargetPlatformVersion)' == '' ">10.0.19041.0</TargetPlatformVersion>
-    <TargetPlatformMinVersion>10.0.19041.0</TargetPlatformMinVersion>
-    <MinimumVisualStudioVersion>14</MinimumVisualStudioVersion>
-    <FileAlignment>512</FileAlignment>
-    <ProjectTypeGuids>{A5A43C5B-DE2A-4C0C-9213-0A381AF9435A};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <RuntimeIdentifiers>win10-x86;win10-x64;win10-arm64</RuntimeIdentifiers>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE;NETFX_CORE;WINDOWS_UWP</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <NoWarn>CS3021</NoWarn>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE;NETFX_CORE;WINDOWS_UWP</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <NoWarn>CS3021</NoWarn>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
-    <PlatformTarget>x86</PlatformTarget>
-    <DebugSymbols>true</DebugSymbols>
-    <OutputPath>bin\x86\Debug\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;NETFX_CORE;WINDOWS_UWP</DefineConstants>
-    <NoWarn>CS3021</NoWarn>
-    <DebugType>full</DebugType>
-    <UseVSHostingProcess>false</UseVSHostingProcess>
-    <ErrorReport>prompt</ErrorReport>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
-    <PlatformTarget>x86</PlatformTarget>
-    <OutputPath>bin\x86\Release\</OutputPath>
-    <DefineConstants>TRACE;NETFX_CORE;WINDOWS_UWP</DefineConstants>
-    <Optimize>true</Optimize>
-    <NoWarn>CS3021</NoWarn>
-    <DebugType>pdbonly</DebugType>
-    <UseVSHostingProcess>false</UseVSHostingProcess>
-    <ErrorReport>prompt</ErrorReport>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|ARM'">
-    <PlatformTarget>ARM</PlatformTarget>
-    <DebugSymbols>true</DebugSymbols>
-    <OutputPath>bin\ARM\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE;NETFX_CORE;WINDOWS_UWP</DefineConstants>
-    <NoWarn>CS3021</NoWarn>
-    <DebugType>full</DebugType>
-    <UseVSHostingProcess>false</UseVSHostingProcess>
-    <ErrorReport>prompt</ErrorReport>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|ARM'">
-    <PlatformTarget>ARM</PlatformTarget>
-    <OutputPath>bin\ARM\Release\</OutputPath>
-    <DefineConstants>TRACE;NETFX_CORE;WINDOWS_UWP</DefineConstants>
-    <Optimize>true</Optimize>
-    <NoWarn>CS3021</NoWarn>
-    <DebugType>pdbonly</DebugType>
-    <UseVSHostingProcess>false</UseVSHostingProcess>
-    <ErrorReport>prompt</ErrorReport>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|ARM64'">
-    <PlatformTarget>ARM64</PlatformTarget>
-    <DebugSymbols>true</DebugSymbols>
-    <OutputPath>bin\ARM64\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE;NETFX_CORE;WINDOWS_UWP</DefineConstants>
-    <NoWarn>CS3021</NoWarn>
-    <DebugType>full</DebugType>
-    <UseVSHostingProcess>false</UseVSHostingProcess>
-    <ErrorReport>prompt</ErrorReport>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|ARM64'">
-    <PlatformTarget>ARM64</PlatformTarget>
-    <OutputPath>bin\ARM64\Release\</OutputPath>
-    <DefineConstants>TRACE;NETFX_CORE;WINDOWS_UWP</DefineConstants>
-    <Optimize>true</Optimize>
-    <NoWarn>CS3021</NoWarn>
-    <DebugType>pdbonly</DebugType>
-    <UseVSHostingProcess>false</UseVSHostingProcess>
-    <ErrorReport>prompt</ErrorReport>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
-    <PlatformTarget>x64</PlatformTarget>
-    <DebugSymbols>true</DebugSymbols>
-    <OutputPath>bin\x64\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE;NETFX_CORE;WINDOWS_UWP</DefineConstants>
-    <NoWarn>CS3021</NoWarn>
-    <DebugType>full</DebugType>
-    <UseVSHostingProcess>false</UseVSHostingProcess>
-    <ErrorReport>prompt</ErrorReport>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
-    <PlatformTarget>x64</PlatformTarget>
-    <OutputPath>bin\x64\Release\</OutputPath>
-    <DefineConstants>TRACE;NETFX_CORE;WINDOWS_UWP</DefineConstants>
-    <Optimize>true</Optimize>
-    <NoWarn>CS3021</NoWarn>
-    <DebugType>pdbonly</DebugType>
-    <UseVSHostingProcess>false</UseVSHostingProcess>
-    <ErrorReport>prompt</ErrorReport>
-  </PropertyGroup>
-  <PropertyGroup>
-    <RestoreProjectStyle>PackageReference</RestoreProjectStyle>
-  </PropertyGroup>
+
   <ItemGroup>
-    <Compile Include="Source\Factory\CompiledScript.cs" />
-    <Compile Include="Source\Factory\Origin.cs" />
-    <Compile Include="Source\Factory\QualifiedTypeOrVar.cs" />
-    <Compile Include="Source\Factory\Syntax\Identifier.cs" />
-    <Compile Include="Source\Factory\Syntax\Namespace.cs" />
-    <Compile Include="Source\Factory\Problem.cs" />
-    <Compile Include="Source\Factory\Reference.cs" />
-    <Compile Include="Source\Factory\Syntax\SimpleType.cs" />
-    <Compile Include="Source\Factory\Syntax\QualifiedType.cs" />
-    <Compile Include="Source\Factory\Global.cs" />
-    <Compile Include="Source\Factory\ScriptSource.cs" />
-    <Compile Include="Source\Hooks\IHookListener.cs" />
-    <Compile Include="Source\Parsing\Parser.cs" />
-    <Compile Include="Source\Parsing\ParserHelper.cs" />
-    <Compile Include="Source\Parsing\Visitor.cs" />
-    <Compile Include="Source\Transformation\SyntaxValidator.cs" />
-    <Compile Include="Source\Transformation\Controller.cs" />
-    <Compile Include="Source\Transformation\DiagnosticFactory.cs" />
-    <Compile Include="Source\Transformation\EventCatcherRewriter.cs" />
-    <Compile Include="Source\Transformation\GetEventOverload.cs" />
-    <Compile Include="Source\Transformation\GlobalVariableDeclarationRewriter.cs" />
-    <Compile Include="Source\Transformation\IControllerFactory.cs" />
-    <Compile Include="Source\Transformation\Identifiers.cs" />
-    <Compile Include="Source\Transformation\Meta.cs" />
-    <Compile Include="Source\Transformation\OriginExtensions.cs" />
-    <Compile Include="Source\Transformation\OriginRewriter.cs" />
-    <Compile Include="Source\Transformation\TransformationException.cs" />
-    <Compile Include="Source\Transformation\Variable.cs" />
-    <Compile Include="Source\Transformation\ExpressionHookGluer.cs" />
-    <Compile Include="Source\Hooks\IHook.cs" />
-    <Compile Include="Source\Transformation\HookInitializerList.cs" />
-    <Compile Include="Source\Transformation\IHookInitializer.cs" />
-    <Compile Include="Source\Transformation\IHookInitializerProvider.cs" />
-    <Compile Include="Source\Transformation\Script.cs" />
-    <Compile Include="Source\Transformation\ScriptFactory.cs" />
-    <Compile Include="Source\Transformation\ScriptTransformer_old.cs" />
-    <Compile Include="Source\Transformation\ScriptGenerator_old.cs" />
-    <Compile Include="Source\Transformation\GlobalVariableAccessRewriter.cs" />
-    <Compile Include="Source\Utils\Compiler.cs" />
-    <Compile Include="Source\Utils\EnumerableHelper.cs" />
-    <Compile Include="Source\Utils\Identity.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Source\Utils\SyntaxFactoryHelper.cs" />
-    <Compile Include="Source\Utils\Testing\TestHooks.cs" />
-    <EmbeddedResource Include="Properties\VooDo.rd.xml" />
+    <PackageReference Include="Antlr4.Runtime.Standard" Version="4.9.1" />
+    <PackageReference Include="Antlr4BuildTasks" Version="8.13.0" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="3.8.0" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Features" Version="3.8.0" />
+    <PackageReference Include="Microsoft.WinUI" Version="3.0.0-preview3.201113.0" />
   </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="Antlr4.Runtime.Standard">
-      <Version>4.9.1</Version>
-    </PackageReference>
-    <PackageReference Include="Antlr4BuildTasks">
-      <Version>8.13.0</Version>
-    </PackageReference>
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp">
-      <Version>3.8.0</Version>
-    </PackageReference>
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Features">
-      <Version>3.8.0</Version>
-    </PackageReference>
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting">
-      <Version>3.8.0</Version>
-    </PackageReference>
-    <PackageReference Include="Microsoft.NETCore.UniversalWindowsPlatform">
-      <Version>6.2.11</Version>
-    </PackageReference>
-    <PackageReference Include="System.CodeDom">
-      <Version>5.0.0</Version>
-    </PackageReference>
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Source\Runtime\" />
-  </ItemGroup>
-  <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">
-    <VisualStudioVersion>14.0</VisualStudioVersion>
-  </PropertyGroup>
-  <Import Project="$(MSBuildExtensionsPath)\Microsoft\WindowsXaml\v$(VisualStudioVersion)\Microsoft.Windows.UI.Xaml.CSharp.targets" />
+
   <ItemGroup>
     <Antlr4 Include="$(ProjectDir)Source\Parsing\VooDoLexer.g4">
       <Listener>false</Listener>
@@ -220,4 +32,5 @@
       <Error>true</Error>
     </Antlr4>
   </ItemGroup>
+  
 </Project>
