@@ -9,7 +9,7 @@ namespace VooDo.Factory
     public sealed class Global : IEquatable<Global>
     {
 
-        public Global(QualifiedType _type, Identifier _name)
+        public Global(QualifiedTypeOrVar _type, Identifier _name)
         {
             if (_type == null)
             {
@@ -24,7 +24,7 @@ namespace VooDo.Factory
         }
 
         public Identifier Name { get; }
-        public QualifiedType Type { get; }
+        public QualifiedTypeOrVar Type { get; }
 
         public override bool Equals(object _obj) => Equals(_obj as Global);
         public bool Equals(Global _other) => _other != null && Name == _other.Name && Type == _other.Type;
@@ -33,11 +33,11 @@ namespace VooDo.Factory
         public override int GetHashCode() => Identity.CombineHash(Name, Type);
         public override string ToString() => $"{{{nameof(Global)}: {Type} {Name}}}";
 
-        public Global WithType(QualifiedType _type)
-            => new Global(_type, Name);
+        public Global WithType(QualifiedTypeOrVar _type)
+            => _type == Type ? this : new Global(_type, Name);
 
         public Global WithName(Identifier _name)
-            => new Global(Type, _name);
+            => _name == Name ? this : new Global(Type, _name);
 
     }
 

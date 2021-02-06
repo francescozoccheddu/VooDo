@@ -110,7 +110,7 @@ namespace VooDo.Parsing
             => SF.VariableDeclaration(Get<TypeSyntax>(_type), CommaSeparatedList(Get<VariableDeclaratorSyntax>(_declarators), _commas));
 
         private VariableDeclaratorSyntax VariableDeclarator(VooDoParser.NameContext _name, IToken _assign, ParserRuleContext _initializer, ParserRuleContext _declarator)
-            => SF.VariableDeclarator(Get<SyntaxToken>(_name), null, SF.EqualsValueClause(Tk(_assign), TryGet<ExpressionSyntax>(_initializer)).From(_declarator));
+            => SF.VariableDeclarator(Get<SyntaxToken>(_name), null, _assign != null ? SF.EqualsValueClause(Tk(_assign), TryGet<ExpressionSyntax>(_initializer)).From(_declarator) : null);
 
         private object Variant(params ParserRuleContext[] _rules)
             => Visit(_rules.Where(_r => _r != null).Single());

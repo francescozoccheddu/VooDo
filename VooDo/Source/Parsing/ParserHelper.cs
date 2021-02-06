@@ -19,7 +19,7 @@ namespace VooDo.Parsing
 
 
         internal static TextSpan GetSpan(this ParserRuleContext _context)
-            => new TextSpan(_context.Start.StartIndex, _context.Stop.StopIndex);
+            => new TextSpan(_context.Start.StartIndex, _context.Stop?.StopIndex ?? _context.Start.StopIndex);
         internal static TextSpan GetSpan(this IToken _token)
             => new TextSpan(_token.StartIndex, _token.StopIndex);
 

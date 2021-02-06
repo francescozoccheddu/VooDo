@@ -27,7 +27,7 @@ namespace VooDo.Transformation
         }
 
         public static TNode WithOriginalSpan<TNode>(this TNode _node, TextSpan? _span, bool _recursive) where TNode : SyntaxNode
-            => _recursive ? OriginalSpanRewriter.RewriteAbsolute(_node, _span) : _node.WithOriginalSpan(_span);
+            => _recursive ? OriginRewriter.RewriteAbsolute(_node, _span) : _node.WithOriginalSpan(_span);
 
         public static TNode WithOriginalSpan<TNode>(this TNode _node, TextSpan? _span) where TNode : SyntaxNode
         {

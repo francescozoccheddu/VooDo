@@ -9,7 +9,7 @@ using System.Linq;
 
 using VooDo.Utils;
 
-namespace VooDo.Factory
+namespace VooDo.Factory.Syntax
 {
     public sealed class Namespace : IEquatable<Namespace>
     {
@@ -124,10 +124,13 @@ namespace VooDo.Factory
         public override string ToString() => (IsAliasQualified ? $"{Alias}::" : "") + string.Join('.', Path);
 
         public Namespace WithAlias(Identifier _alias)
-            => new Namespace(_alias, Path);
+            => _alias == Alias ? this : new Namespace(_alias, Path);
+
+        public Namespace WithPath(params Identifier[] _path)
+            => WithPath((IEnumerable<Identifier>) _path);
 
         public Namespace WithPath(IEnumerable<Identifier> _path)
-            => new Namespace(Alias, _path);
+            => Path.SequenceEqual(_path) ? this : new Namespace(Alias, _path);
 
     }
 }

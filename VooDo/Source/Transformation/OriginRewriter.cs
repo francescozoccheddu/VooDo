@@ -7,23 +7,19 @@ using System;
 namespace VooDo.Transformation
 {
 
-    public static partial class OriginalSpanRewriter
+    public static partial class OriginRewriter
     {
 
         private sealed class RelativeRewriter : CSharpSyntaxRewriter
         {
 
-            private readonly int m_offset;
-
-            public RelativeRewriter(int _offset) => m_offset = _offset;
-
             public override SyntaxNode Visit(SyntaxNode _node)
                 => base.Visit(_node)
-                ?.WithOriginalSpan(_node.GetOriginalOrFullSpan().Offset(m_offset));
+                ?.WithOriginalSpan(_node.GetOriginalOrFullSpan());
 
             public override SyntaxToken VisitToken(SyntaxToken _token)
                 => base.VisitToken(_token)
-                .WithOriginalSpan(_token.GetOriginalOrFullSpan().Offset(m_offset));
+                .WithOriginalSpan(_token.GetOriginalOrFullSpan());
 
         }
 
@@ -44,13 +40,13 @@ namespace VooDo.Transformation
 
         }
 
-        public static TNode RewriteRelative<TNode>(TNode _node, int _offset = 0) where TNode : SyntaxNode
+        public static TNode RewriteFromFullSpan<TNode>(TNode _node) where TNode : SyntaxNode
         {
             if (_node == null)
             {
                 throw new ArgumentNullException(nameof(_node));
             }
-            RelativeRewriter rewriter = new RelativeRewriter(_offset);
+            RelativeRewriter rewriter = new RelativeRewriter();
             return (TNode) rewriter.Visit(_node);
         }
 

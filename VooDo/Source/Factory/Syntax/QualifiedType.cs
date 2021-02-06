@@ -192,16 +192,22 @@ namespace VooDo.Factory.Syntax
             => $"{(IsAliasQualified ? $"{Alias}::" : "")}{string.Join('.', Path)}{(IsNullable ? "?" : "")}{string.Concat(Ranks.Select(_r => $"[{new string(',', _r - 1)}]"))}";
 
         public QualifiedType WithAlias(Identifier _alias = null)
-            => new QualifiedType(_alias, Path, IsNullable, Ranks);
+            => _alias == Alias ? this : new QualifiedType(_alias, Path, IsNullable, Ranks);
+
+        public QualifiedType WithPath(params SimpleType[] _path)
+            => WithPath((IEnumerable<SimpleType>) _path);
 
         public QualifiedType WithPath(IEnumerable<SimpleType> _path)
-            => new QualifiedType(Alias, _path, IsNullable, Ranks);
+            => Path.SequenceEqual(_path) ? this : new QualifiedType(Alias, _path, IsNullable, Ranks);
 
         public QualifiedType WithIsNullable(bool _nullable)
-            => new QualifiedType(Alias, Path, _nullable, Ranks);
+            => _nullable == IsNullable ? this : new QualifiedType(Alias, Path, _nullable, Ranks);
+
+        public QualifiedType WithRanks(int[] _ranks)
+            => WithRanks((IEnumerable<int>) _ranks);
 
         public QualifiedType WithRanks(IEnumerable<int> _ranks)
-            => new QualifiedType(Alias, Path, IsNullable, _ranks);
+            => Ranks.SequenceEqual(_ranks) ? this : new QualifiedType(Alias, Path, IsNullable, _ranks);
 
     }
 }

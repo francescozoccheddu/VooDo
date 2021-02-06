@@ -178,13 +178,13 @@ namespace VooDo.Factory.Syntax
         public override string ToString() => TypeArguments.Any() ? $"{Name}<{string.Join(',', TypeArguments)}>" : $"{Name}";
 
         public SimpleType WithName(Identifier _name)
-            => new SimpleType(_name, TypeArguments);
+            => _name == Name ? this : new SimpleType(_name, TypeArguments);
 
         public SimpleType WithTypeArguments(params QualifiedType[] _typeArguments)
             => WithTypeArguments((IEnumerable<QualifiedType>) _typeArguments);
 
         public SimpleType WithTypeArguments(IEnumerable<QualifiedType> _typeArguments = null)
-            => new SimpleType(Name, _typeArguments);
+            => TypeArguments.SequenceEqual(_typeArguments) ? this : new SimpleType(Name, _typeArguments);
 
     }
 

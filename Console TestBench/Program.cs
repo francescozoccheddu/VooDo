@@ -1,10 +1,7 @@
-﻿using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-
+﻿
 using System;
 
-using VooDo.Parsing;
+using VooDo.Factory;
 
 namespace VooDoTB
 {
@@ -14,14 +11,14 @@ namespace VooDoTB
         private static void Main(string[] _args)
         {
             string code = @"
-if (x is int x)
-{}
-if (x is int _)
-{}
-x.ciao(out int a, out int _);
+int VooDo_VooDo;
+int x = 7;
+global float y = 8;
+global var z = 8;
             ";
-            CompilationUnitSyntax script = Parser.ParseAnyScript(code);
-            Console.WriteLine(script.NormalizeWhitespace().ToFullString());
+            ScriptSource.FromScript(code)
+                .WithAdditionalReferences(Reference.FromAssembly(typeof(object).Assembly))
+                .Compile();
             Console.WriteLine("Press any key to exit");
             Console.ReadLine();
         }
