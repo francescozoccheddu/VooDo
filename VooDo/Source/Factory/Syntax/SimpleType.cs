@@ -1,4 +1,6 @@
-﻿using Microsoft.CodeAnalysis.CSharp;
+﻿#nullable enable
+
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 using System;
@@ -36,10 +38,6 @@ namespace VooDo.Factory.Syntax
 
         public static SimpleType FromSyntax(TypeSyntax _syntax)
         {
-            if (_syntax == null)
-            {
-                throw new ArgumentNullException(nameof(_syntax));
-            }
             if (_syntax is SimpleNameSyntax simple)
             {
                 return FromSyntax(simple);
@@ -55,20 +53,10 @@ namespace VooDo.Factory.Syntax
         }
 
         public static SimpleType FromSyntax(PredefinedTypeSyntax _syntax)
-        {
-            if (_syntax == null)
-            {
-                throw new ArgumentNullException(nameof(_syntax));
-            }
-            return new SimpleType(Identifier.FromSyntax(_syntax.Keyword));
-        }
+            => new SimpleType(Identifier.FromSyntax(_syntax.Keyword));
 
         public static SimpleType FromSyntax(SimpleNameSyntax _syntax)
         {
-            if (_syntax == null)
-            {
-                throw new ArgumentNullException(nameof(_syntax));
-            }
             if (_syntax is IdentifierNameSyntax name)
             {
                 return new SimpleType(Identifier.FromSyntax(name.Identifier));
@@ -87,10 +75,6 @@ namespace VooDo.Factory.Syntax
 
         public static SimpleType Parse(string _type)
         {
-            if (_type == null)
-            {
-                throw new ArgumentNullException(nameof(_type));
-            }
             TypeSyntax syntax = SyntaxFactory.ParseTypeName(_type);
             if (syntax is SimpleNameSyntax simpleSyntax)
             {
@@ -111,10 +95,6 @@ namespace VooDo.Factory.Syntax
 
         public static SimpleType FromType(Type _type)
         {
-            if (_type == null)
-            {
-                throw new ArgumentNullException(nameof(_type));
-            }
             if (_type.IsGenericTypeDefinition)
             {
                 throw new ArgumentException("Unbound type", nameof(_type));
@@ -153,12 +133,8 @@ namespace VooDo.Factory.Syntax
         public static implicit operator SimpleType(string _type) => Parse(_type);
         public static implicit operator SimpleType(Type _type) => FromType(_type);
 
-        public SimpleType(Identifier _name, IEnumerable<QualifiedType> _typeArguments = null)
+        public SimpleType(Identifier _name, IEnumerable<QualifiedType>? _typeArguments = null)
         {
-            if (_name == null)
-            {
-                throw new ArgumentNullException(nameof(_name));
-            }
             Name = _name;
             TypeArguments = _typeArguments.EmptyIfNull().ToImmutableArray();
             if (TypeArguments.AnyNull())
@@ -170,11 +146,11 @@ namespace VooDo.Factory.Syntax
         public Identifier Name { get; }
         public ImmutableArray<QualifiedType> TypeArguments { get; }
 
-        public override bool Equals(object _obj) => Equals(_obj as SimpleType);
-        public bool Equals(SimpleType _other) => _other != null && Name == _other.Name && TypeArguments.SequenceEqual(_other.TypeArguments);
+        public override bool Equals(object? _obj) => Equals(_obj as SimpleType);
+        public bool Equals(SimpleType? _other) => _other != null && Name == _other.Name && TypeArguments.SequenceEqual(_other.TypeArguments);
         public override int GetHashCode() => Identity.CombineHash(Name, Identity.CombineHashes(TypeArguments));
-        public static bool operator ==(SimpleType _left, SimpleType _right) => Identity.AreEqual(_left, _right);
-        public static bool operator !=(SimpleType _left, SimpleType _right) => !(_left == _right);
+        public static bool operator ==(SimpleType? _left, SimpleType? _right) => Identity.AreEqual(_left, _right);
+        public static bool operator !=(SimpleType? _left, SimpleType? _right) => !(_left == _right);
         public override string ToString() => TypeArguments.Any() ? $"{Name}<{string.Join(',', TypeArguments)}>" : $"{Name}";
 
         public SimpleType WithName(Identifier _name)
@@ -183,8 +159,8 @@ namespace VooDo.Factory.Syntax
         public SimpleType WithTypeArguments(params QualifiedType[] _typeArguments)
             => WithTypeArguments((IEnumerable<QualifiedType>) _typeArguments);
 
-        public SimpleType WithTypeArguments(IEnumerable<QualifiedType> _typeArguments = null)
-            => TypeArguments.SequenceEqual(_typeArguments) ? this : new SimpleType(Name, _typeArguments);
+        public SimpleType WithTypeArguments(IEnumerable<QualifiedType>? _typeArguments = null)
+            => TypeArguments.Equals(_typeArguments) ? this : new SimpleType(Name, _typeArguments);
 
     }
 

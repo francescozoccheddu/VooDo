@@ -2,6 +2,12 @@
 <Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
+    <NullableContextOptions>enable</NullableContextOptions>
+    <Nullable>enable</Nullable>
+    <NullableReferenceTypes>true</NullableReferenceTypes>
+    <LangVersion>9.0</LangVersion>
+  </PropertyGroup>
+  <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{D4B3D28F-7B0F-4A86-81D2-9D88C2CE3E5F}</ProjectGuid>
@@ -123,6 +129,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Source\Factory\CompiledScript.cs" />
+    <Compile Include="Source\Factory\Origin.cs" />
     <Compile Include="Source\Factory\QualifiedTypeOrVar.cs" />
     <Compile Include="Source\Factory\Syntax\Identifier.cs" />
     <Compile Include="Source\Factory\Syntax\Namespace.cs" />
@@ -136,7 +143,7 @@
     <Compile Include="Source\Parsing\Parser.cs" />
     <Compile Include="Source\Parsing\ParserHelper.cs" />
     <Compile Include="Source\Parsing\Visitor.cs" />
-    <Compile Include="Source\Transformation\BodyValidator.cs" />
+    <Compile Include="Source\Transformation\SyntaxValidator.cs" />
     <Compile Include="Source\Transformation\Controller.cs" />
     <Compile Include="Source\Transformation\DiagnosticFactory.cs" />
     <Compile Include="Source\Transformation\EventCatcherRewriter.cs" />
@@ -145,7 +152,7 @@
     <Compile Include="Source\Transformation\IControllerFactory.cs" />
     <Compile Include="Source\Transformation\Identifiers.cs" />
     <Compile Include="Source\Transformation\Meta.cs" />
-    <Compile Include="Source\Transformation\TextSpanExtensions.cs" />
+    <Compile Include="Source\Transformation\OriginExtensions.cs" />
     <Compile Include="Source\Transformation\OriginRewriter.cs" />
     <Compile Include="Source\Transformation\TransformationException.cs" />
     <Compile Include="Source\Transformation\Variable.cs" />

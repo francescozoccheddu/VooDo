@@ -17,7 +17,8 @@ global float y = 8;
 global var z = 8;
             ";
             ScriptSource.FromScript(code)
-                .WithAdditionalReferences(Reference.FromAssembly(typeof(object).Assembly))
+                .WithAdditionalReferences(Reference.GetDotNetReferences())
+                .WithAdditionalUsingDirectives("System")
                 .Compile();
             Console.WriteLine("Press any key to exit");
             Console.ReadLine();

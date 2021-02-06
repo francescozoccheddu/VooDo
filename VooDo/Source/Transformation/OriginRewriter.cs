@@ -1,8 +1,9 @@
-﻿using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.Text;
+﻿#nullable enable
 
-using System;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+
+using VooDo.Factory;
 
 namespace VooDo.Transformation
 {
@@ -13,52 +14,38 @@ namespace VooDo.Transformation
         private sealed class RelativeRewriter : CSharpSyntaxRewriter
         {
 
-            public override SyntaxNode Visit(SyntaxNode _node)
+            public override SyntaxNode? Visit(SyntaxNode? _node)
                 => base.Visit(_node)
-                ?.WithOriginalSpan(_node.GetOriginalOrFullSpan());
+                ?.WithOrigin(_node!.TryGetOrigin() ?? OriginExtensions.FromSpan(_node!.Span));
 
             public override SyntaxToken VisitToken(SyntaxToken _token)
                 => base.VisitToken(_token)
-                .WithOriginalSpan(_token.GetOriginalOrFullSpan());
+                .WithOrigin(_token.TryGetOrigin() ?? OriginExtensions.FromSpan(_token.Span));
 
         }
 
         private sealed class AbsoluteRewriter : CSharpSyntaxRewriter
         {
 
-            private readonly TextSpan? m_span;
+            private readonly Origin? m_origin;
 
-            public AbsoluteRewriter(TextSpan? _span) => m_span = _span;
+            public AbsoluteRewriter(Origin? _origin) => m_origin = _origin;
 
-            public override SyntaxNode Visit(SyntaxNode _node)
+            public override SyntaxNode? Visit(SyntaxNode? _node)
                 => base.Visit(_node)
-                ?.WithOriginalSpan(m_span);
+                ?.WithOrigin(m_origin);
 
             public override SyntaxToken VisitToken(SyntaxToken _token)
                 => base.VisitToken(_token)
-                .WithOriginalSpan(m_span);
+                .WithOrigin(m_origin);
 
         }
 
         public static TNode RewriteFromFullSpan<TNode>(TNode _node) where TNode : SyntaxNode
-        {
-            if (_node == null)
-            {
-                throw new ArgumentNullException(nameof(_node));
-            }
-            RelativeRewriter rewriter = new RelativeRewriter();
-            return (TNode) rewriter.Visit(_node);
-        }
+            => (TNode) new RelativeRewriter().Visit(_node)!;
 
-        public static TNode RewriteAbsolute<TNode>(TNode _node, TextSpan? _span) where TNode : SyntaxNode
-        {
-            if (_node == null)
-            {
-                throw new ArgumentNullException(nameof(_node));
-            }
-            AbsoluteRewriter rewriter = new AbsoluteRewriter(_span);
-            return (TNode) rewriter.Visit(_node);
-        }
+        public static TNode RewriteAbsolute<TNode>(TNode _node, Origin? _origin) where TNode : SyntaxNode
+            => (TNode) new AbsoluteRewriter(_origin).Visit(_node)!;
 
     }
 

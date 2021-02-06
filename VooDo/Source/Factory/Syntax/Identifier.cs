@@ -1,4 +1,6 @@
-﻿using Microsoft.CodeAnalysis;
+﻿#nullable enable
+
+using Microsoft.CodeAnalysis;
 
 using System;
 using System.Collections.Generic;
@@ -38,10 +40,10 @@ namespace VooDo.Factory
         public static implicit operator string(Identifier _identifier) => _identifier.m_identifier;
         public static implicit operator Identifier(string _identifier) => new Identifier(_identifier);
 
-        public override bool Equals(object _obj) => Equals(_obj as Identifier);
-        public bool Equals(Identifier _other) => _other != null && m_identifier == _other.m_identifier;
-        public static bool operator ==(Identifier _left, Identifier _right) => EqualityComparer<Identifier>.Default.Equals(_left, _right);
-        public static bool operator !=(Identifier _left, Identifier _right) => !(_left == _right);
+        public override bool Equals(object? _obj) => Equals(_obj as Identifier);
+        public bool Equals(Identifier? _other) => _other != null && m_identifier == _other.m_identifier;
+        public static bool operator ==(Identifier? _left, Identifier? _right) => EqualityComparer<Identifier>.Default.Equals(_left, _right);
+        public static bool operator !=(Identifier? _left, Identifier? _right) => !(_left == _right);
         public override int GetHashCode() => m_identifier.GetHashCode();
         public override string ToString() => this;
 

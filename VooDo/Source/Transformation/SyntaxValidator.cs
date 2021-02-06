@@ -9,7 +9,7 @@ using System.Collections.Immutable;
 namespace VooDo.Transformation
 {
 
-    public static class BodyValidator
+    public static class SyntaxValidator
     {
 
         private sealed class Walker : CSharpSyntaxWalker
@@ -21,6 +21,18 @@ namespace VooDo.Transformation
             private void EmitDiagnostic(SyntaxNode _node)
                 => m_diagnostics.Add(DiagnosticFactory.ForbiddenSyntax(_node));
 
+            private int m_nestedAssignments;
+
+            public override void VisitAssignmentExpression(AssignmentExpressionSyntax _node)
+            {
+                if (m_nestedAssignments > 0)
+                {
+                    m_diagnostics.Add(DiagnosticFactory.NestedAssignmentExpression(_node));
+                }
+                m_nestedAssignments++;
+                base.VisitAssignmentExpression(_node);
+                m_nestedAssignments--;
+            }
             public override void VisitAccessorDeclaration(AccessorDeclarationSyntax _node) => EmitDiagnostic(_node);
             public override void VisitAccessorList(AccessorListSyntax _node) => EmitDiagnostic(_node);
             public override void VisitAnonymousMethodExpression(AnonymousMethodExpressionSyntax _node) => EmitDiagnostic(_node);
@@ -147,7 +159,7 @@ namespace VooDo.Transformation
 
         }
 
-        public static ImmutableArray<Diagnostic> GetSyntaxDiagnostics(SyntaxNode _body)
+        public static ImmutableArray<Diagnostic> Validate(SyntaxNode _body)
         {
             if (_body == null)
             {

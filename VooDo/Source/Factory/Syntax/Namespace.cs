@@ -1,4 +1,5 @@
-﻿
+﻿#nullable enable
+
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
@@ -15,29 +16,13 @@ namespace VooDo.Factory.Syntax
     {
 
         public static Namespace FromSyntax(AliasQualifiedNameSyntax _syntax)
-        {
-            if (_syntax == null)
-            {
-                throw new ArgumentNullException(nameof(_syntax));
-            }
-            return new Namespace(Identifier.FromSyntax(_syntax.Alias.Identifier), new Identifier[] { Identifier.FromSyntax(_syntax.Name.Identifier) });
-        }
+            => new Namespace(Identifier.FromSyntax(_syntax.Alias.Identifier), new Identifier[] { Identifier.FromSyntax(_syntax.Name.Identifier) });
 
         public static Namespace FromSyntax(IdentifierNameSyntax _syntax)
-        {
-            if (_syntax == null)
-            {
-                throw new ArgumentNullException(nameof(_syntax));
-            }
-            return new Namespace(null, new Identifier[] { Identifier.FromSyntax(_syntax.Identifier) });
-        }
+            => new Namespace(null, new Identifier[] { Identifier.FromSyntax(_syntax.Identifier) });
 
         public static Namespace FromSyntax(QualifiedNameSyntax _syntax)
         {
-            if (_syntax == null)
-            {
-                throw new ArgumentNullException(nameof(_syntax));
-            }
             if (_syntax.Right is IdentifierNameSyntax name)
             {
                 Namespace left = FromSyntax(_syntax.Left);
@@ -51,10 +36,6 @@ namespace VooDo.Factory.Syntax
 
         public static Namespace FromSyntax(TypeSyntax _syntax)
         {
-            if (_syntax == null)
-            {
-                throw new ArgumentNullException(nameof(_syntax));
-            }
             if (_syntax is IdentifierNameSyntax name)
             {
                 return FromSyntax(name);
@@ -74,13 +55,7 @@ namespace VooDo.Factory.Syntax
         }
 
         public static Namespace Parse(string _namespace)
-        {
-            if (_namespace == null)
-            {
-                throw new ArgumentNullException(_namespace);
-            }
-            return FromSyntax(SyntaxFactory.ParseTypeName(_namespace));
-        }
+            => FromSyntax(SyntaxFactory.ParseTypeName(_namespace));
 
         public static implicit operator Namespace(string _namespace) => Parse(_namespace);
         public static implicit operator Namespace(Identifier _path) => new Namespace(new[] { _path });
@@ -94,7 +69,7 @@ namespace VooDo.Factory.Syntax
         public Namespace(IEnumerable<Identifier> _path)
             : this(null, _path) { }
 
-        public Namespace(Identifier _alias, IEnumerable<Identifier> _path)
+        public Namespace(Identifier? _alias, IEnumerable<Identifier> _path)
         {
             if (_path == null)
             {
@@ -112,14 +87,14 @@ namespace VooDo.Factory.Syntax
             }
         }
 
-        public Identifier Alias { get; }
+        public Identifier? Alias { get; }
         public ImmutableArray<Identifier> Path { get; }
         public bool IsAliasQualified => Alias != null;
 
-        public override bool Equals(object _obj) => Equals(_obj as Namespace);
-        public bool Equals(Namespace _other) => _other != null && Alias == _other.Alias && Path.SequenceEqual(_other.Path);
-        public static bool operator ==(Namespace _left, Namespace _right) => Identity.AreEqual(_left, _right);
-        public static bool operator !=(Namespace _left, Namespace _right) => !(_left == _right);
+        public override bool Equals(object? _obj) => Equals(_obj as Namespace);
+        public bool Equals(Namespace? _other) => _other != null && Alias == _other.Alias && Path.SequenceEqual(_other.Path);
+        public static bool operator ==(Namespace? _left, Namespace? _right) => Identity.AreEqual(_left, _right);
+        public static bool operator !=(Namespace? _left, Namespace? _right) => !(_left == _right);
         public override int GetHashCode() => Identity.CombineHash(Alias, Identity.CombineHashes(Path));
         public override string ToString() => (IsAliasQualified ? $"{Alias}::" : "") + string.Join('.', Path);
 

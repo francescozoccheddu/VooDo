@@ -1,4 +1,6 @@
-﻿using Microsoft.CodeAnalysis;
+﻿#nullable enable
+
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
@@ -6,7 +8,6 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
-using System.Reflection;
 
 using VooDo.Factory.Syntax;
 using VooDo.Parsing;
@@ -19,39 +20,25 @@ namespace VooDo.Factory
     public sealed class ScriptSource : IEquatable<ScriptSource>
     {
 
-        public static Reference RuntimeReference { get; }
-            = Reference.FromAssembly(Assembly.GetExecutingAssembly(), Identifiers.referenceAlias);
-
         public static ScriptSource FromScript(string _source)
-        {
-            if (_source == null)
-            {
-                throw new ArgumentNullException(nameof(_source));
-            }
-            return FromCSharp(Parser.ParseAnyScript(_source));
-        }
+            => FromCSharp(Parser.ParseAnyScript(_source));
 
         public static ScriptSource FromCSharp(string _source)
-        {
-            if (_source == null)
-            {
-                throw new ArgumentNullException(nameof(_source));
-            }
-            return FromCSharp(SyntaxFactory.ParseCompilationUnit(_source));
-        }
+            => FromCSharp(SyntaxFactory.ParseCompilationUnit(_source));
 
         public static ScriptSource FromCSharp(CompilationUnitSyntax _syntax)
         {
-            if (_syntax == null)
-            {
-                throw new ArgumentNullException(nameof(_syntax));
-            }
             CompilationUnitSyntax source = OriginRewriter.RewriteFromFullSpan(_syntax);
-            ImmutableArray<Diagnostic> diagnostics = BodyValidator.GetSyntaxDiagnostics(_syntax);
+            ImmutableArray<Diagnostic> diagnostics = SyntaxValidator.Validate(source);
             if (diagnostics.Length > 0)
             {
                 throw new ArgumentException("Invalid code", nameof(_syntax));
             }
+            return FromValidCSharp(_syntax).WithAdditionalReferences(Reference.RuntimeReference);
+        }
+
+        private static ScriptSource FromValidCSharp(CompilationUnitSyntax _syntax)
+        {
             ImmutableHashSet<Namespace> usingDirectives = _syntax.Usings
                 .Where(_u => _u.Alias == null && _u.StaticKeyword.IsKind(SyntaxKind.None))
                 .Select(_u => Namespace.FromSyntax(_u.Name))
@@ -61,9 +48,9 @@ namespace VooDo.Factory
                 .Select(_u => QualifiedType.FromSyntax(_u.Name))
                 .ToImmutableHashSet();
             ImmutableDictionary<Identifier, Namespace> usingAliasDirectives = _syntax.Usings
-                .Where(_u => _u.Alias == null && _u.StaticKeyword.IsKind(SyntaxKind.StaticKeyword))
-                .ToImmutableDictionary(_u => Identifier.FromSyntax(_u.Alias.Name.Identifier), _u => Namespace.FromSyntax(_u.Name));
-            return new ScriptSource(source, ImmutableArray.Create(RuntimeReference), ImmutableArray.Create<Global>(), usingDirectives, usingStaticDirectives, usingAliasDirectives);
+                .Where(_u => _u.Alias != null && _u.StaticKeyword.IsKind(SyntaxKind.None))
+                .ToImmutableDictionary(_u => Identifier.FromSyntax(_u.Alias!.Name.Identifier), _u => Namespace.FromSyntax(_u.Name));
+            return new ScriptSource(_syntax, ImmutableArray.Create<Reference>(), ImmutableArray.Create<Global>(), usingDirectives, usingStaticDirectives, usingAliasDirectives);
         }
 
         private ScriptSource(
@@ -74,50 +61,6 @@ namespace VooDo.Factory
             ImmutableHashSet<QualifiedType> _usingStaticDirectives,
             ImmutableDictionary<Identifier, Namespace> _usingAliasDirectives)
         {
-            if (_source == null)
-            {
-                throw new ArgumentNullException(nameof(_source));
-            }
-            if (_references == null)
-            {
-                throw new ArgumentNullException(nameof(_references));
-            }
-            if (_extraGlobals == null)
-            {
-                throw new ArgumentNullException(nameof(_extraGlobals));
-            }
-            if (_usingDirectives == null)
-            {
-                throw new ArgumentNullException(nameof(_usingDirectives));
-            }
-            if (_usingStaticDirectives == null)
-            {
-                throw new ArgumentNullException(nameof(_usingStaticDirectives));
-            }
-            if (_usingAliasDirectives == null)
-            {
-                throw new ArgumentNullException(nameof(_usingAliasDirectives));
-            }
-            if (_references.AnyNull())
-            {
-                throw new ArgumentException("Null reference", nameof(_references));
-            }
-            if (_extraGlobals.AnyNull())
-            {
-                throw new ArgumentException("Null additional global", nameof(_extraGlobals));
-            }
-            if (_usingDirectives.AnyNull())
-            {
-                throw new ArgumentException("Null using directive", nameof(_usingDirectives));
-            }
-            if (_usingStaticDirectives.AnyNull())
-            {
-                throw new ArgumentException("Null using static directive", nameof(_usingStaticDirectives));
-            }
-            if (_usingAliasDirectives.Keys.AnyNull() || _usingAliasDirectives.Values.AnyNull())
-            {
-                throw new ArgumentException("Null using alias directive key or value", nameof(_usingAliasDirectives));
-            }
             if (_extraGlobals.Select(_g => _g.Name).AnyDuplicate())
             {
                 throw new ArgumentException("Duplicate global name");
@@ -134,13 +77,13 @@ namespace VooDo.Factory
             UsingStaticDirectives = _usingStaticDirectives;
         }
 
-        public CompiledScript Compile(QualifiedType _returnType = null)
+        public CompiledScript Compile(QualifiedType? _returnType = null)
         {
             if (!HasRuntimeReference)
             {
                 throw new InvalidOperationException($"No runtime library reference with alias ${Identifiers.referenceAlias}");
             }
-            CSharpCompilationOptions options = new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary);
+            CSharpCompilationOptions options = new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary).WithUsings("System");
             ImmutableArray<MetadataReference> references = References.Select(_r => _r.GetMetadataReference()).ToImmutableArray();
             {
                 SyntaxTree tree = CSharpSyntaxTree.Create(TransformedSyntax);
@@ -153,17 +96,44 @@ namespace VooDo.Factory
         }
 
         private readonly ImmutableDictionary<Identifier, Reference> m_aliasMap;
-        private CompilationUnitSyntax m_transformedSyntax;
+        private CompilationUnitSyntax? m_transformedSyntax;
 
         private CompilationUnitSyntax TransformSource()
         {
+            ScriptSource originalSource = FromValidCSharp(SourceSyntax);
+            IEnumerable<UsingDirectiveSyntax> newUsings = UsingDirectives
+                .Except(originalSource.UsingDirectives)
+                .Select(_u => SyntaxFactory.UsingDirective(SyntaxFactory.ParseName(_u.ToString())))
+                .Concat(UsingStaticDirectives
+                .Except(originalSource.UsingStaticDirectives)
+                .Select(_u => SyntaxFactory.UsingDirective(SyntaxFactory.Token(SyntaxKind.StaticKeyword), null, SyntaxFactory.ParseName(_u.ToString()))))
+                .Concat(UsingAliasDirectives
+                .Except(originalSource.UsingAliasDirectives)
+                .Select(_u => SyntaxFactory.UsingDirective(SyntaxFactory.NameEquals(_u.Key), SyntaxFactory.ParseName(_u.Value.ToString()))))
+                .Select(_u => _u.WithOrigin(Origin.Transformation, true));
+            IEnumerable<ExternAliasDirectiveSyntax> newExterns = Aliases
+                .Except(originalSource.Aliases)
+                .Select(_a => SyntaxFactory.ExternAliasDirective(_a))
+                .Select(_a => _a.WithOrigin(Origin.Transformation, true));
+            IEnumerable<GlobalStatementSyntax>? newGlobals = ExtraGlobals
+                .Select(_g => SyntaxFactory.GlobalStatement(
+                    SyntaxFactory.LocalDeclarationStatement(
+                        SyntaxFactory.VariableDeclaration(
+                            SyntaxFactoryHelper.GenericType(
+                                (NameSyntax) SyntaxFactoryHelper.Type(typeof(Meta.Glob<>), Identifiers.referenceAlias),
+                                new NameSyntax[] { SyntaxFactory.ParseName(_g.Type.ToString()) }),
+                            SyntaxFactory.SingletonSeparatedList(
+                                SyntaxFactory.VariableDeclarator(_g.Name))))))
+                .Select(_g => _g.WithOrigin(Origin.Transformation, true));
             return SourceSyntax
-                .WithExterns(Aliases.Select(_a => SyntaxFactory.ExternAliasDirective()))
+                .AddUsings(newUsings.ToArray())
+                .AddExterns(newExterns.ToArray())
+                .AddMembers(newGlobals.ToArray());
         }
 
         public CompilationUnitSyntax SourceSyntax { get; }
         public CompilationUnitSyntax TransformedSyntax
-            => m_transformedSyntax ?? (m_transformedSyntax = TransformSource());
+            => m_transformedSyntax ??= TransformSource();
         public ImmutableHashSet<Identifier> Aliases { get; }
         public ImmutableArray<Reference> References { get; }
         public ImmutableArray<Global> ExtraGlobals { get; }
@@ -171,10 +141,10 @@ namespace VooDo.Factory
         public ImmutableHashSet<QualifiedType> UsingStaticDirectives { get; }
         public ImmutableDictionary<Identifier, Namespace> UsingAliasDirectives { get; }
         public bool HasRuntimeReference
-            => Reference.AreSameMetadata(GetReferenceByAlias(Identifiers.referenceAlias), RuntimeReference);
+            => Reference.AreSameMetadata(GetReferenceByAlias(Identifiers.referenceAlias), Reference.RuntimeReference);
 
-        public Reference GetReferenceByAlias(Identifier _alias)
-            => m_aliasMap.TryGetValue(_alias, out Reference reference) ? reference : null;
+        public Reference? GetReferenceByAlias(Identifier _alias)
+            => m_aliasMap.TryGetValue(_alias, out Reference? reference) ? reference : null;
 
         public ScriptSource WithAdditionalReferences(params Reference[] _references)
             => WithAdditionalReferences((IEnumerable<Reference>) _references);
@@ -245,8 +215,8 @@ namespace VooDo.Factory
                 Identity.CombineHashes(UsingStaticDirectives),
                 Identity.CombineHashes(UsingAliasDirectives));
 
-        public override bool Equals(object _obj) => Equals(_obj as ScriptSource);
-        public bool Equals(ScriptSource _other) => _other != null
+        public override bool Equals(object? _obj) => Equals(_obj as ScriptSource);
+        public bool Equals(ScriptSource? _other) => _other != null
             && SourceSyntax.IsEquivalentTo(_other.SourceSyntax)
             && References.Equals(_other.References)
             && ExtraGlobals.Equals(_other.ExtraGlobals)
@@ -254,8 +224,8 @@ namespace VooDo.Factory
             && UsingStaticDirectives.SetEquals(_other.UsingStaticDirectives)
             && UsingAliasDirectives.SequenceEqual(_other.UsingAliasDirectives);
 
-        public static bool operator ==(ScriptSource _left, ScriptSource _right) => Identity.AreEqual(_left, _right);
-        public static bool operator !=(ScriptSource _left, ScriptSource _right) => !(_left == _right);
+        public static bool operator ==(ScriptSource? _left, ScriptSource? _right) => Identity.AreEqual(_left, _right);
+        public static bool operator !=(ScriptSource? _left, ScriptSource? _right) => !(_left == _right);
 
     }
 

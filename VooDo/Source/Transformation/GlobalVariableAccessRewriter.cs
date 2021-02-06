@@ -132,7 +132,7 @@ namespace VooDo.Transformation
                     }
                     if (expression != null)
                     {
-                        return OriginRewriter.RewriteAbsolute(expression, _node.GetOriginalSpan());
+                        return OriginRewriter.RewriteAbsolute(expression, _node.GetOrigin());
                     }
                 }
                 return base.VisitInvocationExpression(_node);
@@ -164,7 +164,7 @@ namespace VooDo.Transformation
                 if (variableName != null)
                 {
                     ExpressionSyntax access = CreateAccessSyntax(variableName, false);
-                    return OriginRewriter.RewriteAbsolute(access, _node.GetOriginalOrFullSpan());
+                    return OriginRewriter.RewriteAbsolute(access, _node.GetOrigin());
                 }
                 return null;
             }

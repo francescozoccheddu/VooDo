@@ -1,7 +1,8 @@
-﻿using Microsoft.CodeAnalysis;
+﻿#nullable enable
+
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.CodeAnalysis.Text;
 
 using System;
 
@@ -10,24 +11,6 @@ namespace VooDo.Transformation
 
     internal static class DiagnosticFactory
     {
-
-        private static Location GetLocation(SyntaxNodeOrToken _node)
-        {
-            if (_node == null)
-            {
-                throw new ArgumentNullException(nameof(_node));
-            }
-            TextSpan span;
-            if (_node.IsNode)
-            {
-                span = _node.AsNode().GetOriginalOrFullSpan();
-            }
-            else
-            {
-                span = _node.AsToken().GetOriginalOrFullSpan();
-            }
-            return Location.Create(_node.SyntaxTree, span);
-        }
 
         private static int s_id = 0;
         private static string s_Id => $"VD{++s_id:D3}";
@@ -104,6 +87,14 @@ namespace VooDo.Transformation
             DiagnosticSeverity.Error,
             true);
 
+        private static readonly DiagnosticDescriptor s_nestedAssignmentExpression = new DiagnosticDescriptor(
+            s_Id,
+            "Nested assignment expression",
+            "Nested assignment expression",
+            "Syntax",
+            DiagnosticSeverity.Error,
+            true);
+
         private static string CoalesceName(string _name)
             => _name ?? "<unknown-name>";
 
@@ -111,32 +102,34 @@ namespace VooDo.Transformation
             => _type ?? "<unknown-type>";
 
         internal static Diagnostic ForbiddenSyntax(SyntaxNode _syntax)
-            => Diagnostic.Create(s_forbiddenSyntax, GetLocation(_syntax), Enum.GetName(typeof(SyntaxKind), _syntax.Kind()));
+            => Diagnostic.Create(s_forbiddenSyntax, _syntax.GetLocation(), Enum.GetName(typeof(SyntaxKind), _syntax.Kind()));
 
         internal static Diagnostic ControllerOfNonGlobalVariable(ExpressionSyntax _variableNode, string _variableName)
-            => Diagnostic.Create(s_controllerOfNonGlobalVariable, GetLocation(_variableNode), CoalesceName(_variableName));
+            => Diagnostic.Create(s_controllerOfNonGlobalVariable, _variableNode.GetLocation(), CoalesceName(_variableName));
 
         internal static Diagnostic ControllerOfRefKindArgument(SyntaxToken _refKindToken)
-            => Diagnostic.Create(s_controllerOfRefKindArgument, GetLocation(_refKindToken), _refKindToken.ValueText);
+            => Diagnostic.Create(s_controllerOfRefKindArgument, _refKindToken.GetLocation(), _refKindToken.ValueText);
 
         internal static Diagnostic ControllerOfZeroOrMultipleArguments(InvocationExpressionSyntax _controllerOfNode)
-            => Diagnostic.Create(s_controllerOfZeroOrMultipleArguments, GetLocation(_controllerOfNode), _controllerOfNode.ArgumentList.Arguments.Count);
+            => Diagnostic.Create(s_controllerOfZeroOrMultipleArguments, _controllerOfNode.GetLocation(), _controllerOfNode.ArgumentList.Arguments.Count);
 
         internal static Diagnostic EventCatcherWithoutMemberAccess(ExpressionSyntax _eventCatcherNode)
-            => Diagnostic.Create(s_eventCatcherWithoutMemberAccess, GetLocation(_eventCatcherNode));
+            => Diagnostic.Create(s_eventCatcherWithoutMemberAccess, _eventCatcherNode.GetLocation());
 
         internal static Diagnostic EventCatcherEventHandlerErrorType(ExpressionSyntax _eventCatcherNode, string _eventHandlerType)
-            => Diagnostic.Create(s_eventCatcherEventHandlerErrorType, GetLocation(_eventCatcherNode), CoalesceType(_eventHandlerType));
+            => Diagnostic.Create(s_eventCatcherEventHandlerErrorType, _eventCatcherNode.GetLocation(), CoalesceType(_eventHandlerType));
 
         internal static Diagnostic EventCatcherEventHandlerParameterErrorType(ArgumentSyntax _relatedArgument, string _parameterName, string _parameterType)
-            => Diagnostic.Create(s_eventCatcherEventHandlerParameterErrorType, GetLocation(_relatedArgument), CoalesceName(_parameterName), CoalesceType(_parameterType));
+            => Diagnostic.Create(s_eventCatcherEventHandlerParameterErrorType, _relatedArgument.GetLocation(), CoalesceName(_parameterName), CoalesceType(_parameterType));
 
         internal static Diagnostic EventCatcherArgumentTypeMismatch(ArgumentSyntax _argument, string _parameterName, string _parameterType, string _argumentType)
-            => Diagnostic.Create(s_eventCatcherArgumentTypeMismatch, GetLocation(_argument), CoalesceName(_parameterName), CoalesceType(_parameterType), CoalesceType(_argumentType));
+            => Diagnostic.Create(s_eventCatcherArgumentTypeMismatch, _argument.GetLocation(), CoalesceName(_parameterName), CoalesceType(_parameterType), CoalesceType(_argumentType));
 
         internal static Diagnostic EventCatcherArgumentWithMultipleDeclarations(ArgumentSyntax _argument)
-            => Diagnostic.Create(s_eventCatcherArgumentWithMultipleDeclarations, GetLocation(_argument));
+            => Diagnostic.Create(s_eventCatcherArgumentWithMultipleDeclarations, _argument.GetLocation());
 
+        internal static Diagnostic NestedAssignmentExpression(AssignmentExpressionSyntax _argument)
+            => Diagnostic.Create(s_nestedAssignmentExpression, _argument.GetLocation());
 
         internal static TransformationException AsThrowable(this Diagnostic _diagnostic)
             => new TransformationException(_diagnostic);
