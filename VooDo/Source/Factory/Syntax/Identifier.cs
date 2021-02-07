@@ -6,7 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace VooDo.Factory
+namespace VooDo.Factory.Syntax
 {
 
     public sealed class Identifier : IEquatable<Identifier>
@@ -16,7 +16,7 @@ namespace VooDo.Factory
 
         public Identifier(string _identifier)
         {
-            if (_identifier == null)
+            if (_identifier is null)
             {
                 throw new ArgumentNullException(nameof(_identifier));
             }
@@ -41,7 +41,7 @@ namespace VooDo.Factory
         public static implicit operator Identifier(string _identifier) => new Identifier(_identifier);
 
         public override bool Equals(object? _obj) => Equals(_obj as Identifier);
-        public bool Equals(Identifier? _other) => _other != null && m_identifier == _other.m_identifier;
+        public bool Equals(Identifier? _other) => _other is not null && m_identifier == _other.m_identifier;
         public static bool operator ==(Identifier? _left, Identifier? _right) => EqualityComparer<Identifier>.Default.Equals(_left, _right);
         public static bool operator !=(Identifier? _left, Identifier? _right) => !(_left == _right);
         public override int GetHashCode() => m_identifier.GetHashCode();

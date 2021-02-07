@@ -71,7 +71,7 @@ namespace VooDo.Factory.Syntax
 
         public Namespace(Identifier? _alias, IEnumerable<Identifier> _path)
         {
-            if (_path == null)
+            if (_path is null)
             {
                 throw new ArgumentNullException(nameof(_path));
             }
@@ -89,10 +89,10 @@ namespace VooDo.Factory.Syntax
 
         public Identifier? Alias { get; }
         public ImmutableArray<Identifier> Path { get; }
-        public bool IsAliasQualified => Alias != null;
+        public bool IsAliasQualified => Alias is not null;
 
         public override bool Equals(object? _obj) => Equals(_obj as Namespace);
-        public bool Equals(Namespace? _other) => _other != null && Alias == _other.Alias && Path.SequenceEqual(_other.Path);
+        public bool Equals(Namespace? _other) => _other is not null && Alias == _other.Alias && Path.SequenceEqual(_other.Path);
         public static bool operator ==(Namespace? _left, Namespace? _right) => Identity.AreEqual(_left, _right);
         public static bool operator !=(Namespace? _left, Namespace? _right) => !(_left == _right);
         public override int GetHashCode() => Identity.CombineHash(Alias, Identity.CombineHashes(Path));

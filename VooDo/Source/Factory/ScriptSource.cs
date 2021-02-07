@@ -40,15 +40,15 @@ namespace VooDo.Factory
         private static ScriptSource FromValidCSharp(CompilationUnitSyntax _syntax)
         {
             ImmutableHashSet<Namespace> usingDirectives = _syntax.Usings
-                .Where(_u => _u.Alias == null && _u.StaticKeyword.IsKind(SyntaxKind.None))
+                .Where(_u => _u.Alias is null && _u.StaticKeyword.IsKind(SyntaxKind.None))
                 .Select(_u => Namespace.FromSyntax(_u.Name))
                 .ToImmutableHashSet();
             ImmutableHashSet<QualifiedType> usingStaticDirectives = _syntax.Usings
-                .Where(_u => _u.Alias == null && _u.StaticKeyword.IsKind(SyntaxKind.StaticKeyword))
+                .Where(_u => _u.Alias is null && _u.StaticKeyword.IsKind(SyntaxKind.StaticKeyword))
                 .Select(_u => QualifiedType.FromSyntax(_u.Name))
                 .ToImmutableHashSet();
             ImmutableDictionary<Identifier, Namespace> usingAliasDirectives = _syntax.Usings
-                .Where(_u => _u.Alias != null && _u.StaticKeyword.IsKind(SyntaxKind.None))
+                .Where(_u => _u.Alias is not null && _u.StaticKeyword.IsKind(SyntaxKind.None))
                 .ToImmutableDictionary(_u => Identifier.FromSyntax(_u.Alias!.Name.Identifier), _u => Namespace.FromSyntax(_u.Name));
             return new ScriptSource(_syntax, ImmutableArray.Create<Reference>(), ImmutableArray.Create<Global>(), usingDirectives, usingStaticDirectives, usingAliasDirectives);
         }
@@ -220,7 +220,7 @@ namespace VooDo.Factory
                 Identity.CombineHashes(UsingAliasDirectives));
 
         public override bool Equals(object? _obj) => Equals(_obj as ScriptSource);
-        public bool Equals(ScriptSource? _other) => _other != null
+        public bool Equals(ScriptSource? _other) => _other is not null
             && SourceSyntax.IsEquivalentTo(_other.SourceSyntax)
             && References.Equals(_other.References)
             && ExtraGlobals.Equals(_other.ExtraGlobals)

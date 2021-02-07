@@ -47,7 +47,7 @@ namespace VooDo.Factory
         }
 
         public override bool Equals(object? _obj) => _obj is Origin origin && Equals(origin);
-        public bool Equals(Origin _other) => _other != null && Kind == _other.Kind && Start == _other.Start && Length == _other.Length;
+        public bool Equals(Origin _other) => Kind == _other.Kind && Start == _other.Start && Length == _other.Length;
         public static bool operator ==(Origin? _left, Origin? _right) => Identity.AreEqual(_left, _right);
         public static bool operator !=(Origin? _left, Origin? _right) => !(_left == _right);
         public override string ToString() => Kind switch

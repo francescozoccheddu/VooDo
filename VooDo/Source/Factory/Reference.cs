@@ -9,6 +9,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 
+using VooDo.Factory.Syntax;
 using VooDo.Transformation;
 using VooDo.Utils;
 
@@ -46,7 +47,7 @@ namespace VooDo.Factory
                 {
                     Console.WriteLine(error);
                 }
-                if (reference != null)
+                if (reference is not null)
                 {
                     yield return reference;
                 }
@@ -93,7 +94,7 @@ namespace VooDo.Factory
                 throw new ArgumentException("Null alias", nameof(_aliases));
             }
             m_metadata = _metadata;
-            FilePath = m_metadata.FilePath != null ? new Uri(m_metadata.FilePath).AbsolutePath : null;
+            FilePath = m_metadata.FilePath is not null ? new Uri(m_metadata.FilePath).AbsolutePath : null;
         }
 
         private readonly PortableExecutableReference m_metadata;
@@ -111,7 +112,7 @@ namespace VooDo.Factory
         internal MetadataReference GetMetadataReference() => m_metadata.WithAliases(Aliases.Select(_a => _a.ToString()));
 
         public static bool AreSameMetadata(Reference _a, Reference _b)
-            => _a != null && (_a.m_metadata.Equals(_b.m_metadata) || _a.FilePath == _b.FilePath);
+            => _a is not null && (_a.m_metadata.Equals(_b.m_metadata) || _a.FilePath == _b.FilePath);
 
         public static ImmutableArray<Reference> Merge(IEnumerable<Reference> _references)
             => _references
@@ -120,7 +121,7 @@ namespace VooDo.Factory
                 .ToImmutableArray();
 
         public override bool Equals(object? _obj) => Equals(_obj as Reference);
-        public bool Equals(Reference? _other) => _other != null && m_metadata.Equals(_other.m_metadata) && Aliases.SetEquals(_other.Aliases);
+        public bool Equals(Reference? _other) => _other is not null && m_metadata.Equals(_other.m_metadata) && Aliases.SetEquals(_other.Aliases);
         public override int GetHashCode() => FilePath?.GetHashCode() ?? m_metadata.GetHashCode();
         public static bool operator ==(Reference? _left, Reference? _right) => Identity.AreEqual(_left, _right);
         public static bool operator !=(Reference? _left, Reference? _right) => !(_left == _right);

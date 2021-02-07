@@ -27,7 +27,7 @@ namespace VooDo.Transformation
         internal IHookInitializerProvider HookInitializerProvider { get; }
         private bool Glue(IHookInitializer _hookInitializer, out int _hookIndex)
         {
-            if (_hookInitializer == null)
+            if (_hookInitializer is null)
             {
                 _hookIndex = -1;
                 return false;
@@ -94,7 +94,7 @@ namespace VooDo.Transformation
 
         public ExpressionHookGluer(IHookInitializerProvider _initializerProvider)
         {
-            if (_initializerProvider == null)
+            if (_initializerProvider is null)
             {
                 throw new ArgumentNullException(nameof(_initializerProvider));
             }
@@ -105,7 +105,7 @@ namespace VooDo.Transformation
 
         public SyntaxNode Glue(SemanticModel _semantics)
         {
-            if (_semantics == null)
+            if (_semantics is null)
             {
                 throw new ArgumentNullException(nameof(_semantics));
             }
@@ -114,11 +114,11 @@ namespace VooDo.Transformation
 
         public SyntaxNode Glue(SemanticModel _semantics, SyntaxNode _root)
         {
-            if (_semantics == null)
+            if (_semantics is null)
             {
                 throw new ArgumentNullException(nameof(_semantics));
             }
-            if (_root == null)
+            if (_root is null)
             {
                 throw new ArgumentNullException(nameof(_root));
             }

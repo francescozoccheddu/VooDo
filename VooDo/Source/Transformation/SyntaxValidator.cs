@@ -161,7 +161,7 @@ namespace VooDo.Transformation
 
         public static ImmutableArray<Diagnostic> Validate(SyntaxNode _body)
         {
-            if (_body == null)
+            if (_body is null)
             {
                 throw new ArgumentNullException(nameof(_body));
             }

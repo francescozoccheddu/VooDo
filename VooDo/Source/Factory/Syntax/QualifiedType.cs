@@ -83,7 +83,7 @@ namespace VooDo.Factory.Syntax
                     type = type.GetElementType();
                 }
                 Type nullableUnderlyingType = Nullable.GetUnderlyingType(type);
-                bool nullable = nullableUnderlyingType != null;
+                bool nullable = nullableUnderlyingType is not null;
                 if (nullable)
                 {
                     type = nullableUnderlyingType!;
@@ -129,7 +129,7 @@ namespace VooDo.Factory.Syntax
         public QualifiedType(Identifier? _alias, IEnumerable<SimpleType> _path, bool _nullable = false, IEnumerable<int>? _ranks = null)
         {
             Alias = _alias;
-            if (_path == null)
+            if (_path is null)
             {
                 throw new ArgumentNullException(nameof(_path));
             }
@@ -155,7 +155,7 @@ namespace VooDo.Factory.Syntax
         public bool IsNullable { get; }
         public ImmutableArray<int> Ranks { get; }
 
-        public bool IsAliasQualified => Alias != null;
+        public bool IsAliasQualified => Alias is not null;
         public bool IsArray => Ranks.Any();
         public bool IsSimple => !IsQualified && !IsArray && !IsNullable;
         public bool IsQualified => IsAliasQualified || IsNamespaceQualified;
@@ -171,7 +171,7 @@ namespace VooDo.Factory.Syntax
         }
 
         public override bool Equals(object? _obj) => Equals(_obj as QualifiedType);
-        public bool Equals(QualifiedType? _other) => _other != null && Alias == _other.Alias && Path.SequenceEqual(_other.Path) && IsNullable == _other.IsNullable && Ranks.SequenceEqual(_other.Ranks);
+        public bool Equals(QualifiedType? _other) => _other is not null && Alias == _other.Alias && Path.SequenceEqual(_other.Path) && IsNullable == _other.IsNullable && Ranks.SequenceEqual(_other.Ranks);
         public override int GetHashCode() => Identity.CombineHash(Alias, Identity.CombineHashes(Path), IsNullable, Identity.CombineHashes(Ranks));
         public static bool operator ==(QualifiedType? _left, QualifiedType? _right) => Identity.AreEqual(_left, _right);
         public static bool operator !=(QualifiedType? _left, QualifiedType? _right) => !(_left == _right);

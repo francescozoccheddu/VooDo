@@ -15,7 +15,7 @@ namespace VooDo.Utils
 
         private static SyntaxGenerator s_generator = null;
 
-        public static SyntaxGenerator Generator => s_generator == null
+        public static SyntaxGenerator Generator => s_generator is null
             ? s_generator = SyntaxGenerator.GetGenerator(new AdhocWorkspace(), LanguageNames.CSharp)
             : s_generator;
 
@@ -46,11 +46,11 @@ namespace VooDo.Utils
 
         public static ObjectCreationExpressionSyntax NewObject(TypeSyntax _type, IEnumerable<object> _literalArguments)
         {
-            if (_type == null)
+            if (_type is null)
             {
                 throw new ArgumentNullException(nameof(_type));
             }
-            if (_literalArguments == null)
+            if (_literalArguments is null)
             {
                 throw new ArgumentNullException(nameof(_literalArguments));
             }
@@ -59,15 +59,15 @@ namespace VooDo.Utils
 
         public static InvocationExpressionSyntax StaticMethodCall(TypeSyntax _type, string _methodName, IEnumerable<object> _literalArguments = null, IEnumerable<TypeSyntax> _genericArguments = null)
         {
-            if (_type == null)
+            if (_type is null)
             {
                 throw new ArgumentNullException(nameof(_type));
             }
-            if (_methodName == null)
+            if (_methodName is null)
             {
                 throw new ArgumentNullException(nameof(_methodName));
             }
-            SyntaxNode methodName = _genericArguments == null ? Generator.IdentifierName(_methodName) : Generator.GenericName(_methodName, _genericArguments);
+            SyntaxNode methodName = _genericArguments is null ? Generator.IdentifierName(_methodName) : Generator.GenericName(_methodName, _genericArguments);
             SyntaxNode method = Generator.MemberAccessExpression(_type, methodName);
             IEnumerable<SyntaxNode> arguments = _literalArguments?.Select(Generator.LiteralExpression) ?? Enumerable.Empty<SyntaxNode>();
             return (InvocationExpressionSyntax) Generator.InvocationExpression(method, arguments);

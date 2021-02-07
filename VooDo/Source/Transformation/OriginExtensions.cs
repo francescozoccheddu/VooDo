@@ -22,11 +22,11 @@ namespace VooDo.Transformation
         public static SyntaxToken WithOrigin(this SyntaxToken _node, Origin? _origin)
         {
             SyntaxAnnotation? annotation = _node.GetOriginAnnotation();
-            if (!(annotation == null))
+            if (!(annotation is null))
             {
                 _node = _node.WithoutAnnotations(annotation);
             }
-            if (_origin != null)
+            if (_origin is not null)
             {
                 _node = _node.WithAdditionalAnnotations(_origin.Value.CreateAnnotation());
             }
@@ -39,11 +39,11 @@ namespace VooDo.Transformation
         public static TNode WithOrigin<TNode>(this TNode _node, Origin? _origin) where TNode : SyntaxNode
         {
             SyntaxAnnotation? annotation = _node.GetOriginAnnotation();
-            if (!(annotation == null))
+            if (!(annotation is null))
             {
                 _node = _node.WithoutAnnotations(annotation);
             }
-            if (_origin != null)
+            if (_origin is not null)
             {
                 _node = _node.WithAdditionalAnnotations(_origin.Value.CreateAnnotation());
             }
@@ -56,7 +56,7 @@ namespace VooDo.Transformation
         public static Origin? TryGetOrigin(this SyntaxToken _token)
         {
             SyntaxAnnotation? annotation = _token.GetOriginAnnotation();
-            return annotation == null ? null : FromAnnotation(annotation);
+            return annotation is null ? null : FromAnnotation(annotation);
         }
 
         public static Origin GetOrigin(this SyntaxNode _node)
@@ -65,7 +65,7 @@ namespace VooDo.Transformation
         public static Origin? TryGetOrigin(this SyntaxNode _node)
         {
             SyntaxAnnotation? annotation = _node.GetOriginAnnotation();
-            return annotation == null ? null : FromAnnotation(annotation);
+            return annotation is null ? null : FromAnnotation(annotation);
         }
 
         public static SyntaxAnnotation? GetOriginAnnotation(this SyntaxToken _node)

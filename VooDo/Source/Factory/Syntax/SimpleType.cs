@@ -124,7 +124,7 @@ namespace VooDo.Factory.Syntax
         public ImmutableArray<QualifiedType> TypeArguments { get; }
 
         public override bool Equals(object? _obj) => Equals(_obj as SimpleType);
-        public bool Equals(SimpleType? _other) => _other != null && Name == _other.Name && TypeArguments.SequenceEqual(_other.TypeArguments);
+        public bool Equals(SimpleType? _other) => _other is not null && Name == _other.Name && TypeArguments.SequenceEqual(_other.TypeArguments);
         public override int GetHashCode() => Identity.CombineHash(Name, Identity.CombineHashes(TypeArguments));
         public static bool operator ==(SimpleType? _left, SimpleType? _right) => Identity.AreEqual(_left, _right);
         public static bool operator !=(SimpleType? _left, SimpleType? _right) => !(_left == _right);

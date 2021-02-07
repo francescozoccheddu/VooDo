@@ -13,7 +13,7 @@ namespace VooDo.Transformation
 
         public GetEventOverload(IEnumerable<EArgumentType> _arguments)
         {
-            if (_arguments == null)
+            if (_arguments is null)
             {
                 throw new ArgumentNullException(nameof(_arguments));
             }

@@ -14,7 +14,7 @@ namespace VooDo.Utils
             => _enumerable ?? Enumerable.Empty<TItem>();
 
         internal static bool AnyNull<TItem>(this IEnumerable<TItem> _enumerable) where TItem : class
-            => _enumerable.Any(_i => _i == null);
+            => _enumerable.Any(_i => _i is null);
 
         internal static bool AnyDuplicate<TItem>(this IEnumerable<TItem> _enumerable, IEqualityComparer<TItem> _equalityComparer = null)
         {

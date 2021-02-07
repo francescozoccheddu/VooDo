@@ -12,11 +12,11 @@ namespace VooDo.Transformation
 
         internal Variable(string _name, Type _type)
         {
-            if (_name == null)
+            if (_name is null)
             {
                 throw new ArgumentNullException(nameof(_name));
             }
-            if (_type == null)
+            if (_type is null)
             {
                 throw new ArgumentNullException(nameof(_name));
             }
@@ -67,7 +67,7 @@ namespace VooDo.Transformation
 
         public Controller<TValue> Controller => m_controller is NoController ? null : m_controller;
 
-        public override bool HasController => Controller != null;
+        public override bool HasController => Controller is not null;
 
         public void SetController(IControllerFactory<TValue> _factory)
         {

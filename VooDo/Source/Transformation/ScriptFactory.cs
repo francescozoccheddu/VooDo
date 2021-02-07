@@ -19,7 +19,7 @@ namespace VooDo.Source.Transformation
 
         public ScriptFactory(Type _type)
         {
-            if (_type == null)
+            if (_type is null)
             {
                 throw new ArgumentNullException(nameof(_type));
             }
@@ -27,7 +27,7 @@ namespace VooDo.Source.Transformation
             {
                 throw new ArgumentException("Not a script type", nameof(_type));
             }
-            if (_type.GetConstructor(Type.EmptyTypes) == null)
+            if (_type.GetConstructor(Type.EmptyTypes) is null)
             {
                 throw new ArgumentException("Script does not have a parameterless constructor", nameof(_type));
             }

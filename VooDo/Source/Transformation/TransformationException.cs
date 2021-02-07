@@ -12,7 +12,7 @@ namespace VooDo.Transformation
 
         public TransformationException(Diagnostic _diagnostic)
         {
-            if (_diagnostic == null)
+            if (_diagnostic is null)
             {
                 throw new ArgumentNullException(nameof(_diagnostic));
             }

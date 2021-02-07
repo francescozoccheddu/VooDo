@@ -114,10 +114,10 @@ namespace VooDo.Transformation
             private ExpressionSyntax TryCreateEventAccess(ExpressionSyntax _access, IReadOnlyList<ArgumentSyntax> _arguments)
             {
                 IEventSymbol symbol = GetEventSymbol(_access);
-                if (symbol != null)
+                if (symbol is not null)
                 {
                     MemberAccessExpressionSyntax memberAccess = _access.DescendantNodesAndSelf().OfType<MemberAccessExpressionSyntax>().FirstOrDefault();
-                    if (memberAccess == null)
+                    if (memberAccess is null)
                     {
                         throw DiagnosticFactory.EventCatcherWithoutMemberAccess(_access).AsThrowable();
                     }
@@ -125,7 +125,7 @@ namespace VooDo.Transformation
                     int key = AddSymbol(symbol);
                     m_overloads.Add(overload);
                     IMethodSymbol delegateMethod = ((INamedTypeSymbol) symbol.Type)?.DelegateInvokeMethod;
-                    if (delegateMethod == null)
+                    if (delegateMethod is null)
                     {
                         string eventTypeName = symbol.Type?.ToMinimalDisplayString(m_semantics, _access.FullSpan.Start);
                         throw DiagnosticFactory.EventCatcherEventHandlerErrorType(_access, eventTypeName).AsThrowable();
@@ -176,11 +176,11 @@ namespace VooDo.Transformation
 
         public static TNode Rewrite<TNode>(TNode _node, SemanticModel _semantics, out ImmutableArray<IEventSymbol> _symbols, out ImmutableHashSet<GetEventOverload> _overloads) where TNode : SyntaxNode
         {
-            if (_node == null)
+            if (_node is null)
             {
                 throw new ArgumentNullException(nameof(_node));
             }
-            if (_semantics == null)
+            if (_semantics is null)
             {
                 throw new ArgumentNullException(nameof(_semantics));
             }

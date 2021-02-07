@@ -13,7 +13,7 @@ namespace VooDo.Transformation
 
         protected Controller(Variable<TValue> _variable)
         {
-            if (Variable == null)
+            if (Variable is null)
             {
                 throw new ArgumentNullException(nameof(_variable));
             }

@@ -16,17 +16,17 @@ namespace VooDo.Transformation
 
         protected Script(IEnumerable<Variable> _variables, IEnumerable<IHook> _hooks)
         {
-            if (_variables == null)
+            if (_variables is null)
             {
                 throw new ArgumentNullException(nameof(_variables));
             }
-            if (_hooks == null)
+            if (_hooks is null)
             {
                 throw new ArgumentNullException(nameof(_hooks));
             }
             Variables = new ReadOnlyDictionary<string, Variable>(_variables.ToDictionary(_v => _v.Name, _v => _v));
             m_hooks = _hooks.ToList();
-            if (m_hooks.Any(_h => _h == null))
+            if (m_hooks.Any(_h => _h is null))
             {
                 throw new ArgumentException(nameof(_hooks), new NullReferenceException());
             }

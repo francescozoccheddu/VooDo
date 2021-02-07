@@ -25,7 +25,7 @@ namespace VooDo.Utils
 
             public void EnsureValid()
             {
-                if (AssemblyName == null)
+                if (AssemblyName is null)
                 {
                     throw new NullReferenceException($"{nameof(AssemblyName)} cannot be null");
                 }
@@ -35,7 +35,7 @@ namespace VooDo.Utils
 
         public static CSharpCompilation Compile(CSharpSyntaxTree _tree, Options _options)
         {
-            if (_tree == null)
+            if (_tree is null)
             {
                 throw new ArgumentNullException(nameof(_tree));
             }
@@ -52,7 +52,7 @@ namespace VooDo.Utils
             CSharpSyntaxTree tree = (CSharpSyntaxTree) CSharpSyntaxTree.Create(_root);
             CSharpCompilation compilation = Compile(tree, _options);
             SemanticModel semantics = compilation.GetSemanticModel(tree);
-            if (semantics == null)
+            if (semantics is null)
             {
                 throw new Exception("No semantic model has been generated");
             }

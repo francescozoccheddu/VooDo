@@ -15,7 +15,7 @@ namespace VooDo.Factory.Syntax
 
         public static QualifiedTypeOrVar Parse(string _type)
         {
-            if (_type == null)
+            if (_type is null)
             {
                 throw new ArgumentNullException(nameof(_type));
             }
@@ -49,19 +49,20 @@ namespace VooDo.Factory.Syntax
         public static implicit operator QualifiedTypeOrVar(string _type) => Parse(_type);
         public static implicit operator QualifiedTypeOrVar(Type _type) => FromType(_type);
 
-        public override bool Equals(object _obj) => Equals(_obj as QualifiedTypeOrVar);
-        public bool Equals(QualifiedTypeOrVar _other) => _other != null && Type == _other.Type;
+        public override bool Equals(object? _obj) => Equals(_obj as QualifiedTypeOrVar);
+        public bool Equals(QualifiedTypeOrVar? _other) => _other is not null && Type == _other.Type;
         public override int GetHashCode() => Identity.CombineHash(Type);
-        public static bool operator ==(QualifiedTypeOrVar _left, QualifiedTypeOrVar _right) => Identity.AreEqual(_left, _right);
-        public static bool operator !=(QualifiedTypeOrVar _left, QualifiedTypeOrVar _right) => !(_left == _right);
+        public static bool operator ==(QualifiedTypeOrVar? _left, QualifiedTypeOrVar? _right) => Identity.AreEqual(_left, _right);
+        public static bool operator !=(QualifiedTypeOrVar? _left, QualifiedTypeOrVar? _right) => !(_left == _right);
         public override string ToString() => this == Var ? "var" : Type.ToString();
 
-        private QualifiedTypeOrVar(QualifiedType _type)
+        private QualifiedTypeOrVar(QualifiedType? _type)
         {
             Type = _type;
         }
 
-        public QualifiedType Type { get; }
+        public QualifiedType? Type { get; }
+        public bool IsVar => Type is null;
 
     }
 

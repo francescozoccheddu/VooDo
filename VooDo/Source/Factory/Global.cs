@@ -11,11 +11,11 @@ namespace VooDo.Factory
 
         public Global(QualifiedTypeOrVar _type, Identifier _name)
         {
-            if (_type == null)
+            if (_type is null)
             {
                 throw new ArgumentNullException(nameof(_type));
             }
-            if (_name == null)
+            if (_name is null)
             {
                 throw new ArgumentNullException(nameof(_name));
             }
@@ -27,7 +27,7 @@ namespace VooDo.Factory
         public QualifiedTypeOrVar Type { get; }
 
         public override bool Equals(object _obj) => Equals(_obj as Global);
-        public bool Equals(Global _other) => _other != null && Name == _other.Name && Type == _other.Type;
+        public bool Equals(Global _other) => _other is not null && Name == _other.Name && Type == _other.Type;
         public static bool operator ==(Global _left, Global _right) => Identity.AreEqual(_left, _right);
         public static bool operator !=(Global _left, Global _right) => !(_left == _right);
         public override int GetHashCode() => Identity.CombineHash(Name, Type);

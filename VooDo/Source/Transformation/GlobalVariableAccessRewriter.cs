@@ -33,7 +33,7 @@ namespace VooDo.Transformation
             private string GetSymbolName(ExpressionSyntax _node)
             {
                 SymbolInfo symbol = m_semantics.GetSymbolInfo(_node);
-                if (symbol.Symbol != null && m_symbols.Contains(symbol.Symbol))
+                if (symbol.Symbol is not null && m_symbols.Contains(symbol.Symbol))
                 {
                     return symbol.Symbol.Name;
                 }
@@ -46,7 +46,7 @@ namespace VooDo.Transformation
             private string GetTargetSymbolName(ExpressionSyntax _node)
             {
                 SymbolInfo symbol = m_semantics.GetSymbolInfo(_node);
-                if (symbol.Symbol != null && m_symbols.Contains(symbol.Symbol))
+                if (symbol.Symbol is not null && m_symbols.Contains(symbol.Symbol))
                 {
                     return symbol.Symbol.Name;
                 }
@@ -130,7 +130,7 @@ namespace VooDo.Transformation
                     {
                         expression = TryCreateNameOfSyntax(_node);
                     }
-                    if (expression != null)
+                    if (expression is not null)
                     {
                         return OriginRewriter.RewriteAbsolute(expression, _node.GetOrigin());
                     }
@@ -161,7 +161,7 @@ namespace VooDo.Transformation
             private ExpressionSyntax TryCreateValueOfSyntax(ExpressionSyntax _node)
             {
                 string variableName = GetTargetSymbolName(_node);
-                if (variableName != null)
+                if (variableName is not null)
                 {
                     ExpressionSyntax access = CreateAccessSyntax(variableName, false);
                     return OriginRewriter.RewriteAbsolute(access, _node.GetOrigin());
@@ -173,11 +173,11 @@ namespace VooDo.Transformation
 
         public static TNode Rewrite<TNode>(TNode _syntax, SemanticModel _semantics, IEnumerable<VariableDeclaratorSyntax> _globalDeclarations, out ImmutableArray<Diagnostic> _diagnostics) where TNode : SyntaxNode
         {
-            if (_semantics == null)
+            if (_semantics is null)
             {
                 throw new ArgumentNullException(nameof(_semantics));
             }
-            if (_globalDeclarations == null)
+            if (_globalDeclarations is null)
             {
                 throw new ArgumentNullException(nameof(_globalDeclarations));
             }
@@ -186,15 +186,15 @@ namespace VooDo.Transformation
 
         public static TNode Rewrite<TNode>(TNode _syntax, SemanticModel _semantics, IEnumerable<ISymbol> _globalSymbols, out ImmutableArray<Diagnostic> _diagnostics) where TNode : SyntaxNode
         {
-            if (_syntax == null)
+            if (_syntax is null)
             {
                 throw new ArgumentNullException(nameof(_syntax));
             }
-            if (_semantics == null)
+            if (_semantics is null)
             {
                 throw new ArgumentNullException(nameof(_semantics));
             }
-            if (_globalSymbols == null)
+            if (_globalSymbols is null)
             {
                 throw new ArgumentNullException(nameof(_globalSymbols));
             }
