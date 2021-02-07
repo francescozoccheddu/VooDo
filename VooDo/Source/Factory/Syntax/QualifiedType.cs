@@ -21,7 +21,7 @@ namespace VooDo.Factory.Syntax
                 QualifiedNameSyntax qualified => FromSyntax(qualified, _ignoreUnbound),
                 AliasQualifiedNameSyntax aliased => FromSyntax(aliased, _ignoreUnbound),
                 SimpleNameSyntax simple => FromSyntax(simple),
-                PredefinedTypeSyntax predefined => FromSyntax(predefined, _ignoreUnbound),
+                PredefinedTypeSyntax predefined => FromSyntax(predefined),
                 _ => throw new ArgumentException("Not a qualified type", nameof(_type)),
             }).WithIsNullable(nullable).WithRanks(ranks);
 
@@ -164,8 +164,8 @@ namespace VooDo.Factory.Syntax
         public override QualifiedType WithIsNullable(bool _nullable)
             => _nullable == IsNullable ? this : new QualifiedType(Alias, Path, _nullable, Ranks);
 
-        public override QualifiedType WithRanks(IEnumerable<int> _ranks)
-            => Ranks.SequenceEqual(_ranks) ? this : new QualifiedType(Alias, Path, IsNullable, _ranks);
+        public override QualifiedType WithRanks(IEnumerable<int>? _ranks)
+            => Ranks.SequenceEqual(_ranks.EmptyIfNull()) ? this : new QualifiedType(Alias, Path, IsNullable, _ranks);
 
     }
 }

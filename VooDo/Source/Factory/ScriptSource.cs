@@ -89,7 +89,7 @@ namespace VooDo.Factory
                 SyntaxTree tree = CSharpSyntaxTree.Create(TransformedSyntax);
                 CSharpCompilation compilation = CSharpCompilation.Create(null, new[] { tree }, references, options);
                 SemanticModel semantics = compilation.GetSemanticModel(tree);
-                CompilationUnitSyntax rootWithDecl = GlobalVariableDeclarationRewriter.Rewrite(semantics, out ImmutableArray<Global> globals);
+                CompilationUnitSyntax rootWithDecl = GlobalVariableRewriter.Rewrite(semantics, out ImmutableArray<Global> globals);
                 CompilationUnitSyntax rootWithAccess = null;
             }
             return null;

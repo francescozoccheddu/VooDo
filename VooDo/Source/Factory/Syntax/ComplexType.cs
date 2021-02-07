@@ -35,24 +35,29 @@ namespace VooDo.Factory.Syntax
 
         protected static TypeSyntax Unwrap(TypeSyntax _type, out bool _nullable, out ImmutableArray<int> _ranks)
         {
+            TypeSyntax? newType = _type;
             _nullable = false;
-            _ranks = default;
-            switch (_type)
+            _ranks = ImmutableArray.Create<int>();
+            while (true)
             {
-                case ArrayTypeSyntax arraytype:
+                if (newType is ArrayTypeSyntax arraytype)
                 {
                     if (arraytype.RankSpecifiers.Any(_r => _r.Sizes.Any(_s => _s is not OmittedArraySizeExpressionSyntax)))
                     {
                         throw new ArgumentException("Explicit array size expression", nameof(_type));
                     }
-                    _ranks = arraytype.RankSpecifiers.Select(_r => _r.Rank).ToImmutableArray();
-                    return arraytype.ElementType;
+                    _ranks = _ranks.AddRange(arraytype.RankSpecifiers.Select(_r => _r.Rank));
+                    newType = arraytype.ElementType;
                 }
-                case NullableTypeSyntax nullableType:
-                _nullable = true;
-                return nullableType.ElementType;
-                default:
-                return _type;
+                else if (newType is NullableTypeSyntax nullableType)
+                {
+                    _nullable |= true;
+                    newType = nullableType.ElementType;
+                }
+                else
+                {
+                    return newType;
+                }
             }
         }
 
