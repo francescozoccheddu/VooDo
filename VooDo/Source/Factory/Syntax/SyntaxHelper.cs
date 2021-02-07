@@ -21,16 +21,16 @@ namespace VooDo.Factory.Syntax
         internal static SimpleNameSyntax ToNameSyntax(this SimpleType _simpleType)
             => (SimpleNameSyntax) SyntaxFactory.ParseName(_simpleType.ToString());
 
-        internal static QualifiedType Specialize(this QualifiedType _qualifiedType, params QualifiedType[] _typeArguments)
+        internal static QualifiedType Specialize(this QualifiedType _qualifiedType, params ComplexType[] _typeArguments)
             => _qualifiedType.Specialize((IEnumerable<QualifiedType>) _typeArguments);
 
-        internal static QualifiedType Specialize(this QualifiedType _qualifiedType, IEnumerable<QualifiedType> _typeArguments)
+        internal static QualifiedType Specialize(this QualifiedType _qualifiedType, IEnumerable<ComplexType> _typeArguments)
             => _qualifiedType.WithPath(_qualifiedType.Path.SkipLast(1).Append(_qualifiedType.Path.Last().WithTypeArguments(_typeArguments)));
 
-        internal static TypeSyntax ToTypeSyntax(this QualifiedType _qualifiedType)
+        internal static TypeSyntax ToTypeSyntax(this ComplexType _qualifiedType)
             => SyntaxFactory.ParseTypeName(_qualifiedType.ToString());
 
-        internal static TypeSyntax ToTypeSyntax(this QualifiedTypeOrVar _qualifiedTypeOrVar)
+        internal static TypeSyntax ToTypeSyntax(this ComplexTypeOrVar _qualifiedTypeOrVar)
             => _qualifiedTypeOrVar.IsVar
             ? SyntaxFactory.IdentifierName("var")
             : SyntaxFactory.ParseTypeName(_qualifiedTypeOrVar.ToString());

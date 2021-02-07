@@ -34,25 +34,13 @@ namespace VooDo.Factory.Syntax
             }
         }
 
-        public static Namespace FromSyntax(TypeSyntax _syntax)
+        public static Namespace FromSyntax(TypeSyntax _syntax) => _syntax switch
         {
-            if (_syntax is IdentifierNameSyntax name)
-            {
-                return FromSyntax(name);
-            }
-            else if (_syntax is QualifiedNameSyntax qualified)
-            {
-                return FromSyntax(qualified);
-            }
-            else if (_syntax is AliasQualifiedNameSyntax aliased)
-            {
-                return FromSyntax(aliased);
-            }
-            else
-            {
-                throw new ArgumentException("Not a namespace type", nameof(_syntax));
-            }
-        }
+            IdentifierNameSyntax name => FromSyntax(name),
+            QualifiedNameSyntax qualified => FromSyntax(qualified),
+            AliasQualifiedNameSyntax aliased => FromSyntax(aliased),
+            _ => throw new ArgumentException("Not a namespace type", nameof(_syntax))
+        };
 
         public static Namespace Parse(string _namespace)
             => FromSyntax(SyntaxFactory.ParseTypeName(_namespace));
@@ -98,7 +86,7 @@ namespace VooDo.Factory.Syntax
         public override int GetHashCode() => Identity.CombineHash(Alias, Identity.CombineHashes(Path));
         public override string ToString() => (IsAliasQualified ? $"{Alias}::" : "") + string.Join('.', Path);
 
-        public Namespace WithAlias(Identifier _alias)
+        public Namespace WithAlias(Identifier? _alias)
             => _alias == Alias ? this : new Namespace(_alias, Path);
 
         public Namespace WithPath(params Identifier[] _path)

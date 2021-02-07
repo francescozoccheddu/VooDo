@@ -12,44 +12,40 @@ using VooDo.Utils;
 
 namespace VooDo.Factory.Syntax
 {
-    public sealed class QualifiedType : IEquatable<QualifiedType>
+    public sealed class QualifiedType : ComplexType, IEquatable<QualifiedType>
     {
 
-        public static QualifiedType FromSyntax(TypeSyntax _type, bool _ignoreUnboundGenerics = false)
-        {
-            switch (_type)
+        public static new QualifiedType FromSyntax(TypeSyntax _type, bool _ignoreUnbound = false)
+            => (Unwrap(_type, out bool nullable, out ImmutableArray<int> ranks) switch
             {
-                case ArrayTypeSyntax arraytype:
-                {
-                    if (arraytype.RankSpecifiers.Any(_r => _r.Sizes.Any(_s => _s is not OmittedArraySizeExpressionSyntax)))
-                    {
-                        throw new ArgumentException("Explicit array size expression", nameof(_type));
-                    }
-                    IEnumerable<int> ranks = arraytype.RankSpecifiers.Select(_r => _r.Rank);
-                    return FromSyntax(arraytype.ElementType).WithRanks(ranks);
-                }
+                QualifiedNameSyntax qualified => FromSyntax(qualified, _ignoreUnbound),
+                AliasQualifiedNameSyntax aliased => FromSyntax(aliased, _ignoreUnbound),
+                SimpleNameSyntax simple => FromSyntax(simple),
+                PredefinedTypeSyntax predefined => FromSyntax(predefined, _ignoreUnbound),
+                _ => throw new ArgumentException("Not a qualified type", nameof(_type)),
+            }).WithIsNullable(nullable).WithRanks(ranks);
 
-                case NullableTypeSyntax nullableType:
-                return FromSyntax(nullableType.ElementType).WithIsNullable(true);
-                case QualifiedNameSyntax qualifiedNameSyntax:
-                {
-                    QualifiedType left = FromSyntax(qualifiedNameSyntax.Left);
-                    return left.WithPath(left.Path.Add(SimpleType.FromSyntax(qualifiedNameSyntax.Right, _ignoreUnboundGenerics)));
-                }
+        public static QualifiedType FromSyntax(SimpleNameSyntax _type, bool _ignoreUnbound = false)
+            => SimpleType.FromSyntax(_type, _ignoreUnbound);
 
-                case AliasQualifiedNameSyntax aliasQualifiedNameSyntax:
-                return new QualifiedType(Identifier.FromSyntax(aliasQualifiedNameSyntax.Alias.Identifier), SimpleType.FromSyntax(aliasQualifiedNameSyntax.Name, _ignoreUnboundGenerics));
-                default:
-                return SimpleType.FromSyntax(_type, _ignoreUnboundGenerics);
-            }
+        public static QualifiedType FromSyntax(QualifiedNameSyntax _type, bool _ignoreUnbound = false)
+        {
+            QualifiedType left = FromSyntax(_type.Left);
+            return left.WithPath(left.Path.Add(SimpleType.FromSyntax(_type.Right, _ignoreUnbound)));
         }
 
-        public static QualifiedType Parse(string _type, bool _ignoreUnboundGenerics = false)
-            => FromSyntax(SyntaxFactory.ParseTypeName(_type), _ignoreUnboundGenerics);
+        public static QualifiedType FromSyntax(AliasQualifiedNameSyntax _type, bool _ignoreUnbound = false)
+            => new QualifiedType(Identifier.FromSyntax(_type.Alias.Identifier), SimpleType.FromSyntax(_type.Name, _ignoreUnbound));
 
-        public static QualifiedType FromType(Type _type, bool _ignoreUnboundGenerics = false)
+        public static QualifiedType FromSyntax(PredefinedTypeSyntax _type)
+            => SimpleType.FromSyntax(_type);
+
+        public static new QualifiedType Parse(string _type, bool _ignoreUnbound = false)
+            => FromSyntax(SyntaxFactory.ParseTypeName(_type), _ignoreUnbound);
+
+        public static new QualifiedType FromType(Type _type, bool _ignoreUnbound = false)
         {
-            if (_type.IsGenericTypeDefinition && !_ignoreUnboundGenerics)
+            if (_type.IsGenericTypeDefinition && !_ignoreUnbound)
             {
                 throw new ArgumentException("Unbound type", nameof(_type));
             }
@@ -71,40 +67,29 @@ namespace VooDo.Factory.Syntax
             }
             if (_type.IsPrimitive)
             {
-                return new QualifiedType(SimpleType.FromType(_type, _ignoreUnboundGenerics));
+                return new QualifiedType(SimpleType.FromType(_type, _ignoreUnbound));
             }
             else
             {
-                List<int> ranks = new List<int>();
-                Type type = _type;
-                while (type.IsArray)
-                {
-                    ranks.Add(type.GetArrayRank());
-                    type = type.GetElementType();
-                }
-                Type nullableUnderlyingType = Nullable.GetUnderlyingType(type);
-                bool nullable = nullableUnderlyingType is not null;
-                if (nullable)
-                {
-                    type = nullableUnderlyingType!;
-                }
+                Type type = Unwrap(_type, out bool nullable, out ImmutableArray<int> ranks);
                 List<SimpleType> path = new List<SimpleType>
                 {
-                    SimpleType.FromType(type, _ignoreUnboundGenerics)
+                    type
                 };
                 while (type.IsNested)
                 {
-                    type = type.DeclaringType;
-                    path.Add(SimpleType.FromType(type, _ignoreUnboundGenerics));
+                    type = type.DeclaringType!;
+                    path.Add(SimpleType.FromType(type, _ignoreUnbound));
                 }
                 path.Reverse();
                 ranks.Reverse();
-                return new QualifiedType((Namespace) type.Namespace, path, nullable, ranks);
+                Namespace? @namespace = type.Namespace != null ? Namespace.Parse(type.Namespace) : null;
+                return new QualifiedType(@namespace, path, nullable, ranks);
             }
         }
 
-        public static QualifiedType FromType<TType>(bool _ignoreUnboundGenerics = false)
-            => FromType(typeof(TType), _ignoreUnboundGenerics);
+        public static new QualifiedType FromType<TType>()
+            => FromType(typeof(TType), false);
 
         public static implicit operator QualifiedType(Identifier _identifier) => new QualifiedType(_identifier);
         public static implicit operator QualifiedType(SimpleType _simpleType) => new QualifiedType(_simpleType);
@@ -126,7 +111,7 @@ namespace VooDo.Factory.Syntax
         public QualifiedType(Namespace? _namespace, IEnumerable<SimpleType> _path, bool _nullable = false, IEnumerable<int>? _ranks = null)
             : this(_namespace?.Alias, ((IEnumerable<Identifier>?) _namespace?.Path).EmptyIfNull().Select(_p => new SimpleType(_p)).Concat(_path), _nullable, _ranks) { }
 
-        public QualifiedType(Identifier? _alias, IEnumerable<SimpleType> _path, bool _nullable = false, IEnumerable<int>? _ranks = null)
+        public QualifiedType(Identifier? _alias, IEnumerable<SimpleType> _path, bool _nullable = false, IEnumerable<int>? _ranks = null) : base(_nullable, _ranks)
         {
             Alias = _alias;
             if (_path is null)
@@ -134,29 +119,18 @@ namespace VooDo.Factory.Syntax
                 throw new ArgumentNullException(nameof(_path));
             }
             Path = _path.ToImmutableArray();
-            if (!Path.Any())
+            if (Path.IsEmpty)
             {
                 throw new ArgumentException("Empty path", nameof(_path));
             }
-            if (Path.AnyNull())
-            {
-                throw new ArgumentException("Null path item", nameof(_path));
-            }
-            IsNullable = _nullable;
-            Ranks = _ranks.EmptyIfNull().ToImmutableArray();
-            if (Ranks.Any(_i => _i < 1))
-            {
-                throw new ArgumentException("Non positive rank", nameof(_path));
-            }
+
         }
 
         public Identifier? Alias { get; }
         public ImmutableArray<SimpleType> Path { get; }
-        public bool IsNullable { get; }
-        public ImmutableArray<int> Ranks { get; }
 
         public bool IsAliasQualified => Alias is not null;
-        public bool IsArray => Ranks.Any();
+
         public bool IsSimple => !IsQualified && !IsArray && !IsNullable;
         public bool IsQualified => IsAliasQualified || IsNamespaceQualified;
         public bool IsNamespaceQualified => Path.Length > 1;
@@ -171,29 +145,26 @@ namespace VooDo.Factory.Syntax
         }
 
         public override bool Equals(object? _obj) => Equals(_obj as QualifiedType);
-        public bool Equals(QualifiedType? _other) => _other is not null && Alias == _other.Alias && Path.SequenceEqual(_other.Path) && IsNullable == _other.IsNullable && Ranks.SequenceEqual(_other.Ranks);
-        public override int GetHashCode() => Identity.CombineHash(Alias, Identity.CombineHashes(Path), IsNullable, Identity.CombineHashes(Ranks));
+        public bool Equals(QualifiedType? _other) => _other is not null && Alias == _other.Alias && Path.SequenceEqual(_other.Path) && base.Equals(_other);
+        public override int GetHashCode() => Identity.CombineHash(Alias, Identity.CombineHashes(Path), base.GetHashCode());
         public static bool operator ==(QualifiedType? _left, QualifiedType? _right) => Identity.AreEqual(_left, _right);
         public static bool operator !=(QualifiedType? _left, QualifiedType? _right) => !(_left == _right);
         public override string ToString()
-            => $"{(IsAliasQualified ? $"{Alias}::" : "")}{string.Join('.', Path)}{(IsNullable ? "?" : "")}{string.Concat(Ranks.Select(_r => $"[{new string(',', _r - 1)}]"))}";
+            => $"{(IsAliasQualified ? $"{Alias}::" : "")}{string.Join('.', Path)}{base.ToString()}";
 
         public QualifiedType WithAlias(Identifier? _alias = null)
             => _alias == Alias ? this : new QualifiedType(_alias, Path, IsNullable, Ranks);
 
         public QualifiedType WithPath(params SimpleType[] _path)
-            => WithPath((IEnumerable<SimpleType>) _path);
+            => WithPath(_path);
 
         public QualifiedType WithPath(IEnumerable<SimpleType> _path)
             => Path.SequenceEqual(_path) ? this : new QualifiedType(Alias, _path, IsNullable, Ranks);
 
-        public QualifiedType WithIsNullable(bool _nullable)
+        public override QualifiedType WithIsNullable(bool _nullable)
             => _nullable == IsNullable ? this : new QualifiedType(Alias, Path, _nullable, Ranks);
 
-        public QualifiedType WithRanks(int[] _ranks)
-            => WithRanks((IEnumerable<int>) _ranks);
-
-        public QualifiedType WithRanks(IEnumerable<int> _ranks)
+        public override QualifiedType WithRanks(IEnumerable<int> _ranks)
             => Ranks.SequenceEqual(_ranks) ? this : new QualifiedType(Alias, Path, IsNullable, _ranks);
 
     }

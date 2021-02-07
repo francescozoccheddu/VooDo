@@ -9,11 +9,11 @@ namespace VooDo.Utils
 
         internal sealed class ReferenceComparer<T> : IEqualityComparer<T>
         {
-            public bool Equals(T _x, T _y) => ReferenceEquals(_x, _y);
-            public int GetHashCode(T _obj) => RuntimeHelpers.GetHashCode(_obj);
+            public bool Equals(T? _x, T? _y) => ReferenceEquals(_x, _y);
+            public int GetHashCode(T? _obj) => RuntimeHelpers.GetHashCode(_obj);
         }
 
-        internal static int CombineHash(params object[] _objs) => CombineHashes(_objs);
+        internal static int CombineHash(params object?[] _objs) => CombineHashes(_objs);
 
         internal static int CombineHashes(IEnumerable _objs)
         {
@@ -25,7 +25,7 @@ namespace VooDo.Utils
             return hashCode;
         }
 
-        internal static bool AreEqual(object _a, object _b)
+        internal static bool AreEqual(object? _a, object? _b)
             => ReferenceEquals(_a, _b) || (_a?.Equals(_b) ?? false);
 
     }

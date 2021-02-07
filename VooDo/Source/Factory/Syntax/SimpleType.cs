@@ -55,7 +55,7 @@ namespace VooDo.Factory.Syntax
             GenericNameSyntax genericName when !genericName.IsUnboundGenericName
                 => new SimpleType(
                     Identifier.FromSyntax(genericName.Identifier),
-                    genericName.TypeArgumentList.Arguments.Select(_a => QualifiedType.FromSyntax(_a, _ignoreUnboundGenerics))),
+                    genericName.TypeArgumentList.Arguments.Select(_a => ComplexType.FromSyntax(_a, _ignoreUnboundGenerics))),
             _ => throw new ArgumentException("Not a simple type", nameof(_syntax))
         };
 
@@ -103,14 +103,14 @@ namespace VooDo.Factory.Syntax
                 {
                     name = _type.Name.Substring(0, length);
                 }
-                return new SimpleType(name, _type.GenericTypeArguments.Select(_a => QualifiedType.FromType(_a, _ignoreUnboundGenerics)));
+                return new SimpleType(name, _type.GenericTypeArguments.Select(_a => ComplexType.FromType(_a, _ignoreUnboundGenerics)));
             }
         }
 
         public static implicit operator SimpleType(string _type) => Parse(_type);
         public static implicit operator SimpleType(Type _type) => FromType(_type);
 
-        public SimpleType(Identifier _name, IEnumerable<QualifiedType>? _typeArguments = null)
+        public SimpleType(Identifier _name, IEnumerable<ComplexType>? _typeArguments = null)
         {
             Name = _name;
             TypeArguments = _typeArguments.EmptyIfNull().ToImmutableArray();
@@ -121,7 +121,7 @@ namespace VooDo.Factory.Syntax
         }
 
         public Identifier Name { get; }
-        public ImmutableArray<QualifiedType> TypeArguments { get; }
+        public ImmutableArray<ComplexType> TypeArguments { get; }
 
         public override bool Equals(object? _obj) => Equals(_obj as SimpleType);
         public bool Equals(SimpleType? _other) => _other is not null && Name == _other.Name && TypeArguments.SequenceEqual(_other.TypeArguments);
@@ -133,10 +133,10 @@ namespace VooDo.Factory.Syntax
         public SimpleType WithName(Identifier _name)
             => _name == Name ? this : new SimpleType(_name, TypeArguments);
 
-        public SimpleType WithTypeArguments(params QualifiedType[] _typeArguments)
-            => WithTypeArguments((IEnumerable<QualifiedType>) _typeArguments);
+        public SimpleType WithTypeArguments(params ComplexType[] _typeArguments)
+            => WithTypeArguments((IEnumerable<ComplexType>) _typeArguments);
 
-        public SimpleType WithTypeArguments(IEnumerable<QualifiedType>? _typeArguments = null)
+        public SimpleType WithTypeArguments(IEnumerable<ComplexType>? _typeArguments = null)
             => TypeArguments.Equals(_typeArguments) ? this : new SimpleType(Name, _typeArguments);
 
     }
