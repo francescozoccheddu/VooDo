@@ -9,7 +9,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 
-using VooDo.Factory.Syntax;
+using VooDo.Language.AST.Names;
 using VooDo.Transformation;
 using VooDo.Utils;
 

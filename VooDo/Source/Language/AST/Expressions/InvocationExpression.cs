@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Collections.Immutable;
 
-using VooDo.Language.AST.Expressions;
 using VooDo.Language.AST.Names;
 using VooDo.Utils;
 
-namespace VooDo.Language.AST
+namespace VooDo.Language.AST.Expressions
 {
 
     public sealed record InvocationExpression(Expression Source, ImmutableArray<InvocationExpression.Argument> Arguments = default) : Expression

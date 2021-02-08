@@ -1,4 +1,4 @@
-﻿namespace VooDo.Language.AST
+﻿namespace VooDo.Language.AST.Expressions
 {
 
     public sealed record BinaryExpression(Expression Left, BinaryExpression.EKind Kind, Expression Right) : Expression

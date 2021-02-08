@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 
+using VooDo.Language.AST.Names;
 using VooDo.Parsing;
 using VooDo.Transformation;
 using VooDo.Utils;
@@ -114,17 +115,25 @@ namespace VooDo.Factory
                 .Except(originalSource.Aliases)
                 .Select(_a => SyntaxFactory.ExternAliasDirective(_a))
                 .Select(_a => _a.WithOrigin(Origin.Transformation, true));
-            QualifiedType globalType = QualifiedType.FromType<Meta.Glob<object>>().WithAlias(Identifiers.referenceAlias);
+            QualifiedType globalType = QualifiedType.FromType<Meta.Glob<object>>() with
+            {
+                Alias = Identifiers.referenceAlias
+            };
             IEnumerable<GlobalStatementSyntax>? newGlobals = ExtraGlobals
                 .Select(_g => SyntaxFactory.GlobalStatement(
                     SyntaxFactory.LocalDeclarationStatement(
                         SyntaxFactory.VariableDeclaration(
                             SyntaxFactory.ParseTypeName(
-                                globalType.WithPath(
+                                globalType with
+                                {
+                                    Path =
                                     globalType.Path
                                     .SkipLast(1)
-                                    .Append(globalType.Path.Last()
-                                    .WithTypeArguments(_g.Type.Type ?? QualifiedType.Parse("var")))).ToString()),
+                                    .Append(globalType.Path.Last() with
+                                    {
+                                        TypeArguments = ImmutableArray.Create(_g.Type.Type ?? QualifiedType.Parse("var"))
+                                    }).ToImmutableArray()
+                                }),
                             SyntaxFactory.SingletonSeparatedList(
                                 SyntaxFactory.VariableDeclarator(_g.Name))))))
                 .Select(_g => _g.WithOrigin(Origin.Transformation, true));
@@ -150,16 +159,16 @@ namespace VooDo.Factory
             => m_aliasMap.TryGetValue(_alias, out Reference? reference) ? reference : null;
 
         public ScriptSource WithAdditionalReferences(params Reference[] _references)
-            => WithAdditionalReferences((IEnumerable<Reference>) _references);
+            => WithAdditionalReferences(_references);
 
         public ScriptSource WithAdditionalExtraGlobals(params Global[] _extraGlobals)
-            => WithAdditionalExtraGlobals((IEnumerable<Global>) _extraGlobals);
+            => WithAdditionalExtraGlobals(_extraGlobals);
 
         public ScriptSource WithAdditionalUsingDirectives(params Namespace[] _usingDirectives)
-            => WithAdditionalUsingDirectives((IEnumerable<Namespace>) _usingDirectives);
+            => WithAdditionalUsingDirectives(_usingDirectives);
 
         public ScriptSource WithAdditionalUsingStaticDirectives(params QualifiedType[] _usingStaticDirectives)
-            => WithAdditionalUsingStaticDirectives((IEnumerable<QualifiedType>) _usingStaticDirectives);
+            => WithAdditionalUsingStaticDirectives(_usingStaticDirectives);
 
         public ScriptSource WithAdditionalUsingAliasDirectives(params (Identifier, Namespace)[] _usingAliasDirectives)
             => WithAdditionalUsingAliasDirectives(_usingAliasDirectives.Select(_e => KeyValuePair.Create(_e.Item1, _e.Item2)));
@@ -180,16 +189,16 @@ namespace VooDo.Factory
             => WithUsingAliasDirectives(UsingAliasDirectives.AddRange(_usingAliasDirectives));
 
         public ScriptSource WithReferences(params Reference[] _references)
-            => WithReferences((IEnumerable<Reference>) _references);
+            => WithReferences(_references);
 
         public ScriptSource WithExtraGlobals(params Global[] _extraGlobals)
-            => WithExtraGlobals((IEnumerable<Global>) _extraGlobals);
+            => WithExtraGlobals(_extraGlobals);
 
         public ScriptSource WithUsingDirectives(params Namespace[] _usingDirectives)
-            => WithUsingDirectives((IEnumerable<Namespace>) _usingDirectives);
+            => WithUsingDirectives(_usingDirectives);
 
         public ScriptSource WithUsingStaticDirectives(params QualifiedType[] _usingStaticDirectives)
-            => WithUsingStaticDirectives((IEnumerable<QualifiedType>) _usingStaticDirectives);
+            => WithUsingStaticDirectives(_usingStaticDirectives);
 
         public ScriptSource WithUsingAliasDirectives(params (Identifier, Namespace)[] _usingAliasDirectives)
             => WithUsingAliasDirectives(_usingAliasDirectives.Select(_e => KeyValuePair.Create(_e.Item1, _e.Item2)));

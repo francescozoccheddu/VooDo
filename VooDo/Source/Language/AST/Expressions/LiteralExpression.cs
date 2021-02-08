@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace VooDo.Language.AST
+namespace VooDo.Language.AST.Expressions
 {
 
     public sealed record LiteralExpression : Expression

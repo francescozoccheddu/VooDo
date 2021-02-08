@@ -4,7 +4,7 @@ using System.Collections.Immutable;
 using VooDo.Language.AST.Names;
 using VooDo.Utils;
 
-namespace VooDo.Language.AST
+namespace VooDo.Language.AST.Expressions
 {
 
     public sealed record ObjectCreationExpression(ComplexType? Type, ImmutableArray<Expression> Arguments = default) : Expression

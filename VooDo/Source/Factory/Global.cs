@@ -1,6 +1,6 @@
 ﻿using System;
 
-using VooDo.Factory.Syntax;
+using VooDo.Language.AST.Names;
 using VooDo.Utils;
 
 namespace VooDo.Factory

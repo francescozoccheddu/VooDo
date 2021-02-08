@@ -10,7 +10,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
 using System.Linq;
 
-using VooDo.Factory.Syntax;
+using VooDo.Language.AST.Names;
 using VooDo.Parsing.Generated;
 using VooDo.Transformation;
 using VooDo.Utils;
@@ -184,7 +184,10 @@ namespace VooDo.Parsing
         public override object VisitControllerofExpression([NotNull] VooDoParser.ControllerofExpressionContext _c)
         {
             ArgumentSyntax argument = SF.Argument(IdentifierName(_c.mName)).From(_c.mName);
-            TypeSyntax globalType = QualifiedType.FromType(typeof(Meta)).WithAlias(Identifiers.referenceAlias).ToTypeSyntax();
+            TypeSyntax globalType = (QualifiedType.FromType(typeof(Meta)) with
+            {
+                Alias = Identifiers.referenceAlias
+            }).ToTypeSyntax();
             MemberAccessExpressionSyntax method = (MemberAccessExpressionSyntax) SyntaxFactoryHelper.Generator.MemberAccessExpression(globalType, nameof(Meta.cof));
             return SF.InvocationExpression(
                     method.From(_c.mOp, true),
@@ -216,9 +219,12 @@ namespace VooDo.Parsing
             => SF.IfStatement(Tk(_c.mIf), Tk(_c.mParenO), Get<ExpressionSyntax>(_c.mCond), Tk(_c.mParenC), Get<StatementSyntax>(_c.mThenBody), TryGet<ElseClauseSyntax>(_c.mElse));
         public override object VisitGlobalDeclaration([NotNull] VooDoParser.GlobalDeclarationContext _c)
         {
-            NameSyntax globalUnboundType = (NameSyntax) QualifiedType
-                .FromType<Meta.Glob<object>>()
-                .WithAlias(Identifiers.referenceAlias)
+            NameSyntax globalUnboundType = (NameSyntax) (QualifiedType
+                .FromType<Meta.Glob<object>>() with
+            {
+                Alias = Identifiers.referenceAlias
+
+            })
                 .ToTypeSyntax()
                 .From(_c);
             if (_c.Parent is VooDoParser.GlobalDeclarationStatementContext declaration)
@@ -349,7 +355,10 @@ namespace VooDo.Parsing
                 argList.Add(Tk(SK.CommaToken, _c.mInit));
                 argList.Add(SF.Argument(Get<ExpressionSyntax>(_c.mInitializer)));
             }
-            TypeSyntax globalType = QualifiedType.FromType(typeof(Meta)).WithAlias(Identifiers.referenceAlias).ToTypeSyntax();
+            TypeSyntax globalType = (QualifiedType.FromType(typeof(Meta)) with
+            {
+                Alias = Identifiers.referenceAlias
+            }).ToTypeSyntax();
             MemberAccessExpressionSyntax method = (MemberAccessExpressionSyntax) SyntaxFactoryHelper.Generator.MemberAccessExpression(globalType, nameof(Meta.gexpr));
             return SF.InvocationExpression(method.From(_c, true), SF.ArgumentList(Tk(SK.OpenParenToken, _c), SF.SeparatedList<ArgumentSyntax>(argList), Tk(SK.CloseParenToken, _c)).From(_c));
         }

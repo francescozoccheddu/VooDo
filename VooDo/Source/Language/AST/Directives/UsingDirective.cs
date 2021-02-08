@@ -1,4 +1,5 @@
-﻿using VooDo.Factory.Syntax;
+﻿
+using VooDo.Language.AST.Names;
 
 namespace VooDo.Language.AST.Directives
 {

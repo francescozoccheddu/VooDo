@@ -8,7 +8,7 @@ using System.Collections.Immutable;
 using System.Linq;
 
 using VooDo.Factory;
-using VooDo.Factory.Syntax;
+using VooDo.Language.AST.Names;
 
 namespace VooDo.Transformation
 {

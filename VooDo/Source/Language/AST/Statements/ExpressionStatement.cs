@@ -1,9 +1,9 @@
-﻿using VooDo.Factory.Syntax;
+﻿using VooDo.Language.AST.Names;
 
 namespace VooDo.Language.AST.Statements
 {
 
-    public sealed record UsingDirective(Namespace Namespace)
+    public sealed record ExpressionStatement(Namespace Namespace)
     {
 
 

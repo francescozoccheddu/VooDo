@@ -143,7 +143,14 @@ namespace VooDo.Language.AST.Names
         public ImmutableArray<SimpleType> Path
         {
             get => m_path;
-            init => m_path = value.EmptyIfDefault();
+            init
+            {
+                if (value.IsDefaultOrEmpty)
+                {
+                    throw new ArgumentException("Empty path");
+                }
+                m_path = value;
+            }
         }
         public bool IsAliasQualified => Alias is not null;
         public bool IsSimple => !IsQualified && !IsArray && !IsNullable;
