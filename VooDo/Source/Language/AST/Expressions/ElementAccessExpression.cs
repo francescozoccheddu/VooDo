@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Linq;
 
 using VooDo.Utils;
 
@@ -29,6 +30,7 @@ namespace VooDo.Language.AST.Expressions
 
         #region Overrides
 
+        public override IEnumerable<Node> Children => new Node[] { Source }.Concat(Arguments);
         public override string ToString() => $"{Source}" + (Coalesce ? "?" : "") + $"[{string.Join(",", Arguments)}]";
 
         #endregion

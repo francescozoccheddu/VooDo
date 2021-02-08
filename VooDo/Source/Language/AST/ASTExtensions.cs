@@ -1,8 +1,9 @@
 ﻿namespace VooDo.Language.AST
 {
 
-    public interface IAST
+    public static class ASTExtensions
     {
+
 
     }
 

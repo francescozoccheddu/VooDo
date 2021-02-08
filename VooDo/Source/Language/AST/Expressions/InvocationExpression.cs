@@ -1,4 +1,6 @@
-﻿using System.Collections.Immutable;
+﻿using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Linq;
 
 using VooDo.Language.AST.Names;
 using VooDo.Utils;
@@ -11,7 +13,7 @@ namespace VooDo.Language.AST.Expressions
 
         #region Nested types
 
-        public abstract record Argument : IAST
+        public abstract record Argument : Node
         {
 
             public enum EKind
@@ -23,23 +25,27 @@ namespace VooDo.Language.AST.Expressions
 
             public abstract EKind Kind { get; }
 
+
         }
 
         public sealed record ValueArgument(Expression Expression) : Argument
         {
             public override EKind Kind => EKind.Value;
+            public override IEnumerable<Node> Children => new Node[] { Expression };
             public override string ToString() => $"{Kind.Token()} {Expression}".TrimStart();
         }
 
         public sealed record AssignableArgument(Argument.EKind AssignableKind, AssignableExpression Expression) : Argument
         {
             public override EKind Kind => AssignableKind;
+            public override IEnumerable<Node> Children => new Node[] { Expression };
             public override string ToString() => $"{Kind.Token()} {Expression}".TrimStart();
         }
 
         public sealed record OutDeclarationArgument(ComplexTypeOrVar Type, IdentifierOrDiscard Name) : Argument
         {
             public override EKind Kind => EKind.Out;
+            public override IEnumerable<Node> Children => new Node[] { Type, Name };
             public override string ToString() => $"{Kind.Token()} {Type} {Name}".TrimStart();
         }
 
@@ -58,6 +64,7 @@ namespace VooDo.Language.AST.Expressions
 
         #region Overrides
 
+        public override IEnumerable<Node> Children => new Node[] { Source }.Concat(Arguments);
         public override string ToString() => $"{Source}({string.Join(", ", Arguments)})";
 
         #endregion

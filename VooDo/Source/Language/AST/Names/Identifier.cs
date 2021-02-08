@@ -3,12 +3,13 @@
 using Microsoft.CodeAnalysis;
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace VooDo.Language.AST.Names
 {
 
-    public sealed record Identifier : IAST
+    public sealed record Identifier : Node
     {
 
         #region Creation
@@ -49,6 +50,7 @@ namespace VooDo.Language.AST.Names
 
         #region Overrides
 
+        public override IEnumerable<Node> Children => Enumerable.Empty<Node>();
         public override string ToString() => m_identifier;
 
         #endregion

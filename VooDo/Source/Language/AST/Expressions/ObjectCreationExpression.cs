@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Linq;
 
 using VooDo.Language.AST.Names;
 using VooDo.Utils;
@@ -34,6 +35,7 @@ namespace VooDo.Language.AST.Expressions
 
         #region Override
 
+        public override IEnumerable<Node> Children => IsTypeImplicit ? Arguments : new Node[] { Type! }.Concat(Arguments);
         public override string ToString() => $"{GrammarConstants.newKeyword} " + (IsTypeImplicit ? $"{Type} " : "") + $"({string.Join(", ", Arguments)})";
 
         #endregion

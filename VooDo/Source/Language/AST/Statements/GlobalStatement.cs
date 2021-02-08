@@ -24,6 +24,7 @@ namespace VooDo.Language.AST.Statements
         public int Count => ((IReadOnlyCollection<Statement>) m_declarations).Count;
         public IEnumerator<DeclarationStatement> GetEnumerator() => ((IEnumerable<DeclarationStatement>) m_declarations).GetEnumerator();
         IEnumerator IEnumerable.GetEnumerator() => ((IEnumerable) m_declarations).GetEnumerator();
+        public override IEnumerable<Node> Children => m_declarations;
         public override string ToString() => GrammarConstants.globalKeyword + Count switch
         {
             0 => " {}",

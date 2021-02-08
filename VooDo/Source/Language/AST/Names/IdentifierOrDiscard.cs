@@ -1,4 +1,7 @@
-﻿namespace VooDo.Language.AST.Names
+﻿using System.Collections.Generic;
+using System.Linq;
+
+namespace VooDo.Language.AST.Names
 {
 
     public sealed record IdentifierOrDiscard : Node
@@ -41,6 +44,7 @@
 
         #region Overrides
 
+        public override IEnumerable<Node> Children => IsDiscard ? Enumerable.Empty<Node>() : new Node[] { Identifier! };
         public override string ToString() => IsDiscard ? "_" : Identifier!.ToString();
 
         #endregion

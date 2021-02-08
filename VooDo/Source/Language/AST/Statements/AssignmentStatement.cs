@@ -1,4 +1,6 @@
-﻿using VooDo.Language.AST.Expressions;
+﻿using System.Collections.Generic;
+
+using VooDo.Language.AST.Expressions;
 
 namespace VooDo.Language.AST.Statements
 {
@@ -22,6 +24,7 @@ namespace VooDo.Language.AST.Statements
 
         #region Overrides
 
+        public override IEnumerable<Node> Children => new Node[] { Target, Source };
         public override string ToString() => $"{Target} {Kind.Token()} {Source}{GrammarConstants.statementEndToken}";
 
         #endregion

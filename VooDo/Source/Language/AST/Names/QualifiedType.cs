@@ -154,6 +154,9 @@ namespace VooDo.Language.AST.Names
 
         #region Overrides
 
+        public override IEnumerable<Node> Children =>
+            (IsAliasQualified ? new Node[] { Alias! } : Enumerable.Empty<Node>())
+            .Concat(Path);
         public override string ToString() => (IsAliasQualified ? $"{Alias}::" : "") + string.Join('.', Path) + base.ToString();
 
         #endregion

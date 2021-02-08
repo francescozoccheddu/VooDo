@@ -8,16 +8,15 @@ using VooDo.Utils;
 namespace VooDo.Factory
 {
 
-    public readonly struct Origin : IEquatable<Origin>
+    public readonly struct Origin
     {
 
         public enum EKind
         {
-            Unknown = 0, Source = 1, Transformation = 2, HookInitializer = 3
+            Unknown = 0, Source = 1, HookInitializer = 2
         }
 
         public static Origin Unknown { get; } = default;
-        public static Origin Transformation { get; } = new Origin(EKind.Transformation, -1, 0);
         public static Origin HookInitializer { get; } = new Origin(EKind.HookInitializer, -1, 0);
 
         public static Origin FromSource(int _start, int _length)
@@ -53,7 +52,6 @@ namespace VooDo.Factory
         public override string ToString() => Kind switch
         {
             EKind.Source => $"Source {Start}..{End}",
-            EKind.Transformation => "Transformation",
             EKind.HookInitializer => "HookInitializer",
             _ => "Unknown"
         };

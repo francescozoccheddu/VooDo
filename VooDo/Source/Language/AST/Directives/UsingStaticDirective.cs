@@ -1,11 +1,13 @@
 ﻿
+using System.Collections.Generic;
+
 using VooDo.Language.AST.Names;
 using VooDo.Utils;
 
 namespace VooDo.Language.AST.Directives
 {
 
-    public sealed record UsingStaticDirective(QualifiedType Type)
+    public sealed record UsingStaticDirective(QualifiedType Type) : UsingDirective
     {
 
         #region Members
@@ -21,6 +23,7 @@ namespace VooDo.Language.AST.Directives
 
         #region Overrides
 
+        public override IEnumerable<Node> Children => new Node[] { Type };
         public override string ToString() => $"{GrammarConstants.usingKeyword} {GrammarConstants.staticKeyword} {Type}{GrammarConstants.statementEndToken}";
 
         #endregion

@@ -1,4 +1,6 @@
-﻿namespace VooDo.Language.AST.Expressions
+﻿using System.Collections.Generic;
+
+namespace VooDo.Language.AST.Expressions
 {
 
     public sealed record BinaryExpression(Expression Left, BinaryExpression.EKind Kind, Expression Right) : Expression
@@ -22,6 +24,7 @@
 
         #region Overrides
 
+        public override IEnumerable<Node> Children => new Node[] { Left, Right };
         public override string ToString() => $"{Left} {Kind.Token()} {Right}";
 
         #endregion

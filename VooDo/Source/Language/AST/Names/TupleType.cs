@@ -84,7 +84,7 @@ namespace VooDo.Language.AST.Names
 
         #region Nested types
 
-        public sealed record Element(ComplexType Type, Identifier? Name = null) : IAST
+        public sealed record Element(ComplexType Type, Identifier? Name = null) : Node
         {
 
             public static implicit operator Element(string _type) => Parse(_type);
@@ -95,6 +95,7 @@ namespace VooDo.Language.AST.Names
 
             public bool IsNamed => Name is not null;
 
+            public override IEnumerable<Node> Children => IsNamed ? new Node[] { Type, Name! } : new Node[] { Type };
             public override string ToString() => IsNamed ? $"{Type} {Name}" : $"{Type}";
 
         }
@@ -130,6 +131,7 @@ namespace VooDo.Language.AST.Names
         public Element this[int _index] => ((IReadOnlyList<Element>) m_elements)[_index];
         public IEnumerator<Element> GetEnumerator() => ((IEnumerable<Element>) m_elements).GetEnumerator();
         IEnumerator IEnumerable.GetEnumerator() => ((IEnumerable) m_elements).GetEnumerator();
+        public override IEnumerable<Node> Children => m_elements;
         public override string ToString() => $"({string.Join(',', m_elements)})" + base.ToString();
 
         #endregion

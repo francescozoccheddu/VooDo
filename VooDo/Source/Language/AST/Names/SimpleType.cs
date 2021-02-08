@@ -143,6 +143,7 @@ namespace VooDo.Language.AST.Names
 
         #region Overrides
 
+        public override IEnumerable<Node> Children => new Node[] { Name }.Concat(TypeArguments);
         public override string ToString() => IsGeneric ? $"{Name}<{string.Join(", ", TypeArguments)}>" : $"{Name}";
 
         #endregion

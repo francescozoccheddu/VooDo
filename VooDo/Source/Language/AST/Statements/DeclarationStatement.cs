@@ -1,4 +1,6 @@
-﻿using System.Collections.Immutable;
+﻿using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Linq;
 
 using VooDo.Language.AST.Expressions;
 using VooDo.Language.AST.Names;
@@ -12,11 +14,12 @@ namespace VooDo.Language.AST.Statements
 
         #region Nested types
 
-        public sealed record Declarator(Identifier Name, Expression? Initializer = null) : IAST
+        public sealed record Declarator(Identifier Name, Expression? Initializer = null) : Node
         {
 
             public bool HasInitializer => Initializer is not null;
 
+            public override IEnumerable<Node> Children => HasInitializer ? new Node[] { Initializer! } : Enumerable.Empty<Node>();
             public override string ToString() => HasInitializer ? $"{Name}" : $"{Name} {AssignmentStatement.EKind.Simple.Token()} {Initializer}";
 
         }
@@ -38,6 +41,7 @@ namespace VooDo.Language.AST.Statements
 
         #region Overrides
 
+        public override IEnumerable<Node> Children => new Node[] { Type }.Concat(Declarators);
         public override string ToString() => $"{Type} {string.Join(", ", Declarators)}{GrammarConstants.statementEndToken}";
 
         #endregion

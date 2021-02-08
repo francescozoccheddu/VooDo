@@ -1,4 +1,5 @@
-﻿using System.Collections.Immutable;
+﻿using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 
 using VooDo.Language.AST.Directives;
@@ -8,7 +9,7 @@ using VooDo.Utils;
 namespace VooDo.Language.AST
 {
 
-    public sealed record Script(ImmutableArray<UsingDirective> Usings, BlockStatement Body) : IAST
+    public sealed record Script(ImmutableArray<UsingDirective> Usings, BlockStatement Body) : Node
     {
 
         #region Members
@@ -24,6 +25,7 @@ namespace VooDo.Language.AST
 
         #region Overrides
 
+        public override IEnumerable<Node> Children => ((IEnumerable<Node>) Usings).Append(Body);
         public override string ToString() => Usings.Aggregate("", (_a, _u) => $"{_a}{_u}\n") + Body;
 
         #endregion

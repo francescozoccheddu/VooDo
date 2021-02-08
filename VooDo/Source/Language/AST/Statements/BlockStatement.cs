@@ -24,6 +24,7 @@ namespace VooDo.Language.AST.Statements
         public int Count => ((IReadOnlyCollection<Statement>) m_statements).Count;
         public IEnumerator<Statement> GetEnumerator() => ((IEnumerable<Statement>) m_statements).GetEnumerator();
         IEnumerator IEnumerable.GetEnumerator() => ((IEnumerable) m_statements).GetEnumerator();
+        public override IEnumerable<Node> Children => m_statements;
         public override string ToString() => Count == 0
             ? "{}"
             : $"{{{("\n" + string.Join('\n', this)).Replace("\n", "\n\t")}\n}}";

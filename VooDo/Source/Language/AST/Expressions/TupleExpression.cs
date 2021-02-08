@@ -30,6 +30,7 @@ namespace VooDo.Language.AST.Expressions
         public int Count => ((IReadOnlyCollection<Expression>) m_expressions).Count;
         public IEnumerator<Expression> GetEnumerator() => ((IEnumerable<Expression>) m_expressions).GetEnumerator();
         IEnumerator IEnumerable.GetEnumerator() => ((IEnumerable) m_expressions).GetEnumerator();
+        public override IEnumerable<Node> Children => m_expressions;
         public override string ToString() => $"({string.Join(", ", this)})";
 
         #endregion

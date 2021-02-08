@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace VooDo.Language.AST.Expressions
 {
@@ -100,6 +102,7 @@ namespace VooDo.Language.AST.Expressions
 
         #region Overrides
 
+        public override IEnumerable<Node> Children => Enumerable.Empty<Node>();
         public override string ToString() => Value switch
         {
             string => $"\"{Value}\"",

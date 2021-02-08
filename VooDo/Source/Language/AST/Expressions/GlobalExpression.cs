@@ -1,4 +1,6 @@
-﻿namespace VooDo.Language.AST.Expressions
+﻿using System.Collections.Generic;
+
+namespace VooDo.Language.AST.Expressions
 {
 
     public sealed record GlobalExpression(Expression ControllerExpression, Expression? InitializerExpression) : Expression
@@ -12,6 +14,7 @@
 
         #region Overrides
 
+        public override IEnumerable<Node> Children => HasInitializer ? new Node[] { ControllerExpression, InitializerExpression! } : new Node[] { ControllerExpression };
         public override string ToString() => $"{GrammarConstants.globKeyword} {ControllerExpression}" + (HasInitializer ? $" {GrammarConstants.initKeyword} {InitializerExpression}" : "");
 
         #endregion

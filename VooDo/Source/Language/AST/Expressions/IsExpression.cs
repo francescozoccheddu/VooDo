@@ -1,5 +1,8 @@
 ﻿
 
+using System.Collections.Generic;
+using System.Linq;
+
 using VooDo.Language.AST.Names;
 
 namespace VooDo.Language.AST.Expressions
@@ -16,6 +19,7 @@ namespace VooDo.Language.AST.Expressions
 
         #region Overrides
 
+        public override IEnumerable<Node> Children => new Node[] { Expression, Type }.Concat(IsDeclaration ? new Node[] { Name! } : Enumerable.Empty<Node>());
         public override string ToString() => $"{Expression} {GrammarConstants.isKeyword} {Type}" + (IsDeclaration ? $" {Name}" : "");
 
         #endregion

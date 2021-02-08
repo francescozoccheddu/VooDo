@@ -2,6 +2,8 @@
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace VooDo.Language.AST.Names
 {
@@ -64,7 +66,8 @@ namespace VooDo.Language.AST.Names
 
         #region Overrides
 
-        public override string ToString() => this == Var ? "var" : Type.ToString();
+        public override IEnumerable<Node> Children => IsVar ? Enumerable.Empty<Node>() : new Node[] { Type! };
+        public override string ToString() => IsVar ? "var" : Type!.ToString();
 
         #endregion
 

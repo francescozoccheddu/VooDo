@@ -1,4 +1,6 @@
 ﻿
+using System.Collections.Generic;
+
 using VooDo.Language.AST.Names;
 using VooDo.Language.AST.Statements;
 
@@ -22,6 +24,7 @@ namespace VooDo.Language.AST.Directives
 
         #region Overrides
 
+        public override IEnumerable<Node> Children => HasAlias ? new Node[] { Alias!, Namespace } : new Node[] { Namespace };
         public override string ToString() => $"{GrammarConstants.usingKeyword} "
             + (HasAlias ? $"{Alias} {AssignmentStatement.EKind.Simple.Token()} " : "")
             + Namespace
