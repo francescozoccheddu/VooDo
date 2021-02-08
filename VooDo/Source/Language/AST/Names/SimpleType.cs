@@ -131,7 +131,7 @@ namespace VooDo.Language.AST.Names
 
         #region Members
 
-        private ImmutableArray<ComplexType> m_typeArguments;
+        private ImmutableArray<ComplexType> m_typeArguments = TypeArguments.EmptyIfDefault();
         public ImmutableArray<ComplexType> TypeArguments
         {
             get => m_typeArguments;

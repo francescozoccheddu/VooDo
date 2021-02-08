@@ -4,6 +4,8 @@
     public sealed record BinaryExpression(Expression Left, BinaryExpression.EKind Kind, Expression Right) : Expression
     {
 
+        #region Nested types
+
         public enum EKind
         {
             Add, Subtract,
@@ -15,6 +17,14 @@
             LogicAnd, LogicOr,
             BitwiseAnd, BitwiseOr, BitwiseXor
         }
+
+        #endregion
+
+        #region Overrides
+
+        public override string ToString() => $"{Left} {Kind.Token()} {Right}";
+
+        #endregion
 
     }
 

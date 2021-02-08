@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Immutable;
+﻿using System.Collections.Immutable;
 
 using VooDo.Language.AST.Names;
 using VooDo.Utils;
@@ -24,39 +23,31 @@ namespace VooDo.Language.AST.Expressions
 
             public abstract EKind Kind { get; }
 
-            protected string m_Prefix => Kind switch
-            {
-                EKind.Value => "",
-                EKind.Ref => "ref ",
-                EKind.Out => "out ",
-                _ => throw new NotImplementedException(),
-            };
-
         }
 
         public sealed record ValueArgument(Expression Expression) : Argument
         {
             public override EKind Kind => EKind.Value;
-            public override string ToString() => $"{m_Prefix}{Expression}";
+            public override string ToString() => $"{Kind.Token()} {Expression}".TrimStart();
         }
 
         public sealed record AssignableArgument(Argument.EKind AssignableKind, AssignableExpression Expression) : Argument
         {
             public override EKind Kind => AssignableKind;
-            public override string ToString() => $"{m_Prefix}{Expression}";
+            public override string ToString() => $"{Kind.Token()} {Expression}".TrimStart();
         }
 
         public sealed record OutDeclarationArgument(ComplexTypeOrVar Type, IdentifierOrDiscard Name) : Argument
         {
             public override EKind Kind => EKind.Out;
-            public override string ToString() => $"{m_Prefix}{Type} {Name}";
+            public override string ToString() => $"{Kind.Token()} {Type} {Name}".TrimStart();
         }
 
         #endregion
 
         #region Members
 
-        private ImmutableArray<Argument> m_arguments;
+        private ImmutableArray<Argument> m_arguments = Arguments.EmptyIfDefault();
         public ImmutableArray<Argument> Arguments
         {
             get => m_arguments;

@@ -7,9 +7,11 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 
+using VooDo.Utils;
+
 namespace VooDo.Language.AST.Names
 {
-    public sealed record Namespace : Node
+    public sealed record Namespace(Identifier? Alias, ImmutableArray<Identifier> Path) : Node
     {
 
         #region Creation
@@ -72,26 +74,13 @@ namespace VooDo.Language.AST.Names
 
         #region Members
 
-        public Namespace(Identifier? _alias, ImmutableArray<Identifier> _path)
-        {
-            Path = _path;
-            Alias = _alias;
-        }
 
-        private ImmutableArray<Identifier> m_path;
-
-        public Identifier? Alias { get; init; }
+        private ImmutableArray<Identifier> m_path = Path.NonEmpty();
         public ImmutableArray<Identifier> Path
         {
             get => m_path;
-            init
-            {
-                if (value.IsDefaultOrEmpty)
-                {
-                    throw new ArgumentException("Empty path");
-                }
-                m_path = value;
-            }
+            init => m_path = value.NonEmpty();
+
         }
         public bool IsAliasQualified => Alias is not null;
 

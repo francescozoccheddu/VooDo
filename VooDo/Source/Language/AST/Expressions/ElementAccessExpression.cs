@@ -1,6 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Collections.Immutable;
+
+using VooDo.Utils;
 
 namespace VooDo.Language.AST.Expressions
 {
@@ -17,25 +18,18 @@ namespace VooDo.Language.AST.Expressions
 
         #region Members
 
-        private ImmutableArray<Expression> m_arguments;
+        private ImmutableArray<Expression> m_arguments = Arguments.NonEmpty();
         public ImmutableArray<Expression> Arguments
         {
             get => m_arguments;
-            init
-            {
-                if (m_arguments.IsDefaultOrEmpty)
-                {
-                    throw new ArgumentException("Argument list cannot be empty");
-                }
-                m_arguments = value;
-            }
+            init => m_arguments = value.NonEmpty();
         }
 
         #endregion
 
         #region Overrides
 
-        public override string ToString() => $"{Source}" + (Coalesce ? "?." : ".") + $"[{string.Join(",", Arguments)}]";
+        public override string ToString() => $"{Source}" + (Coalesce ? "?" : "") + $"[{string.Join(",", Arguments)}]";
 
         #endregion
 

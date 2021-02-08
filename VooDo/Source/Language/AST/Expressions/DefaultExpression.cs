@@ -14,7 +14,7 @@ namespace VooDo.Language.AST.Expressions
 
         #region Overrides
 
-        public override string ToString() => "default" + (HasType ? $"({Type})" : "");
+        public override string ToString() => GrammarConstants.defaultKeyword + (HasType ? $"({Type})" : "");
 
         #endregion
 

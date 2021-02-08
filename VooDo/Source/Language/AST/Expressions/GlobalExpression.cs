@@ -12,7 +12,7 @@
 
         #region Overrides
 
-        public override string ToString() => $"glob {ControllerExpression}" + (HasInitializer ? $" init {InitializerExpression}" : "");
+        public override string ToString() => $"{GrammarConstants.globKeyword} {ControllerExpression}" + (HasInitializer ? $" {GrammarConstants.initKeyword} {InitializerExpression}" : "");
 
         #endregion
 

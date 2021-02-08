@@ -10,7 +10,7 @@ namespace VooDo.Language.AST.Expressions
 
         #region Overrides
 
-        public override string ToString() => $"{Expression} as {Type}";
+        public override string ToString() => $"{Expression} {GrammarConstants.asKeyword} {Type}";
 
         #endregion
 

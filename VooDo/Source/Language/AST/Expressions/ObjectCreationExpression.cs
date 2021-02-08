@@ -22,7 +22,7 @@ namespace VooDo.Language.AST.Expressions
 
         #region Members
 
-        private ImmutableArray<Expression> m_arguments;
+        private ImmutableArray<Expression> m_arguments = Arguments.EmptyIfDefault();
         public ImmutableArray<Expression> Arguments
         {
             get => m_arguments;
@@ -34,7 +34,7 @@ namespace VooDo.Language.AST.Expressions
 
         #region Override
 
-        public override string ToString() => "new " + (IsTypeImplicit ? $"{Type} " : "") + $"({string.Join(", ", Arguments)})";
+        public override string ToString() => $"{GrammarConstants.newKeyword} " + (IsTypeImplicit ? $"{Type} " : "") + $"({string.Join(", ", Arguments)})";
 
         #endregion
 

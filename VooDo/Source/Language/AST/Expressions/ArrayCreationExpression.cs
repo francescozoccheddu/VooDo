@@ -1,8 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Collections.Immutable;
 
 using VooDo.Language.AST.Names;
+using VooDo.Utils;
 
 namespace VooDo.Language.AST.Expressions
 {
@@ -22,18 +22,11 @@ namespace VooDo.Language.AST.Expressions
 
         #region Members
 
-        private ImmutableArray<Expression> m_sizes;
+        private ImmutableArray<Expression> m_sizes = Sizes.NonEmpty();
         public ImmutableArray<Expression> Sizes
         {
             get => m_sizes;
-            init
-            {
-                if (value.IsDefaultOrEmpty)
-                {
-                    throw new ArgumentException("Sizes array cannot be empty");
-                }
-                m_sizes = value;
-            }
+            init => m_sizes = Sizes.NonEmpty();
         }
         public int Rank => Sizes.Length;
         public bool IsTypeImplicit => Type is null;
@@ -42,7 +35,7 @@ namespace VooDo.Language.AST.Expressions
 
         #region Override
 
-        public override string ToString() => "new " + (IsTypeImplicit ? $"{Type} " : "") + $"[{string.Join(", ", Sizes)}]";
+        public override string ToString() => $"{GrammarConstants.newKeyword} " + (IsTypeImplicit ? $"{Type} " : "") + $"[{string.Join(", ", Sizes)}]";
 
         #endregion
 

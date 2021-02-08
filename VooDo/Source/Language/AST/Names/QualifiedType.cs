@@ -95,12 +95,11 @@ namespace VooDo.Language.AST.Names
                     path.Add(SimpleType.FromType(type, _ignoreUnbound));
                 }
                 path.Reverse();
-                ranks.Reverse();
                 Namespace? @namespace = type.Namespace != null ? Namespace.Parse(type.Namespace) : null;
                 return new QualifiedType(@namespace, path) with
                 {
                     IsNullable = nullable,
-                    Ranks = ranks
+                    Ranks = ranks.Reverse().ToImmutableArray()
                 };
             }
         }
@@ -139,18 +138,11 @@ namespace VooDo.Language.AST.Names
 
         #region Members
 
-        private ImmutableArray<SimpleType> m_path;
+        private ImmutableArray<SimpleType> m_path = Path.NonEmpty();
         public ImmutableArray<SimpleType> Path
         {
             get => m_path;
-            init
-            {
-                if (value.IsDefaultOrEmpty)
-                {
-                    throw new ArgumentException("Empty path");
-                }
-                m_path = value;
-            }
+            init => m_path.NonEmpty();
         }
         public bool IsAliasQualified => Alias is not null;
         public bool IsSimple => !IsQualified && !IsArray && !IsNullable;

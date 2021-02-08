@@ -1,11 +1,16 @@
-﻿using VooDo.Language.AST.Names;
+﻿using VooDo.Language.AST.Expressions;
 
 namespace VooDo.Language.AST.Statements
 {
 
-    public sealed record ReturnStatement(Namespace Namespace)
+    public sealed record ReturnStatement(Expression Expression) : Statement
     {
 
+        #region Overrides
+
+        public override string ToString() => $"{GrammarConstants.returnKeyword} {Expression}{GrammarConstants.statementEndToken}";
+
+        #endregion
 
     }
 

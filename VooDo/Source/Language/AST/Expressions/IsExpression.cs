@@ -16,7 +16,7 @@ namespace VooDo.Language.AST.Expressions
 
         #region Overrides
 
-        public override string ToString() => $"{Expression} is {Type}" + (IsDeclaration ? $" {Name}" : "");
+        public override string ToString() => $"{Expression} {GrammarConstants.isKeyword} {Type}" + (IsDeclaration ? $" {Name}" : "");
 
         #endregion
 

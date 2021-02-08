@@ -113,18 +113,11 @@ namespace VooDo.Language.AST.Names
 
         #region Members
 
-        private ImmutableArray<int> m_ranks;
+        private ImmutableArray<int> m_ranks = Ranks.EmptyIfDefault().AssertAll<ImmutableArray<int>, int>(_r => _r > 0);
         public ImmutableArray<int> Ranks
         {
             get => m_ranks;
-            init
-            {
-                if (value.Any(_r => _r < 1))
-                {
-                    throw new ArgumentException("Ranks must be positive");
-                }
-                m_ranks = value.EmptyIfDefault();
-            }
+            init => m_ranks = value.EmptyIfDefault().AssertAll<ImmutableArray<int>, int>(_r => _r > 0);
 
         }
         public bool IsArray => Ranks.Any();

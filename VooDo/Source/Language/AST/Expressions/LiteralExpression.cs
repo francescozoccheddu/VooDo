@@ -6,7 +6,7 @@ namespace VooDo.Language.AST.Expressions
     public sealed record LiteralExpression : Expression
     {
 
-        private object? m_value;
+        #region Creation
 
         public static LiteralExpression Null { get; } = new LiteralExpression((object?) null);
         public static LiteralExpression True { get; } = new LiteralExpression(true);
@@ -54,6 +54,10 @@ namespace VooDo.Language.AST.Expressions
         public static LiteralExpression Create(double _value)
             => new LiteralExpression(_value);
 
+        #endregion
+
+        #region Members
+
         public LiteralExpression()
         {
             Value = null;
@@ -64,6 +68,7 @@ namespace VooDo.Language.AST.Expressions
             Value = _value;
         }
 
+        private object? m_value;
         public object? Value
         {
             get => m_value;
@@ -90,6 +95,20 @@ namespace VooDo.Language.AST.Expressions
                 m_value = value;
             }
         }
+
+        #endregion
+
+        #region Overrides
+
+        public override string ToString() => Value switch
+        {
+            string => $"\"{Value}\"",
+            char => $"'{Value}'",
+            null => "null",
+            _ => $"{Value}"
+        };
+
+        #endregion
 
     }
 }

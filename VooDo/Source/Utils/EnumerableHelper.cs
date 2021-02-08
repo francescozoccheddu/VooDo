@@ -35,5 +35,22 @@ namespace VooDo.Utils
             return set;
         }
 
+        internal static TSeq NonEmpty<TSeq, TItem>(this TSeq _enumerable, string? _parameter = null) where TSeq : IEnumerable<TItem>
+            => _enumerable.Assert(_a => _a.Any(), "Empty sequence", _parameter);
+
+        internal static ImmutableArray<TItem> NonEmpty<TItem>(this ImmutableArray<TItem> _array, string? _parameter = null)
+            => _array.Assert(_a => !_a.IsDefaultOrEmpty, "Empty array", _parameter);
+
+        internal static TSeq MoreThanOne<TSeq, TItem>(this TSeq _enumerable, string? _parameter = null) where TSeq : IEnumerable<TItem>
+            => _enumerable.Assert(_a => _a.Count() > 1, "Sequence must contain at least two elements", _parameter);
+
+        internal static TSeq AssertAll<TSeq, TItem>(this TSeq _enumerable, Func<TItem, bool> _predicate, string _message = "Assertion failed", string? _parameter = null) where TSeq : IEnumerable<TItem>
+            => _enumerable.Assert(_a => _a.All(_predicate), _message, _parameter);
+
+        internal static TValue Assert<TValue>(this TValue _value, Func<TValue, bool> _predicate, string _message = "Assertion failed", string? _parameter = null)
+            => !_predicate(_value)
+            ? throw new ArgumentException(_message, _parameter)
+            : _value;
+
     }
 }
