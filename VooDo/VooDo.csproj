@@ -32,5 +32,9 @@
       <Error>true</Error>
     </Antlr4>
   </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Source\Factory\Syntax\" />
+  </ItemGroup>
   
 </Project>

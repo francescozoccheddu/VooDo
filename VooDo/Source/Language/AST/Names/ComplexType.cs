@@ -9,10 +9,13 @@ using System.Runtime.CompilerServices;
 
 using VooDo.Utils;
 
-namespace VooDo.Factory.Syntax
+namespace VooDo.Language.AST.Names
 {
-    public abstract class ComplexType
+
+    public abstract record ComplexType(bool IsNullable = false, ImmutableArray<int> Ranks = default) : ComplexTypeOrExpression
     {
+
+        #region Creation
 
         protected static Type Unwrap(Type _type, out bool _nullable, out ImmutableArray<int> _ranks)
         {
@@ -37,7 +40,7 @@ namespace VooDo.Factory.Syntax
         {
             TypeSyntax? newType = _type;
             _nullable = false;
-            _ranks = ImmutableArray.Create<int>();
+            List<int> ranks = new List<int>();
             while (true)
             {
                 if (newType is ArrayTypeSyntax arraytype)
@@ -46,7 +49,7 @@ namespace VooDo.Factory.Syntax
                     {
                         throw new ArgumentException("Explicit array size expression", nameof(_type));
                     }
-                    _ranks = _ranks.AddRange(arraytype.RankSpecifiers.Select(_r => _r.Rank));
+                    ranks.AddRange(arraytype.RankSpecifiers.Select(_r => _r.Rank));
                     newType = arraytype.ElementType;
                 }
                 else if (newType is NullableTypeSyntax nullableType)
@@ -56,17 +59,25 @@ namespace VooDo.Factory.Syntax
                 }
                 else
                 {
+                    _ranks = ranks.ToImmutableArray();
                     return newType;
                 }
             }
         }
 
         public static ComplexType FromSyntax(TypeSyntax _type, bool _ignoreUnbound = false)
-            => ((ComplexType) (Unwrap(_type, out bool nullable, out ImmutableArray<int> ranks) switch
+        {
+            ComplexType type = Unwrap(_type, out bool nullable, out ImmutableArray<int> ranks) switch
             {
                 TupleTypeSyntax tupleType => TupleType.FromSyntax(tupleType, _ignoreUnbound),
                 _ => QualifiedType.FromSyntax(_type, _ignoreUnbound),
-            })).WithIsNullable(nullable).WithRanks(ranks);
+            };
+            return type with
+            {
+                IsNullable = nullable,
+                Ranks = ranks
+            };
+        }
 
         public static ComplexType Parse(string _type, bool _ignoreUnbound = false)
             => FromSyntax(SyntaxFactory.ParseTypeName(_type), _ignoreUnbound);
@@ -78,46 +89,55 @@ namespace VooDo.Factory.Syntax
                 var t when t.IsAssignableTo(typeof(ITuple)) => TupleType.FromType(_type, _ignoreUnbound),
                 _ => QualifiedType.FromType(_type, _ignoreUnbound)
             };
-            return type.WithIsNullable(nullable).WithRanks(ranks);
+            return type with
+            {
+                IsNullable = nullable,
+                Ranks = ranks
+            };
         }
 
         public static ComplexType FromType<TType>()
             => FromType(typeof(TType), false);
 
-        public static implicit operator ComplexType(Identifier _identifier) => new QualifiedType(_identifier);
-        public static implicit operator ComplexType(SimpleType _simpleType) => new QualifiedType(_simpleType);
+        #endregion
+
+        #region Conversion
+
         public static implicit operator ComplexType(string _type) => Parse(_type);
         public static implicit operator ComplexType(Type _type) => FromType(_type);
+        public static implicit operator ComplexType(Identifier _name) => new QualifiedType(new SimpleType(_name));
+        public static implicit operator ComplexType(SimpleType _simpleType) => new QualifiedType(_simpleType);
+        public static implicit operator string(ComplexType _complexType) => _complexType.ToString();
 
-        internal ComplexType(IEnumerable<int>? _ranks = null) : this(false, _ranks) { }
+        #endregion
 
-        internal ComplexType(bool _isNullable = false, IEnumerable<int>? _ranks = null)
+        #region Members
+
+        private ImmutableArray<int> m_ranks;
+        public ImmutableArray<int> Ranks
         {
-            IsNullable = _isNullable;
-            Ranks = _ranks.EmptyIfNull().ToImmutableArray();
-            if (Ranks.Any(_i => _i < 1))
+            get => m_ranks;
+            init
             {
-                throw new ArgumentException("Non positive rank", nameof(_ranks));
+                if (value.Any(_r => _r < 1))
+                {
+                    throw new ArgumentException("Ranks must be positive");
+                }
+                m_ranks = value.EmptyIfDefault();
             }
-        }
 
-        public bool IsNullable { get; }
-        public ImmutableArray<int> Ranks { get; }
+        }
         public bool IsArray => Ranks.Any();
 
-        public abstract ComplexType WithIsNullable(bool _nullable);
+        #endregion
 
-        public ComplexType WithRanks(int[] _ranks)
-            => WithRanks((IEnumerable<int>) _ranks);
-        public abstract ComplexType WithRanks(IEnumerable<int> _ranks);
-
-        public override bool Equals(object? _obj) => _obj is ComplexType other && IsNullable == other.IsNullable && Ranks.Equals(other.Ranks);
-        public override int GetHashCode() => Identity.CombineHash(IsNullable, Identity.CombineHashes(Ranks));
-        public static bool operator ==(ComplexType? _left, ComplexType? _right) => Identity.AreEqual(_left, _right);
-        public static bool operator !=(ComplexType? _left, ComplexType? _right) => !(_left == _right);
+        #region Overrides
 
         public override string ToString()
             => $"{(IsNullable ? "?" : "")}{string.Concat(Ranks.Select(_r => $"[{new string(',', _r - 1)}]"))}";
 
+        #endregion
+
     }
+
 }

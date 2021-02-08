@@ -9,7 +9,6 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 
-using VooDo.Factory.Syntax;
 using VooDo.Parsing;
 using VooDo.Transformation;
 using VooDo.Utils;
