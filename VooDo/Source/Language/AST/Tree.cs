@@ -1,7 +1,7 @@
 ﻿namespace VooDo.Language.AST
 {
 
-    public static class ASTExtensions
+    public static class Tree
     {
 
 

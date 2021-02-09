@@ -52,5 +52,23 @@ namespace VooDo.Utils
             ? throw new ArgumentException(_message, _parameter)
             : _value;
 
+        internal static IEnumerable<(TItem item, int index)> Enumerate<TItem>(this IEnumerable<TItem> _items)
+        {
+            int i = 0;
+            foreach (TItem? item in _items)
+            {
+                yield return (item, i++);
+            }
+        }
+
+        internal static IEnumerable<TOutItem> SelectIndexed<TItem, TOutItem>(this IEnumerable<TItem> _items, Func<TItem, int, TOutItem> _map)
+        {
+            int i = 0;
+            foreach (TItem? item in _items)
+            {
+                yield return _map(item, i);
+            }
+        }
+
     }
 }

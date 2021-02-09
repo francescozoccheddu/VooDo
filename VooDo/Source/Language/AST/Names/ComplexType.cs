@@ -7,6 +7,7 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Runtime.CompilerServices;
 
+using VooDo.Language.Linking;
 using VooDo.Utils;
 
 namespace VooDo.Language.AST.Names
@@ -126,6 +127,7 @@ namespace VooDo.Language.AST.Names
 
         #region Overrides
 
+        internal abstract override TypeSyntax Emit(LinkArguments _arguments);
         public override string ToString()
             => $"{(IsNullable ? "?" : "")}{string.Concat(Ranks.Select(_r => $"[{new string(',', _r - 1)}]"))}";
 
