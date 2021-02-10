@@ -135,7 +135,7 @@ namespace VooDo.Language.AST.Expressions
                 });
         }
         internal override LiteralExpressionSyntax EmitNode(Scope _scope, Marker _marker) => EmitNode().Own(_marker, this);
-        public override IEnumerable<BodyNodeOrIdentifier> Children => Enumerable.Empty<BodyNodeOrIdentifier>();
+        public override IEnumerable<NodeOrIdentifier> Children => Enumerable.Empty<NodeOrIdentifier>();
         public override string ToString() => EmitNode().ToFullString();
 
         #endregion

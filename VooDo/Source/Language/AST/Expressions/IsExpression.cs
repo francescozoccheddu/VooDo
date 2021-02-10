@@ -35,8 +35,8 @@ namespace VooDo.Language.AST.Expressions
                 Expression.EmitNode(_scope, _marker),
                 Type.EmitNode(_scope, _marker)))
             .Own(_marker, this);
-        public override IEnumerable<BodyNodeOrIdentifier> Children
-            => new BodyNodeOrIdentifier[] { Expression, Type }.Concat(IsDeclaration ? new BodyNodeOrIdentifier[] { Name! } : Enumerable.Empty<BodyNodeOrIdentifier>());
+        public override IEnumerable<NodeOrIdentifier> Children
+            => new NodeOrIdentifier[] { Expression, Type }.Concat(IsDeclaration ? new NodeOrIdentifier[] { Name! } : Enumerable.Empty<NodeOrIdentifier>());
         public override string ToString() => $"{Expression} {GrammarConstants.isKeyword} {Type}" + (IsDeclaration ? $" {Name}" : "");
 
         #endregion

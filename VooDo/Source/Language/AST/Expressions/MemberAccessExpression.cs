@@ -20,7 +20,7 @@ namespace VooDo.Language.AST.Expressions
                 Source.EmitNode(_scope, _marker),
                 SyntaxFactory.IdentifierName(Member.EmitToken(_marker)).Own(_marker, Member))
             .Own(_marker, this);
-        public override IEnumerable<BodyNodeOrIdentifier> Children => new BodyNodeOrIdentifier[] { Source, Member };
+        public override IEnumerable<NodeOrIdentifier> Children => new NodeOrIdentifier[] { Source, Member };
         public override string ToString() => $"{Source}.{Member}";
 
         #endregion

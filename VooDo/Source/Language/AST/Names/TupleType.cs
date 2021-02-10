@@ -87,7 +87,7 @@ namespace VooDo.Language.AST.Names
 
         #region Nested types
 
-        public sealed record Element(ComplexType Type, Identifier? Name = null) : BodyNode
+        public sealed record Element(ComplexType Type, Identifier? Name = null) : Node
         {
 
             public static implicit operator Element(string _type) => Parse(_type);
@@ -105,7 +105,7 @@ namespace VooDo.Language.AST.Names
                     ? Name!.EmitToken(_marker)
                     : SyntaxFactory.Token(SyntaxKind.None))
                 .Own(_marker, this);
-            public override IEnumerable<BodyNodeOrIdentifier> Children => IsNamed ? new BodyNodeOrIdentifier[] { Type, Name! } : new BodyNodeOrIdentifier[] { Type };
+            public override IEnumerable<NodeOrIdentifier> Children => IsNamed ? new NodeOrIdentifier[] { Type, Name! } : new NodeOrIdentifier[] { Type };
             public override string ToString() => IsNamed ? $"{Type} {Name}" : $"{Type}";
 
         }
@@ -142,7 +142,7 @@ namespace VooDo.Language.AST.Names
         public IEnumerator<Element> GetEnumerator() => ((IEnumerable<Element>) m_elements).GetEnumerator();
         IEnumerator IEnumerable.GetEnumerator() => ((IEnumerable) m_elements).GetEnumerator();
         internal override TypeSyntax EmitNonArrayNonNullableType(Scope _scope, Marker _marker)
-            => SyntaxFactory.TupleType(SyntaxFactory.SeparatedList(this.Select(_e => _e.EmitNode(_scope, _marker))));
+            => SyntaxFactory.TupleType(SyntaxFactory.SeparatedList(this.Select(_e => _e.EmitNode(_scope, _marker)))).Own(_marker, this);
         public override IEnumerable<Element> Children => m_elements;
         public override string ToString() => $"({string.Join(',', m_elements)})" + base.ToString();
 

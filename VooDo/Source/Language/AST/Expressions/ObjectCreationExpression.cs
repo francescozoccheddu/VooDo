@@ -48,7 +48,7 @@ namespace VooDo.Language.AST.Expressions
                 .Own(_marker, this);
         }
 
-        public override IEnumerable<BodyNode> Children => IsTypeImplicit ? Arguments : new BodyNode[] { Type! }.Concat(Arguments);
+        public override IEnumerable<Node> Children => IsTypeImplicit ? Arguments : new Node[] { Type! }.Concat(Arguments);
         public override string ToString() => $"{GrammarConstants.newKeyword} " + (IsTypeImplicit ? $"{Type} " : "") + $"({string.Join(", ", Arguments)})";
 
         #endregion

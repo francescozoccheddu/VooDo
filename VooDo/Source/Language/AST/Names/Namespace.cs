@@ -11,7 +11,8 @@ using VooDo.Utils;
 
 namespace VooDo.Language.AST.Names
 {
-    public sealed record Namespace(Identifier? Alias, ImmutableArray<Identifier> Path) : BodyNode
+
+    public sealed record Namespace(Identifier? Alias, ImmutableArray<Identifier> Path) : Node
     {
 
         #region Creation
@@ -88,8 +89,24 @@ namespace VooDo.Language.AST.Names
 
         #region Overrides
 
-        internal override NameSyntax EmitNode(Scope _scope, Marker _marker) => SyntaxFactory.ParseName(ToString()).Own(_marker, this, Marker.EMode.AllDescendants);
-        public override IEnumerable<BodyNodeOrIdentifier> Children => (IsAliasQualified ? new BodyNodeOrIdentifier[] { Alias! } : Enumerable.Empty<BodyNodeOrIdentifier>()).Concat(Path);
+        internal override NameSyntax EmitNode(Scope _scope, Marker _marker)
+        {
+            IdentifierNameSyntax[] path = Path.Select(_i => SyntaxFactory.IdentifierName(_i.EmitToken(_marker)).Own(_marker, _i)).ToArray();
+            NameSyntax type = path[0];
+            if (IsAliasQualified)
+            {
+                type = SyntaxFactory.AliasQualifiedName(
+                    SyntaxFactory.IdentifierName(Alias!.EmitToken(_marker)),
+                    (SimpleNameSyntax) type);
+            }
+            foreach (SimpleType name in Path.Skip(1))
+            {
+                type = SyntaxFactory.QualifiedName(type, name.EmitNode(_scope, _marker));
+            }
+            return type.Own(_marker, this);
+        }
+
+        public override IEnumerable<NodeOrIdentifier> Children => (IsAliasQualified ? new NodeOrIdentifier[] { Alias! } : Enumerable.Empty<NodeOrIdentifier>()).Concat(Path);
         public override string ToString() => (IsAliasQualified ? $"{Alias}::" : "") + string.Join('.', Path);
 
         #endregion

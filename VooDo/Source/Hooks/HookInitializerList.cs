@@ -1,9 +1,6 @@
-﻿
-using System.Collections.Generic;
-
-namespace VooDo.Hooks
+﻿namespace VooDo.Hooks
 {
-    public sealed class HookInitializerList : List<IHookInitializerProvider>, IHookInitializerProvider
+    /*public sealed class HookInitializerList : List<IHookInitializerProvider>, IHookInitializerProvider
     {
 
         public HookInitializerList()
@@ -15,7 +12,7 @@ namespace VooDo.Hooks
         public HookInitializerList(int _capacity) : base(_capacity)
         { }
 
-
-    }
+    
+    }*/
 
 }

@@ -12,7 +12,7 @@ using VooDo.Utils;
 namespace VooDo.Language.AST.Names
 {
 
-    public sealed record SimpleType(Identifier Name, ImmutableArray<ComplexType> TypeArguments = default) : BodyNode
+    public sealed record SimpleType(Identifier Name, ImmutableArray<ComplexType> TypeArguments = default) : Node
     {
 
         #region Creation
@@ -151,7 +151,7 @@ namespace VooDo.Language.AST.Names
                         TypeArguments.Select(_a => _a.EmitNode(_scope, _marker)))))
             : SyntaxFactory.IdentifierName(Name.EmitToken(_marker)))
             .Own(_marker, this);
-        public override IEnumerable<BodyNodeOrIdentifier> Children => new BodyNodeOrIdentifier[] { Name }.Concat(TypeArguments);
+        public override IEnumerable<NodeOrIdentifier> Children => new NodeOrIdentifier[] { Name }.Concat(TypeArguments);
         public override string ToString() => IsGeneric ? $"{Name}<{string.Join(", ", TypeArguments)}>" : $"{Name}";
 
         #endregion

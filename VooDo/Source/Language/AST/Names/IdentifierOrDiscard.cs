@@ -9,7 +9,7 @@ using VooDo.Language.Linking;
 namespace VooDo.Language.AST.Names
 {
 
-    public sealed record IdentifierOrDiscard : BodyNode
+    public sealed record IdentifierOrDiscard : Node
     {
 
         #region Creation

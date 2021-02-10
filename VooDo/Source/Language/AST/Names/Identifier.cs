@@ -12,7 +12,7 @@ using VooDo.Language.Linking;
 namespace VooDo.Language.AST.Names
 {
 
-    public sealed record Identifier : BodyNodeOrIdentifier
+    public sealed record Identifier : NodeOrIdentifier
     {
 
         #region Creation
@@ -55,7 +55,7 @@ namespace VooDo.Language.AST.Names
 
         internal override SyntaxNodeOrToken EmitNodeOrToken(Scope _scope, Marker _marker) => EmitToken(_marker);
         internal SyntaxToken EmitToken(Marker _marker) => SyntaxFactory.Identifier(this).Own(_marker, this);
-        public override IEnumerable<BodyNode> Children => Enumerable.Empty<BodyNode>();
+        public override IEnumerable<Node> Children => Enumerable.Empty<Node>();
         public override string ToString() => m_identifier;
 
         #endregion

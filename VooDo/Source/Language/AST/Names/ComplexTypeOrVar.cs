@@ -10,7 +10,7 @@ using VooDo.Language.Linking;
 namespace VooDo.Language.AST.Names
 {
 
-    public sealed record ComplexTypeOrVar : BodyNode
+    public sealed record ComplexTypeOrVar : Node
     {
 
         #region Creation

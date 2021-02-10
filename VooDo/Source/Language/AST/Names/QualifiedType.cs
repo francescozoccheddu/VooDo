@@ -161,7 +161,7 @@ namespace VooDo.Language.AST.Names
             if (IsAliasQualified)
             {
                 type = SyntaxFactory.AliasQualifiedName(
-                    SyntaxFactory.IdentifierName(Alias!.EmitToken(_marker)),
+                    SyntaxFactory.IdentifierName(Alias!.EmitToken(_marker)).Own(_marker, Alias!),
                     (SimpleNameSyntax) type);
             }
             foreach (SimpleType name in Path.Skip(1))
@@ -171,8 +171,8 @@ namespace VooDo.Language.AST.Names
             return type.Own(_marker, this);
         }
 
-        public override IEnumerable<BodyNodeOrIdentifier> Children =>
-            (IsAliasQualified ? new BodyNodeOrIdentifier[] { Alias! } : Enumerable.Empty<BodyNodeOrIdentifier>())
+        public override IEnumerable<NodeOrIdentifier> Children =>
+            (IsAliasQualified ? new NodeOrIdentifier[] { Alias! } : Enumerable.Empty<NodeOrIdentifier>())
             .Concat(Path);
         public override string ToString() => (IsAliasQualified ? $"{Alias}::" : "") + string.Join('.', Path) + base.ToString();
 

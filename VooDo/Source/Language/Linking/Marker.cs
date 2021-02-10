@@ -82,10 +82,10 @@ namespace VooDo.Language.Linking
             Single, AllDescendants, UnownedDescendants
         }
 
-        private readonly Dictionary<BodyNodeOrIdentifier, int> m_forward = new Dictionary<BodyNodeOrIdentifier, int>();
-        private readonly List<BodyNodeOrIdentifier> m_reverse = new List<BodyNodeOrIdentifier>();
+        private readonly Dictionary<NodeOrIdentifier, int> m_forward = new Dictionary<NodeOrIdentifier, int>();
+        private readonly List<NodeOrIdentifier> m_reverse = new List<NodeOrIdentifier>();
 
-        private int GetOwnerIndex(BodyNodeOrIdentifier _node)
+        private int GetOwnerIndex(NodeOrIdentifier _node)
         {
             if (!m_forward.TryGetValue(_node, out int index))
             {
@@ -96,7 +96,7 @@ namespace VooDo.Language.Linking
             return index;
         }
 
-        internal TNode Own<TNode>(TNode _node, BodyNodeOrIdentifier _owner, EMode _mode = EMode.UnownedDescendants) where TNode : SyntaxNode
+        internal TNode Own<TNode>(TNode _node, NodeOrIdentifier _owner, EMode _mode = EMode.UnownedDescendants) where TNode : SyntaxNode
             => _mode switch
             {
                 EMode.Single => (TNode) SetIndex(_node, GetOwnerIndex(_owner), true)?.AsNode()!,
@@ -105,15 +105,15 @@ namespace VooDo.Language.Linking
                 _ => throw new ArgumentOutOfRangeException(nameof(_mode)),
             };
 
-        internal SyntaxToken Own(SyntaxToken _token, BodyNodeOrIdentifier _owner)
+        internal SyntaxToken Own(SyntaxToken _token, NodeOrIdentifier _owner)
             => SetIndex(_token, GetOwnerIndex(_owner), true)!.Value.AsToken();
 
-        internal SyntaxNodeOrToken Own(SyntaxNodeOrToken _nodeOrToken, BodyNodeOrIdentifier _owner, EMode _mode = EMode.UnownedDescendants)
+        internal SyntaxNodeOrToken Own(SyntaxNodeOrToken _nodeOrToken, NodeOrIdentifier _owner, EMode _mode = EMode.UnownedDescendants)
             => _nodeOrToken.IsToken
             ? Own(_nodeOrToken.AsToken(), _owner)
             : Own(_nodeOrToken.AsNode()!, _owner, _mode);
 
-        internal BodyNodeOrIdentifier GetOwner(SyntaxNodeOrToken _nodeOrToken)
+        internal NodeOrIdentifier GetOwner(SyntaxNodeOrToken _nodeOrToken)
             => m_reverse[int.Parse(GetAnnotation(_nodeOrToken)!.Data!)];
 
 
@@ -122,13 +122,13 @@ namespace VooDo.Language.Linking
     internal static class MarkerExtensions
     {
 
-        internal static TNode Own<TNode>(this TNode _node, Marker _marker, BodyNodeOrIdentifier _owner, Marker.EMode _mode = Marker.EMode.UnownedDescendants) where TNode : SyntaxNode
+        internal static TNode Own<TNode>(this TNode _node, Marker _marker, NodeOrIdentifier _owner, Marker.EMode _mode = Marker.EMode.UnownedDescendants) where TNode : SyntaxNode
             => _marker.Own(_node, _owner, _mode);
 
-        internal static SyntaxToken Own(this SyntaxToken _token, Marker _marker, BodyNodeOrIdentifier _owner)
+        internal static SyntaxToken Own(this SyntaxToken _token, Marker _marker, NodeOrIdentifier _owner)
             => _marker.Own(_token, _owner);
 
-        internal static SyntaxNodeOrToken Own(this SyntaxNodeOrToken _nodeOrToken, Marker _marker, BodyNodeOrIdentifier _owner, Marker.EMode _mode = Marker.EMode.UnownedDescendants)
+        internal static SyntaxNodeOrToken Own(this SyntaxNodeOrToken _nodeOrToken, Marker _marker, NodeOrIdentifier _owner, Marker.EMode _mode = Marker.EMode.UnownedDescendants)
             => _marker.Own(_nodeOrToken, _owner, _mode);
 
     }

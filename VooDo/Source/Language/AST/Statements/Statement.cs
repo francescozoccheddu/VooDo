@@ -5,9 +5,9 @@ using VooDo.Language.Linking;
 namespace VooDo.Language.AST.Statements
 {
 
-    public abstract record Statement : BodyNode
+    public abstract record Statement : Node
     {
-        internal abstract override StatementSyntax Emit(LinkArguments _arguments);
+        internal abstract override StatementSyntax EmitNode(Scope _scope, Marker _marker);
     }
 
 }

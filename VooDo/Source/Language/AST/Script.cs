@@ -1,5 +1,5 @@
-﻿using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
+﻿
+using Microsoft.CodeAnalysis;
 
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -25,15 +25,14 @@ namespace VooDo.Language.AST
             init => m_usings = value.EmptyIfDefault();
         }
 
-        internal override CompilationUnitSyntax Emit(Scope _scope, ImmutableArray<SyntaxNode> _children, EventContext? _eventContext, HookContext? _hookContext)
-        {
-
-        }
-
         #endregion
 
         #region Overrides
 
+        internal override SyntaxNode EmitNode(Scope _scope, Marker _marker)
+        {
+            throw new System.Exception();
+        }
         public override IEnumerable<Node> Children => ((IEnumerable<Node>) Usings).Append(Body);
         public override string ToString() => Usings.Aggregate("", (_a, _u) => $"{_a}{_u}\n") + Body;
 

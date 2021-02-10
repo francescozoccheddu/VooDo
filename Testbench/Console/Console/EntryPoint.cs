@@ -16,7 +16,7 @@ namespace VooDo.ConsoleTestbench
         public static void Run()
         {
             // using System; var x = 8; x += 5 + y;
-            Script? code = new Script(
+            Script code = new Script(
                 new UsingDirective[] { new UsingNamespaceDirective(null, "System") }.ToImmutableArray(),
                 new BlockStatement(new Statement[]
                 {

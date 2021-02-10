@@ -17,16 +17,16 @@ namespace VooDo.Language.AST.Expressions
 
         private static bool IsValidInitializer(Expression _expression)
         {
-            Stack<BodyNodeOrIdentifier> stack = new Stack<BodyNodeOrIdentifier>();
+            Stack<NodeOrIdentifier> stack = new Stack<NodeOrIdentifier>();
             stack.Push(_expression);
             while (stack.Count > 0)
             {
-                BodyNodeOrIdentifier node = stack.Pop();
+                NodeOrIdentifier node = stack.Pop();
                 if (node is GlobalExpression)
                 {
                     return false;
                 }
-                foreach (BodyNodeOrIdentifier child in node.Children)
+                foreach (NodeOrIdentifier child in node.Children)
                 {
                     stack.Push(child);
                 }

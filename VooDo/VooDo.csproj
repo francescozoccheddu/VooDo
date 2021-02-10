@@ -7,6 +7,12 @@
     <RootNamespace>VooDo</RootNamespace>
     <RuntimeIdentifiers>win10-x86;win10-x64;win10-arm64</RuntimeIdentifiers>
   </PropertyGroup>
+  <ItemGroup>
+    <Compile Remove="Source\Parsing\**" />
+    <EmbeddedResource Remove="Source\Parsing\**" />
+    <None Remove="Source\Parsing\**" />
+    <Page Remove="Source\Parsing\**" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Antlr4.Runtime.Standard" Version="4.9.1" />
@@ -15,6 +21,7 @@
     <PackageReference Include="Microsoft.CodeAnalysis.Features" Version="3.8.0" />
     <PackageReference Include="Microsoft.WinUI" Version="3.0.0-preview3.201113.0" />
   </ItemGroup>
+
 
   <ItemGroup>
     <Antlr4 Include="$(ProjectDir)Source\Parsing\VooDoLexer.g4">
@@ -31,10 +38,6 @@
       <Package>VooDo.Parsing.Generated</Package>
       <Error>true</Error>
     </Antlr4>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Source\Factory\Syntax\" />
   </ItemGroup>
 
   <ItemGroup>

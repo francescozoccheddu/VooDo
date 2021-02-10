@@ -46,7 +46,7 @@ namespace VooDo.Language.AST.Directives
             return result.Own(_marker, this);
         }
 
-        public override IEnumerable<BodyNodeOrIdentifier> Children => HasAlias ? new BodyNodeOrIdentifier[] { Alias!, Namespace } : new BodyNodeOrIdentifier[] { Namespace };
+        public override IEnumerable<NodeOrIdentifier> Children => HasAlias ? new NodeOrIdentifier[] { Alias!, Namespace } : new NodeOrIdentifier[] { Namespace };
 
         public override string ToString() => $"{GrammarConstants.usingKeyword} "
             + (HasAlias ? $"{Alias} {AssignmentStatement.EKind.Simple.Token()} " : "")

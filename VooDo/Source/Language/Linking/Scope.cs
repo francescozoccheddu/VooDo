@@ -1,11 +1,12 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 
+using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Linq;
 
 using VooDo.Language.AST.Names;
-using VooDo.Utils;
 
 namespace VooDo.Language.Linking
 {
@@ -53,19 +54,32 @@ namespace VooDo.Language.Linking
         private static GlobalDefinition CreateGlobalDefinition(Global _global, int _index)
             => new GlobalDefinition(_global, $"global_{_index}");
 
+        public void AddLocal(Identifier _name)
+        {
+            if (IsNameTaken(_name))
+            {
+                throw new InvalidOperationException($"Redefinition of {_name}");
+            }
+            m_names.Add(_name, true);
+        }
+
         public GlobalDefinition AddGlobal(Global _global)
         {
+            if (_global.Name is not null)
+            {
+                if (IsNameTaken(_global.Name))
+                {
+                    throw new InvalidOperationException($"Redefinition of {_global.Name}");
+                }
+                m_names.Add(_global.Name, true);
+            }
             GlobalDefinition definition = CreateGlobalDefinition(_global, m_globals.Count);
             m_globals.Add(definition);
             return definition;
         }
 
         public ImmutableArray<GlobalDefinition> AddGlobals(IEnumerable<Global> _globals)
-        {
-            ImmutableArray<GlobalDefinition> definitions = _globals.SelectIndexed((_g, _i) => CreateGlobalDefinition(_g, m_globals.Count + _i)).ToImmutableArray();
-            m_globals.AddRange(definitions);
-            return definitions;
-        }
+            => _globals.Select(AddGlobal).ToImmutableArray();
 
         internal Scope CreateNested() => new Scope(m_globals, new Dictionary<string, bool>(m_names));
 

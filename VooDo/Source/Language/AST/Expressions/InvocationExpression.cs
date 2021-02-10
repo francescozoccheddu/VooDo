@@ -19,7 +19,7 @@ namespace VooDo.Language.AST.Expressions
 
         #region Nested types
 
-        public abstract record Callable : BodyNode
+        public abstract record Callable : Node
         {
 
             internal abstract override ExpressionSyntax EmitNode(Scope _scope, Marker _marker);
@@ -80,7 +80,7 @@ namespace VooDo.Language.AST.Expressions
 
         }
 
-        public abstract record Argument : BodyNode
+        public abstract record Argument : Node
         {
 
             public enum EKind
@@ -132,7 +132,7 @@ namespace VooDo.Language.AST.Expressions
                         Name.EmitNode(_scope, _marker)))
                 .WithRefKindKeyword(SyntaxFactory.Token(SyntaxKind.OutKeyword))
                 .Own(_marker, this);
-            public override IEnumerable<BodyNodeOrIdentifier> Children => new BodyNodeOrIdentifier[] { Type, Name };
+            public override IEnumerable<NodeOrIdentifier> Children => new NodeOrIdentifier[] { Type, Name };
             public override string ToString() => $"{Kind.Token()} {Type} {Name}".TrimStart();
         }
 
@@ -158,7 +158,7 @@ namespace VooDo.Language.AST.Expressions
                     SyntaxFactory.SeparatedList(
                         Arguments.Select(_a => _a.EmitNode(_scope, _marker)))))
             .Own(_marker, this);
-        public override IEnumerable<BodyNode> Children => new BodyNode[] { Source }.Concat(Arguments);
+        public override IEnumerable<Node> Children => new Node[] { Source }.Concat(Arguments);
         public override string ToString() => $"{Source}({string.Join(", ", Arguments)})";
 
         #endregion
