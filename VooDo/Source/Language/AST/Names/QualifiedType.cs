@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 
+using VooDo.Language.Linking;
 using VooDo.Utils;
 
 namespace VooDo.Language.AST.Names
@@ -154,8 +155,24 @@ namespace VooDo.Language.AST.Names
 
         #region Overrides
 
-        public override IEnumerable<Node> Children =>
-            (IsAliasQualified ? new Node[] { Alias! } : Enumerable.Empty<Node>())
+        internal override TypeSyntax EmitNonArrayNonNullableType(Scope _scope, Marker _marker)
+        {
+            NameSyntax type = Path[0].EmitNode(_scope, _marker);
+            if (IsAliasQualified)
+            {
+                type = SyntaxFactory.AliasQualifiedName(
+                    SyntaxFactory.IdentifierName(Alias!.EmitToken(_marker)),
+                    (SimpleNameSyntax) type);
+            }
+            foreach (SimpleType name in Path.Skip(1))
+            {
+                type = SyntaxFactory.QualifiedName(type, name.EmitNode(_scope, _marker));
+            }
+            return type.Own(_marker, this);
+        }
+
+        public override IEnumerable<BodyNodeOrIdentifier> Children =>
+            (IsAliasQualified ? new BodyNodeOrIdentifier[] { Alias! } : Enumerable.Empty<BodyNodeOrIdentifier>())
             .Concat(Path);
         public override string ToString() => (IsAliasQualified ? $"{Alias}::" : "") + string.Join('.', Path) + base.ToString();
 

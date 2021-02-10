@@ -1,4 +1,5 @@
-﻿using Microsoft.CodeAnalysis.CSharp;
+﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 using System;
@@ -7,6 +8,8 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Runtime.CompilerServices;
+
+using VooDo.Language.Linking;
 
 namespace VooDo.Language.AST.Names
 {
@@ -84,7 +87,7 @@ namespace VooDo.Language.AST.Names
 
         #region Nested types
 
-        public sealed record Element(ComplexType Type, Identifier? Name = null) : Node
+        public sealed record Element(ComplexType Type, Identifier? Name = null) : BodyNode
         {
 
             public static implicit operator Element(string _type) => Parse(_type);
@@ -95,7 +98,14 @@ namespace VooDo.Language.AST.Names
 
             public bool IsNamed => Name is not null;
 
-            public override IEnumerable<Node> Children => IsNamed ? new Node[] { Type, Name! } : new Node[] { Type };
+            internal override SyntaxNode EmitNode(Scope _scope, Marker _marker)
+                => SyntaxFactory.TupleElement(
+                    Type.EmitNode(_scope, _marker),
+                    IsNamed
+                    ? Name!.EmitToken(_marker)
+                    : SyntaxFactory.Token(SyntaxKind.None))
+                .Own(_marker, this);
+            public override IEnumerable<BodyNodeOrIdentifier> Children => IsNamed ? new BodyNodeOrIdentifier[] { Type, Name! } : new BodyNodeOrIdentifier[] { Type };
             public override string ToString() => IsNamed ? $"{Type} {Name}" : $"{Type}";
 
         }
@@ -131,7 +141,9 @@ namespace VooDo.Language.AST.Names
         public Element this[int _index] => ((IReadOnlyList<Element>) m_elements)[_index];
         public IEnumerator<Element> GetEnumerator() => ((IEnumerable<Element>) m_elements).GetEnumerator();
         IEnumerator IEnumerable.GetEnumerator() => ((IEnumerable) m_elements).GetEnumerator();
-        public override IEnumerable<Node> Children => m_elements;
+        internal override TypeSyntax EmitNonArrayNonNullableType(Scope _scope, Marker _marker)
+            => SyntaxFactory.TupleType(SyntaxFactory.SeparatedList(this.Select(_e => _e.EmitNode(_scope, _marker))));
+        public override IEnumerable<Element> Children => m_elements;
         public override string ToString() => $"({string.Join(',', m_elements)})" + base.ToString();
 
         #endregion

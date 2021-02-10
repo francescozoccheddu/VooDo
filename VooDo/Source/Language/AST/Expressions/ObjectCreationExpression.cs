@@ -1,30 +1,34 @@
-﻿using System.Collections.Generic;
+﻿using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 
 using VooDo.Language.AST.Names;
+using VooDo.Language.Linking;
 using VooDo.Utils;
 
 namespace VooDo.Language.AST.Expressions
 {
 
-    public sealed record ObjectCreationExpression(ComplexType? Type, ImmutableArray<Expression> Arguments = default) : Expression
+    public sealed record ObjectCreationExpression(ComplexType? Type, ImmutableArray<InvocationExpression.Argument> Arguments = default) : Expression
     {
 
         #region Delegating constructors
 
-        public ObjectCreationExpression(params Expression[] _arguments) : this(_arguments.ToImmutableArray()) { }
-        public ObjectCreationExpression(ComplexType? _type, params Expression[] _arguments) : this(_type, _arguments.EmptyIfNull().ToImmutableArray()) { }
-        public ObjectCreationExpression(IEnumerable<Expression>? _arguments) : this(_arguments.EmptyIfNull().ToImmutableArray()) { }
-        public ObjectCreationExpression(ComplexType? _type, IEnumerable<Expression>? _arguments) : this(_type, _arguments.EmptyIfNull().ToImmutableArray()) { }
-        public ObjectCreationExpression(ImmutableArray<Expression> _arguments) : this(null, _arguments) { }
+        public ObjectCreationExpression(params InvocationExpression.Argument[] _arguments) : this(_arguments.ToImmutableArray()) { }
+        public ObjectCreationExpression(ComplexType? _type, params InvocationExpression.Argument[] _arguments) : this(_type, _arguments.EmptyIfNull().ToImmutableArray()) { }
+        public ObjectCreationExpression(IEnumerable<InvocationExpression.Argument>? _arguments) : this(_arguments.EmptyIfNull().ToImmutableArray()) { }
+        public ObjectCreationExpression(ComplexType? _type, IEnumerable<InvocationExpression.Argument>? _arguments) : this(_type, _arguments.EmptyIfNull().ToImmutableArray()) { }
+        public ObjectCreationExpression(ImmutableArray<InvocationExpression.Argument> _arguments) : this(null, _arguments) { }
 
         #endregion
 
         #region Members
 
-        private ImmutableArray<Expression> m_arguments = Arguments.EmptyIfDefault();
-        public ImmutableArray<Expression> Arguments
+        private ImmutableArray<InvocationExpression.Argument> m_arguments = Arguments.EmptyIfDefault();
+        public ImmutableArray<InvocationExpression.Argument> Arguments
         {
             get => m_arguments;
             init => m_arguments = value.EmptyIfDefault();
@@ -35,7 +39,16 @@ namespace VooDo.Language.AST.Expressions
 
         #region Override
 
-        public override IEnumerable<Node> Children => IsTypeImplicit ? Arguments : new Node[] { Type! }.Concat(Arguments);
+        internal override ExpressionSyntax EmitNode(Scope _scope, Marker _marker)
+        {
+            ArgumentListSyntax argumentList = SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList(Arguments.Select(_a => _a.EmitNode(_scope, _marker))));
+            return (IsTypeImplicit
+                ? (ExpressionSyntax) SyntaxFactory.ImplicitObjectCreationExpression(argumentList, null)
+                : SyntaxFactory.ObjectCreationExpression(Type!.EmitNode(_scope, _marker), argumentList, null))
+                .Own(_marker, this);
+        }
+
+        public override IEnumerable<BodyNode> Children => IsTypeImplicit ? Arguments : new BodyNode[] { Type! }.Concat(Arguments);
         public override string ToString() => $"{GrammarConstants.newKeyword} " + (IsTypeImplicit ? $"{Type} " : "") + $"({string.Join(", ", Arguments)})";
 
         #endregion

@@ -5,10 +5,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
+using VooDo.Language.Linking;
+
 namespace VooDo.Language.AST.Names
 {
 
-    public sealed record ComplexTypeOrVar : Node
+    public sealed record ComplexTypeOrVar : BodyNode
     {
 
         #region Creation
@@ -24,17 +26,10 @@ namespace VooDo.Language.AST.Names
         public static ComplexTypeOrVar FromType<TType>()
             => FromType(typeof(TType));
 
-        public static ComplexTypeOrVar FromSyntax(TypeSyntax _type, bool _ignoreUnbound = false)
-        {
-            if (_type is IdentifierNameSyntax name && name.IsVar)
-            {
-                return Var;
-            }
-            else
-            {
-                return ComplexType.FromSyntax(_type, _ignoreUnbound);
-            }
-        }
+        public static ComplexTypeOrVar FromSyntax(TypeSyntax _type, bool _ignoreUnbound = false) =>
+            _type is IdentifierNameSyntax name && name.IsVar
+            ? Var
+            : ComplexType.FromSyntax(_type, _ignoreUnbound);
 
         public static ComplexTypeOrVar FromComplexType(ComplexType _type)
             => new ComplexTypeOrVar(_type);
@@ -66,7 +61,12 @@ namespace VooDo.Language.AST.Names
 
         #region Overrides
 
-        public override IEnumerable<Node> Children => IsVar ? Enumerable.Empty<Node>() : new Node[] { Type! };
+        internal override TypeSyntax EmitNode(Scope _scope, Marker _marker)
+            => (IsVar
+            ? SyntaxFactory.IdentifierName("var")
+            : Type!.EmitNode(_scope, _marker))
+            .Own(_marker, this);
+        public override IEnumerable<ComplexType> Children => IsVar ? Enumerable.Empty<ComplexType>() : new[] { Type! };
         public override string ToString() => IsVar ? "var" : Type!.ToString();
 
         #endregion

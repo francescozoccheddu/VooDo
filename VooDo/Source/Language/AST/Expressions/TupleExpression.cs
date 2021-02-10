@@ -1,7 +1,13 @@
-﻿using System;
+﻿using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Linq;
+
+using VooDo.Language.Linking;
 
 namespace VooDo.Language.AST.Expressions
 {
@@ -30,7 +36,12 @@ namespace VooDo.Language.AST.Expressions
         public int Count => ((IReadOnlyCollection<Expression>) m_expressions).Count;
         public IEnumerator<Expression> GetEnumerator() => ((IEnumerable<Expression>) m_expressions).GetEnumerator();
         IEnumerator IEnumerable.GetEnumerator() => ((IEnumerable) m_expressions).GetEnumerator();
-        public override IEnumerable<Node> Children => m_expressions;
+        internal override TupleExpressionSyntax EmitNode(Scope _scope, Marker _marker)
+            => SyntaxFactory.TupleExpression(
+                SyntaxFactory.SeparatedList(
+                    this.Select(_e => SyntaxFactory.Argument(_e.EmitNode(_scope, _marker)).Own(_marker, _e))))
+            .Own(_marker, this);
+        public override IEnumerable<Expression> Children => m_expressions;
         public override string ToString() => $"({string.Join(", ", this)})";
 
         #endregion

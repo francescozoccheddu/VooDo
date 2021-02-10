@@ -1,6 +1,4 @@
-﻿
-
-using Microsoft.CodeAnalysis.CSharp;
+﻿using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 using System;
@@ -8,11 +6,12 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 
+using VooDo.Language.Linking;
 using VooDo.Utils;
 
 namespace VooDo.Language.AST.Names
 {
-    public sealed record Namespace(Identifier? Alias, ImmutableArray<Identifier> Path) : Node
+    public sealed record Namespace(Identifier? Alias, ImmutableArray<Identifier> Path) : BodyNode
     {
 
         #region Creation
@@ -89,7 +88,8 @@ namespace VooDo.Language.AST.Names
 
         #region Overrides
 
-        public override IEnumerable<Node> Children => (IsAliasQualified ? new Node[] { Alias! } : Enumerable.Empty<Node>()).Concat(Path);
+        internal override NameSyntax EmitNode(Scope _scope, Marker _marker) => SyntaxFactory.ParseName(ToString()).Own(_marker, this, Marker.EMode.AllDescendants);
+        public override IEnumerable<BodyNodeOrIdentifier> Children => (IsAliasQualified ? new BodyNodeOrIdentifier[] { Alias! } : Enumerable.Empty<BodyNodeOrIdentifier>()).Concat(Path);
         public override string ToString() => (IsAliasQualified ? $"{Alias}::" : "") + string.Join('.', Path);
 
         #endregion

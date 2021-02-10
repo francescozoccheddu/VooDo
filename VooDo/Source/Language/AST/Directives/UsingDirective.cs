@@ -8,7 +8,7 @@ namespace VooDo.Language.AST.Directives
     public abstract record UsingDirective : BodyNode
     {
 
-        internal abstract override UsingDirectiveSyntax Emit(LinkArguments _arguments);
+        internal abstract override UsingDirectiveSyntax EmitNode(Scope _scope, Marker _marker);
 
     }
 

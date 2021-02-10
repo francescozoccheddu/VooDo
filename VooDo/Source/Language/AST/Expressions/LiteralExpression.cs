@@ -1,6 +1,11 @@
-﻿using System;
+﻿using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
+
+using VooDo.Language.Linking;
 
 namespace VooDo.Language.AST.Expressions
 {
@@ -102,14 +107,36 @@ namespace VooDo.Language.AST.Expressions
 
         #region Overrides
 
-        public override IEnumerable<Node> Children => Enumerable.Empty<Node>();
-        public override string ToString() => Value switch
+        private LiteralExpressionSyntax EmitNode()
         {
-            string => $"\"{Value}\"",
-            char => $"'{Value}'",
-            null => "null",
-            _ => $"{Value}"
-        };
+            SyntaxKind kind = m_value switch
+            {
+                true => SyntaxKind.TrueLiteralExpression,
+                false => SyntaxKind.FalseLiteralExpression,
+                null => SyntaxKind.NullLiteralExpression,
+                char => SyntaxKind.CharacterLiteralExpression,
+                string => SyntaxKind.StringLiteralExpression,
+                _ => SyntaxKind.NumericLiteralExpression
+            };
+            return m_value is bool or null
+                ? SyntaxFactory.LiteralExpression(kind)
+                : SyntaxFactory.LiteralExpression(kind, m_value switch
+                {
+                    char v => SyntaxFactory.Literal(v),
+                    decimal v => SyntaxFactory.Literal(v),
+                    string v => SyntaxFactory.Literal(v),
+                    uint v => SyntaxFactory.Literal(v),
+                    double v => SyntaxFactory.Literal(v),
+                    float v => SyntaxFactory.Literal(v),
+                    ulong v => SyntaxFactory.Literal(v),
+                    long v => SyntaxFactory.Literal(v),
+                    int v => SyntaxFactory.Literal(v),
+                    _ => throw new InvalidOperationException()
+                });
+        }
+        internal override LiteralExpressionSyntax EmitNode(Scope _scope, Marker _marker) => EmitNode().Own(_marker, this);
+        public override IEnumerable<BodyNodeOrIdentifier> Children => Enumerable.Empty<BodyNodeOrIdentifier>();
+        public override string ToString() => EmitNode().ToFullString();
 
         #endregion
 

@@ -1,10 +1,15 @@
-﻿using System.Collections.Generic;
+﻿using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+
+using System.Collections.Generic;
 using System.Linq;
+
+using VooDo.Language.Linking;
 
 namespace VooDo.Language.AST.Names
 {
 
-    public sealed record IdentifierOrDiscard : Node
+    public sealed record IdentifierOrDiscard : BodyNode
     {
 
         #region Creation
@@ -44,7 +49,12 @@ namespace VooDo.Language.AST.Names
 
         #region Overrides
 
-        public override IEnumerable<Node> Children => IsDiscard ? Enumerable.Empty<Node>() : new Node[] { Identifier! };
+        internal override VariableDesignationSyntax EmitNode(Scope _scope, Marker _marker)
+            => (IsDiscard
+            ? (VariableDesignationSyntax) SyntaxFactory.DiscardDesignation()
+            : SyntaxFactory.SingleVariableDesignation(Identifier!.EmitToken(_marker)))
+            .Own(_marker, this);
+        public override IEnumerable<Identifier> Children => IsDiscard ? Enumerable.Empty<Identifier>() : new[] { Identifier! };
         public override string ToString() => IsDiscard ? "_" : Identifier!.ToString();
 
         #endregion

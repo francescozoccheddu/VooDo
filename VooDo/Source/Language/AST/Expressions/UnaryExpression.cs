@@ -1,9 +1,15 @@
-﻿using System.Collections.Generic;
+﻿using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+
+using System;
+using System.Collections.Generic;
+
+using VooDo.Language.Linking;
 
 namespace VooDo.Language.AST.Expressions
 {
 
-    public sealed record UnaryExpression(BinaryExpression.EKind Kind, Expression Expression) : Expression
+    public sealed record UnaryExpression(UnaryExpression.EKind Kind, Expression Expression) : Expression
     {
 
         #region Nested types
@@ -19,7 +25,19 @@ namespace VooDo.Language.AST.Expressions
 
         #region Overrides
 
-        public override IEnumerable<Node> Children => new Node[] { Expression };
+        internal override ExpressionSyntax EmitNode(Scope _scope, Marker _marker)
+            => SyntaxFactory.PrefixUnaryExpression(
+                Kind switch
+                {
+                    EKind.Plus => SyntaxKind.UnaryPlusExpression,
+                    EKind.Minus => SyntaxKind.UnaryMinusExpression,
+                    EKind.LogicNot => SyntaxKind.LogicalNotExpression,
+                    EKind.BitwiseNot => SyntaxKind.BitwiseNotExpression,
+                    _ => throw new InvalidOperationException()
+                },
+                Expression.EmitNode(_scope, _marker))
+            .Own(_marker, this);
+        public override IEnumerable<Expression> Children => new[] { Expression };
         public override string ToString() => $"{Kind.Token()}{Expression}";
 
         #endregion

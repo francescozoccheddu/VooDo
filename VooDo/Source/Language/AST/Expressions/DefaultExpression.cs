@@ -1,7 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+
+using System.Collections.Generic;
 using System.Linq;
 
 using VooDo.Language.AST.Names;
+using VooDo.Language.Linking;
 
 namespace VooDo.Language.AST.Expressions
 {
@@ -17,7 +21,12 @@ namespace VooDo.Language.AST.Expressions
 
         #region Overrides
 
-        public override IEnumerable<Node> Children => HasType ? new Node[] { Type! } : Enumerable.Empty<Node>();
+        internal override ExpressionSyntax EmitNode(Scope _scope, Marker _marker)
+            => (HasType
+            ? SyntaxFactory.DefaultExpression(Type!.EmitNode(_scope, _marker))
+            : (ExpressionSyntax) SyntaxFactory.LiteralExpression(SyntaxKind.DefaultExpression))
+            .Own(_marker, this);
+        public override IEnumerable<ComplexType> Children => HasType ? new ComplexType[] { Type! } : Enumerable.Empty<ComplexType>();
         public override string ToString() => GrammarConstants.defaultKeyword + (HasType ? $"({Type})" : "");
 
         #endregion

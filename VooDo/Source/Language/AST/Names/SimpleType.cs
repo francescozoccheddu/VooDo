@@ -1,6 +1,4 @@
-﻿
-
-using Microsoft.CodeAnalysis.CSharp;
+﻿using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 using System;
@@ -8,12 +6,13 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 
+using VooDo.Language.Linking;
 using VooDo.Utils;
 
 namespace VooDo.Language.AST.Names
 {
 
-    public sealed record SimpleType(Identifier Name, ImmutableArray<ComplexType> TypeArguments = default) : Node
+    public sealed record SimpleType(Identifier Name, ImmutableArray<ComplexType> TypeArguments = default) : BodyNode
     {
 
         #region Creation
@@ -143,7 +142,16 @@ namespace VooDo.Language.AST.Names
 
         #region Overrides
 
-        public override IEnumerable<Node> Children => new Node[] { Name }.Concat(TypeArguments);
+        internal override SimpleNameSyntax EmitNode(Scope _scope, Marker _marker)
+            => (IsGeneric
+            ? (SimpleNameSyntax) SyntaxFactory.GenericName(
+                Name.EmitToken(_marker),
+                SyntaxFactory.TypeArgumentList(
+                    SyntaxFactory.SeparatedList(
+                        TypeArguments.Select(_a => _a.EmitNode(_scope, _marker)))))
+            : SyntaxFactory.IdentifierName(Name.EmitToken(_marker)))
+            .Own(_marker, this);
+        public override IEnumerable<BodyNodeOrIdentifier> Children => new BodyNodeOrIdentifier[] { Name }.Concat(TypeArguments);
         public override string ToString() => IsGeneric ? $"{Name}<{string.Join(", ", TypeArguments)}>" : $"{Name}";
 
         #endregion

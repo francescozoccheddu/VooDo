@@ -1,8 +1,13 @@
 ﻿
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+
 using System.Collections.Generic;
 
 using VooDo.Language.AST.Names;
 using VooDo.Language.AST.Statements;
+using VooDo.Language.Linking;
 
 namespace VooDo.Language.AST.Directives
 {
@@ -24,7 +29,25 @@ namespace VooDo.Language.AST.Directives
 
         #region Overrides
 
-        public override IEnumerable<Node> Children => HasAlias ? new Node[] { Alias!, Namespace } : new Node[] { Namespace };
+        internal override UsingDirectiveSyntax EmitNode(Scope _scope, Marker _marker)
+        {
+            NameSyntax name = Namespace.EmitNode(_scope, _marker);
+            UsingDirectiveSyntax result;
+            if (HasAlias)
+            {
+                SyntaxToken alias = Alias!.EmitToken(_marker);
+                NameEqualsSyntax aliasName = SyntaxFactory.NameEquals(SyntaxFactory.IdentifierName(alias)).Own(_marker, Alias);
+                result = SyntaxFactory.UsingDirective(aliasName, name);
+            }
+            else
+            {
+                result = SyntaxFactory.UsingDirective(name);
+            }
+            return result.Own(_marker, this);
+        }
+
+        public override IEnumerable<BodyNodeOrIdentifier> Children => HasAlias ? new BodyNodeOrIdentifier[] { Alias!, Namespace } : new BodyNodeOrIdentifier[] { Namespace };
+
         public override string ToString() => $"{GrammarConstants.usingKeyword} "
             + (HasAlias ? $"{Alias} {AssignmentStatement.EKind.Simple.Token()} " : "")
             + Namespace

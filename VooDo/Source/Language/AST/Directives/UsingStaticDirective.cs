@@ -1,7 +1,11 @@
 ﻿
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+
 using System.Collections.Generic;
 
 using VooDo.Language.AST.Names;
+using VooDo.Language.Linking;
 using VooDo.Utils;
 
 namespace VooDo.Language.AST.Directives
@@ -23,7 +27,13 @@ namespace VooDo.Language.AST.Directives
 
         #region Overrides
 
-        public override IEnumerable<Node> Children => new Node[] { Type };
+        internal override UsingDirectiveSyntax EmitNode(Scope _scope, Marker _marker)
+            => SyntaxFactory.UsingDirective(
+                    SyntaxFactory.Token(SyntaxKind.StaticKeyword),
+                    null,
+                    (NameSyntax) Type.EmitNode(_scope, _marker))
+                .Own(_marker, this);
+        public override IEnumerable<QualifiedType> Children => new QualifiedType[] { Type };
         public override string ToString() => $"{GrammarConstants.usingKeyword} {GrammarConstants.staticKeyword} {Type}{GrammarConstants.statementEndToken}";
 
         #endregion

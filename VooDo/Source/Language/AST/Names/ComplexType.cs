@@ -127,7 +127,28 @@ namespace VooDo.Language.AST.Names
 
         #region Overrides
 
-        internal abstract override TypeSyntax Emit(LinkArguments _arguments);
+        internal sealed override TypeSyntax EmitNode(Scope _scope, Marker _marker)
+        {
+            TypeSyntax? type = EmitNonArrayNonNullableType(_scope, _marker);
+            if (IsNullable)
+            {
+                type = SyntaxFactory.NullableType(type);
+            }
+            if (IsArray)
+            {
+                IEnumerable<ArrayRankSpecifierSyntax> ranks = Ranks.Select(_r
+                    => SyntaxFactory.ArrayRankSpecifier(
+                        SyntaxFactory.SeparatedList<ExpressionSyntax>(
+                            Enumerable.Repeat(
+                                SyntaxFactory.OmittedArraySizeExpression(),
+                                _r))));
+                type = SyntaxFactory.ArrayType(type, SyntaxFactory.List(ranks));
+            }
+            return type.Own(_marker, this);
+        }
+
+        internal abstract TypeSyntax EmitNonArrayNonNullableType(Scope _scope, Marker _marker);
+
         public override string ToString()
             => $"{(IsNullable ? "?" : "")}{string.Concat(Ranks.Select(_r => $"[{new string(',', _r - 1)}]"))}";
 

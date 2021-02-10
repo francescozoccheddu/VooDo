@@ -1,19 +1,23 @@
-﻿using System.Collections.Generic;
+﻿using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 
+using VooDo.Language.Linking;
 using VooDo.Utils;
 
 namespace VooDo.Language.AST.Expressions
 {
 
-    public sealed record ElementAccessExpression(Expression Source, bool Coalesce, ImmutableArray<Expression> Arguments) : AssignableExpression
+    public sealed record ElementAccessExpression(Expression Source, ImmutableArray<Expression> Arguments) : AssignableExpression
     {
 
         #region Delegating constructors
 
-        public ElementAccessExpression(Expression _source, bool _coalesce, params Expression[] _arguments) : this(_source, _coalesce, _arguments.ToImmutableArray()) { }
-        public ElementAccessExpression(Expression _source, bool _coalesce, IEnumerable<Expression> _arguments) : this(_source, _coalesce, _arguments.ToImmutableArray()) { }
+        public ElementAccessExpression(Expression _source, params Expression[] _arguments) : this(_source, _arguments.ToImmutableArray()) { }
+        public ElementAccessExpression(Expression _source, IEnumerable<Expression> _arguments) : this(_source, _arguments.ToImmutableArray()) { }
 
         #endregion
 
@@ -30,8 +34,15 @@ namespace VooDo.Language.AST.Expressions
 
         #region Overrides
 
-        public override IEnumerable<Node> Children => new Node[] { Source }.Concat(Arguments);
-        public override string ToString() => $"{Source}" + (Coalesce ? "?" : "") + $"[{string.Join(",", Arguments)}]";
+        internal override ElementAccessExpressionSyntax EmitNode(Scope _scope, Marker _marker)
+            => SyntaxFactory.ElementAccessExpression(
+                Source.EmitNode(_scope, _marker),
+                SyntaxFactory.BracketedArgumentList(
+                    SyntaxFactory.SeparatedList(
+                        Arguments.Select(_a => SyntaxFactory.Argument(_a.EmitNode(_scope, _marker)).Own(_marker, _a)))))
+            .Own(_marker, this);
+        public override IEnumerable<Expression> Children => new Expression[] { Source }.Concat(Arguments);
+        public override string ToString() => $"{Source}[{string.Join(",", Arguments)}]";
 
         #endregion
 

@@ -32,7 +32,7 @@ namespace VooDo.Language.Linking
         private readonly Dictionary<string, bool> m_names;
         private readonly List<GlobalDefinition> m_globals;
 
-        private Scope() : this(new List<GlobalDefinition>(), new Dictionary<string, bool>())
+        internal Scope() : this(new List<GlobalDefinition>(), new Dictionary<string, bool>())
         { }
 
         private Scope(List<GlobalDefinition> _globals, Dictionary<string, bool> _names)

@@ -1,8 +1,14 @@
-﻿using System.Collections.Generic;
+﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+
+using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 
 using VooDo.Language.AST.Names;
+using VooDo.Language.Linking;
 using VooDo.Utils;
 
 namespace VooDo.Language.AST.Expressions
@@ -16,15 +22,61 @@ namespace VooDo.Language.AST.Expressions
         public abstract record Callable : BodyNode
         {
 
+            internal abstract override ExpressionSyntax EmitNode(Scope _scope, Marker _marker);
+            public abstract override IEnumerable<Expression> Children { get; }
+
         }
 
-        public sealed record Method(AssignableExpressionOrMethod Source, ImmutableArray<ComplexType> TypeArguments = default) : Callable
+        public sealed record Method(NameOrMemberAccessExpression Source, ImmutableArray<ComplexType> TypeArguments = default) : Callable
         {
+
+            private static bool IsValidSource(NameOrMemberAccessExpression _source)
+                => _source is MemberAccessExpression || (_source is NameExpression name && !name.IsControllerOf);
+
+
+            private NameOrMemberAccessExpression m_source = Source.Assert(IsValidSource);
+            public NameOrMemberAccessExpression Source
+            {
+                get => m_source;
+                init => m_source = value.Assert(IsValidSource);
+            }
+
+            internal override ExpressionSyntax EmitNode(Scope _scope, Marker _marker)
+            {
+                ExpressionSyntax source;
+                TypeArgumentListSyntax typeArgumentList = SyntaxFactory.TypeArgumentList(SyntaxFactory.SeparatedList(TypeArguments.Select(_a => _a.EmitNode(_scope, _marker))));
+                if (Source is NameExpression name)
+                {
+                    SyntaxToken identifier = name.Name.EmitToken(_marker);
+                    source = SyntaxFactory.GenericName(identifier, typeArgumentList);
+                }
+                else if (Source is MemberAccessExpression member)
+                {
+
+                    SyntaxToken identifier = member.Member.EmitToken(_marker);
+                    source = SyntaxFactory.MemberAccessExpression(
+                        SyntaxKind.SimpleMemberAccessExpression,
+                        member.Source.EmitNode(_scope, _marker),
+                        SyntaxFactory.GenericName(identifier, typeArgumentList));
+                }
+                else
+                {
+                    throw new InvalidOperationException("Not a method");
+                }
+                return source.Own(_marker, this);
+            }
+
+            public override IEnumerable<NameOrMemberAccessExpression> Children => new[] { Source };
+            public override string ToString() => Source.ToString();
 
         }
 
         public sealed record SimpleCallable(Expression Source) : Callable
         {
+
+            internal override ExpressionSyntax EmitNode(Scope _scope, Marker _marker) => Source.EmitNode(_scope, _marker);
+            public override IEnumerable<Expression> Children => new[] { Source };
+            public override string ToString() => Source.ToString();
 
         }
 
@@ -40,27 +92,47 @@ namespace VooDo.Language.AST.Expressions
 
             public abstract EKind Kind { get; }
 
+            internal abstract override ArgumentSyntax EmitNode(Scope _scope, Marker _marker);
 
         }
 
         public sealed record ValueArgument(Expression Expression) : Argument
         {
             public override EKind Kind => EKind.Value;
-            public override IEnumerable<Node> Children => new Node[] { Expression };
+            internal override ArgumentSyntax EmitNode(Scope _scope, Marker _marker)
+                => SyntaxFactory.Argument(Expression.EmitNode(_scope, _marker)).Own(_marker, this);
+            public override IEnumerable<Expression> Children => new[] { Expression };
             public override string ToString() => $"{Kind.Token()} {Expression}".TrimStart();
         }
 
         public sealed record AssignableArgument(Argument.EKind AssignableKind, AssignableExpression Expression) : Argument
         {
             public override EKind Kind => AssignableKind;
-            public override IEnumerable<Node> Children => new Node[] { Expression };
+            internal override ArgumentSyntax EmitNode(Scope _scope, Marker _marker)
+                => SyntaxFactory.Argument(Expression.EmitNode(_scope, _marker))
+                .WithRefKindKeyword(SyntaxFactory.Token(AssignableKind switch
+                {
+                    EKind.Value => SyntaxKind.None,
+                    EKind.Ref => SyntaxKind.RefKeyword,
+                    EKind.Out => SyntaxKind.OutKeyword,
+                    _ => throw new InvalidOperationException(),
+                }))
+                .Own(_marker, this);
+            public override IEnumerable<AssignableExpression> Children => new[] { Expression };
             public override string ToString() => $"{Kind.Token()} {Expression}".TrimStart();
         }
 
         public sealed record OutDeclarationArgument(ComplexTypeOrVar Type, IdentifierOrDiscard Name) : Argument
         {
             public override EKind Kind => EKind.Out;
-            public override IEnumerable<Node> Children => new Node[] { Type, Name };
+            internal override ArgumentSyntax EmitNode(Scope _scope, Marker _marker)
+                => SyntaxFactory.Argument(
+                    SyntaxFactory.DeclarationExpression(
+                        Type.EmitNode(_scope, _marker),
+                        Name.EmitNode(_scope, _marker)))
+                .WithRefKindKeyword(SyntaxFactory.Token(SyntaxKind.OutKeyword))
+                .Own(_marker, this);
+            public override IEnumerable<BodyNodeOrIdentifier> Children => new BodyNodeOrIdentifier[] { Type, Name };
             public override string ToString() => $"{Kind.Token()} {Type} {Name}".TrimStart();
         }
 
@@ -79,7 +151,14 @@ namespace VooDo.Language.AST.Expressions
 
         #region Overrides
 
-        public override IEnumerable<Node> Children => new Node[] { Source }.Concat(Arguments);
+        internal override InvocationExpressionSyntax EmitNode(Scope _scope, Marker _marker)
+            => SyntaxFactory.InvocationExpression(
+                Source.EmitNode(_scope, _marker),
+                SyntaxFactory.ArgumentList(
+                    SyntaxFactory.SeparatedList(
+                        Arguments.Select(_a => _a.EmitNode(_scope, _marker)))))
+            .Own(_marker, this);
+        public override IEnumerable<BodyNode> Children => new BodyNode[] { Source }.Concat(Arguments);
         public override string ToString() => $"{Source}({string.Join(", ", Arguments)})";
 
         #endregion

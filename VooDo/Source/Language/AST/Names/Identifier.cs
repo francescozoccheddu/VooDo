@@ -1,15 +1,18 @@
 ﻿
 
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
+using VooDo.Language.Linking;
+
 namespace VooDo.Language.AST.Names
 {
 
-    public sealed record Identifier : Node
+    public sealed record Identifier : BodyNodeOrIdentifier
     {
 
         #region Creation
@@ -50,7 +53,9 @@ namespace VooDo.Language.AST.Names
 
         #region Overrides
 
-        public override IEnumerable<Node> Children => Enumerable.Empty<Node>();
+        internal override SyntaxNodeOrToken EmitNodeOrToken(Scope _scope, Marker _marker) => EmitToken(_marker);
+        internal SyntaxToken EmitToken(Marker _marker) => SyntaxFactory.Identifier(this).Own(_marker, this);
+        public override IEnumerable<BodyNode> Children => Enumerable.Empty<BodyNode>();
         public override string ToString() => m_identifier;
 
         #endregion

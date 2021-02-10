@@ -3,17 +3,22 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30907.101
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VooDo", "VooDo\VooDo.csproj", "{EEEFA80A-DD1D-4867-831E-06DD1B0D4CD4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VooDo", "VooDo\VooDo.csproj", "{EEEFA80A-DD1D-4867-831E-06DD1B0D4CD4}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Testbench", "Testbench", "{E3B5C2A7-2D03-4DCC-94A1-17A30704DBC0}"
 EndProject
 Project("{C7167F0D-BC9F-4E6E-AFE1-012C56B48DB5}") = "Desktop (Package)", "Testbench\Desktop\Desktop (Package)\Desktop (Package).wapproj", "{3D755A7F-66E8-4FFC-8BB8-4BAFE1F597F5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Desktop", "Testbench\Desktop\Desktop\Desktop.csproj", "{9EA0C4CE-3FB8-4687-8338-2138A0557B97}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Desktop", "Testbench\Desktop\Desktop\Desktop.csproj", "{9EA0C4CE-3FB8-4687-8338-2138A0557B97}"
 EndProject
 Project("{C7167F0D-BC9F-4E6E-AFE1-012C56B48DB5}") = "Console (Package)", "Testbench\Console\Console (Package)\Console (Package).wapproj", "{F77958BD-41D3-44ED-B8BE-AB4DC07FABD0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Console", "Testbench\Console\Console\Console.csproj", "{B352D946-8E9E-4F85-9269-3EA4929F3CE5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Console", "Testbench\Console\Console\Console.csproj", "{B352D946-8E9E-4F85-9269-3EA4929F3CE5}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{9B51D198-EBCE-41C9-936F-43FD7E74DFF4}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
