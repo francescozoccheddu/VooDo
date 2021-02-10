@@ -5,7 +5,7 @@ using VooDo.Language.AST.Names;
 namespace VooDo.Language.AST.Expressions
 {
 
-    public sealed record MemberAccessExpression(ComplexTypeOrExpression Source, bool Coalesce, Identifier Member) : AssignableExpression
+    public sealed record MemberAccessExpression(ComplexTypeOrExpression Source, bool Coalesce, Identifier Member) : AssignableExpressionOrMethod
     {
 
         #region Overrides

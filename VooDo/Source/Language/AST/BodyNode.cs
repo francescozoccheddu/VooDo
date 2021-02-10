@@ -8,7 +8,7 @@ namespace VooDo.Language.AST
     public abstract record BodyNode
     {
 
-        internal abstract SyntaxNode Emit(LinkArguments _arguments);
+        internal abstract SyntaxNode Emit(Scope _scope, Marker _marker);
 
     }
 }

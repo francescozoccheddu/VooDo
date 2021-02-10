@@ -8,12 +8,27 @@ using VooDo.Utils;
 namespace VooDo.Language.AST.Expressions
 {
 
-    public sealed record InvocationExpression(Expression Source, ImmutableArray<InvocationExpression.Argument> Arguments = default) : Expression
+    public sealed record InvocationExpression(InvocationExpression.Callable Source, ImmutableArray<InvocationExpression.Argument> Arguments = default) : Expression
     {
 
         #region Nested types
 
-        public abstract record Argument : Node
+        public abstract record Callable : BodyNode
+        {
+
+        }
+
+        public sealed record Method(AssignableExpressionOrMethod Source, ImmutableArray<ComplexType> TypeArguments = default) : Callable
+        {
+
+        }
+
+        public sealed record SimpleCallable(Expression Source) : Callable
+        {
+
+        }
+
+        public abstract record Argument : BodyNode
         {
 
             public enum EKind

@@ -1,7 +1,7 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace VooDo.Transformation
+namespace VooDo.Hooks
 {
     public interface IHookInitializerProvider
     {

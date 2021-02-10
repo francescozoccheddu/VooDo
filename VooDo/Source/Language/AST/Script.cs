@@ -1,9 +1,13 @@
-﻿using System.Collections.Generic;
+﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 
 using VooDo.Language.AST.Directives;
 using VooDo.Language.AST.Statements;
+using VooDo.Language.Linking;
 using VooDo.Utils;
 
 namespace VooDo.Language.AST
@@ -19,6 +23,11 @@ namespace VooDo.Language.AST
         {
             get => m_usings;
             init => m_usings = value.EmptyIfDefault();
+        }
+
+        internal override CompilationUnitSyntax Emit(Scope _scope, ImmutableArray<SyntaxNode> _children, EventContext? _eventContext, HookContext? _hookContext)
+        {
+
         }
 
         #endregion

@@ -5,7 +5,7 @@ using VooDo.Language.AST.Names;
 namespace VooDo.Language.AST.Expressions
 {
 
-    public sealed record NameExpression(bool IsControllerOf, Identifier Name) : AssignableExpression
+    public sealed record NameExpression(bool IsControllerOf, Identifier Name) : AssignableExpressionOrMethod
     {
 
         #region Overrides
