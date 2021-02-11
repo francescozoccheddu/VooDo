@@ -151,10 +151,9 @@ namespace VooDo.Language.AST.Expressions
         #region Overrides
 
         internal override InvocationExpressionSyntax EmitNode(Scope _scope, Marker _marker)
-            => SyntaxFactory.InvocationExpression(
+            => SyntaxFactoryHelper.Invocation(
                 Source.EmitNode(_scope, _marker),
-                SyntaxFactoryHelper.Arguments(
-                        Arguments.Select(_a => _a.EmitNode(_scope, _marker))))
+                Arguments.Select(_a => _a.EmitNode(_scope, _marker)))
             .Own(_marker, this);
         public override IEnumerable<Node> Children => new Node[] { Source }.Concat(Arguments);
         public override string ToString() => $"{Source}({string.Join(", ", Arguments)})";

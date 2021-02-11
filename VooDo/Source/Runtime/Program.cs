@@ -40,6 +40,7 @@ namespace VooDo.Runtime
         protected internal abstract void Run();
         protected internal abstract IEnumerable<Variable> m_Variables { get; }
 
+
         private void PrepareAndRun()
         {
             if (m_running)

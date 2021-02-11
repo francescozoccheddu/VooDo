@@ -166,8 +166,7 @@ namespace VooDo.Transformation
                         .WithRefOrOutKeyword(SyntaxFactory.Token(refOrOutKind));
                 }
                 IEnumerable<ArgumentSyntax> arguments = new ArgumentSyntax[] { symbolArgument, sourceArgument }.Concat(eventArguments);
-                InvocationExpressionSyntax invocation = SyntaxFactory.InvocationExpression(method)
-                    .WithArgumentList(SyntaxFactoryHelper.Arguments(arguments));
+                InvocationExpressionSyntax invocation = SyntaxFactoryHelper.Invocation(method, arguments);
                 return invocation;
             }
 

@@ -38,11 +38,9 @@ namespace VooDo.ConsoleTestbench
                             "x"),
                         AssignmentStatement.EKind.Add,
                         new BinaryExpression(
-                            LiteralExpression.Create(5),
+                            LiteralExpression.Create("ciao\n\t"),
                             BinaryExpression.EKind.Add,
-                            new NameExpression(
-                                false,
-                                "y")
+                            new GlobalExpression(LiteralExpression.Null, LiteralExpression.False)
                         )
                     )
                 }.ToImmutableArray()

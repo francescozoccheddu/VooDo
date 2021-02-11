@@ -17,30 +17,67 @@ namespace VooDo.Utils
     internal static class SyntaxFactoryHelper
     {
 
+        private static readonly QualifiedNameSyntax s_programType = (QualifiedNameSyntax) (QualifiedType.FromType<Program>() with
+        {
+            Alias = Linker.runtimeReferenceExternAlias
+        }).ToTypeSyntax();
+
+        private static readonly QualifiedNameSyntax s_genericProgramType = (QualifiedNameSyntax) (QualifiedType.FromType<Program<object>>() with
+        {
+            Alias = Linker.runtimeReferenceExternAlias
+        }).ToTypeSyntax();
+
+        private static readonly QualifiedNameSyntax s_variableType = (QualifiedNameSyntax) (QualifiedType.FromType<Variable>() with
+        {
+            Alias = Linker.runtimeReferenceExternAlias
+        }).ToTypeSyntax();
+
+        private static readonly QualifiedNameSyntax s_genericVariableType = (QualifiedNameSyntax) (QualifiedType.FromType<Variable<object>>() with
+        {
+            Alias = Linker.runtimeReferenceExternAlias
+        }).ToTypeSyntax();
+
+        private static readonly QualifiedNameSyntax s_runtimeHelpersType = (QualifiedNameSyntax) (QualifiedType.FromType(typeof(RuntimeHelpers)) with
+        {
+            Alias = Linker.runtimeReferenceExternAlias
+        }).ToTypeSyntax();
+
         internal static TypeSyntax ToTypeSyntax(this ComplexType _type)
             => _type.EmitNode(new Scope(), new Marker());
 
-        internal static TypeSyntax VariableType()
-        {
-            QualifiedType variableType = QualifiedType.FromType<Variable>() with
-            {
-                Alias = Linker.runtimeReferenceExternAlias
-            };
-            return variableType.ToTypeSyntax();
-        }
+        internal static InvocationExpressionSyntax CreateVariableInvocation(TypeSyntax? _type, LiteralExpressionSyntax _name, ExpressionSyntax _initialValue)
+            => Invocation(
+                MemberAccess(
+                    s_runtimeHelpersType,
+                    GenericName(
+                        nameof(RuntimeHelpers.CreateVariable),
+                        _type!)),
+                    _name,
+                    _initialValue);
 
-        internal static TypeSyntax VariableType(TypeSyntax _type)
+        internal static InvocationExpressionSyntax SetControllerAndGetValueInvocation(ExpressionSyntax _variable, ExpressionSyntax _controller)
+            => Invocation(
+                MemberAccess(
+                    s_runtimeHelpersType,
+                    nameof(RuntimeHelpers.SetControllerAndGetValue)),
+                _variable,
+                _controller);
+
+        internal static TypeSyntax VariableType(TypeSyntax? _type = null)
         {
-            QualifiedType variableType = QualifiedType.FromType<Variable<object>>() with
+            if (_type is null)
             {
-                Alias = Linker.runtimeReferenceExternAlias
-            };
-            QualifiedNameSyntax syntax = (QualifiedNameSyntax) variableType.ToTypeSyntax();
-            GenericNameSyntax right = (GenericNameSyntax) syntax.Right;
-            right = right.WithTypeArgumentList(
-                SF.TypeArgumentList(
-                    SF.SingletonSeparatedList(_type)));
-            return syntax.WithRight(right);
+                return s_variableType;
+            }
+            else
+            {
+                QualifiedNameSyntax syntax = s_genericVariableType;
+                GenericNameSyntax right = (GenericNameSyntax) syntax.Right;
+                right = right.WithTypeArgumentList(
+                    SF.TypeArgumentList(
+                        SF.SingletonSeparatedList(_type)));
+                return syntax.WithRight(right);
+            }
         }
 
         internal static MemberAccessExpressionSyntax MemberAccess(ExpressionSyntax _source, SyntaxToken _member)
@@ -82,22 +119,15 @@ namespace VooDo.Utils
         internal static SyntaxList<TNode> ToSyntaxList<TNode>(this IEnumerable<TNode> _nodes) where TNode : SyntaxNode
             => SF.List(_nodes);
 
-        internal static TypeSyntax ProgramType(TypeSyntax? _returnType)
+        internal static TypeSyntax ProgramType(TypeSyntax? _returnType = null)
         {
             if (_returnType is null)
             {
-                return (QualifiedType.FromType<Program>() with
-                {
-                    Alias = Linker.runtimeReferenceExternAlias
-                }).ToTypeSyntax();
+                return s_programType;
             }
             else
             {
-                QualifiedType programType = QualifiedType.FromType<Variable<Program>>() with
-                {
-                    Alias = Linker.runtimeReferenceExternAlias
-                };
-                QualifiedNameSyntax syntax = (QualifiedNameSyntax) programType.ToTypeSyntax();
+                QualifiedNameSyntax syntax = s_genericProgramType;
                 GenericNameSyntax right = (GenericNameSyntax) syntax.Right;
                 right = right.WithTypeArgumentList(
                     SF.TypeArgumentList(
@@ -108,8 +138,6 @@ namespace VooDo.Utils
 
         internal static SyntaxTokenList Tokens(params SyntaxKind[] _kinds)
             => SF.TokenList(_kinds.Select(_k => SF.Token(_k)));
-
-
 
         internal static ArrayRankSpecifierSyntax ArrayRank(int _rank)
             => SF.ArrayRankSpecifier(
@@ -125,6 +153,14 @@ namespace VooDo.Utils
             .Concat(ArrayRanks(_additionalRanks))
             .ToSyntaxList();
 
+        internal static InvocationExpressionSyntax Invocation(ExpressionSyntax _source, params ExpressionSyntax[] _arguments)
+            => Invocation(_source, _arguments.Select(_a => SF.Argument(_a)));
+
+        internal static InvocationExpressionSyntax Invocation(ExpressionSyntax _source, IEnumerable<ArgumentSyntax> _arguments)
+            => SF.InvocationExpression(
+                _source,
+                Arguments(_arguments));
+
         internal static SyntaxList<ArrayRankSpecifierSyntax> SingleArrayRank()
             => ArrayRanks(new[] { 1 });
 
@@ -139,6 +175,24 @@ namespace VooDo.Utils
 
         internal static EqualsValueClauseSyntax ToEqualsValueClause(this ExpressionSyntax _expression)
             => SF.EqualsValueClause(_expression);
+
+        internal static PredefinedTypeSyntax Void()
+            => SF.PredefinedType(SF.Token(SyntaxKind.VoidKeyword));
+
+        internal static PredefinedTypeSyntax Object()
+            => SF.PredefinedType(SF.Token(SyntaxKind.ObjectKeyword));
+
+        internal static NameSyntax? QualifiedName(IEnumerable<NameSyntax> _names)
+        {
+            NameSyntax? type = null;
+            foreach (NameSyntax name in _names)
+            {
+                type = type is null
+                    ? name
+                    : SF.QualifiedName(type, (SimpleNameSyntax) name);
+            }
+            return type;
+        }
 
     }
 

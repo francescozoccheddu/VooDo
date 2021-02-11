@@ -43,9 +43,5 @@
   <ItemGroup>
     <None Include="..\.editorconfig" Link=".editorconfig" />
   </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Source\Compilation\Transformation\" />
-  </ItemGroup>
   
 </Project>

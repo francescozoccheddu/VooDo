@@ -15,6 +15,7 @@ using VooDo.Runtime;
 using VooDo.Utils;
 
 using SF = Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
+using SFH = VooDo.Utils.SyntaxFactoryHelper;
 
 namespace VooDo.Language.AST
 {
@@ -41,18 +42,18 @@ namespace VooDo.Language.AST
         internal SyntaxNode EmitNode(Scope _scope, Marker _marker, ImmutableArray<Identifier> _externAliases, ComplexType? _returnType)
         {
             TypeSyntax? returnType = _returnType?.EmitNode(_scope, _marker);
-            TypeSyntax variableType = SyntaxFactoryHelper.VariableType();
-            IEnumerable<ExternAliasDirectiveSyntax> aliases = _externAliases.EmptyIfDefault().Select(_a => SF.ExternAliasDirective(_a));
+            TypeSyntax variableType = SFH.VariableType();
+            IEnumerable<ExternAliasDirectiveSyntax> aliases = _externAliases
+                .EmptyIfDefault()
+                .Select(_i => SF.ExternAliasDirective(_i).Own(_marker, _i));
             IEnumerable<UsingDirectiveSyntax> usings = Usings.Select(_u => _u.EmitNode(_scope, _marker));
             MethodDeclarationSyntax? runMethod = SF.MethodDeclaration(
-                                returnType ??
-                                    SF.PredefinedType(
-                                        SF.Token(SyntaxKind.VoidKeyword)),
+                                returnType ?? SFH.Void(),
                                 SF.Identifier(returnType is null
                                     ? nameof(Program.Run)
                                     : nameof(Program<object>.TypedRun)))
                             .WithModifiers(
-                                SyntaxFactoryHelper.Tokens(
+                                SFH.Tokens(
                                     SyntaxKind.ProtectedKeyword,
                                     SyntaxKind.InternalKeyword,
                                     SyntaxKind.OverrideKeyword))
@@ -62,35 +63,26 @@ namespace VooDo.Language.AST
             ImmutableArray<Scope.GlobalDefinition> globals = _scope.GetGlobalDefinitions();
             VariableDeclarationSyntax EmitGlobalDeclaration(Scope.GlobalDefinition _definition)
             {
-                TypeSyntax? type = _definition.Global.Type.IsVar ? null : _definition.Global.Type.EmitNode(_scope, _marker);
+                TypeSyntax? type = _definition.Global.Type.IsVar
+                    ? null
+                    : _definition.Global.Type.EmitNode(_scope, _marker);
                 return SF.VariableDeclaration(
-                            _definition.Global.Type.IsVar
-                                ? variableType
-                                : SyntaxFactoryHelper.VariableType(type!),
+                            SFH.VariableType(type),
                             SF.VariableDeclarator(
                                 _definition.Identifier,
                                 null,
-                                SF.InvocationExpression(
-                                    SyntaxFactoryHelper.MemberAccess(
-                                        variableType,
-                                        _definition.Global.Type.IsVar
-                                        ? SF.IdentifierName(nameof(Variable.Create))
-                                        : SyntaxFactoryHelper.GenericName(
-                                            nameof(Variable.Create),
-                                            type!)),
-                                    SyntaxFactoryHelper.Arguments(new ArgumentSyntax[]{
-                                        SF.Argument(
-                                            _definition.Global.IsAnonymous
-                                            ? SF.LiteralExpression(
-                                                SyntaxKind.NullLiteralExpression)
-                                            : SF.LiteralExpression(
-                                                SyntaxKind.StringLiteralExpression,
-                                                SF.Literal(_definition.Global.Name!))),
-                                        SF.Argument(
-                                            _definition.Global.HasInitializer
-                                            ? _definition.Global.Initializer!.EmitNode(_scope, _marker)
-                                            : SF.LiteralExpression(
-                                                SyntaxKind.DefaultLiteralExpression))}))
+                                SFH.CreateVariableInvocation(
+                                    type,
+                                    _definition.Global.IsAnonymous
+                                    ? SF.LiteralExpression(
+                                        SyntaxKind.NullLiteralExpression)
+                                    : SF.LiteralExpression(
+                                        SyntaxKind.StringLiteralExpression,
+                                        SF.Literal(_definition.Global.Name!)),
+                                    _definition.Global.HasInitializer
+                                    ? _definition.Global.Initializer!.EmitNode(_scope, _marker)
+                                    : SF.LiteralExpression(
+                                        SyntaxKind.DefaultLiteralExpression))
                                 .ToEqualsValueClause())
                             .ToSeparatedList());
             }
@@ -104,16 +96,16 @@ namespace VooDo.Language.AST
                         SF.ArrayCreationExpression(
                             SF.ArrayType(variableType)
                             .WithRankSpecifiers(
-                                SyntaxFactoryHelper.SingleArrayRank()))
+                                SFH.SingleArrayRank()))
                         .WithInitializer(
                             SF.InitializerExpression(
                                 SyntaxKind.ArrayInitializerExpression,
-                                globals.Select(_g => SyntaxFactoryHelper.ThisMemberAccess(_g.Identifier))
+                                globals.Select(_g => SFH.ThisMemberAccess(_g.Identifier))
                                 .ToSeparatedList<ExpressionSyntax>()))
                         .ToEqualsValueClause())
                     .ToSeparatedList()))
             .WithModifiers(
-                SyntaxFactoryHelper.Tokens(
+                SFH.Tokens(
                     SyntaxKind.ProtectedKeyword,
                     SyntaxKind.InternalKeyword,
                     SyntaxKind.OverrideKeyword));
@@ -121,20 +113,20 @@ namespace VooDo.Language.AST
                 globals.Select(_g =>
                     SF.FieldDeclaration(
                         SF.List<AttributeListSyntax>(),
-                        SyntaxFactoryHelper.Tokens(
+                        SFH.Tokens(
                             SyntaxKind.PrivateKeyword,
                             SyntaxKind.ReadOnlyKeyword),
                         EmitGlobalDeclaration(_g)));
             ClassDeclarationSyntax? classDeclaration =
                 SF.ClassDeclaration(Linker.generatedClassName)
                     .WithModifiers(
-                        SyntaxFactoryHelper.Tokens(
+                        SFH.Tokens(
                             SyntaxKind.PublicKeyword,
                             SyntaxKind.SealedKeyword))
                     .WithBaseList(
                         SF.BaseList(
                             SF.SimpleBaseType(
-                                SyntaxFactoryHelper.ProgramType(returnType))
+                                SFH.ProgramType(returnType))
                             .ToSeparatedList<BaseTypeSyntax>()))
                     .WithMembers(globalDeclarations
                         .Cast<MemberDeclarationSyntax>()
