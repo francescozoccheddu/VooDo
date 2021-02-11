@@ -10,6 +10,9 @@ namespace VooDo.Runtime
     public abstract class Variable
     {
 
+        public static Variable<TValue> Create<TValue>(string _name, TValue _value = default)
+            => new Variable<TValue>(_name, _value!);
+
         internal Variable(string _name, Type _type)
         {
             Name = _name;

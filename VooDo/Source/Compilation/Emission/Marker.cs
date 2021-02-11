@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 
 using VooDo.Language.AST;
+using VooDo.Utils;
 
 namespace VooDo.Language.Linking
 {
@@ -82,7 +83,7 @@ namespace VooDo.Language.Linking
             Single, AllDescendants, UnownedDescendants
         }
 
-        private readonly Dictionary<NodeOrIdentifier, int> m_forward = new Dictionary<NodeOrIdentifier, int>();
+        private readonly Dictionary<NodeOrIdentifier, int> m_forward = new Dictionary<NodeOrIdentifier, int>(new Identity.ReferenceComparer<NodeOrIdentifier>());
         private readonly List<NodeOrIdentifier> m_reverse = new List<NodeOrIdentifier>();
 
         private int GetOwnerIndex(NodeOrIdentifier _node)
@@ -115,7 +116,6 @@ namespace VooDo.Language.Linking
 
         internal NodeOrIdentifier GetOwner(SyntaxNodeOrToken _nodeOrToken)
             => m_reverse[int.Parse(GetAnnotation(_nodeOrToken)!.Data!)];
-
 
     }
 

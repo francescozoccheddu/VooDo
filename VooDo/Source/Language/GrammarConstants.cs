@@ -6,10 +6,10 @@ using VooDo.Language.AST.Statements;
 namespace VooDo.Language
 {
 
-    public static class GrammarConstants
+    internal static class GrammarConstants
     {
 
-        public static string Token(this AssignmentStatement.EKind _kind) => _kind switch
+        internal static string Token(this AssignmentStatement.EKind _kind) => _kind switch
         {
             AssignmentStatement.EKind.Simple => "=",
             AssignmentStatement.EKind.Add => "+=",
@@ -26,7 +26,7 @@ namespace VooDo.Language
             _ => throw new NotImplementedException(),
         };
 
-        public static string Token(this BinaryExpression.EKind _kind) => _kind switch
+        internal static string Token(this BinaryExpression.EKind _kind) => _kind switch
         {
             BinaryExpression.EKind.Add => "+",
             BinaryExpression.EKind.Subtract => "-",
@@ -50,7 +50,7 @@ namespace VooDo.Language
             _ => throw new NotImplementedException(),
         };
 
-        public static string Token(this UnaryExpression.EKind _kind) => _kind switch
+        internal static string Token(this UnaryExpression.EKind _kind) => _kind switch
         {
             UnaryExpression.EKind.Plus => "+",
             UnaryExpression.EKind.Minus => "-",
@@ -59,7 +59,7 @@ namespace VooDo.Language
             _ => throw new NotImplementedException(),
         };
 
-        public static string Token(this InvocationExpression.Argument.EKind _kind) => _kind switch
+        internal static string Token(this InvocationExpression.Argument.EKind _kind) => _kind switch
         {
             InvocationExpression.Argument.EKind.Value => "",
             InvocationExpression.Argument.EKind.Ref => "ref",
@@ -67,20 +67,20 @@ namespace VooDo.Language
             _ => throw new NotImplementedException(),
         };
 
-        public const string globalKeyword = "global";
-        public const string globKeyword = "glob";
-        public const string initKeyword = "init";
-        public const string statementEndToken = ";";
-        public const string ifKeyword = "if";
-        public const string elseKeyword = "else";
-        public const string returnKeyword = "return";
-        public const string nameEqualsToken = "=";
-        public const string usingKeyword = "using";
-        public const string staticKeyword = "static";
-        public const string isKeyword = "is";
-        public const string asKeyword = "as";
-        public const string newKeyword = "new";
-        public const string defaultKeyword = "default";
+        internal const string globalKeyword = "global";
+        internal const string globKeyword = "glob";
+        internal const string initKeyword = "init";
+        internal const string statementEndToken = ";";
+        internal const string ifKeyword = "if";
+        internal const string elseKeyword = "else";
+        internal const string returnKeyword = "return";
+        internal const string nameEqualsToken = "=";
+        internal const string usingKeyword = "using";
+        internal const string staticKeyword = "static";
+        internal const string isKeyword = "is";
+        internal const string asKeyword = "as";
+        internal const string newKeyword = "new";
+        internal const string defaultKeyword = "default";
 
     }
 

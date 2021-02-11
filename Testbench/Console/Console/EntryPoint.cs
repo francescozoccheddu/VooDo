@@ -25,7 +25,7 @@ namespace VooDo.ConsoleTestbench
                         new []
                         {
                             new DeclarationStatement(
-                                ComplexTypeOrVar.Var,
+                                ComplexTypeOrVar.Parse("int"),
                                 new DeclarationStatement.Declarator[] {
                                     new DeclarationStatement.Declarator(
                                         "x",

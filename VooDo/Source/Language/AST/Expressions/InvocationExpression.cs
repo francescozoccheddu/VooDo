@@ -54,8 +54,7 @@ namespace VooDo.Language.AST.Expressions
                 {
 
                     SyntaxToken identifier = member.Member.EmitToken(_marker);
-                    source = SyntaxFactory.MemberAccessExpression(
-                        SyntaxKind.SimpleMemberAccessExpression,
+                    source = SyntaxFactoryHelper.MemberAccess(
                         member.Source.EmitNode(_scope, _marker),
                         SyntaxFactory.GenericName(identifier, typeArgumentList));
                 }

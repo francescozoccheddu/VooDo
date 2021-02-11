@@ -16,7 +16,7 @@ namespace VooDo.Runtime
         {
         }
 
-        protected abstract TReturn TypedRun();
+        protected internal abstract TReturn TypedRun();
 
         protected internal sealed override void Run()
             => throw new NotImplementedException();
@@ -38,6 +38,7 @@ namespace VooDo.Runtime
         private int m_locks;
 
         protected internal abstract void Run();
+        protected internal abstract IEnumerable<Variable> m_Variables { get; }
 
         private void PrepareAndRun()
         {

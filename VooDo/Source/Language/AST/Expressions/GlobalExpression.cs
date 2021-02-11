@@ -2,6 +2,7 @@
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 using System.Collections.Generic;
+using System.Linq;
 
 using VooDo.Language.AST.Names;
 using VooDo.Language.Linking;
@@ -16,23 +17,7 @@ namespace VooDo.Language.AST.Expressions
         #region Members
 
         private static bool IsValidInitializer(Expression _expression)
-        {
-            Stack<NodeOrIdentifier> stack = new Stack<NodeOrIdentifier>();
-            stack.Push(_expression);
-            while (stack.Count > 0)
-            {
-                NodeOrIdentifier node = stack.Pop();
-                if (node is GlobalExpression)
-                {
-                    return false;
-                }
-                foreach (NodeOrIdentifier child in node.Children)
-                {
-                    stack.Push(child);
-                }
-            }
-            return true;
-        }
+            => !_expression.DescendantNodes().Any(_e => _e is GlobalExpression);
 
         private Expression? m_initializer = Initializer?.Assert(IsValidInitializer);
         public Expression? Initializer
@@ -57,7 +42,7 @@ namespace VooDo.Language.AST.Expressions
                         {
                             SyntaxFactory.Argument(
                                 SyntaxFactoryHelper.ThisMemberAccess(
-                                    SyntaxFactory.IdentifierName(globalDefinition.Identifier))),
+                                    globalDefinition.Identifier)),
                             SyntaxFactory.Argument(
                                 Controller.EmitNode(_scope, _marker))
                             .Own(_marker, Controller)

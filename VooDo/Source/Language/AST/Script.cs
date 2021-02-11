@@ -14,6 +14,8 @@ using VooDo.Language.Linking;
 using VooDo.Runtime;
 using VooDo.Utils;
 
+using SF = Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
+
 namespace VooDo.Language.AST
 {
 
@@ -39,62 +41,111 @@ namespace VooDo.Language.AST
         internal SyntaxNode EmitNode(Scope _scope, Marker _marker, ImmutableArray<Identifier> _externAliases, ComplexType? _returnType)
         {
             TypeSyntax? returnType = _returnType?.EmitNode(_scope, _marker);
-            IEnumerable<ExternAliasDirectiveSyntax> aliases = _externAliases.EmptyIfDefault().Select(_a => SyntaxFactory.ExternAliasDirective(_a));
+            TypeSyntax variableType = SyntaxFactoryHelper.VariableType();
+            IEnumerable<ExternAliasDirectiveSyntax> aliases = _externAliases.EmptyIfDefault().Select(_a => SF.ExternAliasDirective(_a));
             IEnumerable<UsingDirectiveSyntax> usings = Usings.Select(_u => _u.EmitNode(_scope, _marker));
-            MethodDeclarationSyntax? runMethod = SyntaxFactory.MethodDeclaration(
+            MethodDeclarationSyntax? runMethod = SF.MethodDeclaration(
                                 returnType ??
-                                    SyntaxFactory.PredefinedType(
-                                        SyntaxFactory.Token(SyntaxKind.VoidKeyword)),
-                                SyntaxFactory.Identifier(returnType is null
+                                    SF.PredefinedType(
+                                        SF.Token(SyntaxKind.VoidKeyword)),
+                                SF.Identifier(returnType is null
                                     ? nameof(Program.Run)
-                                    : nameof(Program<object>.Run)))
+                                    : nameof(Program<object>.TypedRun)))
                             .WithModifiers(
-                                SyntaxFactory.TokenList(new[]{
-                                        SyntaxFactory.Token(SyntaxKind.ProtectedKeyword),
-                                        SyntaxFactory.Token(SyntaxKind.OverrideKeyword)}))
+                                SyntaxFactoryHelper.Tokens(
+                                    SyntaxKind.ProtectedKeyword,
+                                    SyntaxKind.InternalKeyword,
+                                    SyntaxKind.OverrideKeyword))
                             .WithBody(
                                 Body.EmitNode(_scope, _marker));
+
+            ImmutableArray<Scope.GlobalDefinition> globals = _scope.GetGlobalDefinitions();
+            VariableDeclarationSyntax EmitGlobalDeclaration(Scope.GlobalDefinition _definition)
+            {
+                TypeSyntax? type = _definition.Global.Type.IsVar ? null : _definition.Global.Type.EmitNode(_scope, _marker);
+                return SF.VariableDeclaration(
+                            _definition.Global.Type.IsVar
+                                ? variableType
+                                : SyntaxFactoryHelper.VariableType(type!),
+                            SF.VariableDeclarator(
+                                _definition.Identifier,
+                                null,
+                                SF.InvocationExpression(
+                                    SyntaxFactoryHelper.MemberAccess(
+                                        variableType,
+                                        _definition.Global.Type.IsVar
+                                        ? SF.IdentifierName(nameof(Variable.Create))
+                                        : SyntaxFactoryHelper.GenericName(
+                                            nameof(Variable.Create),
+                                            type!)),
+                                    SyntaxFactoryHelper.Arguments(new ArgumentSyntax[]{
+                                        SF.Argument(
+                                            _definition.Global.IsAnonymous
+                                            ? SF.LiteralExpression(
+                                                SyntaxKind.NullLiteralExpression)
+                                            : SF.LiteralExpression(
+                                                SyntaxKind.StringLiteralExpression,
+                                                SF.Literal(_definition.Global.Name!))),
+                                        SF.Argument(
+                                            _definition.Global.HasInitializer
+                                            ? _definition.Global.Initializer!.EmitNode(_scope, _marker)
+                                            : SF.LiteralExpression(
+                                                SyntaxKind.DefaultLiteralExpression))}))
+                                .ToEqualsValueClause())
+                            .ToSeparatedList());
+            }
+            FieldDeclarationSyntax? variablesProperty = SF.FieldDeclaration(
+                SF.VariableDeclaration(
+                    ComplexType.FromType<IEnumerable<Variable>>().ToTypeSyntax())
+                .WithVariables(
+                    SF.VariableDeclarator(
+                        SF.Identifier(nameof(Program.m_Variables)))
+                    .WithInitializer(
+                        SF.ArrayCreationExpression(
+                            SF.ArrayType(variableType)
+                            .WithRankSpecifiers(
+                                SyntaxFactoryHelper.SingleArrayRank()))
+                        .WithInitializer(
+                            SF.InitializerExpression(
+                                SyntaxKind.ArrayInitializerExpression,
+                                globals.Select(_g => SyntaxFactoryHelper.ThisMemberAccess(_g.Identifier))
+                                .ToSeparatedList<ExpressionSyntax>()))
+                        .ToEqualsValueClause())
+                    .ToSeparatedList()))
+            .WithModifiers(
+                SyntaxFactoryHelper.Tokens(
+                    SyntaxKind.ProtectedKeyword,
+                    SyntaxKind.InternalKeyword,
+                    SyntaxKind.OverrideKeyword));
             IEnumerable<FieldDeclarationSyntax> globalDeclarations =
-                _scope.GetGlobalDefinitions().Select(_g =>
-                    SyntaxFactory.FieldDeclaration(
-                        SyntaxFactory.List<AttributeListSyntax>(),
-                        SyntaxFactory.TokenList(new[] {
-                            SyntaxFactory.Token(SyntaxKind.PrivateKeyword),
-                            SyntaxFactory.Token(SyntaxKind.ReadOnlyKeyword)
-                        }),
-                        SyntaxFactory.VariableDeclaration(
-                            _g.Global.Type.IsVar
-                            ? SyntaxFactory.PredefinedType(SyntaxFactory.Token(SyntaxKind.ObjectKeyword))
-                            : SyntaxFactoryHelper.VariableType(_g.Global.Type.EmitNode(_scope, _marker)),
-                            SyntaxFactory.SingletonSeparatedList(
-                                SyntaxFactory.VariableDeclarator(
-                                    _g.Identifier,
-                                    null,
-                                    _g.Global.HasInitializer
-                                        ? SyntaxFactory.EqualsValueClause(
-                                            _g.Global.Initializer!.EmitNode(_scope, _marker))
-                                        : null)))));
+                globals.Select(_g =>
+                    SF.FieldDeclaration(
+                        SF.List<AttributeListSyntax>(),
+                        SyntaxFactoryHelper.Tokens(
+                            SyntaxKind.PrivateKeyword,
+                            SyntaxKind.ReadOnlyKeyword),
+                        EmitGlobalDeclaration(_g)));
             ClassDeclarationSyntax? classDeclaration =
-                SyntaxFactory.ClassDeclaration(Linker.generatedClassName)
+                SF.ClassDeclaration(Linker.generatedClassName)
                     .WithModifiers(
-                        SyntaxFactory.TokenList(
-                            new[]{
-                                SyntaxFactory.Token(SyntaxKind.PublicKeyword),
-                                SyntaxFactory.Token(SyntaxKind.SealedKeyword)}))
+                        SyntaxFactoryHelper.Tokens(
+                            SyntaxKind.PublicKeyword,
+                            SyntaxKind.SealedKeyword))
                     .WithBaseList(
-                        SyntaxFactory.BaseList(
-                            SyntaxFactory.SingletonSeparatedList<BaseTypeSyntax>(
-                                SyntaxFactory.SimpleBaseType(
-                                    SyntaxFactoryHelper.ProgramType(returnType)))))
+                        SF.BaseList(
+                            SF.SimpleBaseType(
+                                SyntaxFactoryHelper.ProgramType(returnType))
+                            .ToSeparatedList<BaseTypeSyntax>()))
                     .WithMembers(globalDeclarations
                         .Cast<MemberDeclarationSyntax>()
+                        .Append(variablesProperty)
                         .Append(runMethod)
                         .ToSyntaxList());
-            return SyntaxFactory.CompilationUnit(
+            return SF.CompilationUnit(
                     aliases.ToSyntaxList(),
                     usings.ToSyntaxList(),
-                    SyntaxFactory.List<AttributeListSyntax>(),
-                    SyntaxFactory.SingletonList<MemberDeclarationSyntax>(classDeclaration))
+                    SF.List<AttributeListSyntax>(),
+                    classDeclaration.ToSyntaxList<MemberDeclarationSyntax>())
                 .Own(_marker, this);
         }
 

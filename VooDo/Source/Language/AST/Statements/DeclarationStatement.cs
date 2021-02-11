@@ -29,17 +29,14 @@ namespace VooDo.Language.AST.Statements
                 if (_globalType is not null)
                 {
                     Scope.GlobalDefinition globalDefinition = _scope.AddGlobal(new Global(_globalType, Name, Initializer));
-                    initializer = SyntaxFactory.MemberAccessExpression(
-                        SyntaxKind.SimpleMemberAccessExpression,
-                        SyntaxFactory.ThisExpression(),
-                        SyntaxFactory.IdentifierName(globalDefinition.Identifier));
+                    initializer = SyntaxFactoryHelper.ThisMemberAccess(globalDefinition.Identifier);
                 }
                 else
                 {
                     _scope.AddLocal(Name);
                     initializer = Initializer?.EmitNode(_scope, _marker);
                 }
-                EqualsValueClauseSyntax? initializerClause = initializer is null ? null : SyntaxFactory.EqualsValueClause(initializer);
+                EqualsValueClauseSyntax? initializerClause = initializer?.ToEqualsValueClause();
                 return SyntaxFactory.VariableDeclarator(Name.EmitToken(_marker), null, initializerClause).Own(_marker, this);
             }
             internal override VariableDeclaratorSyntax EmitNode(Scope _scope, Marker _marker) => EmitNode(_scope, _marker, null);

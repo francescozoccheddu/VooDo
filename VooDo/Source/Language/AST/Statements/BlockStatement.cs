@@ -34,7 +34,7 @@ namespace VooDo.Language.AST.Statements
             Scope nestedScope = _scope.CreateNested();
             IEnumerable<StatementSyntax> statements = this.SelectMany(_s => _s is GlobalStatement globals
                         ? globals.EmitNode(nestedScope, _marker).Statements
-                        : SyntaxFactory.SingletonList(_s.EmitNode(nestedScope, _marker)));
+                        : _s.EmitNode(nestedScope, _marker).ToSyntaxList());
             return SyntaxFactory.Block(statements.ToSyntaxList()).Own(_marker, this);
         }
 

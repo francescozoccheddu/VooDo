@@ -140,10 +140,7 @@ namespace VooDo.Transformation
 
             private static ExpressionSyntax CreateEventAccess(ExpressionSyntax _source, GetEventOverload _overload, int _symbolIndex, IReadOnlyList<ExpressionSyntax> _arguments)
             {
-                MemberAccessExpressionSyntax method = SyntaxFactory.MemberAccessExpression(
-                    SyntaxKind.SimpleMemberAccessExpression,
-                    SyntaxFactory.ThisExpression(),
-                    SyntaxFactory.IdentifierName(_overload.Identifier));
+                MemberAccessExpressionSyntax method = SyntaxFactoryHelper.ThisMemberAccess(_overload.Identifier);
                 ArgumentSyntax symbolArgument = SyntaxFactory.Argument(
                     SyntaxFactory.LiteralExpression(
                         SyntaxKind.NumericLiteralExpression,

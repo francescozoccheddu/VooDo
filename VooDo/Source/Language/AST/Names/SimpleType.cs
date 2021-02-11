@@ -144,10 +144,9 @@ namespace VooDo.Language.AST.Names
 
         internal override SimpleNameSyntax EmitNode(Scope _scope, Marker _marker)
             => (IsGeneric
-            ? (SimpleNameSyntax) SyntaxFactory.GenericName(
+            ? (SimpleNameSyntax) SyntaxFactoryHelper.GenericName(
                 Name.EmitToken(_marker),
-                SyntaxFactoryHelper.TypeArguments(
-                    TypeArguments.Select(_a => _a.EmitNode(_scope, _marker))))
+                TypeArguments.Select(_a => _a.EmitNode(_scope, _marker)))
             : SyntaxFactory.IdentifierName(Name.EmitToken(_marker)))
             .Own(_marker, this);
         public override IEnumerable<NodeOrIdentifier> Children => new NodeOrIdentifier[] { Name }.Concat(TypeArguments);

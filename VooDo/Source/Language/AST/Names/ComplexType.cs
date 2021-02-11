@@ -136,11 +136,7 @@ namespace VooDo.Language.AST.Names
             }
             if (IsArray)
             {
-                IEnumerable<ArrayRankSpecifierSyntax> ranks = Ranks.Select(_r
-                    => SyntaxFactory.ArrayRankSpecifier(
-                            Enumerable.Repeat(SyntaxFactory.OmittedArraySizeExpression(), _r)
-                            .ToSeparatedList<ExpressionSyntax>()));
-                type = SyntaxFactory.ArrayType(type, ranks.ToSyntaxList());
+                type = SyntaxFactory.ArrayType(type, SyntaxFactoryHelper.ArrayRanks(Ranks));
             }
             return type.Own(_marker, this);
         }

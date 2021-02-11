@@ -1,5 +1,4 @@
-﻿using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
+﻿using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 using System.Collections.Generic;
 
@@ -18,7 +17,7 @@ namespace VooDo.Language.AST.Expressions
         internal override MemberAccessExpressionSyntax EmitNode(Scope _scope, Marker _marker)
             => SyntaxFactoryHelper.MemberAccess(
                 Source.EmitNode(_scope, _marker),
-                SyntaxFactory.IdentifierName(Member.EmitToken(_marker)).Own(_marker, Member))
+                Member.EmitToken(_marker).Own(_marker, Member))
             .Own(_marker, this);
         public override IEnumerable<NodeOrIdentifier> Children => new NodeOrIdentifier[] { Source, Member };
         public override string ToString() => $"{Source}.{Member}";
