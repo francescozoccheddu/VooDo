@@ -66,13 +66,18 @@ namespace VooDo.Language.AST.Statements
         #region Overrides
 
         internal LocalDeclarationStatementSyntax EmitNode(Scope _scope, Marker _marker, bool _global)
-            => SyntaxFactory.LocalDeclarationStatement(
-                SyntaxFactory.VariableDeclaration(
-                    _global && !Type.IsVar
-                    ? new QualifiedType("Variable").Specialize(Type.Type!).ToTypeSyntax().Own(_marker, Type)
-                    : Type.EmitNode(_scope, _marker),
-                    SyntaxFactory.SeparatedList(Declarators.Select(_d => _d.EmitNode(_scope, _marker, _global ? Type : null)))))
-            .Own(_marker, this);
+        {
+            TypeSyntax type = Type.EmitNode(_scope, _marker);
+            if (_global && !Type.IsVar)
+            {
+                type = SyntaxFactoryHelper.VariableType(type);
+            }
+            return SyntaxFactory.LocalDeclarationStatement(
+                           SyntaxFactory.VariableDeclaration(type,
+                               Declarators.Select(_d => _d.EmitNode(_scope, _marker, _global ? Type : null)).ToSeparatedList()))
+                       .Own(_marker, this);
+        }
+
         internal override LocalDeclarationStatementSyntax EmitNode(Scope _scope, Marker _marker) => EmitNode(_scope, _marker, false);
         public override IEnumerable<Node> Children => new Node[] { Type }.Concat(Declarators);
         public override string ToString() => $"{Type} {string.Join(", ", Declarators)}{GrammarConstants.statementEndToken}";

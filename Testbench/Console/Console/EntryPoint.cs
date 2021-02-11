@@ -6,6 +6,7 @@ using VooDo.Language.AST.Directives;
 using VooDo.Language.AST.Expressions;
 using VooDo.Language.AST.Names;
 using VooDo.Language.AST.Statements;
+using VooDo.Source.Linking;
 
 namespace VooDo.ConsoleTestbench
 {
@@ -16,16 +17,20 @@ namespace VooDo.ConsoleTestbench
         public static void Run()
         {
             // using System; var x = 8; x += 5 + y;
-            Script code = new Script(
+            Script script = new Script(
                 new UsingDirective[] { new UsingNamespaceDirective(null, "System") }.ToImmutableArray(),
                 new BlockStatement(new Statement[]
                 {
-                    new DeclarationStatement(
-                        ComplexTypeOrVar.Var,
-                        new DeclarationStatement.Declarator[] {
-                            new DeclarationStatement.Declarator(
-                                "x",
-                                LiteralExpression.Create(8))
+                    new GlobalStatement(
+                        new []
+                        {
+                            new DeclarationStatement(
+                                ComplexTypeOrVar.Var,
+                                new DeclarationStatement.Declarator[] {
+                                    new DeclarationStatement.Declarator(
+                                        "x",
+                                        LiteralExpression.Create(8))
+                            }.ToImmutableArray())
                         }.ToImmutableArray()),
                     new AssignmentStatement(
                         new NameExpression(
@@ -42,7 +47,7 @@ namespace VooDo.ConsoleTestbench
                     )
                 }.ToImmutableArray()
             ));
-            Console.WriteLine(code);
+            Console.WriteLine(Test.Emit(script));
         }
 
     }

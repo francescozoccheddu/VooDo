@@ -30,11 +30,14 @@ namespace VooDo.Language.AST.Statements
         public IEnumerator<Statement> GetEnumerator() => ((IEnumerable<Statement>) m_statements).GetEnumerator();
         IEnumerator IEnumerable.GetEnumerator() => ((IEnumerable) m_statements).GetEnumerator();
         internal override BlockSyntax EmitNode(Scope _scope, Marker _marker)
-            => SyntaxFactory.Block(SyntaxFactory.List(this.SelectMany(_s
-                => _s is GlobalStatement globals
-            ? globals.EmitNode(_scope, _marker).Statements
-            : (IEnumerable<StatementSyntax>) new StatementSyntax[] { _s.EmitNode(_scope, _marker) })))
-            .Own(_marker, this);
+        {
+            Scope nestedScope = _scope.CreateNested();
+            IEnumerable<StatementSyntax> statements = this.SelectMany(_s => _s is GlobalStatement globals
+                        ? globals.EmitNode(nestedScope, _marker).Statements
+                        : SyntaxFactory.SingletonList(_s.EmitNode(nestedScope, _marker)));
+            return SyntaxFactory.Block(statements.ToSyntaxList()).Own(_marker, this);
+        }
+
         public override IEnumerable<Statement> Children => m_statements;
         public override string ToString() => Count == 0
             ? "{}"

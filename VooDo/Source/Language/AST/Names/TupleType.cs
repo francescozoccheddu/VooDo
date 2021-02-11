@@ -10,6 +10,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 
 using VooDo.Language.Linking;
+using VooDo.Utils;
 
 namespace VooDo.Language.AST.Names
 {
@@ -142,7 +143,7 @@ namespace VooDo.Language.AST.Names
         public IEnumerator<Element> GetEnumerator() => ((IEnumerable<Element>) m_elements).GetEnumerator();
         IEnumerator IEnumerable.GetEnumerator() => ((IEnumerable) m_elements).GetEnumerator();
         internal override TypeSyntax EmitNonArrayNonNullableType(Scope _scope, Marker _marker)
-            => SyntaxFactory.TupleType(SyntaxFactory.SeparatedList(this.Select(_e => _e.EmitNode(_scope, _marker)))).Own(_marker, this);
+            => SyntaxFactory.TupleType(this.Select(_e => _e.EmitNode(_scope, _marker)).ToSeparatedList()).Own(_marker, this);
         public override IEnumerable<Element> Children => m_elements;
         public override string ToString() => $"({string.Join(',', m_elements)})" + base.ToString();
 

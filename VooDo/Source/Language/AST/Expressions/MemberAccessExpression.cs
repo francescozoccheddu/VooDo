@@ -5,6 +5,7 @@ using System.Collections.Generic;
 
 using VooDo.Language.AST.Names;
 using VooDo.Language.Linking;
+using VooDo.Utils;
 
 namespace VooDo.Language.AST.Expressions
 {
@@ -15,8 +16,7 @@ namespace VooDo.Language.AST.Expressions
         #region Overrides
 
         internal override MemberAccessExpressionSyntax EmitNode(Scope _scope, Marker _marker)
-            => SyntaxFactory.MemberAccessExpression(
-                SyntaxKind.SimpleMemberAccessExpression,
+            => SyntaxFactoryHelper.MemberAccess(
                 Source.EmitNode(_scope, _marker),
                 SyntaxFactory.IdentifierName(Member.EmitToken(_marker)).Own(_marker, Member))
             .Own(_marker, this);

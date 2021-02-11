@@ -37,9 +37,8 @@ namespace VooDo.Language.AST.Expressions
         internal override ElementAccessExpressionSyntax EmitNode(Scope _scope, Marker _marker)
             => SyntaxFactory.ElementAccessExpression(
                 Source.EmitNode(_scope, _marker),
-                SyntaxFactory.BracketedArgumentList(
-                    SyntaxFactory.SeparatedList(
-                        Arguments.Select(_a => SyntaxFactory.Argument(_a.EmitNode(_scope, _marker)).Own(_marker, _a)))))
+                SyntaxFactoryHelper.BracketedArguments(
+                        Arguments.Select(_a => SyntaxFactory.Argument(_a.EmitNode(_scope, _marker)).Own(_marker, _a))))
             .Own(_marker, this);
         public override IEnumerable<Expression> Children => new Expression[] { Source }.Concat(Arguments);
         public override string ToString() => $"{Source}[{string.Join(",", Arguments)}]";

@@ -7,6 +7,8 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 
+using VooDo.Utils;
+
 namespace VooDo.Transformation
 {
     // TODO Set original spans correctly (keep original span for event arguments and source and replace for others)
@@ -168,7 +170,7 @@ namespace VooDo.Transformation
                 }
                 IEnumerable<ArgumentSyntax> arguments = new ArgumentSyntax[] { symbolArgument, sourceArgument }.Concat(eventArguments);
                 InvocationExpressionSyntax invocation = SyntaxFactory.InvocationExpression(method)
-                    .WithArgumentList(SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList(arguments)));
+                    .WithArgumentList(SyntaxFactoryHelper.Arguments(arguments));
                 return invocation;
             }
 

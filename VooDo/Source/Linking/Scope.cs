@@ -14,6 +14,8 @@ namespace VooDo.Language.Linking
     internal sealed class Scope
     {
 
+        private const string c_globalFieldNameFormat = "field_{0}";
+
         internal sealed class GlobalDefinition
         {
 
@@ -52,7 +54,7 @@ namespace VooDo.Language.Linking
             => m_globals.ToImmutableArray();
 
         private static GlobalDefinition CreateGlobalDefinition(Global _global, int _index)
-            => new GlobalDefinition(_global, $"global_{_index}");
+            => new GlobalDefinition(_global, string.Format(c_globalFieldNameFormat, _index));
 
         public void AddLocal(Identifier _name)
         {
@@ -60,7 +62,7 @@ namespace VooDo.Language.Linking
             {
                 throw new InvalidOperationException($"Redefinition of {_name}");
             }
-            m_names.Add(_name, true);
+            m_names.Add(_name, false);
         }
 
         public GlobalDefinition AddGlobal(Global _global)

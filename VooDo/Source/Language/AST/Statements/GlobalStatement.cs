@@ -30,7 +30,7 @@ namespace VooDo.Language.AST.Statements
         public IEnumerator<DeclarationStatement> GetEnumerator() => ((IEnumerable<DeclarationStatement>) m_declarations).GetEnumerator();
         IEnumerator IEnumerable.GetEnumerator() => ((IEnumerable) m_declarations).GetEnumerator();
         internal override BlockSyntax EmitNode(Scope _scope, Marker _marker)
-            => SyntaxFactory.Block(SyntaxFactory.List(this.Select(_s => _s.EmitNode(_scope, _marker, true)))).Own(_marker, this);
+            => SyntaxFactory.Block(this.Select(_s => _s.EmitNode(_scope, _marker, true)).ToSyntaxList()).Own(_marker, this);
         public override IEnumerable<DeclarationStatement> Children => m_declarations;
         public override string ToString() => GrammarConstants.globalKeyword + Count switch
         {

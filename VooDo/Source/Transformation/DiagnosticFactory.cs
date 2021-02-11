@@ -131,8 +131,8 @@ namespace VooDo.Transformation
         internal static Diagnostic NestedAssignmentExpression(AssignmentExpressionSyntax _argument)
             => Diagnostic.Create(s_nestedAssignmentExpression, _argument.GetLocation());
 
-        internal static TransformationException AsThrowable(this Diagnostic _diagnostic)
-            => new TransformationException(_diagnostic);
+        internal static Exception AsThrowable(this Diagnostic _diagnostic)
+            => new Exception("REPLACEME");
 
     }
 

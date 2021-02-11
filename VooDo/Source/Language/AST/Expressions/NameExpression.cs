@@ -6,6 +6,7 @@ using System.Collections.Generic;
 
 using VooDo.Language.AST.Names;
 using VooDo.Language.Linking;
+using VooDo.Utils;
 
 namespace VooDo.Language.AST.Expressions
 {
@@ -25,10 +26,7 @@ namespace VooDo.Language.AST.Expressions
             ExpressionSyntax result;
             IdentifierNameSyntax name = SyntaxFactory.IdentifierName(Name.EmitToken(_marker));
             result = isGlobal
-                ? SyntaxFactory.MemberAccessExpression(
-                    SyntaxKind.SimpleMemberAccessExpression,
-                    name,
-                    SyntaxFactory.IdentifierName(IsControllerOf ? "Controller" : "Value"))
+                ? SyntaxFactoryHelper.MemberAccess(name, IsControllerOf ? "Controller" : "Value")
                 : (ExpressionSyntax) name;
             return result.Own(_marker, this);
         }

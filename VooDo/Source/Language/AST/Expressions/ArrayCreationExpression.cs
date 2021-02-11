@@ -51,8 +51,8 @@ namespace VooDo.Language.AST.Expressions
         {
             ArrayTypeSyntax type = (ArrayTypeSyntax) Type.EmitNode(_scope, _marker);
             SyntaxList<ArrayRankSpecifierSyntax> rankSpecifiers = type.RankSpecifiers;
-            ArrayRankSpecifierSyntax rank = rankSpecifiers[0].WithSizes(SyntaxFactory.SeparatedList(Sizes.Select(_s => _s.EmitNode(_scope, _marker))));
-            rankSpecifiers = SyntaxFactory.List(new[] { rank }.Concat(rankSpecifiers.Skip(1)));
+            ArrayRankSpecifierSyntax rank = rankSpecifiers[0].WithSizes(Sizes.Select(_s => _s.EmitNode(_scope, _marker)).ToSeparatedList());
+            rankSpecifiers = new[] { rank }.Concat(rankSpecifiers.Skip(1)).ToSyntaxList();
             type = type.WithRankSpecifiers(rankSpecifiers);
             return SyntaxFactory.ArrayCreationExpression(type).Own(_marker, this);
         }

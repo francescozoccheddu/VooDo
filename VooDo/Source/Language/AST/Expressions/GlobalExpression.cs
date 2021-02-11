@@ -51,21 +51,17 @@ namespace VooDo.Language.AST.Expressions
         {
             Scope.GlobalDefinition globalDefinition = _scope.AddGlobal(new Global(ComplexTypeOrVar.Var, null, Initializer));
             return SyntaxFactory.InvocationExpression(
-                SyntaxFactory.MemberAccessExpression(
-                    SyntaxKind.SimpleMemberAccessExpression,
-                    SyntaxFactory.ThisExpression(),
-                    SyntaxFactory.IdentifierName("SetControllerAndGetValue")),
-                SyntaxFactory.ArgumentList(
-                    SyntaxFactory.SeparatedList(
+                SyntaxFactoryHelper.ThisMemberAccess("SetControllerAndGetValue"),
+                SyntaxFactoryHelper.Arguments(
                         new ArgumentSyntax[]
                         {
                             SyntaxFactory.Argument(
-                                SyntaxFactory.MemberAccessExpression(
-                                    SyntaxKind.SimpleMemberAccessExpression,
-                                    SyntaxFactory.ThisExpression(),
+                                SyntaxFactoryHelper.ThisMemberAccess(
                                     SyntaxFactory.IdentifierName(globalDefinition.Identifier))),
-                            SyntaxFactory.Argument(Controller.EmitNode(_scope, _marker)).Own(_marker, Controller)
-                        })))
+                            SyntaxFactory.Argument(
+                                Controller.EmitNode(_scope, _marker))
+                            .Own(_marker, Controller)
+                        }))
                 .Own(_marker, this);
         }
         public override IEnumerable<Expression> Children => HasInitializer ? new Expression[] { Controller, Initializer! } : new Expression[] { Controller };

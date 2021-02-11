@@ -41,7 +41,7 @@ namespace VooDo.Language.AST.Expressions
 
         internal override ExpressionSyntax EmitNode(Scope _scope, Marker _marker)
         {
-            ArgumentListSyntax argumentList = SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList(Arguments.Select(_a => _a.EmitNode(_scope, _marker))));
+            ArgumentListSyntax argumentList = SyntaxFactoryHelper.Arguments(Arguments.Select(_a => _a.EmitNode(_scope, _marker)));
             return (IsTypeImplicit
                 ? (ExpressionSyntax) SyntaxFactory.ImplicitObjectCreationExpression(argumentList, null)
                 : SyntaxFactory.ObjectCreationExpression(Type!.EmitNode(_scope, _marker), argumentList, null))

@@ -8,6 +8,7 @@ using System.Collections.Immutable;
 using System.Linq;
 
 using VooDo.Language.Linking;
+using VooDo.Utils;
 
 namespace VooDo.Language.AST.Expressions
 {
@@ -38,8 +39,7 @@ namespace VooDo.Language.AST.Expressions
         IEnumerator IEnumerable.GetEnumerator() => ((IEnumerable) m_expressions).GetEnumerator();
         internal override TupleExpressionSyntax EmitNode(Scope _scope, Marker _marker)
             => SyntaxFactory.TupleExpression(
-                SyntaxFactory.SeparatedList(
-                    this.Select(_e => SyntaxFactory.Argument(_e.EmitNode(_scope, _marker)).Own(_marker, _e))))
+                    this.Select(_e => SyntaxFactory.Argument(_e.EmitNode(_scope, _marker)).Own(_marker, _e)).ToSeparatedList())
             .Own(_marker, this);
         public override IEnumerable<Expression> Children => m_expressions;
         public override string ToString() => $"({string.Join(", ", this)})";

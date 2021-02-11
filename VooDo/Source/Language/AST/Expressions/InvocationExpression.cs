@@ -44,7 +44,7 @@ namespace VooDo.Language.AST.Expressions
             internal override ExpressionSyntax EmitNode(Scope _scope, Marker _marker)
             {
                 ExpressionSyntax source;
-                TypeArgumentListSyntax typeArgumentList = SyntaxFactory.TypeArgumentList(SyntaxFactory.SeparatedList(TypeArguments.Select(_a => _a.EmitNode(_scope, _marker))));
+                TypeArgumentListSyntax typeArgumentList = SyntaxFactoryHelper.TypeArguments(TypeArguments.Select(_a => _a.EmitNode(_scope, _marker)));
                 if (Source is NameExpression name)
                 {
                     SyntaxToken identifier = name.Name.EmitToken(_marker);
@@ -154,9 +154,8 @@ namespace VooDo.Language.AST.Expressions
         internal override InvocationExpressionSyntax EmitNode(Scope _scope, Marker _marker)
             => SyntaxFactory.InvocationExpression(
                 Source.EmitNode(_scope, _marker),
-                SyntaxFactory.ArgumentList(
-                    SyntaxFactory.SeparatedList(
-                        Arguments.Select(_a => _a.EmitNode(_scope, _marker)))))
+                SyntaxFactoryHelper.Arguments(
+                        Arguments.Select(_a => _a.EmitNode(_scope, _marker))))
             .Own(_marker, this);
         public override IEnumerable<Node> Children => new Node[] { Source }.Concat(Arguments);
         public override string ToString() => $"{Source}({string.Join(", ", Arguments)})";
