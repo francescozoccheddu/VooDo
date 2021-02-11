@@ -20,7 +20,7 @@ namespace VooDo.Compilation
     {
 
         public static Reference RuntimeReference { get; }
-            = FromAssembly(Assembly.GetExecutingAssembly(), Compiler.runtimeReferenceExternAlias);
+            = FromAssembly(Assembly.GetExecutingAssembly(), Compiler.runtimeReferenceAlias);
 
         private sealed class MetadataEqualityComparerImpl : IEqualityComparer<Reference>
         {

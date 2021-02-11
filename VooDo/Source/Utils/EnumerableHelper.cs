@@ -70,5 +70,17 @@ namespace VooDo.Utils
             }
         }
 
+        internal static IEnumerable<TOutItem> SelectNonNull<TItem, TOutItem>(this IEnumerable<TItem?> _items, Func<TItem, TOutItem?> _map)
+        {
+            foreach (TItem item in _items)
+            {
+                TOutItem? mapped = _map(item);
+                if (mapped is not null)
+                {
+                    yield return mapped;
+                }
+            }
+        }
+
     }
 }

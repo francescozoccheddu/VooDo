@@ -36,7 +36,7 @@ namespace VooDo.Language.AST
         #region Overrides
 
         internal override CompilationUnitSyntax EmitNode(Scope _scope, Marker _marker)
-            => EmitNode(_scope, _marker, ImmutableArray.Create(new Identifier(Compiler.runtimeReferenceExternAlias)), null);
+            => EmitNode(_scope, _marker, ImmutableArray.Create(new Identifier(Compiler.runtimeReferenceAlias)), null);
 
         internal CompilationUnitSyntax EmitNode(Scope _scope, Marker _marker, ImmutableArray<Identifier> _externAliases, ComplexType? _returnType)
         {

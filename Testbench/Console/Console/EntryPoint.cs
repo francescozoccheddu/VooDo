@@ -6,9 +6,11 @@ using VooDo.Language.AST.Directives;
 using VooDo.Language.AST.Expressions;
 using VooDo.Language.AST.Names;
 using VooDo.Language.AST.Statements;
+using VooDo.Runtime;
 
 namespace VooDo.ConsoleTestbench
 {
+    public interface Culo : IControllerFactory<float> { }
     internal static class EntryPoint
     {
 
@@ -39,12 +41,16 @@ namespace VooDo.ConsoleTestbench
                         new BinaryExpression(
                             LiteralExpression.Create("ciao\n\t"),
                             BinaryExpression.EKind.Add,
-                            new GlobalExpression(LiteralExpression.Null, LiteralExpression.False)
+                            new GlobalExpression(
+                                new CastExpression(
+                                    QualifiedType.FromType<Culo>(),
+                                    LiteralExpression.Null),
+                                LiteralExpression.False)
                         )
                     )
                 }.ToImmutableArray()
             ));
-            Compiler.Compile(script, Reference.GetSystemReferences().Add(Reference.RuntimeReference), null);
+            Compiler.Compile(script, Reference.GetSystemReferences().Add(Reference.RuntimeReference).Add(Reference.FromAssembly(typeof(Culo).Assembly)), null);
         }
 
     }

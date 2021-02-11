@@ -3,7 +3,6 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 using System;
-using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 
@@ -19,7 +18,7 @@ namespace VooDo.Compilation
     public static class Compiler
     {
 
-        public const string runtimeReferenceExternAlias = "VooDoRuntime";
+        public const string runtimeReferenceAlias = "VooDoRuntime";
         public const string generatedClassName = "GeneratedProgram";
         public const string globalFieldPrefix = "field_";
 
@@ -32,9 +31,9 @@ namespace VooDo.Compilation
                 {
                     throw new InvalidOperationException("No runtime reference");
                 }
-                if (!_references[runtimeIndex].Aliases.Contains(runtimeReferenceExternAlias))
+                if (!_references[runtimeIndex].Aliases.Contains(runtimeReferenceAlias))
                 {
-                    throw new InvalidOperationException($"Runtime reference must define '{runtimeReferenceExternAlias}' alias");
+                    throw new InvalidOperationException($"Runtime reference must define '{runtimeReferenceAlias}' alias");
                 }
             }
             Marker marker = new Marker();
@@ -61,8 +60,7 @@ namespace VooDo.Compilation
             ImmutableArray<Diagnostic> d = compilation.GetDiagnostics();
             SemanticModel semantics = compilation.GetSemanticModel(tree);
             {
-                IEnumerable<SyntaxToken> globalFields = scope.GetGlobalDefinitions().Select(_g => _g.Identifier);
-                syntax = ImplicitGlobalTypeRewriter.Rewrite(semantics, globalFields.ToImmutableHashSet());
+                syntax = ImplicitGlobalTypeRewriter.Rewrite(semantics, scope.GetGlobalDefinitions());
                 SyntaxTree newTree = CSharpSyntaxTree.Create(syntax, parseOptions);
                 compilation = compilation.ReplaceSyntaxTree(tree, newTree);
                 tree = newTree;
