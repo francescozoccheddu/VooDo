@@ -195,6 +195,11 @@ namespace VooDo.Utils
             return type;
         }
 
+        internal static PropertyDeclarationSyntax ArrowProperty(TypeSyntax _type, string _name, ExpressionSyntax _expression)
+            => SF.PropertyDeclaration(_type, _name)
+                .WithExpressionBody(SF.ArrowExpressionClause(_expression))
+                .WithSemicolonToken(SF.Token(SyntaxKind.SemicolonToken));
+
     }
 
 }

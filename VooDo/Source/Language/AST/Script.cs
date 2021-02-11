@@ -84,20 +84,20 @@ namespace VooDo.Language.AST
                                 .ToEqualsValueClause())
                             .ToSeparatedList());
             }
-            PropertyDeclarationSyntax variablesProperty = SF.PropertyDeclaration(
-                 ComplexType.FromType<Variable[]>().ToTypeSyntax(),
-                 nameof(Program.m_Variables))
-                .WithExpressionBody(
-                    SF.ArrowExpressionClause(
-                        SF.ArrayCreationExpression(
-                            SF.ArrayType(variableType)
-                            .WithRankSpecifiers(
-                                SFH.SingleArrayRank()))
-                        .WithInitializer(
-                            SF.InitializerExpression(
-                                SyntaxKind.ArrayInitializerExpression,
-                                globals.Select(_g => SFH.ThisMemberAccess(_g.Identifier))
-                            .ToSeparatedList<ExpressionSyntax>()))))
+            PropertyDeclarationSyntax variablesProperty = SFH.ArrowProperty(
+                SF.ArrayType(
+                    SFH.VariableType(),
+                    SFH.SingleArrayRank()),
+                nameof(Program.m_Variables),
+                SF.ArrayCreationExpression(
+                    SF.ArrayType(variableType)
+                    .WithRankSpecifiers(
+                        SFH.SingleArrayRank()))
+                    .WithInitializer(
+                        SF.InitializerExpression(
+                            SyntaxKind.ArrayInitializerExpression,
+                            globals.Select(_g => SFH.ThisMemberAccess(_g.Identifier))
+                        .ToSeparatedList<ExpressionSyntax>())))
                 .WithModifiers(
                     SFH.Tokens(
                         SyntaxKind.ProtectedKeyword,

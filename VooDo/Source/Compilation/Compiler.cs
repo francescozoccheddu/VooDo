@@ -41,8 +41,13 @@ namespace VooDo.Compilation
             Scope scope = new Scope();
             CompilationUnitSyntax syntax;
             SyntaxTree tree;
-            CSharpParseOptions parseOptions = CSharpParseOptions.Default.WithLanguageVersion(LanguageVersion.CSharp7);
-            CSharpCompilationOptions compilationOptions = new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary);
+            CSharpParseOptions parseOptions = CSharpParseOptions.Default.WithLanguageVersion(LanguageVersion.CSharp9);
+            CSharpCompilationOptions compilationOptions = new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary)
+                .WithAllowUnsafe(false)
+                .WithOverflowChecks(true)
+                .WithNullableContextOptions(NullableContextOptions.Disable)
+                .WithMetadataImportOptions(MetadataImportOptions.Public)
+                .WithUsings("System");
             {
                 ImmutableArray<Identifier> externAliases = _references
                     .SelectMany(_r => _r.Aliases)

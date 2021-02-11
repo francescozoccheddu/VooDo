@@ -158,6 +158,10 @@ namespace VooDo.Language.AST.Names
 
         internal override TypeSyntax EmitNonArrayNonNullableType(Scope _scope, Marker _marker)
         {
+            if (IsSimple)
+            {
+                return Path[0].EmitNode(_scope, _marker, true);
+            }
             NameSyntax type = Path[0].EmitNode(_scope, _marker);
             if (IsAliasQualified)
             {

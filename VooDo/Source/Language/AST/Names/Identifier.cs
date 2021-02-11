@@ -5,6 +5,7 @@ using Microsoft.CodeAnalysis.CSharp;
 
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 
 using VooDo.Compilation;
@@ -17,6 +18,7 @@ namespace VooDo.Language.AST.Names
     {
 
         #region Creation
+
 
         public static Identifier FromSyntax(SyntaxToken _token) => new Identifier(_token.ValueText);
 
@@ -54,6 +56,29 @@ namespace VooDo.Language.AST.Names
 
         #region Overrides
 
+        private static readonly ImmutableDictionary<string, SyntaxToken> s_predefinedTypesTokens =
+            new SyntaxKind[] {
+                SyntaxKind.BoolKeyword,
+                SyntaxKind.CharKeyword,
+                SyntaxKind.StringKeyword,
+                SyntaxKind.ByteKeyword,
+                SyntaxKind.SByteKeyword,
+                SyntaxKind.ShortKeyword,
+                SyntaxKind.UShortKeyword,
+                SyntaxKind.IntKeyword,
+                SyntaxKind.UIntKeyword,
+                SyntaxKind.LongKeyword,
+                SyntaxKind.ULongKeyword,
+                SyntaxKind.DecimalKeyword,
+                SyntaxKind.FloatKeyword,
+                SyntaxKind.DoubleKeyword,
+                SyntaxKind.ObjectKeyword
+            }.Select(_k => SyntaxFactory.Token(_k))
+            .ToImmutableDictionary(_t => _t.ValueText);
+
+        internal SyntaxToken? EmitPredefinedTypeKeywordToken(Marker _marker)
+            => s_predefinedTypesTokens.TryGetValue(this, out SyntaxToken token)
+            ? token.Own(_marker, this) : null;
         internal override SyntaxNodeOrToken EmitNodeOrToken(Scope _scope, Marker _marker) => EmitToken(_marker);
         internal SyntaxToken EmitToken(Marker _marker) => SyntaxFactory.Identifier(this).Own(_marker, this);
         public override IEnumerable<Node> Children => Enumerable.Empty<Node>();

@@ -8,6 +8,7 @@ using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.InteropServices;
 
 using VooDo.Language.AST.Names;
 using VooDo.Utils;
@@ -29,7 +30,19 @@ namespace VooDo.Compilation
 
         public static IEqualityComparer<Reference> MetadataEqualityComparer { get; } = new MetadataEqualityComparerImpl();
 
-        public static Reference GetSystemReference() => FromAssembly(typeof(object).Assembly);
+        public static ImmutableArray<Reference> GetSystemReferences()
+        {
+            string directory = RuntimeEnvironment.GetRuntimeDirectory();
+            string[] names =
+            {
+                "System.Runtime.dll",
+                "mscorlib.dll",
+                "System.dll",
+                typeof(object).Assembly.Location,
+                typeof(int).Assembly.Location,
+            };
+            return names.Select(_n => FromFile(Path.Combine(directory, _n))).ToImmutableArray();
+        }
 
         public static Reference FromStream(Stream _stream, params Identifier[] _aliases)
             => FromStream(_stream, _aliases);

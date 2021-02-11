@@ -1,4 +1,5 @@
-﻿using Microsoft.CodeAnalysis.CSharp;
+﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 using System;
@@ -142,6 +143,19 @@ namespace VooDo.Language.AST.Names
         #endregion
 
         #region Overrides
+
+        internal TypeSyntax EmitNode(Scope _scope, Marker _marker, bool _allowPredefined)
+        {
+            if (_allowPredefined && !IsGeneric)
+            {
+                SyntaxToken? keyword = Name.EmitPredefinedTypeKeywordToken(_marker);
+                if (keyword is not null)
+                {
+                    return SyntaxFactory.PredefinedType(keyword.Value).Own(_marker, this);
+                }
+            }
+            return EmitNode(_scope, _marker);
+        }
 
         internal override SimpleNameSyntax EmitNode(Scope _scope, Marker _marker)
             => (IsGeneric

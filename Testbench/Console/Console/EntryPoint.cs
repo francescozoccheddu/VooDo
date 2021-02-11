@@ -44,7 +44,7 @@ namespace VooDo.ConsoleTestbench
                     )
                 }.ToImmutableArray()
             ));
-            Compiler.Compile(script, ImmutableArray.Create(Reference.RuntimeReference, Reference.GetSystemReference()), null);
+            Compiler.Compile(script, Reference.GetSystemReferences().Add(Reference.RuntimeReference), null);
         }
 
     }
