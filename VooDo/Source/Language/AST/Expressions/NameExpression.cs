@@ -4,6 +4,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
 
+using VooDo.Compilation;
 using VooDo.Language.AST.Names;
 using VooDo.Language.Linking;
 using VooDo.Runtime;

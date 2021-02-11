@@ -10,7 +10,6 @@ using System.Linq;
 using System.Reflection;
 
 using VooDo.Language.AST.Names;
-using VooDo.Language.Linking;
 using VooDo.Utils;
 
 namespace VooDo.Compilation
@@ -20,7 +19,7 @@ namespace VooDo.Compilation
     {
 
         public static Reference RuntimeReference { get; }
-            = FromAssembly(Assembly.GetExecutingAssembly(), Linker.runtimeReferenceExternAlias);
+            = FromAssembly(Assembly.GetExecutingAssembly(), Compiler.runtimeReferenceExternAlias);
 
         private sealed class MetadataEqualityComparerImpl : IEqualityComparer<Reference>
         {

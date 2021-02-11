@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 
+using VooDo.Compilation;
 using VooDo.Language.Linking;
 using VooDo.Utils;
 

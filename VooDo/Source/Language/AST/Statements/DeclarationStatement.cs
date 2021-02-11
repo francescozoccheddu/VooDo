@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 
+using VooDo.Compilation;
 using VooDo.Language.AST.Expressions;
 using VooDo.Language.AST.Names;
 using VooDo.Language.Linking;

@@ -2,6 +2,7 @@
 
 using System.Collections.Generic;
 
+using VooDo.Compilation;
 using VooDo.Factory;
 using VooDo.Language.Linking;
 
@@ -10,6 +11,9 @@ namespace VooDo.Language.AST
 
     public abstract record NodeOrIdentifier
     {
+
+        public virtual bool Equals(NodeOrIdentifier? _other) => true;
+        public override int GetHashCode() => 0;
 
         public Origin Origin { get; init; } = default;
         public abstract override string ToString();

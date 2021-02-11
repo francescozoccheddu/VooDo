@@ -3,6 +3,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
+using VooDo.Compilation;
 using VooDo.Language.AST.Names;
 using VooDo.Language.Linking;
 using VooDo.Utils;

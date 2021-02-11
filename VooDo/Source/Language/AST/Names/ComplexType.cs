@@ -7,6 +7,7 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Runtime.CompilerServices;
 
+using VooDo.Compilation;
 using VooDo.Language.Linking;
 using VooDo.Utils;
 

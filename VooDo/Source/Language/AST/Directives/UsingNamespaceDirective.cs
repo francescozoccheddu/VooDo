@@ -5,6 +5,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 using System.Collections.Generic;
 
+using VooDo.Compilation;
 using VooDo.Language.AST.Names;
 using VooDo.Language.AST.Statements;
 using VooDo.Language.Linking;

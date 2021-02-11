@@ -1,5 +1,6 @@
 ﻿using Microsoft.CodeAnalysis.CSharp.Syntax;
 
+using VooDo.Compilation;
 using VooDo.Language.Linking;
 
 namespace VooDo.Language.AST.Directives

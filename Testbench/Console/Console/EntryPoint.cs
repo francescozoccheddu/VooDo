@@ -1,12 +1,11 @@
-﻿using System;
-using System.Collections.Immutable;
+﻿using System.Collections.Immutable;
 
+using VooDo.Compilation;
 using VooDo.Language.AST;
 using VooDo.Language.AST.Directives;
 using VooDo.Language.AST.Expressions;
 using VooDo.Language.AST.Names;
 using VooDo.Language.AST.Statements;
-using VooDo.Source.Linking;
 
 namespace VooDo.ConsoleTestbench
 {
@@ -45,7 +44,7 @@ namespace VooDo.ConsoleTestbench
                     )
                 }.ToImmutableArray()
             ));
-            Console.WriteLine(Test.Emit(script));
+            Compiler.Compile(script, ImmutableArray.Create(Reference.RuntimeReference, Reference.GetSystemReference()), null);
         }
 
     }

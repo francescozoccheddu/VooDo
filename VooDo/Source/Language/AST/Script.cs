@@ -1,12 +1,11 @@
-﻿
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
+﻿using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 
+using VooDo.Compilation;
 using VooDo.Language.AST.Directives;
 using VooDo.Language.AST.Names;
 using VooDo.Language.AST.Statements;
@@ -36,10 +35,10 @@ namespace VooDo.Language.AST
 
         #region Overrides
 
-        internal override SyntaxNode EmitNode(Scope _scope, Marker _marker)
-            => EmitNode(_scope, _marker, ImmutableArray.Create(new Identifier(Linker.runtimeReferenceExternAlias)), null);
+        internal override CompilationUnitSyntax EmitNode(Scope _scope, Marker _marker)
+            => EmitNode(_scope, _marker, ImmutableArray.Create(new Identifier(Compiler.runtimeReferenceExternAlias)), null);
 
-        internal SyntaxNode EmitNode(Scope _scope, Marker _marker, ImmutableArray<Identifier> _externAliases, ComplexType? _returnType)
+        internal CompilationUnitSyntax EmitNode(Scope _scope, Marker _marker, ImmutableArray<Identifier> _externAliases, ComplexType? _returnType)
         {
             TypeSyntax? returnType = _returnType?.EmitNode(_scope, _marker);
             TypeSyntax variableType = SFH.VariableType();
@@ -55,7 +54,6 @@ namespace VooDo.Language.AST
                             .WithModifiers(
                                 SFH.Tokens(
                                     SyntaxKind.ProtectedKeyword,
-                                    SyntaxKind.InternalKeyword,
                                     SyntaxKind.OverrideKeyword))
                             .WithBody(
                                 Body.EmitNode(_scope, _marker));
@@ -86,13 +84,11 @@ namespace VooDo.Language.AST
                                 .ToEqualsValueClause())
                             .ToSeparatedList());
             }
-            FieldDeclarationSyntax? variablesProperty = SF.FieldDeclaration(
-                SF.VariableDeclaration(
-                    ComplexType.FromType<IEnumerable<Variable>>().ToTypeSyntax())
-                .WithVariables(
-                    SF.VariableDeclarator(
-                        SF.Identifier(nameof(Program.m_Variables)))
-                    .WithInitializer(
+            PropertyDeclarationSyntax variablesProperty = SF.PropertyDeclaration(
+                 ComplexType.FromType<Variable[]>().ToTypeSyntax(),
+                 nameof(Program.m_Variables))
+                .WithExpressionBody(
+                    SF.ArrowExpressionClause(
                         SF.ArrayCreationExpression(
                             SF.ArrayType(variableType)
                             .WithRankSpecifiers(
@@ -101,14 +97,11 @@ namespace VooDo.Language.AST
                             SF.InitializerExpression(
                                 SyntaxKind.ArrayInitializerExpression,
                                 globals.Select(_g => SFH.ThisMemberAccess(_g.Identifier))
-                                .ToSeparatedList<ExpressionSyntax>()))
-                        .ToEqualsValueClause())
-                    .ToSeparatedList()))
-            .WithModifiers(
-                SFH.Tokens(
-                    SyntaxKind.ProtectedKeyword,
-                    SyntaxKind.InternalKeyword,
-                    SyntaxKind.OverrideKeyword));
+                            .ToSeparatedList<ExpressionSyntax>()))))
+                .WithModifiers(
+                    SFH.Tokens(
+                        SyntaxKind.ProtectedKeyword,
+                        SyntaxKind.OverrideKeyword));
             IEnumerable<FieldDeclarationSyntax> globalDeclarations =
                 globals.Select(_g =>
                     SF.FieldDeclaration(
@@ -118,7 +111,7 @@ namespace VooDo.Language.AST
                             SyntaxKind.ReadOnlyKeyword),
                         EmitGlobalDeclaration(_g)));
             ClassDeclarationSyntax? classDeclaration =
-                SF.ClassDeclaration(Linker.generatedClassName)
+                SF.ClassDeclaration(Compiler.generatedClassName)
                     .WithModifiers(
                         SFH.Tokens(
                             SyntaxKind.PublicKeyword,

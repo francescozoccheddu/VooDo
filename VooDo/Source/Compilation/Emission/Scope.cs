@@ -4,17 +4,15 @@ using Microsoft.CodeAnalysis.CSharp;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Linq;
 
 using VooDo.Language.AST.Names;
+using VooDo.Language.Linking;
 
-namespace VooDo.Language.Linking
+namespace VooDo.Compilation
 {
 
     internal sealed class Scope
     {
-
-        private const string c_globalFieldNameFormat = "field_{0}";
 
         internal sealed class GlobalDefinition
         {
@@ -54,7 +52,7 @@ namespace VooDo.Language.Linking
             => m_globals.ToImmutableArray();
 
         private static GlobalDefinition CreateGlobalDefinition(Global _global, int _index)
-            => new GlobalDefinition(_global, string.Format(c_globalFieldNameFormat, _index));
+            => new GlobalDefinition(_global, Compiler.globalFieldPrefix + _index);
 
         public void AddLocal(Identifier _name)
         {
@@ -79,9 +77,6 @@ namespace VooDo.Language.Linking
             m_globals.Add(definition);
             return definition;
         }
-
-        public ImmutableArray<GlobalDefinition> AddGlobals(IEnumerable<Global> _globals)
-            => _globals.Select(AddGlobal).ToImmutableArray();
 
         internal Scope CreateNested() => new Scope(m_globals, new Dictionary<string, bool>(m_names));
 

@@ -12,10 +12,6 @@ namespace VooDo.Runtime
     public abstract class Program<TReturn> : Program
     {
 
-        protected Program(IEnumerable<Variable> _variables) : base(_variables)
-        {
-        }
-
         protected internal abstract TReturn TypedRun();
 
         protected internal sealed override void Run()
@@ -26,9 +22,9 @@ namespace VooDo.Runtime
     public abstract class Program : IHookListener
     {
 
-        protected Program(IEnumerable<Variable> _variables)
+        protected Program()
         {
-            Variables = new ReadOnlyDictionary<string, Variable>(_variables.ToDictionary(_v => _v.Name, _v => _v));
+            Variables = new ReadOnlyDictionary<string, Variable>(m_Variables.ToDictionary(_v => _v.Name, _v => _v));
         }
 
         public IReadOnlyDictionary<string, Variable> Variables { get; }
@@ -38,8 +34,7 @@ namespace VooDo.Runtime
         private int m_locks;
 
         protected internal abstract void Run();
-        protected internal abstract IEnumerable<Variable> m_Variables { get; }
-
+        protected internal abstract Variable[] m_Variables { get; }
 
         private void PrepareAndRun()
         {

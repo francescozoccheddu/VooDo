@@ -3,6 +3,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 using System.Collections.Generic;
 
+using VooDo.Compilation;
 using VooDo.Language.AST.Expressions;
 using VooDo.Language.Linking;
 
