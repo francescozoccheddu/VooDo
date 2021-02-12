@@ -80,14 +80,6 @@ outDeclarationArgument
 	: OUT mType = complexType mName = identifierOrDiscard
 ;
 
-callable
-	: mVar1 = simpleCallable | mVar2 = method
-;
-
-simpleCallable
-	: mSource = expression
-;
-
 method
 	: mSource = nameOrMemberAccessExpression (LT mTypeArgs += complexType (COMMA mTypeArgs += complexType)* GT)?
 ;
@@ -141,7 +133,8 @@ expression
 	| mLeft = expression mOp = COAL mRight = expression																					# binaryExpression
 	| OPEN_PARENS mType = complexType CLOSE_PARENS mExpr = expression																	# castExpression
 	| mCond = expression QUEST mTrue = expression COLON mFalse = expression																# conditionalExpression
-	| mSource = callable OPEN_PARENS (mArgs += argument (COMMA mArgs += argument)*)? CLOSE_PARENS										# invocationExpression
+	| mSource = expression OPEN_PARENS (mArgs += argument (COMMA mArgs += argument)*)? CLOSE_PARENS										# simpleInvocationExpression
+	| mSource = method OPEN_PARENS (mArgs += argument (COMMA mArgs += argument)*)? CLOSE_PARENS											# methodInvocationExpression
 	| GLOB mController = expression (INIT mInitializer = expression)																	# globalExpression
 	| mSource = expression IS mType = complexType (mName = identifierOrDiscard)?														# isExpression
 	| DEFAULT (OPEN_PARENS mType = complexType CLOSE_PARENS)																			# defaultExpression
