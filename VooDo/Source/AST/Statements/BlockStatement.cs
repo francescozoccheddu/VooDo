@@ -7,7 +7,6 @@ using System.Collections.Immutable;
 using System.Linq;
 
 using VooDo.Compilation;
-using VooDo.Compilation;
 using VooDo.Utils;
 
 namespace VooDo.AST.Statements
@@ -42,7 +41,7 @@ namespace VooDo.AST.Statements
         public override IEnumerable<Statement> Children => m_statements;
         public override string ToString() => Count == 0
             ? "{}"
-            : $"{{{("\n" + string.Join('\n', this)).Replace("\n", "\n\t")}\n}}";
+            : $"{{{("\n" + string.Join('\n', m_statements)).Replace("\n", "\n\t")}\n}}";
 
         #endregion
 

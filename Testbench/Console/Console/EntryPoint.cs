@@ -1,11 +1,9 @@
-﻿using System.Collections.Immutable;
+﻿
+using System;
 
-using VooDo.Compilation;
 using VooDo.AST;
-using VooDo.AST.Directives;
-using VooDo.AST.Expressions;
-using VooDo.AST.Names;
-using VooDo.AST.Statements;
+using VooDo.Compilation;
+using VooDo.Parsing;
 using VooDo.Runtime;
 
 namespace VooDo.ConsoleTestbench
@@ -17,39 +15,20 @@ namespace VooDo.ConsoleTestbench
 
         public static void Run()
         {
+            string code = @"
+
+using System;
+
+global var x = 7;
+int y = 8;
+y += x;
+$x = null;
+y = glob 7 * 4 + 2;
+            ";
             // using System; var x = 8; x += 5 + y;
-            Script script = new Script(
-                new UsingDirective[] { new UsingNamespaceDirective(null, "System") }.ToImmutableArray(),
-                new BlockStatement(new Statement[]
-                {
-                    new GlobalStatement(
-                        new []
-                        {
-                            new DeclarationStatement(
-                                ComplexTypeOrVar.Parse("int"),
-                                new DeclarationStatement.Declarator[] {
-                                    new DeclarationStatement.Declarator(
-                                        "x",
-                                        LiteralExpression.Create(8))
-                            }.ToImmutableArray())
-                        }.ToImmutableArray()),
-                    new AssignmentStatement(
-                        new NameExpression(
-                            false,
-                            "x"),
-                        AssignmentStatement.EKind.Add,
-                        new BinaryExpression(
-                            LiteralExpression.Create("ciao\n\t"),
-                            BinaryExpression.EKind.Add,
-                            new GlobalExpression(
-                                new CastExpression(
-                                    QualifiedType.FromType<Culo>(),
-                                    LiteralExpression.Null),
-                                LiteralExpression.False)
-                        )
-                    )
-                }.ToImmutableArray()
-            ));
+            Script script = Parser.Script(code);
+            Console.WriteLine(script);
+            return;
             Compiler.Compile(script, Reference.GetSystemReferences().Add(Reference.RuntimeReference).Add(Reference.FromAssembly(typeof(Culo).Assembly)), null);
         }
 

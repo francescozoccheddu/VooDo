@@ -3,6 +3,10 @@
 using System;
 
 using VooDo.AST;
+using VooDo.AST.Directives;
+using VooDo.AST.Expressions;
+using VooDo.AST.Names;
+using VooDo.AST.Statements;
 using VooDo.Parsing.Generated;
 
 namespace VooDo.Parsing
@@ -17,31 +21,27 @@ namespace VooDo.Parsing
             return new VooDoParser(new CommonTokenStream(lexer));
         }
 
-        private static Script Parse(ParserRuleContext _rule)
-            => (Script) new Visitor().Visit(_rule);
+        private static TNodeOrIdentifier Parse<TNodeOrIdentifier>(string _source, Func<VooDoParser, ParserRuleContext> _ruleProvider) where TNodeOrIdentifier : NodeOrIdentifier
+            => (TNodeOrIdentifier) new Visitor().Visit(_ruleProvider(MakeParser(_source)));
 
-        public static Script Script(string _script) => Parse(MakeParser(_script).script());
-
-        public static Script Statement(string _script) => Parse(MakeParser(_script).script());
-
-        public static Script UsingDirective(string _script) => Parse(MakeParser(_script).script());
-
-        public static Script Expression(string _script) => Parse(MakeParser(_script).script());
-
-        public static Script ComplexTypeOrVar(string _script) => Parse(MakeParser(_script).script());
-
-        public static Script ComplexType(string _script) => Parse(MakeParser(_script).script());
-
-        public static Script QualifiedType(string _script) => Parse(MakeParser(_script).script());
-
-        public static Script TupleType(string _script) => Parse(MakeParser(_script).script());
-
-        public static Script Namespace(string _script) => Parse(MakeParser(_script).script());
-
-        public static Script SimpleType(string _script) => Parse(MakeParser(_script).script());
-
-        public static TNodeOrIdentifier NodeOrIdentifier<TNodeOrIdentifier>(string _script) where TNodeOrIdentifier : NodeOrIdentifier
-            => throw new NotImplementedException();
+        // Script
+        public static Script Script(string _source) => Parse<Script>(_source, _p => _p.script_Greedy());
+        // Directives
+        public static UsingDirective UsingDirective(string _source) => Parse<UsingDirective>(_source, _p => _p.usingDirective_Greedy());
+        // Expressions
+        public static Expression Expression(string _source) => Parse<Expression>(_source, _p => _p.expression_Greedy());
+        // Names
+        public static ComplexType ComplexType(string _source) => Parse<ComplexType>(_source, _p => _p.complexType_Greedy());
+        public static SimpleType SimpleType(string _source) => Parse<SimpleType>(_source, _p => _p.simpleType_Greedy());
+        public static QualifiedType QualifiedType(string _source) => Parse<QualifiedType>(_source, _p => _p.qualifiedType_Greedy());
+        public static TupleType TupleType(string _source) => Parse<TupleType>(_source, _p => _p.tupleType_Greedy());
+        public static Identifier Identifier(string _source) => Parse<Identifier>(_source, _p => _p.identifier_Greedy());
+        public static Namespace Namespace(string _source) => Parse<Namespace>(_source, _p => _p.namespace_Greedy());
+        public static ComplexTypeOrVar ComplexTypeOrVar(string _source) => Parse<ComplexTypeOrVar>(_source, _p => _p.complexTypeOrVar_Greedy());
+        public static IdentifierOrDiscard IdentifierOrDiscard(string _source) => Parse<IdentifierOrDiscard>(_source, _p => _p.identifierOrDiscard_Greedy());
+        public static ComplexTypeOrExpression ComplexTypeOrExpression(string _source) => Parse<ComplexTypeOrExpression>(_source, _p => _p.complexTypeOrExpression_Greedy());
+        // Statements
+        public static Statement Statement(string _source) => Parse<Statement>(_source, _p => _p.statement_Greedy());
 
     }
 

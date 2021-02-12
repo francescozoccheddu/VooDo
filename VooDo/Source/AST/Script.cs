@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 
-using VooDo.Compilation;
 using VooDo.AST.Directives;
 using VooDo.AST.Names;
 using VooDo.AST.Statements;
@@ -19,7 +18,7 @@ using SFH = VooDo.Utils.SyntaxFactoryHelper;
 namespace VooDo.AST
 {
 
-    public sealed record Script(ImmutableArray<UsingDirective> Usings, BlockStatement Body) : Node
+    public sealed record Script(ImmutableArray<UsingDirective> Usings, ImmutableArray<Statement> Statements) : Node
     {
 
         #region Members
@@ -56,7 +55,8 @@ namespace VooDo.AST
                                     SyntaxKind.ProtectedKeyword,
                                     SyntaxKind.OverrideKeyword))
                             .WithBody(
-                                Body.EmitNode(_scope, _marker));
+                                SF.Block(
+                                    Statements.Select(_s => _s.EmitNode(_scope, _marker)).ToSeparatedList()));
 
             ImmutableArray<Scope.GlobalDefinition> globals = _scope.GetGlobalDefinitions();
             VariableDeclarationSyntax EmitGlobalDeclaration(Scope.GlobalDefinition _definition)
@@ -134,8 +134,8 @@ namespace VooDo.AST
                 .Own(_marker, this);
         }
 
-        public override IEnumerable<Node> Children => ((IEnumerable<Node>) Usings).Append(Body);
-        public override string ToString() => Usings.Aggregate("", (_a, _u) => $"{_a}{_u}\n") + Body;
+        public override IEnumerable<Node> Children => ((IEnumerable<Node>) Usings).Concat(Statements);
+        public override string ToString() => (string.Join('\n', Usings) + '\n' + string.Join('\n', Statements)).Trim();
 
         #endregion
 

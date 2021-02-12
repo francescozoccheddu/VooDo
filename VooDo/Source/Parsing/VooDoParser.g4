@@ -6,6 +6,60 @@ options
 	tokenVocab = VooDoLexer;
 }
 
+// Until EOF
+
+script_Greedy
+	: script EOF
+;
+
+usingDirective_Greedy
+	: usingDirective EOF
+;
+
+statement_Greedy
+	: statement EOF
+;
+
+expression_Greedy
+	: expression EOF
+;
+
+identifier_Greedy
+	: identifier EOF
+;
+
+identifierOrDiscard_Greedy
+	: identifierOrDiscard EOF
+;
+
+namespace_Greedy
+	: namespace EOF
+;
+
+simpleType_Greedy
+	: simpleType EOF
+;
+
+complexType_Greedy
+	: complexType EOF
+;
+
+complexTypeOrVar_Greedy
+	: complexTypeOrVar EOF
+;
+
+qualifiedType_Greedy
+	: qualifiedType EOF
+;
+
+tupleType_Greedy
+	: tupleType EOF
+;
+
+complexTypeOrExpression_Greedy
+	: complexTypeOrExpression EOF
+;
+
 // Script
 
 script

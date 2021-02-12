@@ -35,7 +35,7 @@ namespace VooDo.Parsing
             => _rule.Select(Get<TNodeOrIdentifier>).ToImmutableArray();
 
         private TNodeOrIdentifier Variant<TNodeOrIdentifier>(ParserRuleContext _rule) where TNodeOrIdentifier : NodeOrIdentifier
-            => Get<TNodeOrIdentifier>(_rule.children.Cast<ParserRuleContext>().Single(_r => _r is not null));
+            => Get<TNodeOrIdentifier>(_rule.GetRuleContexts<ParserRuleContext>().Single(_r => _r is not null));
 
         private TNodeOrIdentifier Get<TNodeOrIdentifier>(ParserRuleContext _rule) where TNodeOrIdentifier : NodeOrIdentifier
             => TryGet<TNodeOrIdentifier>(_rule)!;
@@ -167,7 +167,7 @@ namespace VooDo.Parsing
         public override NodeOrIdentifier VisitFalseLiteralExpression([NotNull] VooDoParser.FalseLiteralExpressionContext _c)
             => LiteralExpression.False;
         public override NodeOrIdentifier VisitFullScript([NotNull] VooDoParser.FullScriptContext _c)
-            => new Script(Get<UsingDirective>(_c._mUsings), new BlockStatement(Get<Statement>(_c._mBody)) with { Origin = GetOrigin(_c) });
+            => new Script(Get<UsingDirective>(_c._mUsings), Get<Statement>(_c._mBody));
         public override NodeOrIdentifier VisitGlobalExpression([NotNull] VooDoParser.GlobalExpressionContext _c)
             => new GlobalExpression(Get<Expression>(_c.mController), TryGet<Expression>(_c.mInitializer));
         public override NodeOrIdentifier VisitGlobalStatement([NotNull] VooDoParser.GlobalStatementContext _c)
@@ -181,9 +181,8 @@ namespace VooDo.Parsing
         public override NodeOrIdentifier VisitInlineScript([NotNull] VooDoParser.InlineScriptContext _c)
         {
             Origin origin = GetOrigin(_c);
-            ReturnStatement item = new ReturnStatement(Get<Expression>(_c.mExpr)) with { Origin = origin };
-            BlockStatement body = new BlockStatement(ImmutableArray.Create<Statement>(item)) with { Origin = origin };
-            return new Script(default, body);
+            ReturnStatement expression = new ReturnStatement(Get<Expression>(_c.mExpr)) with { Origin = origin };
+            return new Script(default, ImmutableArray.Create<Statement>(expression));
         }
         public override NodeOrIdentifier VisitIsExpression([NotNull] VooDoParser.IsExpressionContext _c)
             => new IsExpression(Get<Expression>(_c.mSource), Get<ComplexType>(_c.mType), TryGet<IdentifierOrDiscard>(_c.mName));
@@ -259,6 +258,20 @@ namespace VooDo.Parsing
             => new UsingStaticDirective(Get<QualifiedType>(_c.mType));
         public override NodeOrIdentifier VisitValueArgument([NotNull] VooDoParser.ValueArgumentContext _c)
             => new InvocationExpression.ValueArgument(null, Get<Expression>(_c.mValue));
+
+        public override NodeOrIdentifier VisitScript_Greedy([NotNull] VooDoParser.Script_GreedyContext _c) => Variant<Script>(_c);
+        public override NodeOrIdentifier VisitUsingDirective_Greedy([NotNull] VooDoParser.UsingDirective_GreedyContext _c) => Variant<UsingDirective>(_c);
+        public override NodeOrIdentifier VisitStatement_Greedy([NotNull] VooDoParser.Statement_GreedyContext _c) => Variant<Statement>(_c);
+        public override NodeOrIdentifier VisitExpression_Greedy([NotNull] VooDoParser.Expression_GreedyContext _c) => Variant<Expression>(_c);
+        public override NodeOrIdentifier VisitIdentifier_Greedy([NotNull] VooDoParser.Identifier_GreedyContext _c) => Variant<Identifier>(_c);
+        public override NodeOrIdentifier VisitIdentifierOrDiscard_Greedy([NotNull] VooDoParser.IdentifierOrDiscard_GreedyContext _c) => Variant<IdentifierOrDiscard>(_c);
+        public override NodeOrIdentifier VisitNamespace_Greedy([NotNull] VooDoParser.Namespace_GreedyContext _c) => Variant<Namespace>(_c);
+        public override NodeOrIdentifier VisitSimpleType_Greedy([NotNull] VooDoParser.SimpleType_GreedyContext _c) => Variant<SimpleType>(_c);
+        public override NodeOrIdentifier VisitComplexType_Greedy([NotNull] VooDoParser.ComplexType_GreedyContext _c) => Variant<ComplexType>(_c);
+        public override NodeOrIdentifier VisitComplexTypeOrVar_Greedy([NotNull] VooDoParser.ComplexTypeOrVar_GreedyContext _c) => Variant<ComplexTypeOrVar>(_c);
+        public override NodeOrIdentifier VisitQualifiedType_Greedy([NotNull] VooDoParser.QualifiedType_GreedyContext _c) => Variant<QualifiedType>(_c);
+        public override NodeOrIdentifier VisitTupleType_Greedy([NotNull] VooDoParser.TupleType_GreedyContext _c) => Variant<TupleType>(_c);
+        public override NodeOrIdentifier VisitComplexTypeOrExpression_Greedy([NotNull] VooDoParser.ComplexTypeOrExpression_GreedyContext _c) => Variant<ComplexTypeOrExpression>(_c);
 
     }
 
