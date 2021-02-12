@@ -1,4 +1,5 @@
-﻿using Microsoft.CodeAnalysis.CSharp;
+﻿
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 using System;
@@ -14,14 +15,14 @@ using VooDo.Utils;
 namespace VooDo.Language.AST.Names
 {
 
-    public abstract record ComplexType(bool IsNullable = false, ImmutableArray<int> Ranks = default) : ComplexTypeOrExpression
+    public abstract record ComplexType(bool IsNullable = false, ImmutableArray<ComplexType.RankSpecifier> Ranks = default) : ComplexTypeOrExpression
     {
 
         #region Creation
 
-        protected static Type Unwrap(Type _type, out bool _nullable, out ImmutableArray<int> _ranks)
+        protected static Type Unwrap(Type _type, out bool _nullable, out ImmutableArray<RankSpecifier> _ranks)
         {
-            List<int> ranks = new List<int>();
+            List<RankSpecifier> ranks = new List<RankSpecifier>();
             Type type = _type;
             while (type.IsArray)
             {
@@ -38,11 +39,11 @@ namespace VooDo.Language.AST.Names
             return type;
         }
 
-        protected static TypeSyntax Unwrap(TypeSyntax _type, out bool _nullable, out ImmutableArray<int> _ranks)
+        protected static TypeSyntax Unwrap(TypeSyntax _type, out bool _nullable, out ImmutableArray<RankSpecifier> _ranks)
         {
             TypeSyntax? newType = _type;
             _nullable = false;
-            List<int> ranks = new List<int>();
+            List<RankSpecifier> ranks = new List<RankSpecifier>();
             while (true)
             {
                 if (newType is ArrayTypeSyntax arraytype)
@@ -51,7 +52,7 @@ namespace VooDo.Language.AST.Names
                     {
                         throw new ArgumentException("Explicit array size expression", nameof(_type));
                     }
-                    ranks.AddRange(arraytype.RankSpecifiers.Select(_r => _r.Rank));
+                    ranks.AddRange(arraytype.RankSpecifiers.Select(_r => new RankSpecifier(_r.Rank)));
                     newType = arraytype.ElementType;
                 }
                 else if (newType is NullableTypeSyntax nullableType)
@@ -69,7 +70,7 @@ namespace VooDo.Language.AST.Names
 
         public static ComplexType FromSyntax(TypeSyntax _type, bool _ignoreUnbound = false)
         {
-            ComplexType type = Unwrap(_type, out bool nullable, out ImmutableArray<int> ranks) switch
+            ComplexType type = Unwrap(_type, out bool nullable, out ImmutableArray<RankSpecifier> ranks) switch
             {
                 TupleTypeSyntax tupleType => TupleType.FromSyntax(tupleType, _ignoreUnbound),
                 _ => QualifiedType.FromSyntax(_type, _ignoreUnbound),
@@ -86,7 +87,7 @@ namespace VooDo.Language.AST.Names
 
         public static ComplexType FromType(Type _type, bool _ignoreUnbound = false)
         {
-            ComplexType type = Unwrap(_type, out bool nullable, out ImmutableArray<int> ranks) switch
+            ComplexType type = Unwrap(_type, out bool nullable, out ImmutableArray<RankSpecifier> ranks) switch
             {
                 var t when t.IsAssignableTo(typeof(ITuple)) => TupleType.FromType(_type, _ignoreUnbound),
                 _ => QualifiedType.FromType(_type, _ignoreUnbound)
@@ -113,13 +114,38 @@ namespace VooDo.Language.AST.Names
 
         #endregion
 
+        #region Nested types
+
+        public sealed record RankSpecifier(int Rank) : Node
+        {
+
+            public static implicit operator RankSpecifier(int _rank) => new(_rank);
+
+            private int m_rank = Rank.Assert(_v => _v > 0);
+            public int Rank
+            {
+                get => m_rank;
+                init => m_rank = value.Assert(_v => _v > 0);
+            }
+
+            public override IEnumerable<NodeOrIdentifier> Children => Enumerable.Empty<NodeOrIdentifier>();
+            internal override ArrayRankSpecifierSyntax EmitNode(Scope _scope, Marker _marker)
+                => SyntaxFactoryHelper.ArrayRank(m_rank).Own(_marker, this);
+
+            public override string ToString()
+                => $"[{new string(',', m_rank - 1)}]";
+
+        }
+
+        #endregion
+
         #region Members
 
-        private ImmutableArray<int> m_ranks = Ranks.EmptyIfDefault().AssertAll<ImmutableArray<int>, int>(_r => _r > 0);
-        public ImmutableArray<int> Ranks
+        private ImmutableArray<RankSpecifier> m_ranks = Ranks.EmptyIfDefault();
+        public ImmutableArray<RankSpecifier> Ranks
         {
             get => m_ranks;
-            init => m_ranks = value.EmptyIfDefault().AssertAll<ImmutableArray<int>, int>(_r => _r > 0);
+            init => m_ranks = value.EmptyIfDefault();
 
         }
         public bool IsArray => Ranks.Any();
@@ -137,15 +163,15 @@ namespace VooDo.Language.AST.Names
             }
             if (IsArray)
             {
-                type = SyntaxFactory.ArrayType(type, SyntaxFactoryHelper.ArrayRanks(Ranks));
+                type = SyntaxFactory.ArrayType(type, Ranks.Select(_r => _r.EmitNode(_scope, _marker)).ToSyntaxList());
             }
             return type.Own(_marker, this);
         }
 
-        internal abstract TypeSyntax EmitNonArrayNonNullableType(Scope _scope, Marker _marker);
+        private protected abstract TypeSyntax EmitNonArrayNonNullableType(Scope _scope, Marker _marker);
 
         public override string ToString()
-            => $"{(IsNullable ? "?" : "")}{string.Concat(Ranks.Select(_r => $"[{new string(',', _r - 1)}]"))}";
+            => $"{(IsNullable ? "?" : "")}{string.Concat(Ranks)}";
 
         #endregion
 

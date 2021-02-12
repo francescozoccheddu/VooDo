@@ -19,6 +19,21 @@ namespace VooDo.Language.AST.Names
 
         #region Creation
 
+        public static Identifier Bool { get; } = "bool";
+        public static Identifier Char { get; } = "char";
+        public static Identifier String { get; } = "string";
+        public static Identifier Byte { get; } = "byte";
+        public static Identifier SByte { get; } = "sbyte";
+        public static Identifier Short { get; } = "short";
+        public static Identifier UShort { get; } = "ushort";
+        public static Identifier Int { get; } = "int";
+        public static Identifier UInt { get; } = "uint";
+        public static Identifier Long { get; } = "long";
+        public static Identifier ULong { get; } = "ulong";
+        public static Identifier Decimal { get; } = "decimal";
+        public static Identifier Float { get; } = "float";
+        public static Identifier Double { get; } = "double";
+        public static Identifier Object { get; } = "object";
 
         public static Identifier FromSyntax(SyntaxToken _token) => new Identifier(_token.ValueText);
 

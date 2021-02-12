@@ -80,57 +80,56 @@ namespace VooDo.Language.AST.Expressions
 
         }
 
-        public abstract record Argument : Node
+        public abstract record Argument(Identifier? Parameter) : Node
         {
 
             public enum EKind
             {
-                Value, Ref, Out
+                Value, Ref, Out, In
             }
-
-            internal Argument() { }
 
             public abstract EKind Kind { get; }
 
-            internal abstract override ArgumentSyntax EmitNode(Scope _scope, Marker _marker);
+            private protected abstract ExpressionSyntax EmitArgumentExpression(Scope _scope, Marker _marker);
+            internal sealed override ArgumentSyntax EmitNode(Scope _scope, Marker _marker)
+                => SyntaxFactory.Argument(EmitArgumentExpression(_scope, _marker))
+                    .WithRefKindKeyword(SyntaxFactory.Token(Kind switch
+                    {
+                        EKind.Value => SyntaxKind.None,
+                        EKind.Ref => SyntaxKind.RefKeyword,
+                        EKind.Out => SyntaxKind.OutKeyword,
+                        EKind.In => SyntaxKind.InKeyword,
+                        _ => throw new InvalidOperationException(),
+                    }))
+                .Own(_marker, this);
 
         }
 
-        public sealed record ValueArgument(Expression Expression) : Argument
+        public sealed record ValueArgument(Identifier Parameter, Expression Expression) : Argument(Parameter)
         {
             public override EKind Kind => EKind.Value;
-            internal override ArgumentSyntax EmitNode(Scope _scope, Marker _marker)
-                => SyntaxFactory.Argument(Expression.EmitNode(_scope, _marker)).Own(_marker, this);
+            private protected override ExpressionSyntax EmitArgumentExpression(Scope _scope, Marker _marker)
+                => Expression.EmitNode(_scope, _marker).Own(_marker, this);
             public override IEnumerable<Expression> Children => new[] { Expression };
             public override string ToString() => $"{Kind.Token()} {Expression}".TrimStart();
         }
 
-        public sealed record AssignableArgument(Argument.EKind AssignableKind, AssignableExpression Expression) : Argument
+        public sealed record AssignableArgument(Identifier Parameter, Argument.EKind AssignableKind, AssignableExpression Expression) : Argument(Parameter)
         {
             public override EKind Kind => AssignableKind;
-            internal override ArgumentSyntax EmitNode(Scope _scope, Marker _marker)
-                => SyntaxFactory.Argument(Expression.EmitNode(_scope, _marker))
-                .WithRefKindKeyword(SyntaxFactory.Token(AssignableKind switch
-                {
-                    EKind.Value => SyntaxKind.None,
-                    EKind.Ref => SyntaxKind.RefKeyword,
-                    EKind.Out => SyntaxKind.OutKeyword,
-                    _ => throw new InvalidOperationException(),
-                }))
-                .Own(_marker, this);
+            private protected override ExpressionSyntax EmitArgumentExpression(Scope _scope, Marker _marker)
+                => Expression.EmitNode(_scope, _marker).Own(_marker, this);
             public override IEnumerable<AssignableExpression> Children => new[] { Expression };
             public override string ToString() => $"{Kind.Token()} {Expression}".TrimStart();
         }
 
-        public sealed record OutDeclarationArgument(ComplexTypeOrVar Type, IdentifierOrDiscard Name) : Argument
+        public sealed record OutDeclarationArgument(Identifier Parameter, ComplexTypeOrVar Type, IdentifierOrDiscard Name) : Argument(Parameter)
         {
             public override EKind Kind => EKind.Out;
-            internal override ArgumentSyntax EmitNode(Scope _scope, Marker _marker)
-                => SyntaxFactory.Argument(
-                    SyntaxFactory.DeclarationExpression(
+            private protected override ExpressionSyntax EmitArgumentExpression(Scope _scope, Marker _marker)
+                => SyntaxFactory.DeclarationExpression(
                         Type.EmitNode(_scope, _marker),
-                        Name.EmitNode(_scope, _marker)))
-                .WithRefKindKeyword(SyntaxFactory.Token(SyntaxKind.OutKeyword))
+                        Name.EmitNode(_scope, _marker))
                 .Own(_marker, this);
             public override IEnumerable<NodeOrIdentifier> Children => new NodeOrIdentifier[] { Type, Name };
             public override string ToString() => $"{Kind.Token()} {Type} {Name}".TrimStart();

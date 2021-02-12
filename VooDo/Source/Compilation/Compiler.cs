@@ -60,11 +60,15 @@ namespace VooDo.Compilation
             ImmutableArray<Diagnostic> d = compilation.GetDiagnostics();
             SemanticModel semantics = compilation.GetSemanticModel(tree);
             {
-                syntax = ImplicitGlobalTypeRewriter.Rewrite(semantics, scope.GetGlobalDefinitions());
-                SyntaxTree newTree = CSharpSyntaxTree.Create(syntax, parseOptions);
-                compilation = compilation.ReplaceSyntaxTree(tree, newTree);
-                tree = newTree;
-                semantics = compilation.GetSemanticModel(tree);
+                CompilationUnitSyntax newSyntax = ImplicitGlobalTypeRewriter.Rewrite(semantics, scope.GetGlobalDefinitions());
+                if (newSyntax != syntax)
+                {
+                    SyntaxTree newTree = CSharpSyntaxTree.Create(newSyntax, parseOptions);
+                    compilation = compilation.ReplaceSyntaxTree(tree, newTree);
+                    tree = newTree;
+                    semantics = compilation.GetSemanticModel(tree);
+                    syntax = (CompilationUnitSyntax) tree.GetRoot();
+                }
             }
             throw new NotImplementedException();
         }

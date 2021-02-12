@@ -1,5 +1,4 @@
-﻿using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
+﻿using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 using System;
@@ -29,7 +28,7 @@ namespace VooDo.Language.AST.Names
         }.ToImmutableHashSet();
 
         public static new TupleType FromSyntax(TypeSyntax _syntax, bool _ignoreUnbound = false)
-            => FromSyntax((TupleTypeSyntax) Unwrap(_syntax, out bool nullable, out ImmutableArray<int> ranks), _ignoreUnbound) with
+            => FromSyntax((TupleTypeSyntax) Unwrap(_syntax, out bool nullable, out ImmutableArray<RankSpecifier> ranks), _ignoreUnbound) with
             {
                 IsNullable = nullable,
                 Ranks = ranks
@@ -100,7 +99,7 @@ namespace VooDo.Language.AST.Names
 
             public bool IsNamed => Name is not null;
 
-            internal override SyntaxNode EmitNode(Scope _scope, Marker _marker)
+            internal override TupleElementSyntax EmitNode(Scope _scope, Marker _marker)
                 => SyntaxFactory.TupleElement(
                     Type.EmitNode(_scope, _marker),
                     IsNamed
@@ -143,7 +142,7 @@ namespace VooDo.Language.AST.Names
         public Element this[int _index] => ((IReadOnlyList<Element>) m_elements)[_index];
         public IEnumerator<Element> GetEnumerator() => ((IEnumerable<Element>) m_elements).GetEnumerator();
         IEnumerator IEnumerable.GetEnumerator() => ((IEnumerable) m_elements).GetEnumerator();
-        internal override TypeSyntax EmitNonArrayNonNullableType(Scope _scope, Marker _marker)
+        private protected override TypeSyntax EmitNonArrayNonNullableType(Scope _scope, Marker _marker)
             => SyntaxFactory.TupleType(this.Select(_e => _e.EmitNode(_scope, _marker)).ToSeparatedList()).Own(_marker, this);
         public override IEnumerable<Element> Children => m_elements;
         public override string ToString() => $"({string.Join(',', m_elements)})" + base.ToString();

@@ -22,7 +22,7 @@ namespace VooDo.Language.AST.Names
 
         public static new QualifiedType FromSyntax(TypeSyntax _type, bool _ignoreUnbound = false)
         {
-            QualifiedType type = Unwrap(_type, out bool nullable, out ImmutableArray<int> ranks) switch
+            QualifiedType type = Unwrap(_type, out bool nullable, out ImmutableArray<RankSpecifier> ranks) switch
             {
                 QualifiedNameSyntax qualified => FromSyntax(qualified, _ignoreUnbound),
                 AliasQualifiedNameSyntax aliased => FromSyntax(aliased, _ignoreUnbound),
@@ -86,7 +86,7 @@ namespace VooDo.Language.AST.Names
             }
             else
             {
-                Type type = Unwrap(_type, out bool nullable, out ImmutableArray<int> ranks);
+                Type type = Unwrap(_type, out bool nullable, out ImmutableArray<RankSpecifier> ranks);
                 List<SimpleType> path = new List<SimpleType>
                 {
                     type
@@ -156,7 +156,7 @@ namespace VooDo.Language.AST.Names
 
         #region Overrides
 
-        internal override TypeSyntax EmitNonArrayNonNullableType(Scope _scope, Marker _marker)
+        private protected override TypeSyntax EmitNonArrayNonNullableType(Scope _scope, Marker _marker)
         {
             if (IsSimple)
             {
