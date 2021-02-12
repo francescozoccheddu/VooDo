@@ -1,6 +1,7 @@
 ﻿using Antlr4.Runtime;
 
 using System;
+using System.IO;
 
 using VooDo.AST;
 using VooDo.AST.Directives;
@@ -15,10 +16,29 @@ namespace VooDo.Parsing
     public static class Parser
     {
 
+        private sealed class ErrorListener : IAntlrErrorListener<int>, IAntlrErrorListener<IToken>
+        {
+
+            public static ErrorListener Instance { get; } = new ErrorListener();
+
+            private ErrorListener() { }
+
+            public void SyntaxError(TextWriter _output, IRecognizer _recognizer, int _offendingSymbol, int _line, int _charPositionInLine, string _msg, RecognitionException _e)
+                => throw new NotImplementedException();
+
+            public void SyntaxError(TextWriter _output, IRecognizer _recognizer, IToken _offendingSymbol, int _line, int _charPositionInLine, string _msg, RecognitionException _e)
+                => throw new NotImplementedException();
+        }
+
         private static VooDoParser MakeParser(string _script)
         {
             VooDoLexer lexer = new VooDoLexer(new AntlrInputStream(_script));
-            return new VooDoParser(new CommonTokenStream(lexer));
+            lexer.RemoveErrorListeners();
+            lexer.AddErrorListener(ErrorListener.Instance);
+            VooDoParser parser = new VooDoParser(new CommonTokenStream(lexer));
+            parser.RemoveErrorListeners();
+            parser.AddErrorListener(ErrorListener.Instance);
+            return parser;
         }
 
         private static TNodeOrIdentifier Parse<TNodeOrIdentifier>(string _source, Func<VooDoParser, ParserRuleContext> _ruleProvider) where TNodeOrIdentifier : NodeOrIdentifier

@@ -70,16 +70,16 @@ IF
 	: 'if'
 ;
 
-IN
-	: 'in'
+INIT
+	: 'init'
 ;
 
 INT
 	: 'int'
 ;
 
-INIT
-	: 'init'
+IN
+	: 'in'
 ;
 
 IS
@@ -190,6 +190,90 @@ VERBATIUM_STRING
 	: '@"' ( ~'"' | '""')* '"'
 ;
 
+ASSIGN_LSH
+	: '<<='
+;
+
+ASSIGN_RSH
+	: '>>='
+;
+
+ASSIGN_COAL
+	: '??='
+;
+
+DCOLON
+	: '::'
+;
+
+COAL
+	: '??'
+;
+
+LAND
+	: '&&'
+;
+
+LOR
+	: '||'
+;
+
+EQ
+	: '=='
+;
+
+NEQ
+	: '!='
+;
+
+LE
+	: '<='
+;
+
+GE
+	: '>='
+;
+
+ASSIGN_ADD
+	: '+='
+;
+
+ASSIGN_SUB
+	: '-='
+;
+
+ASSIGN_MUL
+	: '*='
+;
+
+ASSIGN_DIV
+	: '/='
+;
+
+ASSIGN_MOD
+	: '%='
+;
+
+ASSIGN_AND
+	: '&='
+;
+
+ASSIGN_OR
+	: '|='
+;
+
+ASSIGN_XOR
+	: '^='
+;
+
+LSH
+	: '<<'
+;
+
+RSH
+	: '>>'
+;
+
 OPEN_BRACE
 	: '{'
 ;
@@ -288,90 +372,6 @@ GT
 
 QUEST
 	: '?'
-;
-
-DCOLON
-	: '::'
-;
-
-COAL
-	: '??'
-;
-
-LAND
-	: '&&'
-;
-
-LOR
-	: '||'
-;
-
-EQ
-	: '=='
-;
-
-NEQ
-	: '!='
-;
-
-LE
-	: '<='
-;
-
-GE
-	: '>='
-;
-
-ASSIGN_ADD
-	: '+='
-;
-
-ASSIGN_SUB
-	: '-='
-;
-
-ASSIGN_MUL
-	: '*='
-;
-
-ASSIGN_DIV
-	: '/='
-;
-
-ASSIGN_MOD
-	: '%='
-;
-
-ASSIGN_AND
-	: '&='
-;
-
-ASSIGN_OR
-	: '|='
-;
-
-ASSIGN_XOR
-	: '^='
-;
-
-LSH
-	: '<<'
-;
-
-RSH
-	: '>>'
-;
-
-ASSIGN_LSH
-	: '<<='
-;
-
-ASSIGN_RSH
-	: '>>='
-;
-
-ASSIGN_COAL
-	: '??='
 ;
 
 // Fragments
