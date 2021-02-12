@@ -9,7 +9,7 @@ options
 // Script
 
 script
-	: mUsings += usingDirective* mBody = statement* # fullScript | mExpr = expression # inlineScript
+	: mUsings += usingDirective* mBody += statement* # fullScript | mExpr = expression # inlineScript
 ;
 
 // Statements
@@ -47,13 +47,13 @@ statement
 	| OPEN_BRACE mStatements += statement* CLOSE_BRACE										# blockStatement
 	| IF mCondition = parenthesizedExpression mThen = statement (ELSE mElse = statement)?	# ifStatement
 	| RETURN mExpr = expression SEMICOLON													# returnStatement
-	| (mVar1 = declarationStatement | mVar2 = globalStatement)								# otherStatement
+	| (declarationStatement | globalStatement)												# otherStatement
 ;
 
 // Expressions
 
 assignableExpression
-	: mVar1 = nameExpression | mVar2 = memberAccessExpression | mVar3 = tupleDeclarationExpression
+	: nameExpression | memberAccessExpression | tupleDeclarationExpression
 ;
 
 elementAccessExpression
@@ -61,11 +61,11 @@ elementAccessExpression
 ;
 
 argument
-	: (mParam = identifier COLON)? unnamedArgument
+	: (mParam = identifier COLON)? mArgument = unnamedArgument
 ;
 
 unnamedArgument
-	: mVar1 = valueArgument | mVar2 = assignableArgument | mVar3 = outDeclarationArgument
+	: valueArgument | assignableArgument | outDeclarationArgument
 ;
 
 valueArgument
@@ -85,7 +85,7 @@ method
 ;
 
 complexTypeOrExpression
-	: mVar1 = complexType | mVar2 = expression
+	: complexType | expression
 ;
 
 memberAccessExpression
@@ -97,7 +97,7 @@ nameExpression
 ;
 
 nameOrMemberAccessExpression
-	: mVar1 = nameExpression | mVar2 = memberAccessExpression
+	: nameExpression | memberAccessExpression
 ;
 
 parenthesizedExpression
@@ -118,7 +118,7 @@ tupleDeclarationExpression
 
 expression
 	: NEW mType = complexType OPEN_BRACKET mSizes += expression (COMMA mSizes += expression)* CLOSE_BRACKET mRanks += rankSpecifier*	# arrayCreationExpression
-	| mVar1 = assignableExpression																										# otherExpression
+	| assignableExpression																												# otherExpression
 	| mExpr = expression AS mType = complexType																							# asExpression
 	| mLeft = expression mOp = (MUL | DIV | MOD) mRight = expression																	# binaryExpression
 	| mLeft = expression mOp = (PLUS | MINUS) mRight = expression																		# binaryExpression
@@ -149,18 +149,18 @@ expression
 // Directives
 
 usingDirective
-	: USING (mAlias = identifier ASSIGN)? namespace SEMICOLON	# usingNamespaceDirective
-	| USING STATIC qualifiedTypeBase SEMICOLON					# usingStaticDirective
+	: USING (mAlias = identifier ASSIGN)? mName = namespace SEMICOLON	# usingNamespaceDirective
+	| USING STATIC mType = qualifiedTypeBase SEMICOLON					# usingStaticDirective
 ;
 
 // Names
 
 identifierOrDiscard
-	: mVar1 = DISCARD | mVar2 = identifier
+	: DISCARD | mIdentifier = identifier
 ;
 
 complexTypeOrVar
-	: mVar1 = complexType | mVar2 = VAR
+	: mType = complexType | VAR
 ;
 
 qualifiedTypeBase
@@ -176,7 +176,7 @@ tupleTypeElement
 ;
 
 complexTypeBase
-	: mVar1 = qualifiedTypeBase | mVar2 = tupleTypeBase
+	: qualifiedTypeBase | tupleTypeBase
 ;
 
 rankSpecifier
@@ -192,7 +192,7 @@ qualifiedType
 ;
 
 complexType
-	: mVar1 = qualifiedType | mVar2 = tupleType
+	: qualifiedType | tupleType
 ;
 
 simpleType

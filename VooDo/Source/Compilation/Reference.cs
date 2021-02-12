@@ -10,7 +10,7 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
 
-using VooDo.Language.AST.Names;
+using VooDo.AST.Names;
 using VooDo.Utils;
 
 namespace VooDo.Compilation

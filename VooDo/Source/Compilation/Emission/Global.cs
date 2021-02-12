@@ -1,7 +1,7 @@
-﻿using VooDo.Language.AST.Expressions;
-using VooDo.Language.AST.Names;
+﻿using VooDo.AST.Expressions;
+using VooDo.AST.Names;
 
-namespace VooDo.Language.Linking
+namespace VooDo.Compilation
 {
 
     public sealed record Global(ComplexTypeOrVar Type, Identifier? Name, Expression? Initializer = null)

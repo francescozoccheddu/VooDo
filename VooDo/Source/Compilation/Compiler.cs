@@ -7,9 +7,9 @@ using System.Collections.Immutable;
 using System.Linq;
 
 using VooDo.Compilation.Transformation;
-using VooDo.Language.AST;
-using VooDo.Language.AST.Names;
-using VooDo.Language.Linking;
+using VooDo.AST;
+using VooDo.AST.Names;
+using VooDo.Compilation;
 using VooDo.Utils;
 
 namespace VooDo.Compilation

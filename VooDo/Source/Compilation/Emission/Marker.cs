@@ -5,10 +5,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-using VooDo.Language.AST;
+using VooDo.AST;
 using VooDo.Utils;
 
-namespace VooDo.Language.Linking
+namespace VooDo.Compilation
 {
 
     internal sealed class Marker

@@ -6,8 +6,8 @@ using System.Collections.Generic;
 using System.Linq;
 
 using VooDo.Compilation;
-using VooDo.Language.AST.Names;
-using VooDo.Language.Linking;
+using VooDo.AST.Names;
+using VooDo.Compilation;
 using VooDo.Runtime;
 
 using SF = Microsoft.CodeAnalysis.CSharp.SyntaxFactory;

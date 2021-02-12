@@ -1,11 +1,11 @@
 ﻿using System.Collections.Immutable;
 
 using VooDo.Compilation;
-using VooDo.Language.AST;
-using VooDo.Language.AST.Directives;
-using VooDo.Language.AST.Expressions;
-using VooDo.Language.AST.Names;
-using VooDo.Language.AST.Statements;
+using VooDo.AST;
+using VooDo.AST.Directives;
+using VooDo.AST.Expressions;
+using VooDo.AST.Names;
+using VooDo.AST.Statements;
 using VooDo.Runtime;
 
 namespace VooDo.ConsoleTestbench

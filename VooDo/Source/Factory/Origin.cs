@@ -8,7 +8,7 @@ using VooDo.Utils;
 namespace VooDo.Factory
 {
 
-    public readonly struct Origin
+    public readonly struct Origin : IEquatable<Origin>
     {
 
         public enum EKind
@@ -17,9 +17,10 @@ namespace VooDo.Factory
         }
 
         public static Origin Unknown { get; } = default;
-        public static Origin HookInitializer { get; } = new Origin(EKind.HookInitializer, -1, 0);
 
-        public static Origin FromSource(int _start, int _length)
+        internal static Origin HookInitializer { get; } = new Origin(EKind.HookInitializer, -1, 0);
+
+        internal static Origin FromSource(int _start, int _length)
         {
             if (_start < 0)
             {

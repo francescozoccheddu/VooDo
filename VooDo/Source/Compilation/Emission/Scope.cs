@@ -5,8 +5,8 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 
-using VooDo.Language.AST.Names;
-using VooDo.Language.Linking;
+using VooDo.AST.Names;
+using VooDo.Compilation;
 
 namespace VooDo.Compilation
 {
