@@ -3,6 +3,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 
@@ -17,7 +18,7 @@ namespace VooDo.Compilation.Transformation
     internal static class ImplicitGlobalTypeRewriter
     {
 
-        private sealed record Field(GlobalDefinition Definition, FieldDeclarationSyntax Syntax);
+        private sealed record Field(GlobalDefinition Definition, VariableDeclarationSyntax Syntax);
 
         private static void GetRuntimeSymbols(SemanticModel _semantics, out INamedTypeSymbol _variableSymbol, out INamedTypeSymbol _controllerFactorySymbol)
         {
@@ -45,9 +46,9 @@ namespace VooDo.Compilation.Transformation
             return null;
         }
 
-        private static ITypeSymbol? GetInitializerType(FieldDeclarationSyntax _syntax, SemanticModel _semantics)
+        private static ITypeSymbol? GetInitializerType(VariableDeclarationSyntax _syntax, SemanticModel _semantics)
         {
-            InvocationExpressionSyntax invocation = (InvocationExpressionSyntax) _syntax.Declaration.Variables.Single().Initializer!.Value;
+            InvocationExpressionSyntax invocation = (InvocationExpressionSyntax) _syntax.Variables.Single().Initializer!.Value;
             ExpressionSyntax argument = invocation.ArgumentList.Arguments[1].Expression;
             return _semantics.GetTypeInfo(argument).ConvertedType;
         }
@@ -124,7 +125,7 @@ namespace VooDo.Compilation.Transformation
                     ITypeSymbol symbol = _semantics.GetTypeInfo(_field.Declaration.Type).Type!;
                     if (symbol.Equals(variableSymbol, SymbolEqualityComparer.Default))
                     {
-                        return new(definition, _field);
+                        return new(definition, _field.Declaration);
                     }
                 }
                 return null;
@@ -137,13 +138,29 @@ namespace VooDo.Compilation.Transformation
             ImmutableArray<ITypeSymbol?> types = InferTypes(fields, _semantics, controllerFactorySymbol);
             {
                 int firstError = types.IndexOf(null);
-                if (firstError > 0)
+                if (firstError >= 0)
                 {
                     throw new ApplicationException($"Cannot infer type for global '{_globals[firstError].Global.Name ?? "<unnamed-global>"}'");
                 }
             }
-            throw new Exception();
-
+            ImmutableDictionary<VariableDeclarationSyntax, ITypeSymbol> map = fields.Zip(types, (_f, _t) => KeyValuePair.Create(_f.Syntax, _t!)).ToImmutableDictionary();
+            VariableDeclarationSyntax Replace(VariableDeclarationSyntax _original, VariableDeclarationSyntax _updated)
+            {
+                ITypeSymbol symbol = map[_original];
+                TypeSyntax type = SyntaxFactory.ParseTypeName(symbol.ToDisplayString());
+                TypeArgumentListSyntax typeArguments = SyntaxFactoryHelper.TypeArguments(type);
+                {
+                    QualifiedNameSyntax name = (QualifiedNameSyntax) _updated.Type;
+                    _updated = _updated.WithType(name.WithRight(SyntaxFactory.GenericName(name.Right.Identifier, typeArguments)));
+                }
+                {
+                    InvocationExpressionSyntax initializer = (InvocationExpressionSyntax) _updated.Variables.Single().Initializer!.Value;
+                    GenericNameSyntax methodName = (GenericNameSyntax) ((MemberAccessExpressionSyntax) initializer.Expression).Name;
+                    _updated = _updated.ReplaceNode(methodName, methodName.WithTypeArgumentList(typeArguments));
+                }
+                return _updated;
+            }
+            return root.ReplaceNodes(fields.Select(_f => _f.Syntax), Replace);
         }
 
     }

@@ -105,6 +105,9 @@ namespace VooDo.Utils
         internal static BracketedArgumentListSyntax BracketedArguments(IEnumerable<ArgumentSyntax> _arguments)
             => SF.BracketedArgumentList(_arguments.ToSeparatedList());
 
+        internal static TypeArgumentListSyntax TypeArguments(params TypeSyntax[] _typeArguments)
+            => TypeArguments((IEnumerable<TypeSyntax>) _typeArguments);
+
         internal static TypeArgumentListSyntax TypeArguments(IEnumerable<TypeSyntax> _typeArguments)
             => SF.TypeArgumentList(_typeArguments.ToSeparatedList());
 
