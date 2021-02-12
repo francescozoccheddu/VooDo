@@ -6,221 +6,284 @@ options
 	tokenVocab = VooDoLexer;
 }
 
-// Entry point
-
-anyScript
-	: mScript1 = script | mScript2 = inlineScript
-;
+// Script
 
 script
-	: mUsings += usingDirective* mBody = scriptBody EOF
+	: mVar1 = fullScript | mVar2 = inlineScript
+;
+
+fullScript
+	: mUsings += usingDirective* mBody = blockStatement
 ;
 
 inlineScript
-	: mSrc = expression
-;
-
-scriptBody
-	: mGlobals = globalsBlock? mStatements += statement*
-;
-
-globalsBlock
-	: mGlobals = GLOBALS mBraceO = OPEN_BRACE mStatements += implicitGlobalDeclarationStatement* mBraceC = CLOSE_BRACE
-;
-
-// Basic concepts
-
-genericName
-	: mName = name mTypeArguments = typeArgumentList?
-;
-
-aliasGenericName
-	: (mAlias = name mDCol = DCOLON)? mName = genericName
-;
-
-qualifiedAliasGenericName
-	: mLeft = qualifiedAliasGenericName DOT mRight = genericName # qualifiedName | mSrc = aliasGenericName # qualifiedGenericNamePass
-;
-
-// Types
-
-type
-	: mType = nullableType mRanks += arrayRankSpecifier*
-;
-
-typeWithSize
-	: mType = nullableType mSize = arraySizeSpecifier mRanks += arrayRankSpecifier*
-;
-
-nullableType
-	: mType = nonArrayType mQuest = INTERR?
-;
-
-nonArrayType
-	: mType1 = predefinedStructType | mType2 = classType | mType3 = tupleType
-;
-
-tupleType
-	: mParenO = OPEN_PARENS mElements += tupleTypeElement (mCommas += COMMA mElements += tupleTypeElement)+ mParenC = CLOSE_PARENS
-;
-
-tupleTypeElement
-	: mType = type mName = name?
-;
-
-predefinedStructType
-	: mType = (SBYTE | BYTE | SHORT | USHORT | INT | UINT | LONG | ULONG | CHAR | DECIMAL | FLOAT | DOUBLE | BOOL)
-;
-
-predefinedClassType
-	: mType = (OBJECT | STRING)
-;
-
-predefinedType
-	: mType1 = predefinedClassType | mType2 = predefinedStructType
-;
-
-classType
-	: mType1 = qualifiedAliasGenericName | mType2 = predefinedClassType
-;
-
-typeArgumentList
-	: mLt = LT mTypes += type (mCommas += COMMA mTypes += type)* mGt = GT
-;
-
-// Expressions
-
-argumentList
-	: mParenO = OPEN_PARENS (mArguments += argument (mCommas += COMMA mArguments += argument)*)? mParenC = CLOSE_PARENS
-;
-
-argument
-	: mParam = nameColon? mKind = (REF | IN)? mExpr = expression | mParam = nameColon? mKind = OUT (mDeclExpr = declarationExpression | mExpr = expression)
-;
-
-declarationExpression
-	: mType = typeOrVar mName = name
-;
-
-bracketedArgumentList
-	: mBracketO = OPEN_BRACKET mArguments += indexerArgument ( mCommas += COMMA mArguments += indexerArgument)* mBracketC = CLOSE_BRACKET
-;
-
-indexerArgument
-	: mParam = nameColon? mIn = IN? mExpr = expression
-;
-
-nameColon
-	: mName = name mColon = COLON
-;
-
-expression
-	: mSrc = (REGULAR_STRING | VERBATIUM_STRING | INTEGER_LITERAL | HEX_INTEGER_LITERAL | BIN_INTEGER_LITERAL | REAL_LITERAL | CHAR_LITERAL)	# literalExpression
-	| mKeyword = (NULL | TRUE | FALSE | DEFAULT)																								# keywordLiteralExpression
-	| mOp = CONTROLLEROF mName = name																											# controllerofExpression
-	| mGlob = GLOB mContr = expression (mInit = INIT mInitializer = expression)?																# globExpression
-	| mName = name																																# nameExpression
-	| mNew = NEW mType = nonArrayType mArgumentList = argumentList																				# objectCreationExpression
-	| mNew = NEW mArgumentList = argumentList																									# implicitObjectCreationExpression
-	| mNew = NEW mType = typeWithSize mInitializer = arrayInitializer?																			# arrayCreationExpression
-	| mSrc = expression mArgumentList = argumentList																							# invocationExpression
-	| mParenO = OPEN_PARENS mExpr = expression mParenC = CLOSE_PARENS																			# parensExpression
-	| mParenO = OPEN_PARENS mElements += expression (mCommas += COMMA mElements += expression)+ mParenC = CLOSE_PARENS							# tupleExpression
-	| mDefault = DEFAULT (mParenO = OPEN_PARENS mType = type mParenC = CLOSE_PARENS)															# defaultExpression
-	| mSrc = expression mNullable = INTERR? mDot = DOT mMemb = genericName																		# memberAccessExpression
-	| mSrc = typeMemberAccessExpressionSource mDot = DOT mMemb = genericName																	# typeMemberAccessExpression
-	| mSrc = expression mNullable = INTERR? mArgList = bracketedArgumentList																	# elementAccessExpression
-	| mOp = PLUS mSrc = expression																												# unaryPlusExpression
-	| mOp = MINUS mSrc = expression																												# unaryMinusExpression
-	| mOp = NOT mSrc = expression																												# notExpression
-	| mOp = BCOMPL mSrc = expression																											# bcomplExpression
-	| mParenO = OPEN_PARENS mType = type mParenC = CLOSE_PARENS mSrc = expression																# castExpression
-	| mSrc = expression mOp = AS mType = type																									# asExpression
-	| mSrc = expression mOp = IS mType = type mName = name?																						# isExpression
-	| mLeft = expression mOp = (MUL | DIV | MOD) mRight = expression																			# multiplicativeExpressionGroup
-	| mLeft = expression mOp = (PLUS | MINUS) mRight = expression																				# additiveExpressionGroup
-	| mLeft = expression mOp = (LSH | RSH) mRight = expression																					# shiftExpressionGroup
-	| mLeft = expression mOp = (LT | GT | LE | GE) mRight = expression																			# comparisonExpressionGroup
-	| mLeft = expression mOp = (EQ | NEQ) mRight = expression																					# equalityExpressionGroup
-	| mLeft = expression mOp = AND mRight = expression																							# andExpression
-	| mLeft = expression mOp = XOR mRight = expression																							# xorExpression
-	| mLeft = expression mOp = OR mRight = expression																							# orExpression
-	| mLeft = expression mOp = LAND mRight = expression																							# landExpression
-	| mLeft = expression mOp = LOR mRight = expression																							# lorExpression
-	| mCond = expression mInterr = INTERR mThen = expression mCol = COLON mElse = expression													# conditionalExpression
-;
-
-typeMemberAccessExpressionSource
-	: mType1 = predefinedType | mType2 = aliasGenericName
-;
-
-// Arrays
-arrayRankSpecifier
-	: mBracketO = OPEN_BRACKET mCommas += COMMA* mBracketC = CLOSE_BRACKET
-;
-
-arraySizeSpecifier
-	: mBracketO = OPEN_BRACKET mRanks += expression (mCommas += COMMA mSizes += expression)* mBracketC = CLOSE_BRACKET
-;
-
-arrayInitializer
-	: mBraceO = OPEN_BRACE (mElements += variableInitializer (mCommas += COMMA mElements += variableInitializer)* mCommas += COMMA?)? mBraceC = CLOSE_BRACE
+	: mExpr = expression
 ;
 
 // Statements
 
-block
-	: mBraceO = OPEN_BRACE mStatements += statement* mBraceC = CLOSE_BRACE
+assignmentStatement
+	: mTarget = assignableExpression mOp =
+	(
+		ASSIGN
+		| ASSIGN_ADD
+		| ASSIGN_AND
+		| ASSIGN_COAL
+		| ASSIGN_DIV
+		| ASSIGN_LSH
+		| ASSIGN_MOD
+		| ASSIGN_MUL
+		| ASSIGN_OR
+		| ASSIGN_RSH
+		| ASSIGN_SUB
+		| ASSIGN_XOR
+	) mSource = expression SEMICOLON
+;
+
+blockStatement
+	: OPEN_BRACE mStatements += statement* CLOSE_BRACE
+;
+
+declarationStatement
+	: mType = complexTypeOrExpression mDeclarators += declarator (COMMA mDeclarators += declarator)* SEMICOLON
+;
+
+declarator
+	: mName = identifier (ASSIGN mInitializer = expression)?
+;
+
+expressionStatement
+	: mExpr = expression SEMICOLON
+;
+
+globalStatement
+	: GLOBAL OPEN_BRACE mDeclarations += declarationStatement* CLOSE_BRACE
+	| GLOBAL mDeclarations += declarationStatement
+;
+
+ifStatement
+	: IF mCondition = parenthesizedExpression mThen = statement (ELSE mElse = statement)?
+;
+
+returnStatement
+	: RETURN mExpr = expression SEMICOLON
 ;
 
 statement
-	: mTgt = expression mOp = (ASSIGN | ASSIGN_ADD | ASSIGN_AND | ASSIGN_DIV | ASSIGN_LSH | ASSIGN_MOD | ASSIGN_MUL | ASSIGN_NULLC | ASSIGN_OR | ASSIGN_RSH | ASSIGN_SUB | ASSIGN_XOR) mSrc = expression mScol = SEMICOLON	# assignmentStatement
-	| mExpr = expression mSCol = SEMICOLON																																													# expressionStatement
-	| mSrc = variableDeclaration mSCol = SEMICOLON																																											# variableDeclarationStatement
-	| mGlobal = GLOBAL mSrc = globalDeclaration mSCol = SEMICOLON																																							# globalDeclarationStatement
-	| mIf = IF mParenO = OPEN_PARENS mCond = expression mParenC = CLOSE_PARENS mThenBody = statement mElse = elseClause?																									# ifStatement
-	| mReturn = RETURN mSrc = expression mSCol = SEMICOLON																																									# returnStatement
-	| mBlock = block																																																		# blockStatement
+	: mVar1 = assignmentStatement
+	| mVar2 = blockStatement
+	| mVar3 = expressionStatement
+	| mVar4 = declarationStatement
+	| mVar5 = globalStatement
+	| mVar6 = ifStatement
+	| mVar7 = returnStatement
 ;
 
-elseClause
-	: mElse = ELSE mBody = statement
+// Expressions
+
+arrayCreationExpression
+	: NEW mType = complexType OPEN_BRACKET mSizes += expression (COMMA mSizes += expression)* CLOSE_BRACKET mRanks += rankSpecifier*
 ;
 
-implicitGlobalDeclarationStatement
-	: mSrc = globalDeclaration mCol = SEMICOLON
+asExpression
+	: expression AS complexType
 ;
 
-typeOrVar
-	: mType = type # explicityVariableType | mVar = VAR # inferredVariableType
+assignableExpression
+	: mVar1 = nameExpression | mVar2 = memberAccessExpression
 ;
 
-variableDeclarator
-	: mTgt = name (mOp = ASSIGN mSrc = variableInitializer)?
+binaryExpression
+	: mLeft = expression mOp = (MUL | DIV | MOD) mRight = expression
+	| mLeft = expression mOp = (PLUS | MINUS) mRight = expression
+	| mLeft = expression mOp = (LSH | RSH) mRight = expression
+	| mLeft = expression mOp = (LT | LE | GT | GE) mRight = expression
+	| mLeft = expression mOp = (EQ | NEQ) mRight = expression
+	| mLeft = expression mOp = AND mRight = expression
+	| mLeft = expression mOp = XOR mRight = expression
+	| mLeft = expression mOp = OR mRight = expression
+	| mLeft = expression mOp = LAND mRight = expression
+	| mLeft = expression mOp = LOR mRight = expression
+	| mLeft = expression mOp = COAL mRight = expression
 ;
 
-variableInitializer
-	: mSrc = expression # expressionVariableInitializer | mSrc = arrayInitializer # arrayVariableInitializer
+castExpression
+	: OPEN_PARENS mType = complexType CLOSE_PARENS mExpr = expression
 ;
 
-variableDeclaration
-	: mType = typeOrVar mDeclarators += variableDeclarator (mCommas += COMMA mDeclarators += variableDeclarator)*
+conditionalExpression
+	: mCond = expression QUEST mTrue = expression COLON mFalse = expression
 ;
 
-globalDeclaration
-	: mType = typeOrVar mDeclarators += variableDeclarator (mCommas += COMMA mDeclarators += variableDeclarator)*
+defaultExpression
+	: DEFAULT (OPEN_PARENS mType = complexType CLOSE_PARENS)
 ;
 
-// Namespaces
+elementAccessExpression
+	: mSource = expression OPEN_BRACKET mArgs += expression (COMMA mArgs += expression)* CLOSE_BRACKET
+;
+
+globalExpression
+	: GLOB mController = expression (INIT mInitializer = expression)
+;
+
+argument
+	: mVar1 = valueArgument | mVar2 = assignableArgument | mVar3 = outDeclarationArgument
+;
+
+valueArgument
+	: mValue = expression
+;
+
+assignableArgument
+	: mKind = (IN | REF | OUT)? mValue = expression
+;
+
+outDeclarationArgument
+	: OUT mType = complexType mName = identifierOrDiscard
+;
+
+callable
+	: mVar1 = simpleCallable | mVar2 = method
+;
+
+simpleCallable
+	: mSource = expression
+;
+
+method
+	: mSource = nameOrMemberAccessExpression (LT mTypeArgs += complexType (COMMA mTypeArgs += complexType)* GT)?
+;
+
+invocationExpression
+	: mSource = callable OPEN_PARENS (mArgs += argument (COMMA mArgs += argument)*)? CLOSE_PARENS
+;
+
+isExpression
+	: mSource = expression IS mType = complexType (mName = identifierOrDiscard)?
+;
+
+literalExpression
+	: NULL																										# nullLiteralExpression
+	| FALSE																										# falseLiteralExpression
+	| TRUE																										# trueLiteralExpression
+	| mLiteral = (INTEGER_LITERAL | CHAR_LITERAL | REAL_LITERAL | BIN_INTEGER_LITERAL | HEX_INTEGER_LITERAL)	# otherLiteralExpression
+;
+
+complexTypeOrExpression
+	: mVar1 = complexType | mVar2 = expression
+;
+
+memberAccessExpression
+	: mSource = complexTypeOrExpression DOT mMember = identifier
+;
+
+nameExpression
+	: mControllerOf = CONTROLLEROF? mName = identifier
+;
+
+nameOrMemberAccessExpression
+	: mVar1 = nameExpression | mVar2 = memberAccessExpression
+;
+
+objectCreationExpression
+	: NEW mType = complexTypeBase? OPEN_PARENS (mArgs += argument (COMMA mArgs += argument)*)? CLOSE_PARENS
+;
+
+tupleExpression
+	: OPEN_PARENS mElements += expression (COMMA mElements += expression)+ CLOSE_PARENS
+;
+
+unaryExpression
+	: mOp = (PLUS | MINUS | NOT | BNOT) mExpr = expression
+;
+
+parenthesizedExpression
+	: OPEN_PARENS mExpr = expression CLOSE_PARENS
+;
+
+expression
+	: mVar1 = arrayCreationExpression
+	| mVar2 = asExpression
+	| mVar3 = assignableExpression
+	| mVar4 = binaryExpression
+	| mVar5 = castExpression
+	| mVar6 = conditionalExpression
+	| mVar7 = defaultExpression
+	| mVar8 = globalExpression
+	| mVar9 = invocationExpression
+	| mVar10 = isExpression
+	| mVar11 = literalExpression
+	| mVar12 = objectCreationExpression
+	| mVar13 = tupleExpression
+	| mVar14 = unaryExpression
+	| mVar15 = parenthesizedExpression
+;
+
+// Directives
 
 usingDirective
-	: mUsing = USING mAlias = nameEquals mName = name mSCol = SEMICOLON # UsingAlias | mUsing = USING mStatic = STATIC? mName = qualifiedAliasGenericName mSCol = SEMICOLON # Using
+	: mVar1 = usingNamespaceDirective | mVar2 = usingStaticDirective
 ;
 
-nameEquals
-	: mName = name mEq = ASSIGN
+usingNamespaceDirective
+	: USING (mAlias = identifier ASSIGN)? namespace SEMICOLON
 ;
 
-name
-	: mName = (IDENTIFIER | GLOBALS | STATIC | USING)
+usingStaticDirective
+	: USING STATIC qualifiedTypeBase SEMICOLON
+;
+
+// Names
+
+identifierOrDiscard
+	: mVar1 = DISCARD | mVar2 = identifier
+;
+
+complexTypeOrVar
+	: mVar1 = complexType | mVar2 = VAR
+;
+
+qualifiedTypeBase
+	: (mAlias = identifier DCOLON)? mPath += simpleType (DOT mPath += simpleType)*
+;
+
+tupleTypeBase
+	: OPEN_PARENS mElements += tupleTypeElement (COMMA mElements += tupleTypeElement)+ CLOSE_PARENS
+;
+
+tupleTypeElement
+	: mType = complexType mName = identifier?
+;
+
+complexTypeBase
+	: mVar1 = qualifiedTypeBase | mVar2 = tupleTypeBase
+;
+
+rankSpecifier
+	: OPEN_BRACE mCommas += COMMA CLOSE_BRACE
+;
+
+tupleType
+	: mBase = tupleTypeBase (mNullable = QUEST)? mRanks += rankSpecifier*
+;
+
+qualifiedType
+	: mBase = qualifiedTypeBase (mNullable = QUEST)? mRanks += rankSpecifier*
+;
+
+complexType
+	: mVar1 = qualifiedType | mVar2 = tupleType
+;
+
+simpleType
+	: mName = identifier (LT mTypeArgs += complexType (COMMA mTypeArgs += complexType)* GT)?
+;
+
+namespace
+	: (mAlias = identifier DCOLON)? mPath += identifier (DOT mPath += identifier)*
+;
+
+identifier
+	: IDENTIFIER | STATIC | USING | DISCARD
 ;

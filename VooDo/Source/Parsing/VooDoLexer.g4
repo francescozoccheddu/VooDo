@@ -66,10 +66,6 @@ GLOBAL
 	: 'global'
 ;
 
-GLOBALS
-	: 'globals'
-;
-
 IF
 	: 'if'
 ;
@@ -158,6 +154,10 @@ VAR
 	: 'var'
 ;
 
+DISCARD
+	: '_'
+;
+
 IDENTIFIER
 	: '@'? IdentifierOrKeyword
 ;
@@ -175,8 +175,7 @@ BIN_INTEGER_LITERAL
 ;
 
 REAL_LITERAL
-	: ([0-9] ( '_'* [0-9])*)? '.' [0-9] ('_'* [0-9])* ExponentPart? [FfDdMm]?
-	| [0-9] ('_'* [0-9])* ([FfDdMm] | ExponentPart [FfDdMm]?)
+	: ([0-9] ( '_'* [0-9])*)? '.' [0-9] ('_'* [0-9])* ExponentPart? [FfDdMm]? | [0-9] ('_'* [0-9])* ([FfDdMm] | ExponentPart [FfDdMm]?)
 ;
 
 CHAR_LITERAL
@@ -192,11 +191,11 @@ VERBATIUM_STRING
 ;
 
 OPEN_BRACE
-	: '{' 
+	: '{'
 ;
 
 CLOSE_BRACE
-	: '}' 
+	: '}'
 ;
 
 OPEN_BRACKET
@@ -224,7 +223,7 @@ COMMA
 ;
 
 COLON
-	: ':' 
+	: ':'
 ;
 
 SEMICOLON
@@ -271,7 +270,7 @@ NOT
 	: '!'
 ;
 
-BCOMPL
+BNOT
 	: '~'
 ;
 
@@ -287,7 +286,7 @@ GT
 	: '>'
 ;
 
-INTERR
+QUEST
 	: '?'
 ;
 
@@ -295,7 +294,7 @@ DCOLON
 	: '::'
 ;
 
-NULLC
+COAL
 	: '??'
 ;
 
@@ -371,7 +370,7 @@ ASSIGN_RSH
 	: '>>='
 ;
 
-ASSIGN_NULLC
+ASSIGN_COAL
 	: '??='
 ;
 
@@ -406,10 +405,7 @@ fragment SimpleEscapeSequence
 ;
 
 fragment HexEscapeSequence
-	: '\\x' HexDigit
-	| '\\x' HexDigit HexDigit
-	| '\\x' HexDigit HexDigit HexDigit
-	| '\\x' HexDigit HexDigit HexDigit HexDigit
+	: '\\x' HexDigit | '\\x' HexDigit HexDigit | '\\x' HexDigit HexDigit HexDigit | '\\x' HexDigit HexDigit HexDigit HexDigit
 ;
 
 fragment NewLine
@@ -457,22 +453,12 @@ fragment IdentifierStartCharacter
 ;
 
 fragment IdentifierPartCharacter
-	: LetterCharacter
-	| DecimalDigitCharacter
-	| ConnectingCharacter
-	| CombiningCharacter
-	| FormattingCharacter
+	: LetterCharacter | DecimalDigitCharacter | ConnectingCharacter | CombiningCharacter | FormattingCharacter
 ;
 
 //'<A Unicode Character Of Classes Lu, Ll, Lt, Lm, Lo, Or Nl>' WARNING: ignores UnicodeEscapeSequence
 fragment LetterCharacter
-	: UnicodeClassLU
-	| UnicodeClassLL
-	| UnicodeClassLT
-	| UnicodeClassLM
-	| UnicodeClassLO
-	| UnicodeClassNL
-	| UnicodeEscapeSequence
+	: UnicodeClassLU | UnicodeClassLL | UnicodeClassLT | UnicodeClassLM | UnicodeClassLO | UnicodeClassNL | UnicodeEscapeSequence
 ;
 
 //'<A Unicode Character Of The Class Nd>' WARNING: ignores UnicodeEscapeSequence
@@ -497,8 +483,7 @@ fragment FormattingCharacter
 
 //B.1.5 Unicode Character Escape Sequences
 fragment UnicodeEscapeSequence
-	: '\\u' HexDigit HexDigit HexDigit HexDigit
-	| '\\U' HexDigit HexDigit HexDigit HexDigit HexDigit HexDigit HexDigit HexDigit
+	: '\\u' HexDigit HexDigit HexDigit HexDigit | '\\U' HexDigit HexDigit HexDigit HexDigit HexDigit HexDigit HexDigit HexDigit
 ;
 
 fragment HexDigit
@@ -727,13 +712,7 @@ fragment UnicodeClassLL
 ;
 
 fragment UnicodeClassLT
-	: '\u01c5' ..'\u01cb'
-	| '\u01f2' ..'\u1f88'
-	| '\u1f89' ..'\u1f8f'
-	| '\u1f98' ..'\u1f9f'
-	| '\u1fa8' ..'\u1faf'
-	| '\u1fbc' ..'\u1fcc'
-	| '\u1ffc' ..'\u1ffc'
+	: '\u01c5' ..'\u01cb' | '\u01f2' ..'\u1f88' | '\u1f89' ..'\u1f8f' | '\u1f98' ..'\u1f9f' | '\u1fa8' ..'\u1faf' | '\u1fbc' ..'\u1fcc' | '\u1ffc' ..'\u1ffc'
 ;
 
 fragment UnicodeClassLM
