@@ -22,28 +22,8 @@ AS
 	: 'as'
 ;
 
-BOOL
-	: 'bool'
-;
-
-BYTE
-	: 'byte'
-;
-
-CHAR
-	: 'char'
-;
-
-DECIMAL
-	: 'decimal'
-;
-
 DEFAULT
 	: 'default'
-;
-
-DOUBLE
-	: 'double'
 ;
 
 ELSE
@@ -52,10 +32,6 @@ ELSE
 
 FALSE
 	: 'false'
-;
-
-FLOAT
-	: 'float'
 ;
 
 GLOB
@@ -74,10 +50,6 @@ INIT
 	: 'init'
 ;
 
-INT
-	: 'int'
-;
-
 IN
 	: 'in'
 ;
@@ -86,20 +58,12 @@ IS
 	: 'is'
 ;
 
-LONG
-	: 'long'
-;
-
 NEW
 	: 'new'
 ;
 
 NULL
 	: 'null'
-;
-
-OBJECT
-	: 'object'
 ;
 
 OUT
@@ -114,36 +78,12 @@ RETURN
 	: 'return'
 ;
 
-SBYTE
-	: 'sbyte'
-;
-
-SHORT
-	: 'short'
-;
-
 STATIC
 	: 'static'
 ;
 
-STRING
-	: 'string'
-;
-
 TRUE
 	: 'true'
-;
-
-UINT
-	: 'uint'
-;
-
-ULONG
-	: 'ulong'
-;
-
-USHORT
-	: 'ushort'
 ;
 
 USING

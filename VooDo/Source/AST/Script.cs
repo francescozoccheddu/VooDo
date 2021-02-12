@@ -135,7 +135,7 @@ namespace VooDo.AST
         }
 
         public override IEnumerable<Node> Children => ((IEnumerable<Node>) Usings).Concat(Statements);
-        public override string ToString() => (string.Join('\n', Usings) + '\n' + string.Join('\n', Statements)).Trim();
+        public override string ToString() => (string.Join('\n', Usings) + "\n\n" + string.Join('\n', Statements)).Trim();
 
         #endregion
 

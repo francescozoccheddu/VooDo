@@ -189,7 +189,7 @@ expression
 	| mCond = expression QUEST mTrue = expression COLON mFalse = expression																# conditionalExpression
 	| mSource = expression OPEN_PARENS (mArgs += argument (COMMA mArgs += argument)*)? CLOSE_PARENS										# simpleInvocationExpression
 	| mSource = method OPEN_PARENS (mArgs += argument (COMMA mArgs += argument)*)? CLOSE_PARENS											# methodInvocationExpression
-	| GLOB mController = expression (INIT mInitializer = expression)																	# globalExpression
+	| GLOB mController = expression (INIT mInitializer = expression)?																	# globalExpression
 	| mSource = expression IS mType = complexType (mName = identifierOrDiscard)?														# isExpression
 	| DEFAULT (OPEN_PARENS mType = complexType CLOSE_PARENS)																			# defaultExpression
 	| OPEN_PARENS mElements += tupleExpressionElement (COMMA mElements += tupleExpressionElement)+ CLOSE_PARENS							# tupleExpression

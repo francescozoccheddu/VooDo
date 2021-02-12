@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 
-using VooDo.Compilation;
 using VooDo.AST.Expressions;
 using VooDo.AST.Names;
 using VooDo.Compilation;
@@ -43,7 +42,7 @@ namespace VooDo.AST.Statements
             internal override VariableDeclaratorSyntax EmitNode(Scope _scope, Marker _marker) => EmitNode(_scope, _marker, null);
             public override IEnumerable<NodeOrIdentifier> Children
                 => (HasInitializer ? new NodeOrIdentifier[] { Initializer! } : Enumerable.Empty<NodeOrIdentifier>()).Append(Name);
-            public override string ToString() => HasInitializer ? $"{Name}" : $"{Name} {AssignmentStatement.EKind.Simple.Token()} {Initializer}";
+            public override string ToString() => HasInitializer ? $"{Name} {AssignmentStatement.EKind.Simple.Token()} {Initializer}" : $"{Name}";
 
         }
 
