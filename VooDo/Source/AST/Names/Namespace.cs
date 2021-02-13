@@ -106,7 +106,7 @@ namespace VooDo.AST.Names
 
         public override Namespace ReplaceNodes(Func<NodeOrIdentifier?, NodeOrIdentifier?> _map)
         {
-            Identifier? newAlias = (Identifier?) _map(Alias).NonNull();
+            Identifier? newAlias = (Identifier?) _map(Alias);
             ImmutableArray<Identifier> newPath = Path.Map(_map).NonNull();
             if (ReferenceEquals(newAlias, Alias) && newPath == Path)
             {

@@ -6,7 +6,8 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 
-using VooDo.Compilation.Problems;
+using VooDo.Errors;
+using VooDo.Errors.Problems;
 using VooDo.Runtime;
 using VooDo.Utils;
 
@@ -80,7 +81,7 @@ namespace VooDo.Compilation.Transformation
                 .ToImmutableArray();
             ImmutableDictionary<string, int> anonFieldsMap = _fields
                 .SelectIndexed((_f, _i) => (field: _f, index: _i))
-                .Where(_z => _z.field.Definition.Global.IsAnonymous)
+                .Where(_z => _z.field.Definition.Prototype.Global.IsAnonymous)
                 .ToImmutableDictionary(_z => _z.field.Definition.Identifier.ValueText, _z => _z.index);
 
             bool TryGetControllerExpression(InvocationExpressionSyntax _syntax, out ExpressionSyntax? _expression, out int _index)
@@ -135,12 +136,12 @@ namespace VooDo.Compilation.Transformation
                 .SelectNonNull(ZipGlobal)
                 .ToImmutableArray();
             ImmutableArray<ImmutableArray<ITypeSymbol>> candidateTypes = InferTypes(fields, _semantics, controllerFactorySymbol);
-            {
-                IEnumerable<GlobalDefinition>? problems = candidateTypes
-                    .Zip(fields)
-                    .Where(_z => _z.First.Length != 1)
-                    .Select(_z => _z.Second.Definition)
-            }
+            candidateTypes
+                .Zip(fields)
+                .Where(_z => _z.First.Length != 1)
+                .Select(_z => new GlobalTypeInferenceProblem(_z.First, _z.Second.Definition.Prototype))
+                .ThrowErrors();
+            IEnumerable<ITypeSymbol> types = candidateTypes.Select(_c => _c.Single());
             ImmutableDictionary<VariableDeclarationSyntax, ITypeSymbol> map = fields.Zip(types, (_f, _t) => KeyValuePair.Create(_f.Syntax, _t!)).ToImmutableDictionary();
             VariableDeclarationSyntax Replace(VariableDeclarationSyntax _original, VariableDeclarationSyntax _updated)
             {

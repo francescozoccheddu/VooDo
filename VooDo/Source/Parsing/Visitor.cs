@@ -16,7 +16,6 @@ using VooDo.AST.Directives;
 using VooDo.AST.Expressions;
 using VooDo.AST.Names;
 using VooDo.AST.Statements;
-using VooDo.Factory;
 using VooDo.Parsing.Generated;
 
 namespace VooDo.Parsing
@@ -32,11 +31,14 @@ namespace VooDo.Parsing
             m_source = _source;
         }
 
+        private Origin MakeOrigin(int _start, int _end)
+            => new CodeOrigin(_start, _end - _start, m_source);
+
         private Origin GetOrigin(IToken _token)
-            => new CodeOrigin(_token.StartIndex, _token.StopIndex, m_source);
+            => MakeOrigin(_token.StartIndex, _token.StopIndex);
 
         private Origin GetOrigin(ParserRuleContext _context)
-            => new CodeOrigin(_context.Start.StartIndex, (_context.Stop ?? _context.Start).StopIndex, m_source);
+            => MakeOrigin(_context.Start.StartIndex, (_context.Stop ?? _context.Start).StopIndex);
 
         private ImmutableArray<TNodeOrIdentifier> Get<TNodeOrIdentifier>(IEnumerable<ParserRuleContext> _rule) where TNodeOrIdentifier : NodeOrIdentifier
             => _rule.Select(Get<TNodeOrIdentifier>).ToImmutableArray();
@@ -213,7 +215,10 @@ namespace VooDo.Parsing
             => new LiteralExpression(((LiteralExpressionSyntax) SyntaxFactory.ParseExpression(_c.GetText())).Token.Value);
         public override NodeOrIdentifier VisitOtherStatement([NotNull] VooDoParser.OtherStatementContext _c)
             => Variant<Statement>(_c);
-        public override NodeOrIdentifier VisitOutDeclarationArgument([NotNull] VooDoParser.OutDeclarationArgumentContext _c)
+
+        public override NodeOrIdentifier VisitOutDeclarationArgumentWithDiscard([NotNull] VooDoParser.OutDeclarationArgumentWithDiscardContext _c)
+            => new InvocationExpression.OutDeclarationArgument(null, ComplexTypeOrVar.Var, IdentifierOrDiscard.Discard);
+        public override NodeOrIdentifier VisitOutDeclarationArgumentWithType([NotNull] VooDoParser.OutDeclarationArgumentWithTypeContext _c)
             => new InvocationExpression.OutDeclarationArgument(null, Get<ComplexTypeOrVar>(_c.mType), Get<IdentifierOrDiscard>(_c.mName));
         public override NodeOrIdentifier VisitParenthesizedExpression([NotNull] VooDoParser.ParenthesizedExpressionContext _c)
             => Get<Expression>(_c.mExpr);

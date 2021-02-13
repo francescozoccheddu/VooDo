@@ -20,11 +20,11 @@ namespace VooDo.Compilation
 
             public GlobalDefinition(GlobalPrototype _global, SyntaxToken _identifier)
             {
-                Global = _global;
+                Prototype = _global;
                 Identifier = _identifier;
             }
 
-            public GlobalPrototype Global { get; }
+            public GlobalPrototype Prototype { get; }
             public SyntaxToken Identifier { get; }
 
         }

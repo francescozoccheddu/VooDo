@@ -15,48 +15,50 @@ namespace VooDo.AST
 
         private static IEnumerable<NodeOrIdentifier> VisitDepthFirstPostorder(NodeOrIdentifier _node, Predicate<NodeOrIdentifier> _shouldVisitChildren)
         {
-            Queue<IEnumerator<NodeOrIdentifier>> queue = new();
-            queue.Enqueue(((IEnumerable<NodeOrIdentifier>) new[] { _node }).GetEnumerator());
-            Stack<NodeOrIdentifier> stack = new();
-            while (queue.Count > 0)
+            if (!_shouldVisitChildren(_node))
             {
-                IEnumerator<NodeOrIdentifier> enumerator = queue.Peek();
-                if (enumerator.MoveNext())
+                yield return _node;
+                yield break;
+            }
+            Stack<(IEnumerator<NodeOrIdentifier> children, NodeOrIdentifier node)> stack = new();
+            stack.Push((_node.Children.GetEnumerator(), _node));
+            while (stack.Count > 0)
+            {
+                (IEnumerator<NodeOrIdentifier> children, NodeOrIdentifier node) = stack.Peek();
+                if (children.MoveNext())
                 {
-                    NodeOrIdentifier node = enumerator.Current;
-                    stack.Push(node);
-                    if (_shouldVisitChildren(node))
+                    NodeOrIdentifier child = children.Current;
+                    if (_shouldVisitChildren(child))
                     {
-                        queue.Enqueue(node.Children.GetEnumerator());
+                        stack.Push((child.Children.GetEnumerator(), child));
+                    }
+                    else
+                    {
+                        yield return child;
                     }
                 }
                 else
                 {
-                    _ = queue.Dequeue();
-                    yield return stack.Pop();
+                    _ = stack.Pop();
+                    yield return node;
                 }
             }
         }
 
         private static IEnumerable<NodeOrIdentifier> VisitDepthFirstPreorder(NodeOrIdentifier _node, Predicate<NodeOrIdentifier> _shouldVisitChildren)
         {
-            Queue<IEnumerator<NodeOrIdentifier>> queue = new();
-            queue.Enqueue(((IEnumerable<NodeOrIdentifier>) new[] { _node }).GetEnumerator());
-            while (queue.Count > 0)
+            Stack<NodeOrIdentifier> stack = new();
+            stack.Push(_node);
+            while (stack.Count > 0)
             {
-                IEnumerator<NodeOrIdentifier> enumerator = queue.Peek();
-                if (enumerator.MoveNext())
+                NodeOrIdentifier node = stack.Pop();
+                yield return node;
+                if (_shouldVisitChildren(node))
                 {
-                    NodeOrIdentifier node = enumerator.Current;
-                    yield return node;
-                    if (_shouldVisitChildren(node))
+                    foreach (NodeOrIdentifier child in node.Children.Reverse())
                     {
-                        queue.Enqueue(node.Children.GetEnumerator());
+                        stack.Push(child);
                     }
-                }
-                else
-                {
-                    _ = queue.Dequeue();
                 }
             }
         }
@@ -116,17 +118,11 @@ namespace VooDo.AST
             public NodeOrIdentifier? Replaced { get; }
         }
 
-        public static NodeOrIdentifier? ReplaceDescendantNodes(this NodeOrIdentifier _node, Func<NodeOrIdentifier?, NodeOrIdentifier?> _map)
-            => ReplaceDescendantNodes(_node, _map, _ => true);
-
-        public static NodeOrIdentifier? ReplaceDescendantNodes(this NodeOrIdentifier _node, Func<NodeOrIdentifier?, NodeOrIdentifier?> _map, Predicate<NodeOrIdentifier> _shouldVisitChildren)
-            => ReplaceDescendantNodes(_node, _i => _map(_i.Replaced), _shouldVisitChildren);
-
         private static NodeOrIdentifier? ReplaceNodeRecursive(NodeOrIdentifier? _node, Node? _parent, Func<ReplaceInfo, NodeOrIdentifier?> _map, Predicate<NodeOrIdentifier> _shouldVisitChildren)
         {
             if (_node is not null && _shouldVisitChildren(_node) && _node.Children.Any())
             {
-                return _node.ReplaceNodes(_c => ReplaceNodeRecursive(_c, (Node) _node, _map, _shouldVisitChildren));
+                return _node.ReplaceNodes(_c => ReplaceNodeRecursive(_c, _parent, _map, _shouldVisitChildren));
             }
             else
             {
@@ -134,11 +130,18 @@ namespace VooDo.AST
             }
         }
 
-        public static NodeOrIdentifier? ReplaceDescendantNodes(this NodeOrIdentifier _node, Func<ReplaceInfo, NodeOrIdentifier?> _map)
+        public static TNodeOrIdentifier? ReplaceDescendantNodes<TNodeOrIdentifier>(this TNodeOrIdentifier _node, Func<NodeOrIdentifier?, NodeOrIdentifier?> _map) where TNodeOrIdentifier : NodeOrIdentifier
             => ReplaceDescendantNodes(_node, _map, _ => true);
 
-        public static NodeOrIdentifier? ReplaceDescendantNodes(this NodeOrIdentifier _node, Func<ReplaceInfo, NodeOrIdentifier?> _map, Predicate<NodeOrIdentifier> _shouldVisitChildren)
-            => ReplaceNodeRecursive(_node, null, _map, _shouldVisitChildren);
+        public static TNodeOrIdentifier? ReplaceDescendantNodes<TNodeOrIdentifier>(this TNodeOrIdentifier _node, Func<NodeOrIdentifier?, NodeOrIdentifier?> _map, Predicate<NodeOrIdentifier> _shouldVisitChildren) where TNodeOrIdentifier : NodeOrIdentifier
+            => ReplaceDescendantNodes(_node, _i => _map(_i.Replaced), _shouldVisitChildren);
+
+
+        public static TNodeOrIdentifier? ReplaceDescendantNodes<TNodeOrIdentifier>(this TNodeOrIdentifier _node, Func<ReplaceInfo, NodeOrIdentifier?> _map) where TNodeOrIdentifier : NodeOrIdentifier
+            => ReplaceDescendantNodes(_node, _map, _ => true);
+
+        public static TNodeOrIdentifier? ReplaceDescendantNodes<TNodeOrIdentifier>(this TNodeOrIdentifier _node, Func<ReplaceInfo, NodeOrIdentifier?> _map, Predicate<NodeOrIdentifier> _shouldVisitChildren) where TNodeOrIdentifier : NodeOrIdentifier
+            => (TNodeOrIdentifier?) ReplaceNodeRecursive(_node, null, _map, _shouldVisitChildren);
 
     }
 

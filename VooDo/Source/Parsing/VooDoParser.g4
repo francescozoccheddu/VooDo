@@ -107,7 +107,7 @@ statement
 // Expressions
 
 assignableExpression
-	: nameExpression | memberAccessExpression | tupleDeclarationExpression
+	: nameOrMemberAccessExpression | tupleDeclarationExpression
 ;
 
 elementAccessExpression
@@ -131,7 +131,8 @@ assignableArgument
 ;
 
 outDeclarationArgument
-	: OUT mType = complexType mName = identifierOrDiscard
+	: OUT mType = complexType mName = identifierOrDiscard	# outDeclarationArgumentWithType
+	| OUT DISCARD											# outDeclarationArgumentWithDiscard
 ;
 
 method
@@ -172,7 +173,7 @@ tupleDeclarationExpression
 
 expression
 	: NEW mType = complexType OPEN_BRACKET mSizes += expression (COMMA mSizes += expression)* CLOSE_BRACKET mRanks += rankSpecifier*	# arrayCreationExpression
-	| assignableExpression																												# otherExpression
+	| (assignableExpression | parenthesizedExpression)																					# otherExpression
 	| mExpr = expression AS mType = complexType																							# asExpression
 	| mLeft = expression mOp = (MUL | DIV | MOD) mRight = expression																	# binaryExpression
 	| mLeft = expression mOp = (PLUS | MINUS) mRight = expression																		# binaryExpression

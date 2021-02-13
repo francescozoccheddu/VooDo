@@ -80,9 +80,9 @@ namespace VooDo.AST
             ImmutableArray<Scope.GlobalDefinition> globals = _scope.GetGlobalDefinitions();
             VariableDeclarationSyntax EmitGlobalDeclaration(Scope.GlobalDefinition _definition)
             {
-                TypeSyntax? type = _definition.Global.Global.Type.IsVar
+                TypeSyntax? type = _definition.Prototype.Global.Type.IsVar
                     ? null
-                    : _definition.Global.Global.Type.EmitNode(_scope, _marker);
+                    : _definition.Prototype.Global.Type.EmitNode(_scope, _marker);
                 return SF.VariableDeclaration(
                             SFH.VariableType(type),
                             SF.VariableDeclarator(
@@ -90,14 +90,14 @@ namespace VooDo.AST
                                 null,
                                 SFH.CreateVariableInvocation(
                                     type,
-                                    _definition.Global.Global.IsAnonymous
+                                    _definition.Prototype.Global.IsAnonymous
                                     ? SF.LiteralExpression(
                                         SyntaxKind.NullLiteralExpression)
                                     : SF.LiteralExpression(
                                         SyntaxKind.StringLiteralExpression,
-                                        SF.Literal(_definition.Global.Global.Name!)),
-                                    _definition.Global.Global.HasInitializer
-                                    ? _definition.Global.Global.Initializer!.EmitNode(_scope, _marker)
+                                        SF.Literal(_definition.Prototype.Global.Name!)),
+                                    _definition.Prototype.Global.HasInitializer
+                                    ? _definition.Prototype.Global.Initializer!.EmitNode(_scope, _marker)
                                     : SF.LiteralExpression(
                                         SyntaxKind.DefaultLiteralExpression))
                                 .ToEqualsValueClause())

@@ -173,7 +173,7 @@ namespace VooDo.AST.Names
 
         public override QualifiedType ReplaceNodes(Func<NodeOrIdentifier?, NodeOrIdentifier?> _map)
         {
-            Identifier? newAlias = (Identifier?) _map(Alias).NonNull();
+            Identifier? newAlias = (Identifier?) _map(Alias);
             ImmutableArray<SimpleType> newPath = Path.Map(_map).NonNull();
             QualifiedType newThis = (QualifiedType) base.ReplaceNodes(_map);
             if (ReferenceEquals(newAlias, Alias) && newPath == Path)

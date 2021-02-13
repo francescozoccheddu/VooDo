@@ -62,7 +62,7 @@ namespace VooDo.AST.Statements
 
             internal override VariableDeclaratorSyntax EmitNode(Scope _scope, Marker _marker) => EmitNode(_scope, _marker, null);
             public override IEnumerable<NodeOrIdentifier> Children
-                => (HasInitializer ? new NodeOrIdentifier[] { Initializer! } : Enumerable.Empty<NodeOrIdentifier>()).Append(Name);
+                => HasInitializer ? new NodeOrIdentifier[] { Name, Initializer! } : new NodeOrIdentifier[] { Name };
             public override string ToString() => HasInitializer ? $"{Name} {AssignmentStatement.EKind.Simple.Token()} {Initializer}" : $"{Name}";
 
         }

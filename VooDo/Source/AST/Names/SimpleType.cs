@@ -151,7 +151,7 @@ namespace VooDo.AST.Names
 
         #region Overrides
 
-        public override QualifiedType ReplaceNodes(Func<NodeOrIdentifier?, NodeOrIdentifier?> _map)
+        public override SimpleType ReplaceNodes(Func<NodeOrIdentifier?, NodeOrIdentifier?> _map)
         {
             Identifier newName = (Identifier) _map(Name).NonNull();
             ImmutableArray<ComplexType> newTypeArguments = TypeArguments.Map(_map).NonNull();

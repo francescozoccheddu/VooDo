@@ -19,11 +19,23 @@ namespace VooDo.Utils
         internal static bool AnyNull<TItem>(this IEnumerable<TItem?> _enumerable) where TItem : class
             => _enumerable.Any(_i => _i is null);
 
-        internal static bool AnyDuplicate<TItem>(this IEnumerable<TItem> _enumerable, IEqualityComparer<TItem>? _equalityComparer = null)
+        internal static bool FirstDuplicate<TItem>(this IEnumerable<TItem> _enumerable, out TItem? _item, IEqualityComparer<TItem>? _equalityComparer = null)
         {
-            ImmutableHashSet<TItem> set = _enumerable.ToImmutableHashSet(_equalityComparer ?? EqualityComparer<TItem>.Default);
-            return set.Count < _enumerable.Count();
+            _item = default;
+            HashSet<TItem> set = new(_equalityComparer ?? EqualityComparer<TItem>.Default);
+            foreach (TItem item in _enumerable)
+            {
+                if (!set.Add(item))
+                {
+                    _item = item;
+                    return true;
+                }
+            }
+            return false;
         }
+
+        internal static bool AnyDuplicate<TItem>(this IEnumerable<TItem> _enumerable, IEqualityComparer<TItem>? _equalityComparer = null)
+            => FirstDuplicate(_enumerable, out _, _equalityComparer);
 
         internal static ImmutableArray<TValue> NonNull<TValue>(this ImmutableArray<TValue?> _array) where TValue : class
             => (_array.AnyNull()
@@ -104,7 +116,7 @@ namespace VooDo.Utils
             => _array.Map(_map, new Identity.ReferenceComparer<TItem>());
 
         internal static ImmutableArray<TItem?> Map<TItem>(this ImmutableArray<TItem> _array, Func<TItem, object?> _map, IEqualityComparer<TItem> _comparer)
-            => _array.Map(_a => (TItem) _map(_a), _comparer);
+            => _array.Map(_a => (TItem?) _map(_a), _comparer);
 
     }
 }
