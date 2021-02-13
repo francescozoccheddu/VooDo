@@ -1,6 +1,7 @@
 ﻿using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -49,21 +50,20 @@ namespace VooDo.AST.Names
 
         #region Overrides
 
-        public override ArrayCreationExpression ReplaceNodes(Func<NodeOrIdentifier?, NodeOrIdentifier?> _map)
+        public override IdentifierOrDiscard ReplaceNodes(Func<NodeOrIdentifier?, NodeOrIdentifier?> _map)
         {
-            ComplexType newType = (ComplexType) _map(Type).NonNull();
-            ImmutableArray<Expression> newSizes = Sizes.Map(_map).NonNull();
-            if (ReferenceEquals(newType, Type) && newSizes == Sizes)
+            if (IsDiscard)
+            {
+                return this;
+            }
+            Identifier? newIdentifier = (Identifier?) _map(Identifier);
+            if (ReferenceEquals(newIdentifier, Identifier))
             {
                 return this;
             }
             else
             {
-                return this with
-                {
-                    Type = newType,
-                    Sizes = newSizes
-                };
+                return new IdentifierOrDiscard(newIdentifier);
             }
         }
 

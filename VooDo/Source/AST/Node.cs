@@ -25,7 +25,7 @@ namespace VooDo.AST
         public virtual IEnumerable<NodeOrIdentifier> Children
             => Enumerable.Empty<NodeOrIdentifier>();
 
-        public virtual IEnumerable<Problem> GetSyntaxProblems()
+        public IEnumerable<Problem> GetSyntaxProblems()
             => GetSelfSyntaxProblems().Concat(Children.SelectMany(_c => _c.GetSyntaxProblems()));
 
         protected virtual IEnumerable<Problem> GetSelfSyntaxProblems()

@@ -9,6 +9,7 @@ using System.Linq;
 
 using VooDo.AST.Names;
 using VooDo.Compilation;
+using VooDo.Errors.Problems;
 using VooDo.Utils;
 
 namespace VooDo.AST.Expressions
@@ -31,47 +32,56 @@ namespace VooDo.AST.Expressions
 
         #region Members
 
-        private readonly ImmutableArray<TElement> m_elements;
+        private ImmutableArray<TElement> m_elements;
+        private ImmutableArray<TElement> m_Elements
+        {
+            get => m_elements;
+            init
+            {
+                if (value.Length < 2)
+                {
+                    throw new SyntaxError(this, "A tuple must have at least two elements").AsThrowable();
+                }
+                m_elements = value;
+            }
+        }
 
         private protected TupleExpressionBase(ImmutableArray<TElement> _elements)
         {
-            if (_elements.Length < 2)
-            {
-                throw new ArgumentException("A tuple must have at least two elements", nameof(_elements));
-            }
-            m_elements = _elements;
+            m_Elements = _elements;
         }
 
         #endregion
 
         #region Overrides
 
-        protected abstract TupleExpressionBase<TElement> Create(ImmutableArray<TElement> _elements);
-
         public sealed override TupleExpressionBase<TElement> ReplaceNodes(Func<NodeOrIdentifier?, NodeOrIdentifier?> _map)
         {
-            ImmutableArray<TElement> newSizes = m_elements.Map(_map).NonNull();
-            if (newSizes == m_elements)
+            ImmutableArray<TElement> newSizes = m_Elements.Map(_map).NonNull();
+            if (newSizes == m_Elements)
             {
                 return this;
             }
             else
             {
-                return Create(m_elements);
+                return this with
+                {
+                    m_Elements = newSizes
+                };
             }
         }
 
-        public TElement this[int _index] => ((IReadOnlyList<TElement>) m_elements)[_index];
-        public int Count => ((IReadOnlyCollection<TElement>) m_elements).Count;
-        public IEnumerator<TElement> GetEnumerator() => ((IEnumerable<TElement>) m_elements).GetEnumerator();
-        IEnumerator IEnumerable.GetEnumerator() => ((IEnumerable) m_elements).GetEnumerator();
+        public TElement this[int _index] => ((IReadOnlyList<TElement>) m_Elements)[_index];
+        public int Count => ((IReadOnlyCollection<TElement>) m_Elements).Count;
+        public IEnumerator<TElement> GetEnumerator() => ((IEnumerable<TElement>) m_Elements).GetEnumerator();
+        IEnumerator IEnumerable.GetEnumerator() => ((IEnumerable) m_Elements).GetEnumerator();
 
         protected sealed override EPrecedence m_Precedence => EPrecedence.Primary;
         internal sealed override TupleExpressionSyntax EmitNode(Scope _scope, Marker _marker)
             => SyntaxFactory.TupleExpression(this.Select(_e => _e.EmitNode(_scope, _marker)).ToSeparatedList())
             .Own(_marker, this);
-        public override IEnumerable<TElement> Children => m_elements;
-        public override string ToString() => $"({string.Join(", ", m_elements)})";
+        public override IEnumerable<TElement> Children => m_Elements;
+        public override string ToString() => $"({string.Join(", ", m_Elements)})";
 
         #endregion
 
@@ -115,8 +125,6 @@ namespace VooDo.AST.Expressions
             public override string ToString() => IsNamed ? $"{Name}: {Expression}" : $"{Expression}";
 
         }
-
-        protected override TupleExpression Create(ImmutableArray<Element> _elements) => new TupleExpression(_elements);
 
     }
 
@@ -163,8 +171,6 @@ namespace VooDo.AST.Expressions
             public override string ToString() => $"{Type} {Name}";
 
         }
-
-        protected override TupleDeclarationExpression Create(ImmutableArray<Element> _elements) => new TupleDeclarationExpression(_elements);
 
     }
 

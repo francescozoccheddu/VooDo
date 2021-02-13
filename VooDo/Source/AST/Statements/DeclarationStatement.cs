@@ -1,6 +1,7 @@
 ﻿using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
+using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -8,12 +9,13 @@ using System.Linq;
 using VooDo.AST.Expressions;
 using VooDo.AST.Names;
 using VooDo.Compilation;
+using VooDo.Errors.Problems;
 using VooDo.Utils;
 
 namespace VooDo.AST.Statements
 {
 
-    public record DeclarationStatement(ComplexTypeOrVar Type, ImmutableArray<DeclarationStatement.Declarator> Declarators) : Statement
+    public record DeclarationStatement : Statement
     {
 
         #region Nested types
@@ -23,12 +25,12 @@ namespace VooDo.AST.Statements
 
             public bool HasInitializer => Initializer is not null;
 
-            internal VariableDeclaratorSyntax EmitNode(Scope _scope, Marker _marker, ComplexTypeOrVar? _globalType)
+            internal VariableDeclaratorSyntax EmitNode(Scope _scope, Marker _marker, DeclarationStatement? _declarationStatement)
             {
                 ExpressionSyntax? initializer;
-                if (_globalType is not null)
+                if (_declarationStatement is not null)
                 {
-                    Scope.GlobalDefinition globalDefinition = _scope.AddGlobal(new Global(_globalType, Name, Initializer));
+                    Scope.GlobalDefinition globalDefinition = _scope.AddGlobal(new GlobalPrototype(new Global(_declarationStatement.Type, Name, Initializer), _declarationStatement, this));
                     initializer = SyntaxFactoryHelper.ThisMemberAccess(globalDefinition.Identifier);
                 }
                 else
@@ -39,6 +41,25 @@ namespace VooDo.AST.Statements
                 EqualsValueClauseSyntax? initializerClause = initializer?.ToEqualsValueClause();
                 return SyntaxFactory.VariableDeclarator(Name.EmitToken(_marker), null, initializerClause).Own(_marker, this);
             }
+
+            public override Declarator ReplaceNodes(Func<NodeOrIdentifier?, NodeOrIdentifier?> _map)
+            {
+                Identifier newName = (Identifier) _map(Name).NonNull();
+                Expression? newInitializer = (Expression?) _map(Initializer);
+                if (ReferenceEquals(newName, Name) && ReferenceEquals(newInitializer, Initializer))
+                {
+                    return this;
+                }
+                else
+                {
+                    return this with
+                    {
+                        Name = newName,
+                        Initializer = newInitializer
+                    };
+                }
+            }
+
             internal override VariableDeclaratorSyntax EmitNode(Scope _scope, Marker _marker) => EmitNode(_scope, _marker, null);
             public override IEnumerable<NodeOrIdentifier> Children
                 => (HasInitializer ? new NodeOrIdentifier[] { Initializer! } : Enumerable.Empty<NodeOrIdentifier>()).Append(Name);
@@ -50,11 +71,26 @@ namespace VooDo.AST.Statements
 
         #region Members
 
-        private ImmutableArray<Declarator> m_declarators = Declarators.NonEmpty();
+        public DeclarationStatement(ComplexTypeOrVar _type, ImmutableArray<Declarator> _declarators)
+        {
+            Type = _type;
+            Declarators = _declarators;
+        }
+
+        public ComplexTypeOrVar Type { get; init; }
+
+        private ImmutableArray<Declarator> m_declarators;
         public ImmutableArray<Declarator> Declarators
         {
             get => m_declarators;
-            init => m_declarators = value.NonEmpty();
+            init
+            {
+                if (value.IsDefaultOrEmpty)
+                {
+                    throw new SyntaxError(this, "DeclarationStatement must have at least one declarator").AsThrowable();
+                }
+                m_declarators = value;
+            }
 
         }
 
@@ -62,11 +98,29 @@ namespace VooDo.AST.Statements
 
         #region Overrides
 
-        public override ArrayCreationExpression ReplaceNodes(Func<NodeOrIdentifier?, NodeOrIdentifier?> _map)
+        protected override IEnumerable<Problem> GetSelfSyntaxProblems()
         {
-            ComplexType newType = (ComplexType) _map(Type).NonNull();
-            ImmutableArray<Expression> newSizes = Sizes.Map(_map).NonNull();
-            if (ReferenceEquals(newType, Type) && newSizes == Sizes)
+            if (Type.IsVar)
+            {
+                return Declarators
+                    .Where(_d => !_d.HasInitializer)
+                    .Select(_d => new ChildSyntaxError(this, _d, "A variable declaration with var type must provide an initializer"))
+                    .Concat(
+                        Declarators
+                        .Where(_d => _d.Initializer is DefaultExpression expression && !expression.HasType)
+                        .Select(_d => new ChildSyntaxError(this, _d, "A variable declaration with var type cannot have a non-typed default initializer")));
+            }
+            else
+            {
+                return Enumerable.Empty<Problem>();
+            }
+        }
+
+        public override DeclarationStatement ReplaceNodes(Func<NodeOrIdentifier?, NodeOrIdentifier?> _map)
+        {
+            ComplexTypeOrVar newType = (ComplexTypeOrVar) _map(Type).NonNull();
+            ImmutableArray<Declarator> newDeclarators = Declarators.Map(_map).NonNull();
+            if (ReferenceEquals(newType, Type) && newDeclarators == Declarators)
             {
                 return this;
             }
@@ -75,7 +129,7 @@ namespace VooDo.AST.Statements
                 return this with
                 {
                     Type = newType,
-                    Sizes = newSizes
+                    Declarators = newDeclarators
                 };
             }
         }
@@ -89,7 +143,7 @@ namespace VooDo.AST.Statements
             }
             return SyntaxFactory.LocalDeclarationStatement(
                            SyntaxFactory.VariableDeclaration(type,
-                               Declarators.Select(_d => _d.EmitNode(_scope, _marker, _global ? Type : null)).ToSeparatedList()))
+                               Declarators.Select(_d => _d.EmitNode(_scope, _marker, _global ? this : null)).ToSeparatedList()))
                        .Own(_marker, this);
         }
 

@@ -61,21 +61,20 @@ namespace VooDo.AST.Names
 
         #region Overrides
 
-        public override ArrayCreationExpression ReplaceNodes(Func<NodeOrIdentifier?, NodeOrIdentifier?> _map)
+        public override ComplexTypeOrVar ReplaceNodes(Func<NodeOrIdentifier?, NodeOrIdentifier?> _map)
         {
-            ComplexType newType = (ComplexType) _map(Type).NonNull();
-            ImmutableArray<Expression> newSizes = Sizes.Map(_map).NonNull();
-            if (ReferenceEquals(newType, Type) && newSizes == Sizes)
+            if (IsVar)
+            {
+                return this;
+            }
+            ComplexType? newType = (ComplexType?) _map(Type);
+            if (ReferenceEquals(newType, Type))
             {
                 return this;
             }
             else
             {
-                return this with
-                {
-                    Type = newType,
-                    Sizes = newSizes
-                };
+                return new ComplexTypeOrVar(newType);
             }
         }
 

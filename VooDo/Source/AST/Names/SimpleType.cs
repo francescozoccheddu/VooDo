@@ -13,7 +13,7 @@ using VooDo.Utils;
 namespace VooDo.AST.Names
 {
 
-    public sealed record SimpleType(Identifier Name, ImmutableArray<ComplexType> TypeArguments = default) : Node
+    public sealed record SimpleType : Node
     {
 
         #region Creation
@@ -131,7 +131,15 @@ namespace VooDo.AST.Names
 
         #region Members
 
-        private ImmutableArray<ComplexType> m_typeArguments = TypeArguments.EmptyIfDefault();
+        public SimpleType(Identifier _name, ImmutableArray<ComplexType> _typeArguments = default)
+        {
+            Name = _name;
+            TypeArguments = _typeArguments;
+        }
+
+        public Identifier Name { get; init; }
+
+        private ImmutableArray<ComplexType> m_typeArguments;
         public ImmutableArray<ComplexType> TypeArguments
         {
             get => m_typeArguments;
@@ -143,11 +151,11 @@ namespace VooDo.AST.Names
 
         #region Overrides
 
-        public override ArrayCreationExpression ReplaceNodes(Func<NodeOrIdentifier?, NodeOrIdentifier?> _map)
+        public override QualifiedType ReplaceNodes(Func<NodeOrIdentifier?, NodeOrIdentifier?> _map)
         {
-            ComplexType newType = (ComplexType) _map(Type).NonNull();
-            ImmutableArray<Expression> newSizes = Sizes.Map(_map).NonNull();
-            if (ReferenceEquals(newType, Type) && newSizes == Sizes)
+            Identifier newName = (Identifier) _map(Name).NonNull();
+            ImmutableArray<ComplexType> newTypeArguments = TypeArguments.Map(_map).NonNull();
+            if (ReferenceEquals(newName, Name) && newTypeArguments == TypeArguments)
             {
                 return this;
             }
@@ -155,8 +163,8 @@ namespace VooDo.AST.Names
             {
                 return this with
                 {
-                    Type = newType,
-                    Sizes = newSizes
+                    Name = newName,
+                    TypeArguments = newTypeArguments
                 };
             }
         }

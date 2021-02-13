@@ -1,11 +1,13 @@
 ﻿using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
 using VooDo.AST.Expressions;
 using VooDo.Compilation;
+using VooDo.Utils;
 
 namespace VooDo.AST.Statements
 {
@@ -21,11 +23,12 @@ namespace VooDo.AST.Statements
 
         #region Overrides
 
-        public override ArrayCreationExpression ReplaceNodes(Func<NodeOrIdentifier?, NodeOrIdentifier?> _map)
+        public override IfStatement ReplaceNodes(Func<NodeOrIdentifier?, NodeOrIdentifier?> _map)
         {
-            ComplexType newType = (ComplexType) _map(Type).NonNull();
-            ImmutableArray<Expression> newSizes = Sizes.Map(_map).NonNull();
-            if (ReferenceEquals(newType, Type) && newSizes == Sizes)
+            Expression newCondition = (Expression) _map(Condition).NonNull();
+            Statement newThen = (Statement) _map(Then).NonNull();
+            Statement? newElse = (Statement?) _map(Else);
+            if (ReferenceEquals(newCondition, Condition) && ReferenceEquals(newThen, Then) && ReferenceEquals(newElse, Else))
             {
                 return this;
             }
@@ -33,8 +36,9 @@ namespace VooDo.AST.Statements
             {
                 return this with
                 {
-                    Type = newType,
-                    Sizes = newSizes
+                    Condition = newCondition,
+                    Then = newThen,
+                    Else = newElse
                 };
             }
         }

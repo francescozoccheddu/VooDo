@@ -1,6 +1,7 @@
 ﻿using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -17,19 +18,23 @@ namespace VooDo.AST.Statements
 
         #region Members
 
-        private readonly ImmutableArray<Statement> m_statements;
+        private ImmutableArray<Statement> m_statements;
+        private ImmutableArray<Statement> m_Statements
+        {
+            get => m_statements;
+            init => m_statements = value.EmptyIfDefault();
+        }
 
-        public BlockStatement(ImmutableArray<Statement> _statements) => m_statements = _statements.EmptyIfDefault();
+        public BlockStatement(ImmutableArray<Statement> _statements) => m_Statements = _statements;
 
         #endregion
 
         #region Overrides
 
-        public override ArrayCreationExpression ReplaceNodes(Func<NodeOrIdentifier?, NodeOrIdentifier?> _map)
+        public override BlockStatement ReplaceNodes(Func<NodeOrIdentifier?, NodeOrIdentifier?> _map)
         {
-            ComplexType newType = (ComplexType) _map(Type).NonNull();
-            ImmutableArray<Expression> newSizes = Sizes.Map(_map).NonNull();
-            if (ReferenceEquals(newType, Type) && newSizes == Sizes)
+            ImmutableArray<Statement> newStatements = m_statements.Map(_map).NonNull();
+            if (newStatements == m_statements)
             {
                 return this;
             }
@@ -37,16 +42,15 @@ namespace VooDo.AST.Statements
             {
                 return this with
                 {
-                    Type = newType,
-                    Sizes = newSizes
+                    m_Statements = newStatements
                 };
             }
         }
 
-        public Statement this[int _index] => ((IReadOnlyList<Statement>) m_statements)[_index];
-        public int Count => ((IReadOnlyCollection<Statement>) m_statements).Count;
-        public IEnumerator<Statement> GetEnumerator() => ((IEnumerable<Statement>) m_statements).GetEnumerator();
-        IEnumerator IEnumerable.GetEnumerator() => ((IEnumerable) m_statements).GetEnumerator();
+        public Statement this[int _index] => ((IReadOnlyList<Statement>) m_Statements)[_index];
+        public int Count => ((IReadOnlyCollection<Statement>) m_Statements).Count;
+        public IEnumerator<Statement> GetEnumerator() => ((IEnumerable<Statement>) m_Statements).GetEnumerator();
+        IEnumerator IEnumerable.GetEnumerator() => ((IEnumerable) m_Statements).GetEnumerator();
         internal override BlockSyntax EmitNode(Scope _scope, Marker _marker)
         {
             Scope nestedScope = _scope.CreateNested();
@@ -56,10 +60,10 @@ namespace VooDo.AST.Statements
             return SyntaxFactory.Block(statements.ToSyntaxList()).Own(_marker, this);
         }
 
-        public override IEnumerable<Statement> Children => m_statements;
+        public override IEnumerable<Statement> Children => m_Statements;
         public override string ToString() => Count == 0
             ? "{}"
-            : $"{{{("\n" + string.Join('\n', m_statements)).Replace("\n", "\n\t")}\n}}";
+            : $"{{{("\n" + string.Join('\n', m_Statements)).Replace("\n", "\n\t")}\n}}";
 
         #endregion
 

@@ -4,11 +4,11 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 
 using System;
-using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 
 using VooDo.Compilation;
+using VooDo.Errors.Problems;
 
 namespace VooDo.AST.Names
 {
@@ -51,42 +51,26 @@ namespace VooDo.AST.Names
 
         public Identifier(string _identifier)
         {
+            m_identifier = _identifier;
             if (!_identifier.All(_c => _c == '_' || char.IsLetterOrDigit(_c)))
             {
-                throw new ArgumentException("Non alphanumeric or underscore character", nameof(_identifier));
+                throw new SyntaxError(this, "Non alphanumeric or underscore character").AsThrowable();
             }
             if (_identifier.Length == 0)
             {
-                throw new ArgumentException("Empty identifier", nameof(_identifier));
+                throw new SyntaxError(this, "Empty identifier").AsThrowable();
             }
             if (char.IsDigit(_identifier[0]))
             {
-                throw new ArgumentException("Non letter or undescore starting letter", nameof(_identifier));
+                throw new SyntaxError(this, "Non letter or undescore starting letter").AsThrowable();
             }
-            m_identifier = _identifier;
         }
 
         #endregion
 
         #region Overrides
 
-        public override ArrayCreationExpression ReplaceNodes(Func<NodeOrIdentifier?, NodeOrIdentifier?> _map)
-        {
-            ComplexType newType = (ComplexType) _map(Type).NonNull();
-            ImmutableArray<Expression> newSizes = Sizes.Map(_map).NonNull();
-            if (ReferenceEquals(newType, Type) && newSizes == Sizes)
-            {
-                return this;
-            }
-            else
-            {
-                return this with
-                {
-                    Type = newType,
-                    Sizes = newSizes
-                };
-            }
-        }
+        public override Identifier ReplaceNodes(Func<NodeOrIdentifier?, NodeOrIdentifier?> _map) => this;
 
         private static readonly ImmutableDictionary<string, SyntaxToken> s_predefinedTypesTokens =
             new SyntaxKind[] {
@@ -113,7 +97,6 @@ namespace VooDo.AST.Names
             ? token.Own(_marker, this) : null;
         internal override SyntaxNodeOrToken EmitNodeOrToken(Scope _scope, Marker _marker) => EmitToken(_marker);
         internal SyntaxToken EmitToken(Marker _marker) => SyntaxFactory.Identifier(this).Own(_marker, this);
-        public override IEnumerable<Node> Children => Enumerable.Empty<Node>();
         public override string ToString() => m_identifier;
 
         #endregion

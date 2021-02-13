@@ -9,12 +9,13 @@ using System.Collections.Immutable;
 using System.Linq;
 
 using VooDo.Compilation;
+using VooDo.Errors.Problems;
 using VooDo.Utils;
 
 namespace VooDo.AST.Names
 {
 
-    public sealed record QualifiedType(Identifier? Alias, ImmutableArray<SimpleType> Path) : ComplexType
+    public sealed record QualifiedType : ComplexType
     {
 
         #region Creation
@@ -139,11 +140,26 @@ namespace VooDo.AST.Names
 
         #region Members
 
-        private ImmutableArray<SimpleType> m_path = Path.NonEmpty();
+        public QualifiedType(Identifier? _alias, ImmutableArray<SimpleType> _path)
+        {
+            Alias = _alias;
+            Path = _path;
+        }
+
+        public Identifier? Alias { get; init; }
+
+        private ImmutableArray<SimpleType> m_path;
         public ImmutableArray<SimpleType> Path
         {
             get => m_path;
-            init => m_path.NonEmpty();
+            init
+            {
+                if (value.IsDefaultOrEmpty)
+                {
+                    throw new SyntaxError(this, "QualifiedType path cannot be empty").AsThrowable();
+                }
+                m_path = value;
+            }
         }
         public bool IsAliasQualified => Alias is not null;
         public bool IsSimple => !IsQualified && !IsArray && !IsNullable;
@@ -155,20 +171,21 @@ namespace VooDo.AST.Names
 
         #region Overrides
 
-        public override ArrayCreationExpression ReplaceNodes(Func<NodeOrIdentifier?, NodeOrIdentifier?> _map)
+        public override QualifiedType ReplaceNodes(Func<NodeOrIdentifier?, NodeOrIdentifier?> _map)
         {
-            ComplexType newType = (ComplexType) _map(Type).NonNull();
-            ImmutableArray<Expression> newSizes = Sizes.Map(_map).NonNull();
-            if (ReferenceEquals(newType, Type) && newSizes == Sizes)
+            Identifier? newAlias = (Identifier?) _map(Alias).NonNull();
+            ImmutableArray<SimpleType> newPath = Path.Map(_map).NonNull();
+            QualifiedType newThis = (QualifiedType) base.ReplaceNodes(_map);
+            if (ReferenceEquals(newAlias, Alias) && newPath == Path)
             {
-                return this;
+                return newThis;
             }
             else
             {
-                return this with
+                return newThis with
                 {
-                    Type = newType,
-                    Sizes = newSizes
+                    Alias = newAlias,
+                    Path = newPath
                 };
             }
         }

@@ -9,12 +9,13 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 
 using VooDo.Compilation;
+using VooDo.Errors.Problems;
 using VooDo.Utils;
 
 namespace VooDo.AST.Names
 {
 
-    public abstract record ComplexType(bool IsNullable = false, ImmutableArray<ComplexType.RankSpecifier> Ranks = default) : ComplexTypeOrExpression
+    public abstract record ComplexType : ComplexTypeOrExpression
     {
 
         #region Creation
@@ -115,19 +116,32 @@ namespace VooDo.AST.Names
 
         #region Nested types
 
-        public sealed record RankSpecifier(int Rank) : Node
+        public sealed record RankSpecifier : Node
         {
 
             public static implicit operator RankSpecifier(int _rank) => new(_rank);
 
-            private int m_rank = Rank.Assert(_v => _v > 0);
+            public RankSpecifier(int _rank)
+            {
+                Rank = _rank;
+            }
+
+            private int m_rank;
             public int Rank
             {
                 get => m_rank;
-                init => m_rank = value.Assert(_v => _v > 0);
+                init
+                {
+                    if (value < 1)
+                    {
+                        throw new SyntaxError(this, "Rank must be positive").AsThrowable();
+                    }
+                    m_rank = value;
+                }
             }
 
-            public override IEnumerable<NodeOrIdentifier> Children => Enumerable.Empty<NodeOrIdentifier>();
+            public override RankSpecifier ReplaceNodes(Func<NodeOrIdentifier?, NodeOrIdentifier?> _map) => this;
+
             internal override ArrayRankSpecifierSyntax EmitNode(Scope _scope, Marker _marker)
                 => SyntaxFactoryHelper.ArrayRank(m_rank).Own(_marker, this);
 
@@ -140,7 +154,15 @@ namespace VooDo.AST.Names
 
         #region Members
 
-        private ImmutableArray<RankSpecifier> m_ranks = Ranks.EmptyIfDefault();
+        public ComplexType(bool _isNullable = false, ImmutableArray<RankSpecifier> _ranks = default)
+        {
+            IsNullable = _isNullable;
+            Ranks = _ranks;
+        }
+
+        public bool IsNullable { get; init; }
+
+        private ImmutableArray<RankSpecifier> m_ranks;
         public ImmutableArray<RankSpecifier> Ranks
         {
             get => m_ranks;
@@ -153,11 +175,10 @@ namespace VooDo.AST.Names
 
         #region Overrides
 
-        public override ArrayCreationExpression ReplaceNodes(Func<NodeOrIdentifier?, NodeOrIdentifier?> _map)
+        public override ComplexType ReplaceNodes(Func<NodeOrIdentifier?, NodeOrIdentifier?> _map)
         {
-            ComplexType newType = (ComplexType) _map(Type).NonNull();
-            ImmutableArray<Expression> newSizes = Sizes.Map(_map).NonNull();
-            if (ReferenceEquals(newType, Type) && newSizes == Sizes)
+            ImmutableArray<RankSpecifier> newRanks = Ranks.Map(_map).NonNull();
+            if (newRanks == Ranks)
             {
                 return this;
             }
@@ -165,8 +186,7 @@ namespace VooDo.AST.Names
             {
                 return this with
                 {
-                    Type = newType,
-                    Sizes = newSizes
+                    Ranks = newRanks
                 };
             }
         }

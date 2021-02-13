@@ -7,12 +7,13 @@ using System.Collections.Immutable;
 using System.Linq;
 
 using VooDo.Compilation;
+using VooDo.Errors.Problems;
 using VooDo.Utils;
 
 namespace VooDo.AST.Names
 {
 
-    public sealed record Namespace(Identifier? Alias, ImmutableArray<Identifier> Path) : Node
+    public sealed record Namespace : Node
     {
 
         #region Creation
@@ -75,12 +76,26 @@ namespace VooDo.AST.Names
 
         #region Members
 
+        public Namespace(Identifier? _alias, ImmutableArray<Identifier> _path)
+        {
+            Alias = _alias;
+            Path = _path;
+        }
 
-        private ImmutableArray<Identifier> m_path = Path.NonEmpty();
+        public Identifier? Alias { get; init; }
+
+        private ImmutableArray<Identifier> m_path;
         public ImmutableArray<Identifier> Path
         {
             get => m_path;
-            init => m_path = value.NonEmpty();
+            init
+            {
+                if (value.IsDefaultOrEmpty)
+                {
+                    throw new SyntaxError(this, "Namespace path cannot be empty").AsThrowable();
+                }
+                m_path = value;
+            }
 
         }
         public bool IsAliasQualified => Alias is not null;
@@ -89,11 +104,11 @@ namespace VooDo.AST.Names
 
         #region Overrides
 
-        public override ArrayCreationExpression ReplaceNodes(Func<NodeOrIdentifier?, NodeOrIdentifier?> _map)
+        public override Namespace ReplaceNodes(Func<NodeOrIdentifier?, NodeOrIdentifier?> _map)
         {
-            ComplexType newType = (ComplexType) _map(Type).NonNull();
-            ImmutableArray<Expression> newSizes = Sizes.Map(_map).NonNull();
-            if (ReferenceEquals(newType, Type) && newSizes == Sizes)
+            Identifier? newAlias = (Identifier?) _map(Alias).NonNull();
+            ImmutableArray<Identifier> newPath = Path.Map(_map).NonNull();
+            if (ReferenceEquals(newAlias, Alias) && newPath == Path)
             {
                 return this;
             }
@@ -101,8 +116,8 @@ namespace VooDo.AST.Names
             {
                 return this with
                 {
-                    Type = newType,
-                    Sizes = newSizes
+                    Alias = newAlias,
+                    Path = newPath
                 };
             }
         }

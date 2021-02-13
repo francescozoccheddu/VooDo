@@ -1,6 +1,7 @@
 ﻿using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
+using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -34,11 +35,11 @@ namespace VooDo.AST
 
         #region Overrides
 
-        public override ArrayCreationExpression ReplaceNodes(Func<NodeOrIdentifier?, NodeOrIdentifier?> _map)
+        public override Script ReplaceNodes(Func<NodeOrIdentifier?, NodeOrIdentifier?> _map)
         {
-            ComplexType newType = (ComplexType) _map(Type).NonNull();
-            ImmutableArray<Expression> newSizes = Sizes.Map(_map).NonNull();
-            if (ReferenceEquals(newType, Type) && newSizes == Sizes)
+            ImmutableArray<UsingDirective> newUsings = Usings.Map(_map).NonNull();
+            ImmutableArray<Statement> newStatements = Statements.Map(_map).NonNull();
+            if (newUsings == Usings && newStatements == Statements)
             {
                 return this;
             }
@@ -46,8 +47,8 @@ namespace VooDo.AST
             {
                 return this with
                 {
-                    Type = newType,
-                    Sizes = newSizes
+                    Usings = newUsings,
+                    Statements = newStatements
                 };
             }
         }

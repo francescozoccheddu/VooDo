@@ -1,6 +1,7 @@
 ﻿using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -17,19 +18,23 @@ namespace VooDo.AST.Statements
 
         #region Members
 
-        private readonly ImmutableArray<DeclarationStatement> m_declarations;
+        private ImmutableArray<DeclarationStatement> m_declarations;
+        private ImmutableArray<DeclarationStatement> m_Declarations
+        {
+            get => m_declarations;
+            init => m_declarations = value.EmptyIfDefault();
+        }
 
-        public GlobalStatement(ImmutableArray<DeclarationStatement> _declarations) => m_declarations = _declarations.EmptyIfDefault();
+        public GlobalStatement(ImmutableArray<DeclarationStatement> _declarations) => m_Declarations = _declarations;
 
         #endregion
 
         #region Overrides
 
-        public override ArrayCreationExpression ReplaceNodes(Func<NodeOrIdentifier?, NodeOrIdentifier?> _map)
+        public override GlobalStatement ReplaceNodes(Func<NodeOrIdentifier?, NodeOrIdentifier?> _map)
         {
-            ComplexType newType = (ComplexType) _map(Type).NonNull();
-            ImmutableArray<Expression> newSizes = Sizes.Map(_map).NonNull();
-            if (ReferenceEquals(newType, Type) && newSizes == Sizes)
+            ImmutableArray<DeclarationStatement> newDeclarations = m_Declarations.Map(_map).NonNull();
+            if (newDeclarations == m_Declarations)
             {
                 return this;
             }
@@ -37,19 +42,18 @@ namespace VooDo.AST.Statements
             {
                 return this with
                 {
-                    Type = newType,
-                    Sizes = newSizes
+                    m_Declarations = newDeclarations
                 };
             }
         }
 
-        public DeclarationStatement this[int _index] => ((IReadOnlyList<DeclarationStatement>) m_declarations)[_index];
-        public int Count => ((IReadOnlyCollection<Statement>) m_declarations).Count;
-        public IEnumerator<DeclarationStatement> GetEnumerator() => ((IEnumerable<DeclarationStatement>) m_declarations).GetEnumerator();
-        IEnumerator IEnumerable.GetEnumerator() => ((IEnumerable) m_declarations).GetEnumerator();
+        public DeclarationStatement this[int _index] => ((IReadOnlyList<DeclarationStatement>) m_Declarations)[_index];
+        public int Count => ((IReadOnlyCollection<Statement>) m_Declarations).Count;
+        public IEnumerator<DeclarationStatement> GetEnumerator() => ((IEnumerable<DeclarationStatement>) m_Declarations).GetEnumerator();
+        IEnumerator IEnumerable.GetEnumerator() => ((IEnumerable) m_Declarations).GetEnumerator();
         internal override BlockSyntax EmitNode(Scope _scope, Marker _marker)
             => SyntaxFactory.Block(this.Select(_s => _s.EmitNode(_scope, _marker, true)).ToSyntaxList()).Own(_marker, this);
-        public override IEnumerable<DeclarationStatement> Children => m_declarations;
+        public override IEnumerable<DeclarationStatement> Children => m_Declarations;
         public override string ToString() => GrammarConstants.globalKeyword + Count switch
         {
             0 => " {}",

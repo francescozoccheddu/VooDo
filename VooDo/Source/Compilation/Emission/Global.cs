@@ -1,6 +1,5 @@
 ﻿using System;
 
-using VooDo.AST;
 using VooDo.AST.Expressions;
 using VooDo.AST.Names;
 using VooDo.AST.Statements;
@@ -19,16 +18,15 @@ namespace VooDo.Compilation
     public sealed record GlobalPrototype
     {
 
-        private readonly Node m_syntax;
-
-        public GlobalPrototype(Global _global, DeclarationStatement.Declarator _declarator)
+        public GlobalPrototype(Global _global, DeclarationStatement _declaration, DeclarationStatement.Declarator _declarator)
         {
             if (_global.IsAnonymous)
             {
                 throw new ArgumentException("Expected named global", nameof(_global));
             }
             Global = _global;
-            m_syntax = _declarator;
+            Declarator = _declarator;
+            Declaration = _declaration;
         }
 
         public GlobalPrototype(Global _global, GlobalExpression _expression)
@@ -38,12 +36,13 @@ namespace VooDo.Compilation
                 throw new ArgumentException("Expected anonymous global", nameof(_global));
             }
             Global = _global;
-            m_syntax = _expression;
+            Expression = _expression;
         }
 
         public Global Global { get; }
-        public DeclarationStatement.Declarator? Declarator => m_syntax as DeclarationStatement.Declarator;
-        public GlobalExpression? Expression => m_syntax as GlobalExpression;
+        public DeclarationStatement? Declaration { get; }
+        public DeclarationStatement.Declarator? Declarator { get; }
+        public GlobalExpression? Expression { get; }
 
     }
 

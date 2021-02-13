@@ -6,6 +6,7 @@ using System.Collections.Generic;
 
 using VooDo.AST.Expressions;
 using VooDo.Compilation;
+using VooDo.Utils;
 
 namespace VooDo.AST.Statements
 {
@@ -29,11 +30,11 @@ namespace VooDo.AST.Statements
 
         #region Overrides
 
-        public override ArrayCreationExpression ReplaceNodes(Func<NodeOrIdentifier?, NodeOrIdentifier?> _map)
+        public override AssignmentStatement ReplaceNodes(Func<NodeOrIdentifier?, NodeOrIdentifier?> _map)
         {
-            ComplexType newType = (ComplexType) _map(Type).NonNull();
-            ImmutableArray<Expression> newSizes = Sizes.Map(_map).NonNull();
-            if (ReferenceEquals(newType, Type) && newSizes == Sizes)
+            AssignableExpression newTarget = (AssignableExpression) _map(Target).NonNull();
+            Expression newExpression = (Expression) _map(Source).NonNull();
+            if (ReferenceEquals(newTarget, Target) && ReferenceEquals(newExpression, Source))
             {
                 return this;
             }
@@ -41,8 +42,8 @@ namespace VooDo.AST.Statements
             {
                 return this with
                 {
-                    Type = newType,
-                    Sizes = newSizes
+                    Target = newTarget,
+                    Source = newExpression
                 };
             }
         }

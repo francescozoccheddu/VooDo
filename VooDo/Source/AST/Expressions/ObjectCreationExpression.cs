@@ -13,22 +13,24 @@ using VooDo.Utils;
 namespace VooDo.AST.Expressions
 {
 
-    public sealed record ObjectCreationExpression(ComplexType? Type, ImmutableArray<InvocationExpression.Argument> Arguments = default) : Expression
+    public sealed record ObjectCreationExpression : Expression
     {
 
         #region Delegating constructors
 
-        public ObjectCreationExpression(params InvocationExpression.Argument[] _arguments) : this(_arguments.ToImmutableArray()) { }
-        public ObjectCreationExpression(ComplexType? _type, params InvocationExpression.Argument[] _arguments) : this(_type, _arguments.EmptyIfNull().ToImmutableArray()) { }
-        public ObjectCreationExpression(IEnumerable<InvocationExpression.Argument>? _arguments) : this(_arguments.EmptyIfNull().ToImmutableArray()) { }
-        public ObjectCreationExpression(ComplexType? _type, IEnumerable<InvocationExpression.Argument>? _arguments) : this(_type, _arguments.EmptyIfNull().ToImmutableArray()) { }
         public ObjectCreationExpression(ImmutableArray<InvocationExpression.Argument> _arguments) : this(null, _arguments) { }
+        public ObjectCreationExpression(ComplexType? _type = null, ImmutableArray<InvocationExpression.Argument> _arguments = default)
+        {
+            Type = _type;
+            Arguments = _arguments;
+        }
 
         #endregion
 
         #region Members
 
-        private ImmutableArray<InvocationExpression.Argument> m_arguments = Arguments.EmptyIfDefault();
+        public ComplexType? Type { get; init; }
+        private ImmutableArray<InvocationExpression.Argument> m_arguments;
         public ImmutableArray<InvocationExpression.Argument> Arguments
         {
             get => m_arguments;
