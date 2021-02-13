@@ -25,31 +25,14 @@ namespace VooDo.Utils
             return set.Count < _enumerable.Count();
         }
 
-        internal static ImmutableHashSet<TItem> DistintToImmutableHashSet<TItem>(this IEnumerable<TItem> _enumerable, IEqualityComparer<TItem>? _equalityComparer = null)
-        {
-            ImmutableHashSet<TItem> set = _enumerable.ToImmutableHashSet(_equalityComparer ?? EqualityComparer<TItem>.Default);
-            if (set.Count < _enumerable.Count())
-            {
-                throw new ArgumentException("Duplicate found", nameof(_enumerable));
-            }
-            return set;
-        }
+        internal static ImmutableArray<TValue> NonNull<TValue>(this ImmutableArray<TValue?> _array) where TValue : class
+            => (_array.AnyNull()
+            ? throw new NullReferenceException()
+            : _array)!;
 
-        internal static TSeq NonEmpty<TSeq, TItem>(this TSeq _enumerable, string? _parameter = null) where TSeq : IEnumerable<TItem>
-            => _enumerable.Assert(_a => _a.Any(), "Empty sequence", _parameter);
-
-        internal static ImmutableArray<TItem> NonEmpty<TItem>(this ImmutableArray<TItem> _array, string? _parameter = null)
-            => _array.Assert(_a => !_a.IsDefaultOrEmpty, "Empty array", _parameter);
-
-        internal static TSeq MoreThanOne<TSeq, TItem>(this TSeq _enumerable, string? _parameter = null) where TSeq : IEnumerable<TItem>
-            => _enumerable.Assert(_a => _a.Count() > 1, "Sequence must contain at least two elements", _parameter);
-
-        internal static TSeq AssertAll<TSeq, TItem>(this TSeq _enumerable, Func<TItem, bool> _predicate, string _message = "Assertion failed", string? _parameter = null) where TSeq : IEnumerable<TItem>
-            => _enumerable.Assert(_a => _a.All(_predicate), _message, _parameter);
-
-        internal static TValue Assert<TValue>(this TValue _value, Func<TValue, bool> _predicate, string _message = "Assertion failed", string? _parameter = null)
-            => !_predicate(_value)
-            ? throw new ArgumentException(_message, _parameter)
+        internal static TValue NonNull<TValue>(this TValue? _value) where TValue : class
+            => _value is null
+            ? throw new NullReferenceException()
             : _value;
 
         internal static IEnumerable<(TItem item, int index)> Enumerate<TItem>(this IEnumerable<TItem> _items)
@@ -74,13 +57,54 @@ namespace VooDo.Utils
         {
             foreach (TItem item in _items)
             {
-                TOutItem? mapped = _map(item);
+                TOutItem? mapped = _map(item!);
                 if (mapped is not null)
                 {
                     yield return mapped;
                 }
             }
         }
+
+        internal static ImmutableArray<TItem?> Map<TItem>(this ImmutableArray<TItem> _array, Func<TItem, TItem?> _map)
+            => _array.Map(_map, new Identity.ReferenceComparer<TItem>());
+
+        internal static ImmutableArray<TItem?> Map<TItem>(this ImmutableArray<TItem> _array, Func<TItem, TItem?> _map, IEqualityComparer<TItem> _comparer)
+        {
+            TItem?[]? newItems = null;
+            int i;
+            for (i = 0; i < _array.Length; i++)
+            {
+                TItem? newItem = _map(_array[i]);
+                if (!_comparer.Equals(newItem, _array[i]))
+                {
+                    newItems = new TItem[_array.Length];
+                    for (int c = 0; c < i; c++)
+                    {
+                        newItems[c] = _array[c];
+                    }
+                    newItems[i] = newItem;
+                    break;
+                }
+            }
+            while (++i < _array.Length)
+            {
+                newItems![i] = _map(_array[i]);
+            }
+            if (newItems is null)
+            {
+                return _array!;
+            }
+            else
+            {
+                return newItems.ToImmutableArray();
+            }
+        }
+
+        internal static ImmutableArray<TItem?> Map<TItem>(this ImmutableArray<TItem> _array, Func<TItem, object?> _map)
+            => _array.Map(_map, new Identity.ReferenceComparer<TItem>());
+
+        internal static ImmutableArray<TItem?> Map<TItem>(this ImmutableArray<TItem> _array, Func<TItem, object?> _map, IEqualityComparer<TItem> _comparer)
+            => _array.Map(_a => (TItem) _map(_a), _comparer);
 
     }
 }

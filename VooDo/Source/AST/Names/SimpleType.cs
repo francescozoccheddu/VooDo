@@ -8,7 +8,6 @@ using System.Collections.Immutable;
 using System.Linq;
 
 using VooDo.Compilation;
-using VooDo.Compilation;
 using VooDo.Utils;
 
 namespace VooDo.AST.Names
@@ -143,6 +142,24 @@ namespace VooDo.AST.Names
         #endregion
 
         #region Overrides
+
+        public override ArrayCreationExpression ReplaceNodes(Func<NodeOrIdentifier?, NodeOrIdentifier?> _map)
+        {
+            ComplexType newType = (ComplexType) _map(Type).NonNull();
+            ImmutableArray<Expression> newSizes = Sizes.Map(_map).NonNull();
+            if (ReferenceEquals(newType, Type) && newSizes == Sizes)
+            {
+                return this;
+            }
+            else
+            {
+                return this with
+                {
+                    Type = newType,
+                    Sizes = newSizes
+                };
+            }
+        }
 
         internal TypeSyntax EmitNode(Scope _scope, Marker _marker, bool _allowPredefined)
         {

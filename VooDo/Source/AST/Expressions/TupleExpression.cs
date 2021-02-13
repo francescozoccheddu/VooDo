@@ -7,7 +7,6 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 
-using VooDo.Compilation;
 using VooDo.AST.Names;
 using VooDo.Compilation;
 using VooDo.Utils;
@@ -23,6 +22,7 @@ namespace VooDo.AST.Expressions
         public abstract record ElementBase : Node
         {
 
+            public abstract override ElementBase ReplaceNodes(Func<NodeOrIdentifier?, NodeOrIdentifier?> _map);
             internal abstract override ArgumentSyntax EmitNode(Scope _scope, Marker _marker);
 
         }
@@ -46,11 +46,28 @@ namespace VooDo.AST.Expressions
 
         #region Overrides
 
+        protected abstract TupleExpressionBase<TElement> Create(ImmutableArray<TElement> _elements);
+
+        public sealed override TupleExpressionBase<TElement> ReplaceNodes(Func<NodeOrIdentifier?, NodeOrIdentifier?> _map)
+        {
+            ImmutableArray<TElement> newSizes = m_elements.Map(_map).NonNull();
+            if (newSizes == m_elements)
+            {
+                return this;
+            }
+            else
+            {
+                return Create(m_elements);
+            }
+        }
+
         public TElement this[int _index] => ((IReadOnlyList<TElement>) m_elements)[_index];
         public int Count => ((IReadOnlyCollection<TElement>) m_elements).Count;
         public IEnumerator<TElement> GetEnumerator() => ((IEnumerable<TElement>) m_elements).GetEnumerator();
         IEnumerator IEnumerable.GetEnumerator() => ((IEnumerable) m_elements).GetEnumerator();
-        internal override TupleExpressionSyntax EmitNode(Scope _scope, Marker _marker)
+
+        protected sealed override EPrecedence m_Precedence => EPrecedence.Primary;
+        internal sealed override TupleExpressionSyntax EmitNode(Scope _scope, Marker _marker)
             => SyntaxFactory.TupleExpression(this.Select(_e => _e.EmitNode(_scope, _marker)).ToSeparatedList())
             .Own(_marker, this);
         public override IEnumerable<TElement> Children => m_elements;
@@ -70,6 +87,24 @@ namespace VooDo.AST.Expressions
 
             public bool IsNamed => Name is not null;
 
+            public override Element ReplaceNodes(Func<NodeOrIdentifier?, NodeOrIdentifier?> _map)
+            {
+                Identifier? newName = (Identifier?) _map(Name);
+                Expression newExpression = (Expression) _map(Expression).NonNull();
+                if (ReferenceEquals(newName, Name) && ReferenceEquals(newExpression, Expression))
+                {
+                    return this;
+                }
+                else
+                {
+                    return this with
+                    {
+                        Name = newName,
+                        Expression = newExpression
+                    };
+                }
+            }
+
             internal override ArgumentSyntax EmitNode(Scope _scope, Marker _marker)
                 => SyntaxFactory.Argument(Expression.EmitNode(_scope, _marker))
                 .WithNameColon(IsNamed
@@ -81,6 +116,8 @@ namespace VooDo.AST.Expressions
 
         }
 
+        protected override TupleExpression Create(ImmutableArray<Element> _elements) => new TupleExpression(_elements);
+
     }
 
     public sealed record TupleDeclarationExpression : TupleExpressionBase<TupleDeclarationExpression.Element>
@@ -90,6 +127,24 @@ namespace VooDo.AST.Expressions
 
         public sealed record Element(ComplexTypeOrVar Type, IdentifierOrDiscard Name) : ElementBase
         {
+
+            public override Element ReplaceNodes(Func<NodeOrIdentifier?, NodeOrIdentifier?> _map)
+            {
+                ComplexTypeOrVar newType = (ComplexTypeOrVar) _map(Type).NonNull();
+                IdentifierOrDiscard newName = (IdentifierOrDiscard) _map(Name).NonNull();
+                if (ReferenceEquals(newType, Type) && ReferenceEquals(newName, Name))
+                {
+                    return this;
+                }
+                else
+                {
+                    return this with
+                    {
+                        Type = newType,
+                        Name = newName
+                    };
+                }
+            }
 
             internal override ArgumentSyntax EmitNode(Scope _scope, Marker _marker)
             {
@@ -108,6 +163,8 @@ namespace VooDo.AST.Expressions
             public override string ToString() => $"{Type} {Name}";
 
         }
+
+        protected override TupleDeclarationExpression Create(ImmutableArray<Element> _elements) => new TupleDeclarationExpression(_elements);
 
     }
 

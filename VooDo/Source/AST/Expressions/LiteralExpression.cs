@@ -2,10 +2,9 @@
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
 
 using VooDo.Compilation;
+using VooDo.Errors.Problems;
 
 namespace VooDo.AST.Expressions
 {
@@ -92,7 +91,7 @@ namespace VooDo.AST.Expressions
                     or float
                     or double))
                 {
-                    throw new ArgumentException("Not a literal type");
+                    throw new SyntaxError(this, "Non literal value type").AsThrowable();
                 }
                 m_value = value;
             }
@@ -101,6 +100,10 @@ namespace VooDo.AST.Expressions
         #endregion
 
         #region Overrides
+
+        protected override EPrecedence m_Precedence => EPrecedence.Primary;
+
+        public override LiteralExpression ReplaceNodes(Func<NodeOrIdentifier?, NodeOrIdentifier?> _map) => this;
 
         private LiteralExpressionSyntax EmitNode()
         {
@@ -130,7 +133,6 @@ namespace VooDo.AST.Expressions
                 });
         }
         internal override LiteralExpressionSyntax EmitNode(Scope _scope, Marker _marker) => EmitNode().Own(_marker, this);
-        public override IEnumerable<NodeOrIdentifier> Children => Enumerable.Empty<NodeOrIdentifier>();
         public override string ToString() => EmitNode().ToFullString();
 
         #endregion

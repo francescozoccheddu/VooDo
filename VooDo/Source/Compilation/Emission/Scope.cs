@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 
 using VooDo.AST.Names;
-using VooDo.Compilation;
 
 namespace VooDo.Compilation
 {
@@ -17,15 +16,15 @@ namespace VooDo.Compilation
         internal sealed class GlobalDefinition
         {
 
-            public GlobalDefinition(Global _global, string _identifier) : this(_global, SyntaxFactory.Identifier(_identifier)) { }
+            public GlobalDefinition(GlobalPrototype _global, string _identifier) : this(_global, SyntaxFactory.Identifier(_identifier)) { }
 
-            public GlobalDefinition(Global _global, SyntaxToken _identifier)
+            public GlobalDefinition(GlobalPrototype _global, SyntaxToken _identifier)
             {
                 Global = _global;
                 Identifier = _identifier;
             }
 
-            public Global Global { get; }
+            public GlobalPrototype Global { get; }
             public SyntaxToken Identifier { get; }
 
         }
@@ -51,7 +50,7 @@ namespace VooDo.Compilation
         public ImmutableArray<GlobalDefinition> GetGlobalDefinitions()
             => m_globals.ToImmutableArray();
 
-        private static GlobalDefinition CreateGlobalDefinition(Global _global, int _index)
+        private static GlobalDefinition CreateGlobalDefinition(GlobalPrototype _global, int _index)
             => new GlobalDefinition(_global, Compiler.globalFieldPrefix + _index);
 
         public void AddLocal(Identifier _name)
@@ -63,15 +62,15 @@ namespace VooDo.Compilation
             m_names.Add(_name, false);
         }
 
-        public GlobalDefinition AddGlobal(Global _global)
+        public GlobalDefinition AddGlobal(GlobalPrototype _global)
         {
-            if (_global.Name is not null)
+            if (_global.Global.Name is not null)
             {
-                if (IsNameTaken(_global.Name))
+                if (IsNameTaken(_global.Global.Name))
                 {
-                    throw new InvalidOperationException($"Redefinition of {_global.Name}");
+                    throw new InvalidOperationException($"Redefinition of {_global.Global.Name}");
                 }
-                m_names.Add(_global.Name, true);
+                m_names.Add(_global.Global.Name, true);
             }
             GlobalDefinition definition = CreateGlobalDefinition(_global, m_globals.Count);
             m_globals.Add(definition);

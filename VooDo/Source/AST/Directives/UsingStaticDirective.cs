@@ -2,31 +2,60 @@
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
+using System;
 using System.Collections.Generic;
 
-using VooDo.Compilation;
 using VooDo.AST.Names;
 using VooDo.Compilation;
+using VooDo.Errors.Problems;
 using VooDo.Utils;
 
 namespace VooDo.AST.Directives
 {
 
-    public sealed record UsingStaticDirective(QualifiedType Type) : UsingDirective
+    public sealed record UsingStaticDirective : UsingDirective
     {
 
         #region Members
 
-        private QualifiedType m_type = Type.Assert(_t => !_t.IsArray && !_t.IsNullable, "Nullable or array type");
+        public UsingStaticDirective(QualifiedType _type)
+        {
+            m_type = Type = _type;
+        }
+
+        private QualifiedType m_type;
         public QualifiedType Type
         {
             get => m_type;
-            init => m_type = value.Assert(_t => !_t.IsArray && !_t.IsNullable, "Nullable or array type");
+            init
+            {
+                if (value.IsArray || value.IsNullable)
+                {
+                    throw new ChildSyntaxError(this, value, "Using static directive type cannot be nullable or array").AsThrowable();
+                }
+                m_type = value;
+            }
         }
 
         #endregion
 
         #region Overrides
+
+        public override UsingStaticDirective ReplaceNodes(Func<NodeOrIdentifier?, NodeOrIdentifier?> _map)
+        {
+            QualifiedType newType = (QualifiedType) _map(Type).NonNull();
+            if (ReferenceEquals(newType, Type))
+            {
+                return this;
+            }
+            else
+            {
+                return this with
+                {
+                    Type = newType
+                };
+            }
+        }
 
         internal override UsingDirectiveSyntax EmitNode(Scope _scope, Marker _marker)
             => SyntaxFactory.UsingDirective(

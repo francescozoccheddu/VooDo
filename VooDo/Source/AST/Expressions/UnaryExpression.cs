@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 
 using VooDo.Compilation;
-using VooDo.Compilation;
+using VooDo.Utils;
 
 namespace VooDo.AST.Expressions
 {
@@ -25,6 +25,24 @@ namespace VooDo.AST.Expressions
         #endregion
 
         #region Overrides
+
+        protected override EPrecedence m_Precedence => EPrecedence.Unary;
+
+        public override UnaryExpression ReplaceNodes(Func<NodeOrIdentifier?, NodeOrIdentifier?> _map)
+        {
+            Expression newExpression = (Expression) _map(Expression).NonNull();
+            if (ReferenceEquals(newExpression, Expression))
+            {
+                return this;
+            }
+            else
+            {
+                return this with
+                {
+                    Expression = newExpression
+                };
+            }
+        }
 
         internal override ExpressionSyntax EmitNode(Scope _scope, Marker _marker)
             => SyntaxFactory.PrefixUnaryExpression(

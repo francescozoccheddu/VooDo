@@ -3,12 +3,13 @@
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
-using VooDo.Compilation;
 using VooDo.AST.Names;
 using VooDo.Compilation;
+using VooDo.Utils;
 
 namespace VooDo.AST.Expressions
 {
@@ -24,6 +25,26 @@ namespace VooDo.AST.Expressions
 
         #region Overrides
 
+        protected override EPrecedence m_Precedence => EPrecedence.Relational;
+
+        public override IsExpression ReplaceNodes(Func<NodeOrIdentifier?, NodeOrIdentifier?> _map)
+        {
+            ComplexType newType = (ComplexType) _map(Type).NonNull();
+            IdentifierOrDiscard? newName = (IdentifierOrDiscard?) _map(Name);
+            if (ReferenceEquals(newType, Type) && ReferenceEquals(newName, Name))
+            {
+                return this;
+            }
+            else
+            {
+                return this with
+                {
+                    Type = newType,
+                    Name = newName
+                };
+            }
+        }
+
         internal override ExpressionSyntax EmitNode(Scope _scope, Marker _marker)
             => (IsDeclaration
             ? SyntaxFactory.IsPatternExpression(
@@ -38,7 +59,7 @@ namespace VooDo.AST.Expressions
             .Own(_marker, this);
         public override IEnumerable<NodeOrIdentifier> Children
             => new NodeOrIdentifier[] { Expression, Type }.Concat(IsDeclaration ? new NodeOrIdentifier[] { Name! } : Enumerable.Empty<NodeOrIdentifier>());
-        public override string ToString() => $"{Expression} {GrammarConstants.isKeyword} {Type}" + (IsDeclaration ? $" {Name}" : "");
+        public override string ToString() => $"{LeftCode(Expression)} {GrammarConstants.isKeyword} {Type}" + (IsDeclaration ? $" {Name}" : "");
 
         #endregion
 

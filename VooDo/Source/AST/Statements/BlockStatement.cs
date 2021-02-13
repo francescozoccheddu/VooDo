@@ -25,6 +25,24 @@ namespace VooDo.AST.Statements
 
         #region Overrides
 
+        public override ArrayCreationExpression ReplaceNodes(Func<NodeOrIdentifier?, NodeOrIdentifier?> _map)
+        {
+            ComplexType newType = (ComplexType) _map(Type).NonNull();
+            ImmutableArray<Expression> newSizes = Sizes.Map(_map).NonNull();
+            if (ReferenceEquals(newType, Type) && newSizes == Sizes)
+            {
+                return this;
+            }
+            else
+            {
+                return this with
+                {
+                    Type = newType,
+                    Sizes = newSizes
+                };
+            }
+        }
+
         public Statement this[int _index] => ((IReadOnlyList<Statement>) m_statements)[_index];
         public int Count => ((IReadOnlyCollection<Statement>) m_statements).Count;
         public IEnumerator<Statement> GetEnumerator() => ((IEnumerable<Statement>) m_statements).GetEnumerator();

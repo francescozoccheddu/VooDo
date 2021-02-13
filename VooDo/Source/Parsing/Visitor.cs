@@ -25,11 +25,18 @@ namespace VooDo.Parsing
     internal sealed class Visitor : VooDoParserBaseVisitor<NodeOrIdentifier>
     {
 
-        private static Origin GetOrigin(IToken _token)
-            => Origin.FromSource(_token.StartIndex, _token.StopIndex);
+        private readonly string m_source;
 
-        private static Origin GetOrigin(ParserRuleContext _context)
-            => Origin.FromSource(_context.Start.StartIndex, (_context.Stop ?? _context.Start).StopIndex);
+        internal Visitor(string _source)
+        {
+            m_source = _source;
+        }
+
+        private Origin GetOrigin(IToken _token)
+            => new CodeOrigin(_token.StartIndex, _token.StopIndex, m_source);
+
+        private Origin GetOrigin(ParserRuleContext _context)
+            => new CodeOrigin(_context.Start.StartIndex, (_context.Stop ?? _context.Start).StopIndex, m_source);
 
         private ImmutableArray<TNodeOrIdentifier> Get<TNodeOrIdentifier>(IEnumerable<ParserRuleContext> _rule) where TNodeOrIdentifier : NodeOrIdentifier
             => _rule.Select(Get<TNodeOrIdentifier>).ToImmutableArray();

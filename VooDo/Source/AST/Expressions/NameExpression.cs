@@ -4,7 +4,6 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
 
-using VooDo.Compilation;
 using VooDo.AST.Names;
 using VooDo.Compilation;
 using VooDo.Runtime;
@@ -17,6 +16,24 @@ namespace VooDo.AST.Expressions
     {
 
         #region Overrides
+
+        protected override EPrecedence m_Precedence => EPrecedence.Primary;
+
+        public override NameExpression ReplaceNodes(Func<NodeOrIdentifier?, NodeOrIdentifier?> _map)
+        {
+            Identifier newName = (Identifier) _map(Name).NonNull();
+            if (ReferenceEquals(newName, Name))
+            {
+                return this;
+            }
+            else
+            {
+                return this with
+                {
+                    Name = newName
+                };
+            }
+        }
 
         internal override ExpressionSyntax EmitNode(Scope _scope, Marker _marker)
         {

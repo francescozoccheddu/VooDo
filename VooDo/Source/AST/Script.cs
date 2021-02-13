@@ -34,6 +34,24 @@ namespace VooDo.AST
 
         #region Overrides
 
+        public override ArrayCreationExpression ReplaceNodes(Func<NodeOrIdentifier?, NodeOrIdentifier?> _map)
+        {
+            ComplexType newType = (ComplexType) _map(Type).NonNull();
+            ImmutableArray<Expression> newSizes = Sizes.Map(_map).NonNull();
+            if (ReferenceEquals(newType, Type) && newSizes == Sizes)
+            {
+                return this;
+            }
+            else
+            {
+                return this with
+                {
+                    Type = newType,
+                    Sizes = newSizes
+                };
+            }
+        }
+
         internal override CompilationUnitSyntax EmitNode(Scope _scope, Marker _marker)
             => EmitNode(_scope, _marker, ImmutableArray.Create(new Identifier(Compiler.runtimeReferenceAlias)), null);
 
@@ -61,9 +79,9 @@ namespace VooDo.AST
             ImmutableArray<Scope.GlobalDefinition> globals = _scope.GetGlobalDefinitions();
             VariableDeclarationSyntax EmitGlobalDeclaration(Scope.GlobalDefinition _definition)
             {
-                TypeSyntax? type = _definition.Global.Type.IsVar
+                TypeSyntax? type = _definition.Global.Global.Type.IsVar
                     ? null
-                    : _definition.Global.Type.EmitNode(_scope, _marker);
+                    : _definition.Global.Global.Type.EmitNode(_scope, _marker);
                 return SF.VariableDeclaration(
                             SFH.VariableType(type),
                             SF.VariableDeclarator(
@@ -71,14 +89,14 @@ namespace VooDo.AST
                                 null,
                                 SFH.CreateVariableInvocation(
                                     type,
-                                    _definition.Global.IsAnonymous
+                                    _definition.Global.Global.IsAnonymous
                                     ? SF.LiteralExpression(
                                         SyntaxKind.NullLiteralExpression)
                                     : SF.LiteralExpression(
                                         SyntaxKind.StringLiteralExpression,
-                                        SF.Literal(_definition.Global.Name!)),
-                                    _definition.Global.HasInitializer
-                                    ? _definition.Global.Initializer!.EmitNode(_scope, _marker)
+                                        SF.Literal(_definition.Global.Global.Name!)),
+                                    _definition.Global.Global.HasInitializer
+                                    ? _definition.Global.Global.Initializer!.EmitNode(_scope, _marker)
                                     : SF.LiteralExpression(
                                         SyntaxKind.DefaultLiteralExpression))
                                 .ToEqualsValueClause())

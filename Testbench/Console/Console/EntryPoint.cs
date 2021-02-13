@@ -11,8 +11,6 @@ namespace VooDo.ConsoleTestbench
     public interface Culo : IControllerFactory<bool> { }
     internal static class EntryPoint
     {
-
-
         public static void Run()
         {
             string code = @"

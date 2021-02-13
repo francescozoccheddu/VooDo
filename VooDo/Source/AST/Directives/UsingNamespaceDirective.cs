@@ -3,12 +3,13 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
+using System;
 using System.Collections.Generic;
 
-using VooDo.Compilation;
 using VooDo.AST.Names;
 using VooDo.AST.Statements;
 using VooDo.Compilation;
+using VooDo.Utils;
 
 namespace VooDo.AST.Directives
 {
@@ -18,7 +19,7 @@ namespace VooDo.AST.Directives
 
         #region Delegating constructors
 
-
+        public UsingNamespaceDirective(Namespace _namespace) : this(null, _namespace) { }
 
         #endregion
 
@@ -29,6 +30,24 @@ namespace VooDo.AST.Directives
         #endregion
 
         #region Overrides
+
+        public override UsingNamespaceDirective ReplaceNodes(Func<NodeOrIdentifier?, NodeOrIdentifier?> _map)
+        {
+            Identifier? newAlias = (Identifier?) _map(Alias);
+            Namespace newNamespace = (Namespace) _map(Namespace).NonNull();
+            if (ReferenceEquals(newAlias, Alias) && ReferenceEquals(newNamespace, Namespace))
+            {
+                return this;
+            }
+            else
+            {
+                return this with
+                {
+                    Alias = newAlias,
+                    Namespace = newNamespace
+                };
+            }
+        }
 
         internal override UsingDirectiveSyntax EmitNode(Scope _scope, Marker _marker)
         {

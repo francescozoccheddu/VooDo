@@ -1,11 +1,11 @@
 ﻿using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
+using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 
-using VooDo.Compilation;
 using VooDo.AST.Names;
 using VooDo.Compilation;
 using VooDo.Utils;
@@ -39,6 +39,26 @@ namespace VooDo.AST.Expressions
         #endregion
 
         #region Override
+
+        protected override EPrecedence m_Precedence => EPrecedence.Primary;
+
+        public override ObjectCreationExpression ReplaceNodes(Func<NodeOrIdentifier?, NodeOrIdentifier?> _map)
+        {
+            ComplexType? newType = (ComplexType?) _map(Type);
+            ImmutableArray<InvocationExpression.Argument> newArguments = Arguments.Map(_map).NonNull();
+            if (ReferenceEquals(newType, Type) && newArguments == Arguments)
+            {
+                return this;
+            }
+            else
+            {
+                return this with
+                {
+                    Type = newType,
+                    Arguments = newArguments
+                };
+            }
+        }
 
         internal override ExpressionSyntax EmitNode(Scope _scope, Marker _marker)
         {

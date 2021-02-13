@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 
 using VooDo.Compilation;
-using VooDo.Compilation;
+using VooDo.Utils;
 
 namespace VooDo.AST.Expressions
 {
@@ -30,6 +30,48 @@ namespace VooDo.AST.Expressions
         #endregion
 
         #region Overrides
+
+        protected override EPrecedence m_Precedence => Kind switch
+        {
+            EKind.Add or
+            EKind.Subtract => EPrecedence.Additive,
+            EKind.Multiply or
+            EKind.Divide or
+            EKind.Modulo => EPrecedence.Multiplicative,
+            EKind.LeftShift or
+            EKind.RightShift => EPrecedence.Shift,
+            EKind.Equals or
+            EKind.NotEquals => EPrecedence.Equality,
+            EKind.LessThan or
+            EKind.LessThanOrEqual or
+            EKind.GreaterThan or
+            EKind.GreaterThanOrEqual => EPrecedence.Relational,
+            EKind.Coalesce => EPrecedence.Coalesce,
+            EKind.LogicAnd => EPrecedence.LogicAnd,
+            EKind.LogicOr => EPrecedence.LogicOr,
+            EKind.BitwiseAnd => EPrecedence.BitwiseAnd,
+            EKind.BitwiseOr => EPrecedence.BitwiseOr,
+            EKind.BitwiseXor => EPrecedence.BitwiseXor,
+            _ => throw new InvalidOperationException(),
+        };
+
+        public override BinaryExpression ReplaceNodes(Func<NodeOrIdentifier?, NodeOrIdentifier?> _map)
+        {
+            Expression newLeft = (Expression) _map(Left).NonNull();
+            Expression newRight = (Expression) _map(Right).NonNull();
+            if (ReferenceEquals(newLeft, Left) && ReferenceEquals(newRight, Right))
+            {
+                return this;
+            }
+            else
+            {
+                return this with
+                {
+                    Left = newLeft,
+                    Right = newRight
+                };
+            }
+        }
 
         internal override BinaryExpressionSyntax EmitNode(Scope _scope, Marker _marker)
             => SyntaxFactory.BinaryExpression(
@@ -60,7 +102,7 @@ namespace VooDo.AST.Expressions
                 Right.EmitNode(_scope, _marker))
             .Own(_marker, this);
         public override IEnumerable<Expression> Children => new Expression[] { Left, Right };
-        public override string ToString() => $"{Left} {Kind.Token()} {Right}";
+        public override string ToString() => $"{LeftCode(Left)} {Kind.Token()} {RightCode(Right)}";
 
         #endregion
 

@@ -2,11 +2,11 @@
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 
+using VooDo.Compilation.Problems;
 using VooDo.Runtime;
 using VooDo.Utils;
 
@@ -25,25 +25,24 @@ namespace VooDo.Compilation.Transformation
             CSharpCompilation compilation = (CSharpCompilation) _semantics.Compilation;
             MetadataReference runtime = compilation.References.First(_r => _r.Properties.Aliases.Contains(Compiler.runtimeReferenceAlias));
             IAssemblySymbol runtimeSymbol = (IAssemblySymbol) compilation.GetAssemblyOrModuleSymbol(runtime)!;
-            _variableSymbol = runtimeSymbol.GetTypeByMetadataName(typeof(Variable).FullName!)!;
-            _controllerFactorySymbol = runtimeSymbol.GetTypeByMetadataName(typeof(IControllerFactory<>).FullName!)!;
+            INamedTypeSymbol? variableSymbol = runtimeSymbol.GetTypeByMetadataName(typeof(Variable).FullName!);
+            INamedTypeSymbol? controllerFactorySymbol = runtimeSymbol.GetTypeByMetadataName(typeof(IControllerFactory<>).FullName!);
+            if (variableSymbol is null || controllerFactorySymbol is null)
+            {
+                throw new NoSemanticsException();
+            }
+            _variableSymbol = variableSymbol;
+            _controllerFactorySymbol = controllerFactorySymbol;
         }
 
-        private static ITypeSymbol? Conciliate(ITypeSymbol? _a, ITypeSymbol? _b)
+        private static ImmutableArray<ITypeSymbol> Conciliate(ITypeSymbol? _a, ImmutableArray<ITypeSymbol> _b)
         {
-            if (_a == null)
+            IEnumerable<ITypeSymbol> candidates = _b;
+            if (_a is not null)
             {
-                return _b;
+                candidates = candidates.Append(_a);
             }
-            if (_b == null)
-            {
-                return _a;
-            }
-            if (_a.Equals(_b, SymbolEqualityComparer.Default))
-            {
-                return _a;
-            }
-            return null;
+            return candidates.Distinct<ITypeSymbol>(SymbolEqualityComparer.Default).ToImmutableArray();
         }
 
         private static ITypeSymbol? GetInitializerType(VariableDeclarationSyntax _syntax, SemanticModel _semantics)
@@ -53,27 +52,27 @@ namespace VooDo.Compilation.Transformation
             return _semantics.GetTypeInfo(argument).ConvertedType;
         }
 
-        private static ITypeSymbol? GetControllerType(ExpressionSyntax _syntax, SemanticModel _semantics, INamedTypeSymbol _controllerFactorySymbol)
+        private static ImmutableArray<ITypeSymbol> GetControllerTypes(ExpressionSyntax _syntax, SemanticModel _semantics, INamedTypeSymbol _controllerFactorySymbol)
         {
             ITypeSymbol? symbol = _semantics.GetTypeInfo(_syntax).ConvertedType;
             if (symbol is INamedTypeSymbol namedSymbol)
             {
                 if (_controllerFactorySymbol.Equals(namedSymbol.ConstructedFrom, SymbolEqualityComparer.Default))
                 {
-                    return namedSymbol.TypeArguments[0];
+                    return ImmutableArray.Create(namedSymbol.TypeArguments[0]);
                 }
-                ImmutableArray<INamedTypeSymbol> implementations = namedSymbol.AllInterfaces
-                    .Where(_i => _i is INamedTypeSymbol ni && ni.ConstructedFrom.Equals(_controllerFactorySymbol, SymbolEqualityComparer.Default))
-                    .ToImmutableArray();
-                if (implementations.Length == 1)
+                else
                 {
-                    return implementations[0].TypeArguments[0];
+                    return namedSymbol.AllInterfaces
+                        .Where(_i => _i is INamedTypeSymbol ni && ni.ConstructedFrom.Equals(_controllerFactorySymbol, SymbolEqualityComparer.Default))
+                        .Select(_i => _i.TypeArguments[0])
+                        .ToImmutableArray();
                 }
             }
-            return null;
+            return ImmutableArray.Create<ITypeSymbol>();
         }
 
-        private static ImmutableArray<ITypeSymbol?> InferTypes(ImmutableArray<Field> _fields, SemanticModel _semantics, INamedTypeSymbol _controllerFactorySymbol)
+        private static ImmutableArray<ImmutableArray<ITypeSymbol>> InferTypes(ImmutableArray<Field> _fields, SemanticModel _semantics, INamedTypeSymbol _controllerFactorySymbol)
         {
             CompilationUnitSyntax root = (CompilationUnitSyntax) _semantics.SyntaxTree.GetRoot();
             ImmutableArray<ITypeSymbol?> initializers = _fields
@@ -102,13 +101,13 @@ namespace VooDo.Compilation.Transformation
                 return false;
             }
 
-            ImmutableDictionary<int, ITypeSymbol>? controllers = root
+            ImmutableDictionary<int, ImmutableArray<ITypeSymbol>>? controllers = root
                 .DescendantNodes()
                 .OfType<InvocationExpressionSyntax>()
                 .SelectNonNull(_e => TryGetControllerExpression(_e, out ExpressionSyntax? expression, out int index)
-                    ? (index, GetControllerType(expression!, _semantics, _controllerFactorySymbol))
-                    : ((int index, ITypeSymbol? symbol)?) null)
-                .ToImmutableDictionary(_e => _e!.Value.index, _e => _e!.Value.symbol);
+                    ? (index, GetControllerTypes(expression!, _semantics, _controllerFactorySymbol))
+                    : ((int index, ImmutableArray<ITypeSymbol> types)?) null)
+                .ToImmutableDictionary(_e => _e!.Value.index, _e => _e!.Value.types);
             return initializers.SelectIndexed((_a, _i) => Conciliate(_a, controllers.GetValueOrDefault(_i))).ToImmutableArray();
         }
 
@@ -135,13 +134,12 @@ namespace VooDo.Compilation.Transformation
                 .OfType<FieldDeclarationSyntax>()
                 .SelectNonNull(ZipGlobal)
                 .ToImmutableArray();
-            ImmutableArray<ITypeSymbol?> types = InferTypes(fields, _semantics, controllerFactorySymbol);
+            ImmutableArray<ImmutableArray<ITypeSymbol>> candidateTypes = InferTypes(fields, _semantics, controllerFactorySymbol);
             {
-                int firstError = types.IndexOf(null);
-                if (firstError >= 0)
-                {
-                    throw new ApplicationException($"Cannot infer type for global '{_globals[firstError].Global.Name ?? "<unnamed-global>"}'");
-                }
+                IEnumerable<GlobalDefinition>? problems = candidateTypes
+                    .Zip(fields)
+                    .Where(_z => _z.First.Length != 1)
+                    .Select(_z => _z.Second.Definition)
             }
             ImmutableDictionary<VariableDeclarationSyntax, ITypeSymbol> map = fields.Zip(types, (_f, _t) => KeyValuePair.Create(_f.Syntax, _t!)).ToImmutableDictionary();
             VariableDeclarationSyntax Replace(VariableDeclarationSyntax _original, VariableDeclarationSyntax _updated)
