@@ -9,6 +9,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 
 using VooDo.Compilation;
+using VooDo.Compilation.Emission;
 using VooDo.Errors.Problems;
 using VooDo.Utils;
 

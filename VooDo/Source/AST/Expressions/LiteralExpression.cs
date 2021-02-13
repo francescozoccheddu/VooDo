@@ -4,6 +4,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 
 using VooDo.Compilation;
+using VooDo.Compilation.Emission;
 using VooDo.Errors.Problems;
 
 namespace VooDo.AST.Expressions

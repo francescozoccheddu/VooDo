@@ -6,12 +6,11 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 
-using VooDo.Errors;
 using VooDo.Errors.Problems;
 using VooDo.Runtime;
 using VooDo.Utils;
 
-using static VooDo.Compilation.Scope;
+using static VooDo.Compilation.Emission.Scope;
 
 namespace VooDo.Compilation.Transformation
 {
@@ -30,7 +29,7 @@ namespace VooDo.Compilation.Transformation
             INamedTypeSymbol? controllerFactorySymbol = runtimeSymbol.GetTypeByMetadataName(typeof(IControllerFactory<>).FullName!);
             if (variableSymbol is null || controllerFactorySymbol is null)
             {
-                throw new NoSemanticsException();
+                throw new NoSemanticsProblem().AsThrowable();
             }
             _variableSymbol = variableSymbol;
             _controllerFactorySymbol = controllerFactorySymbol;

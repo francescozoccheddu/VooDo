@@ -4,7 +4,7 @@ using VooDo.AST.Expressions;
 using VooDo.AST.Names;
 using VooDo.AST.Statements;
 
-namespace VooDo.Compilation
+namespace VooDo.Compilation.Emission
 {
 
     public sealed record Global(ComplexTypeOrVar Type, Identifier? Name, Expression? Initializer = null)
@@ -31,7 +31,7 @@ namespace VooDo.Compilation
 
         public GlobalPrototype(Global _global, GlobalExpression _expression)
         {
-            if (_global.IsAnonymous)
+            if (!_global.IsAnonymous)
             {
                 throw new ArgumentException("Expected anonymous global", nameof(_global));
             }

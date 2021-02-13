@@ -8,11 +8,13 @@ using System.Linq;
 using VooDo.AST;
 using VooDo.Utils;
 
-namespace VooDo.Compilation
+namespace VooDo.Compilation.Emission
 {
 
     internal sealed class Marker
     {
+
+
 
         private const string c_annotationKind = "VooDo " + nameof(Marker);
         private static SyntaxAnnotation CreateAnnotation(int _index)
@@ -118,6 +120,8 @@ namespace VooDo.Compilation
             => m_reverse[int.Parse(GetAnnotation(_nodeOrToken)!.Data!)];
 
     }
+
+
 
     internal static class MarkerExtensions
     {

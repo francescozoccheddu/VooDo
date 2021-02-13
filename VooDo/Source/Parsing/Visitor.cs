@@ -172,7 +172,7 @@ namespace VooDo.Parsing
         public override NodeOrIdentifier VisitElementAccessExpression([NotNull] VooDoParser.ElementAccessExpressionContext _c)
             => new ElementAccessExpression(Get<Expression>(_c.mSource), Get<Expression>(_c._mArgs));
         public override NodeOrIdentifier VisitExpressionStatement([NotNull] VooDoParser.ExpressionStatementContext _c)
-            => new ExpressionStatement(Get<Expression>(_c.mExpr));
+            => new ExpressionStatement(Get<InvocationOrObjectCreationExpression>(_c.mExpr));
         public override NodeOrIdentifier VisitFalseLiteralExpression([NotNull] VooDoParser.FalseLiteralExpressionContext _c)
             => LiteralExpression.False;
         public override NodeOrIdentifier VisitFullScript([NotNull] VooDoParser.FullScriptContext _c)
@@ -209,13 +209,14 @@ namespace VooDo.Parsing
             => new Namespace(TryGet<Identifier>(_c.mAlias), Get<Identifier>(_c._mPath));
         public override NodeOrIdentifier VisitNullLiteralExpression([NotNull] VooDoParser.NullLiteralExpressionContext _c)
             => LiteralExpression.Null;
+        public override NodeOrIdentifier VisitObjectCreationExpression([NotNull] VooDoParser.ObjectCreationExpressionContext _c)
+            => new ObjectCreationExpression(TryGet<ComplexType>(_c.mType), Get<InvocationExpression.Argument>(_c._mArgs));
         public override NodeOrIdentifier VisitOtherExpression([NotNull] VooDoParser.OtherExpressionContext _c)
             => Variant<Expression>(_c);
         public override NodeOrIdentifier VisitOtherLiteralExpression([NotNull] VooDoParser.OtherLiteralExpressionContext _c)
             => new LiteralExpression(((LiteralExpressionSyntax) SyntaxFactory.ParseExpression(_c.GetText())).Token.Value);
         public override NodeOrIdentifier VisitOtherStatement([NotNull] VooDoParser.OtherStatementContext _c)
             => Variant<Statement>(_c);
-
         public override NodeOrIdentifier VisitOutDeclarationArgumentWithDiscard([NotNull] VooDoParser.OutDeclarationArgumentWithDiscardContext _c)
             => new InvocationExpression.OutDeclarationArgument(null, ComplexTypeOrVar.Var, IdentifierOrDiscard.Discard);
         public override NodeOrIdentifier VisitOutDeclarationArgumentWithType([NotNull] VooDoParser.OutDeclarationArgumentWithTypeContext _c)

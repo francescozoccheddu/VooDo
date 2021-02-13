@@ -2,7 +2,7 @@
 
 using System;
 
-using VooDo.Compilation;
+using VooDo.Compilation.Emission;
 
 namespace VooDo.AST
 {

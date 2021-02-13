@@ -6,6 +6,7 @@ using System.Collections.Generic;
 
 using VooDo.AST.Expressions;
 using VooDo.Compilation;
+using VooDo.Compilation.Emission;
 using VooDo.Utils;
 
 namespace VooDo.AST.Statements

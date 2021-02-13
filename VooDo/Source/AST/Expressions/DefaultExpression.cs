@@ -7,6 +7,7 @@ using System.Linq;
 
 using VooDo.AST.Names;
 using VooDo.Compilation;
+using VooDo.Compilation.Emission;
 
 namespace VooDo.AST.Expressions
 {

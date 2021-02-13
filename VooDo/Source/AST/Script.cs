@@ -10,6 +10,7 @@ using VooDo.AST.Directives;
 using VooDo.AST.Names;
 using VooDo.AST.Statements;
 using VooDo.Compilation;
+using VooDo.Compilation.Emission;
 using VooDo.Runtime;
 using VooDo.Utils;
 
@@ -97,7 +98,7 @@ namespace VooDo.AST
                                         SyntaxKind.StringLiteralExpression,
                                         SF.Literal(_definition.Prototype.Global.Name!)),
                                     _definition.Prototype.Global.HasInitializer
-                                    ? _definition.Prototype.Global.Initializer!.EmitNode(_scope, _marker)
+                                    ? _definition.Prototype.Global.Initializer!.EmitNode(new Scope(), _marker)
                                     : SF.LiteralExpression(
                                         SyntaxKind.DefaultLiteralExpression))
                                 .ToEqualsValueClause())

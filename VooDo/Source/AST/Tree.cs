@@ -2,11 +2,24 @@
 using System.Collections.Generic;
 using System.Linq;
 
+using VooDo.AST.Expressions;
+using VooDo.AST.Names;
+using VooDo.AST.Statements;
+
 namespace VooDo.AST
 {
 
     public static class Tree
     {
+
+        public static bool IsStatementAncestor(NodeOrIdentifier _node)
+            => _node is Script or IfStatement or GlobalStatement or BlockStatement;
+
+        public static bool IsExpressionAncestor(NodeOrIdentifier _node)
+            => _node is Script or Statement or Expression or InvocationExpression.Argument or InvocationExpression.Callable or TupleExpression.Element or DeclarationStatement.Declarator;
+
+        public static bool IsName(NodeOrIdentifier _node)
+            => _node is Identifier or IdentifierOrDiscard or SimpleType or ComplexType or ComplexTypeOrVar or Namespace;
 
         public enum ETraversal
         {

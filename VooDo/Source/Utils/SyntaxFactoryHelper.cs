@@ -5,9 +5,9 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
 using System.Linq;
 
-using VooDo.Compilation;
 using VooDo.AST.Names;
 using VooDo.Compilation;
+using VooDo.Compilation.Emission;
 using VooDo.Runtime;
 
 using SF = Microsoft.CodeAnalysis.CSharp.SyntaxFactory;

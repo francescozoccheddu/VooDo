@@ -8,13 +8,13 @@ using System.Collections.Immutable;
 using System.Linq;
 
 using VooDo.AST.Names;
-using VooDo.Compilation;
+using VooDo.Compilation.Emission;
 using VooDo.Utils;
 
 namespace VooDo.AST.Expressions
 {
 
-    public sealed record InvocationExpression(InvocationExpression.Callable Source, ImmutableArray<InvocationExpression.Argument> Arguments = default) : Expression
+    public sealed record InvocationExpression(InvocationExpression.Callable Source, ImmutableArray<InvocationExpression.Argument> Arguments = default) : InvocationOrObjectCreationExpression
     {
 
         #region Nested types

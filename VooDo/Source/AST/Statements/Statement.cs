@@ -1,7 +1,6 @@
 ﻿using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-using VooDo.Compilation;
-using VooDo.Compilation;
+using VooDo.Compilation.Emission;
 
 namespace VooDo.AST.Statements
 {

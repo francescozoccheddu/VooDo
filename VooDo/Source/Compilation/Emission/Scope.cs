@@ -7,7 +7,7 @@ using System.Collections.Immutable;
 
 using VooDo.AST.Names;
 
-namespace VooDo.Compilation
+namespace VooDo.Compilation.Emission
 {
 
     internal sealed class Scope

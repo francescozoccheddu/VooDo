@@ -31,6 +31,9 @@ namespace VooDo.Errors.Problems
         public static IEnumerable<Problem> Semantic(this IEnumerable<Problem> _problems)
             => _problems.OfKind(EKind.Semantic);
 
+        public static IEnumerable<Problem> Emission(this IEnumerable<Problem> _problems)
+            => _problems.OfKind(EKind.Emission);
+
         public static IEnumerable<Problem> OfKind(this IEnumerable<Problem> _problems, EKind _kind)
             => _problems.Where(_p => _p.Kind == _kind);
 

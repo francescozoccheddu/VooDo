@@ -3,7 +3,7 @@
 using System.Collections.Immutable;
 
 using VooDo.AST;
-using VooDo.Compilation;
+using VooDo.Compilation.Emission;
 
 namespace VooDo.Errors.Problems
 {

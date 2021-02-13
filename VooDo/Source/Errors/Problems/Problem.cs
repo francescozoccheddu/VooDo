@@ -14,10 +14,10 @@ namespace VooDo.Errors.Problems
 
         public enum EKind
         {
-            Syntactic, Semantic
+            Syntactic, Semantic, Emission
         }
 
-        internal Problem(EKind _kind, ESeverity _severity, NodeOrIdentifier _source, string _description)
+        internal Problem(EKind _kind, ESeverity _severity, NodeOrIdentifier? _source, string _description)
         {
             Kind = _kind;
             Source = _source;
@@ -25,13 +25,13 @@ namespace VooDo.Errors.Problems
             Description = _description;
         }
 
-        public NodeOrIdentifier Source { get; }
+        public NodeOrIdentifier? Source { get; }
         public EKind Kind { get; }
         public ESeverity Severity { get; }
         public string Description { get; }
 
         public string GetDisplayMessage()
-            => $"{Severity}: {Description} ({Source.Origin.GetDisplayMessage()})";
+            => $"{Severity}: {Description}" + (Source is not null ? $" ({Source.Origin.GetDisplayMessage()})" : "");
 
     }
 

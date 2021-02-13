@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 
 using VooDo.Compilation;
+using VooDo.Compilation.Emission;
 
 namespace VooDo.AST.Names
 {

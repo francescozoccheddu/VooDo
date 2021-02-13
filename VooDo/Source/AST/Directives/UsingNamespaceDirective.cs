@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using VooDo.AST.Names;
 using VooDo.AST.Statements;
 using VooDo.Compilation;
+using VooDo.Compilation.Emission;
 using VooDo.Utils;
 
 namespace VooDo.AST.Directives

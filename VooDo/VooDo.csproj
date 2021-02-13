@@ -37,5 +37,9 @@
   <ItemGroup>
     <None Include="..\.editorconfig" Link=".editorconfig" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Source\AST\HookInitialization\" />
+  </ItemGroup>
   
 </Project>

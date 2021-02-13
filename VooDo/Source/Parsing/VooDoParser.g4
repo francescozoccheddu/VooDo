@@ -173,6 +173,7 @@ tupleDeclarationExpression
 
 expression
 	: NEW mType = complexType OPEN_BRACKET mSizes += expression (COMMA mSizes += expression)* CLOSE_BRACKET mRanks += rankSpecifier*	# arrayCreationExpression
+	| NEW mType = complexType? OPEN_PARENS (mArgs += argument (COMMA mArgs += argument)*)? CLOSE_PARENS									# objectCreationExpression
 	| (assignableExpression | parenthesizedExpression)																					# otherExpression
 	| mExpr = expression AS mType = complexType																							# asExpression
 	| mLeft = expression mOp = (MUL | DIV | MOD) mRight = expression																	# binaryExpression
@@ -186,10 +187,10 @@ expression
 	| mLeft = expression mOp = LAND mRight = expression																					# binaryExpression
 	| mLeft = expression mOp = LOR mRight = expression																					# binaryExpression
 	| mLeft = expression mOp = COAL mRight = expression																					# binaryExpression
-	| OPEN_PARENS mType = complexType CLOSE_PARENS mExpr = expression																	# castExpression
-	| mCond = expression QUEST mTrue = expression COLON mFalse = expression																# conditionalExpression
 	| mSource = expression OPEN_PARENS (mArgs += argument (COMMA mArgs += argument)*)? CLOSE_PARENS										# simpleInvocationExpression
 	| mSource = method OPEN_PARENS (mArgs += argument (COMMA mArgs += argument)*)? CLOSE_PARENS											# methodInvocationExpression
+	| OPEN_PARENS mType = complexType CLOSE_PARENS mExpr = expression																	# castExpression
+	| mCond = expression QUEST mTrue = expression COLON mFalse = expression																# conditionalExpression
 	| GLOB mController = expression (INIT mInitializer = expression)?																	# globalExpression
 	| mSource = expression IS mType = complexType (mName = identifierOrDiscard)?														# isExpression
 	| DEFAULT (OPEN_PARENS mType = complexType CLOSE_PARENS)																			# defaultExpression
