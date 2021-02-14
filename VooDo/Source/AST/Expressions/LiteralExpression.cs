@@ -3,9 +3,9 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 using System;
 
-using VooDo.Compiling;
 using VooDo.Compiling.Emission;
 using VooDo.Problems;
+using VooDo.Utils;
 
 namespace VooDo.AST.Expressions
 {

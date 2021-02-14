@@ -7,7 +7,6 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 
-using VooDo.Compiling.Emission;
 using VooDo.Problems;
 using VooDo.Runtime;
 using VooDo.Utils;
@@ -25,7 +24,7 @@ namespace VooDo.Compiling.Transformation
         private static void GetRuntimeSymbols(SemanticModel _semantics, out INamedTypeSymbol _controllerFactorySymbol)
         {
             CSharpCompilation compilation = (CSharpCompilation) _semantics.Compilation;
-            MetadataReference runtime = compilation.References.First(_r => _r.Properties.Aliases.Contains(Compilation.runtimeReferenceAlias));
+            MetadataReference runtime = compilation.References.First(_r => _r.Properties.Aliases.Contains(CompilationConstants.runtimeReferenceAlias));
             IAssemblySymbol runtimeSymbol = (IAssemblySymbol) compilation.GetAssemblyOrModuleSymbol(runtime)!;
             INamedTypeSymbol? controllerFactorySymbol = runtimeSymbol.GetTypeByMetadataName(typeof(IControllerFactory<>).FullName!);
             if (controllerFactorySymbol is null)
@@ -126,14 +125,8 @@ namespace VooDo.Compiling.Transformation
             return declarations.ToImmutableArray();
         }
 
-        internal static CompilationUnitSyntax Rewrite(SemanticModel _semantics, ImmutableArray<GlobalDefinition> _globals, Tagger _tagger)
+        internal static CompilationUnitSyntax Rewrite(Session _session)
         {
-            _globals = _globals.Where(_g => _g.Prototype.Global.Type.IsVar).ToImmutableArray();
-            CompilationUnitSyntax root = (CompilationUnitSyntax) _semantics.SyntaxTree.GetRoot();
-            ClassDeclarationSyntax classDeclaration = root.Members.OfType<ClassDeclarationSyntax>().Single();
-
-
-
             throw new NotImplementedException();
         }
 

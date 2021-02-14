@@ -23,9 +23,9 @@ int q = glob 7;
 int p = glob 6 init 5;
             ";
             Script script = Parser.Script(code);
-            ImmutableArray<Reference> references = Reference.GetSystemReferences().Add(Reference.RuntimeReference).Add(Reference.FromAssembly(typeof(Culo).Assembly));
-            CompiledScript compilation = Compiling.Compilation.Create(script, new Compiling.Compilation.Options() with { References = references });
-            Console.WriteLine(compilation.Code);
+            ImmutableArray<Reference> references = CompilationOptions.Default.References.Add(Reference.FromAssembly(typeof(Culo).Assembly));
+            Compilation compilation = Compilation.Create(script, new CompilationOptions() with { References = references });
+            Console.WriteLine(compilation.CSharpCode);
         }
 
     }

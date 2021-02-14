@@ -39,15 +39,15 @@ namespace VooDo.Compiling
                     int runtimeIndex = m_references.IndexOf(Reference.RuntimeReference, Reference.MetadataEqualityComparer);
                     if (runtimeIndex < 0)
                     {
-                        throw new CompilationOptionsException("No runtime reference", nameof(References));
+                        throw new CompilationOptionsPropertyProblem("No runtime reference", this, nameof(References)).AsThrowable();
                     }
-                    if (!m_references[runtimeIndex].Aliases.Contains(Compilation.runtimeReferenceAlias))
+                    if (!m_references[runtimeIndex].Aliases.Contains(CompilationConstants.runtimeReferenceAlias))
                     {
-                        throw new CompilationOptionsException($"Runtime reference must define '{Compilation.runtimeReferenceAlias}' alias", nameof(References));
+                        throw new CompilationOptionsPropertyProblem($"Runtime reference must define '{CompilationConstants.runtimeReferenceAlias}' alias", this, nameof(References)).AsThrowable();
                     }
                     if (m_references.SelectMany(_r => _r.Aliases).FirstDuplicate(out Identifier? duplicateAlias))
                     {
-                        throw new CompilationOptionsException($"Duplicate reference alias '{duplicateAlias}'", nameof(References));
+                        throw new CompilationOptionsPropertyProblem($"Duplicate reference alias '{duplicateAlias}'", this, nameof(References)).AsThrowable();
                     }
                 }
             }

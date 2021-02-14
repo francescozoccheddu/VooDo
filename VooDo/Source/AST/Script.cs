@@ -133,7 +133,7 @@ namespace VooDo.AST
                             SyntaxKind.ReadOnlyKeyword),
                         EmitGlobalDeclaration(_g)));
             ClassDeclarationSyntax? classDeclaration =
-                SF.ClassDeclaration(Compilation.generatedClassName)
+                SF.ClassDeclaration(CompilationConstants.generatedClassName)
                     .WithModifiers(
                         SFH.Tokens(
                             SyntaxKind.PublicKeyword,

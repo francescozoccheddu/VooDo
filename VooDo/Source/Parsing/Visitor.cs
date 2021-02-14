@@ -73,7 +73,7 @@ namespace VooDo.Parsing
         }
 
         public override Node VisitArgument([NotNull] VooDoParser.ArgumentContext _c)
-            => Get<InvocationExpression.Argument>(_c.mArgument) with { Parameter = TryGet<Identifier>(_c.mParam) };
+            => Get<Argument>(_c.mArgument) with { Parameter = TryGet<Identifier>(_c.mParam) };
         public override Node VisitArrayCreationExpression([NotNull] VooDoParser.ArrayCreationExpressionContext _c)
         {
             ImmutableArray<Expression> sizes = Get<Expression>(_c._mSizes);
@@ -89,15 +89,15 @@ namespace VooDo.Parsing
             => new AsExpression(Get<Expression>(_c.mExpr), Get<ComplexType>(_c.mType));
         public override Node VisitAssignableArgument([NotNull] VooDoParser.AssignableArgumentContext _c)
         {
-            InvocationExpression.Argument.EKind kind = _c.mKind?.Type switch
+            Argument.EKind kind = _c.mKind?.Type switch
             {
-                VooDoParser.IN => InvocationExpression.Argument.EKind.In,
-                VooDoParser.OUT => InvocationExpression.Argument.EKind.Out,
-                VooDoParser.REF => InvocationExpression.Argument.EKind.Ref,
-                null => InvocationExpression.Argument.EKind.Value,
+                VooDoParser.IN => Argument.EKind.In,
+                VooDoParser.OUT => Argument.EKind.Out,
+                VooDoParser.REF => Argument.EKind.Ref,
+                null => Argument.EKind.Value,
                 _ => throw new FormatException("Unexpected argument kind")
             };
-            return new InvocationExpression.AssignableArgument(null, kind, Get<AssignableExpression>(_c.mValue));
+            return new AssignableArgument(null, kind, Get<AssignableExpression>(_c.mValue));
         }
         public override Node VisitAssignableExpression([NotNull] VooDoParser.AssignableExpressionContext _c)
             => Variant<AssignableExpression>(_c);
@@ -200,7 +200,7 @@ namespace VooDo.Parsing
         public override Node VisitMethod([NotNull] VooDoParser.MethodContext _c)
             => new InvocationExpression.Method(Get<NameOrMemberAccessExpression>(_c.mSource), Get<ComplexType>(_c._mTypeArgs));
         public override Node VisitMethodInvocationExpression([NotNull] VooDoParser.MethodInvocationExpressionContext _c)
-            => new InvocationExpression(Get<InvocationExpression.Method>(_c.mSource), Get<InvocationExpression.Argument>(_c._mArgs));
+            => new InvocationExpression(Get<InvocationExpression.Method>(_c.mSource), Get<Argument>(_c._mArgs));
         public override Node VisitNameExpression([NotNull] VooDoParser.NameExpressionContext _c)
             => new NameExpression(_c.mControllerOf is not null, Get<Identifier>(_c.mName));
         public override Node VisitNameOrMemberAccessExpression([NotNull] VooDoParser.NameOrMemberAccessExpressionContext _c)
@@ -210,7 +210,7 @@ namespace VooDo.Parsing
         public override Node VisitNullLiteralExpression([NotNull] VooDoParser.NullLiteralExpressionContext _c)
             => LiteralExpression.Null;
         public override Node VisitObjectCreationExpression([NotNull] VooDoParser.ObjectCreationExpressionContext _c)
-            => new ObjectCreationExpression(TryGet<ComplexType>(_c.mType), Get<InvocationExpression.Argument>(_c._mArgs));
+            => new ObjectCreationExpression(TryGet<ComplexType>(_c.mType), Get<Argument>(_c._mArgs));
         public override Node VisitOtherExpression([NotNull] VooDoParser.OtherExpressionContext _c)
             => Variant<Expression>(_c);
         public override Node VisitOtherLiteralExpression([NotNull] VooDoParser.OtherLiteralExpressionContext _c)
@@ -218,9 +218,9 @@ namespace VooDo.Parsing
         public override Node VisitOtherStatement([NotNull] VooDoParser.OtherStatementContext _c)
             => Variant<Statement>(_c);
         public override Node VisitOutDeclarationArgumentWithDiscard([NotNull] VooDoParser.OutDeclarationArgumentWithDiscardContext _c)
-            => new InvocationExpression.OutDeclarationArgument(null, ComplexTypeOrVar.Var, IdentifierOrDiscard.Discard);
+            => new OutDeclarationArgument(null, ComplexTypeOrVar.Var, IdentifierOrDiscard.Discard);
         public override Node VisitOutDeclarationArgumentWithType([NotNull] VooDoParser.OutDeclarationArgumentWithTypeContext _c)
-            => new InvocationExpression.OutDeclarationArgument(null, Get<ComplexTypeOrVar>(_c.mType), Get<IdentifierOrDiscard>(_c.mName));
+            => new OutDeclarationArgument(null, Get<ComplexTypeOrVar>(_c.mType), Get<IdentifierOrDiscard>(_c.mName));
         public override Node VisitParenthesizedExpression([NotNull] VooDoParser.ParenthesizedExpressionContext _c)
             => Get<Expression>(_c.mExpr);
         public override Node VisitQualifiedType([NotNull] VooDoParser.QualifiedTypeContext _c)
@@ -232,7 +232,7 @@ namespace VooDo.Parsing
         public override Node VisitReturnStatement([NotNull] VooDoParser.ReturnStatementContext _c)
             => new ReturnStatement(Get<Expression>(_c.mExpr));
         public override Node VisitSimpleInvocationExpression([NotNull] VooDoParser.SimpleInvocationExpressionContext _c)
-            => new InvocationExpression(Get<InvocationExpression.SimpleCallable>(_c.mSource), Get<InvocationExpression.Argument>(_c._mArgs));
+            => new InvocationExpression(Get<InvocationExpression.SimpleCallable>(_c.mSource), Get<Argument>(_c._mArgs));
         public override Node VisitSimpleType([NotNull] VooDoParser.SimpleTypeContext _c)
             => new SimpleType(Get<Identifier>(_c.mName), Get<ComplexType>(_c._mTypeArgs));
         public override Node VisitTrueLiteralExpression([NotNull] VooDoParser.TrueLiteralExpressionContext _c)
@@ -264,13 +264,13 @@ namespace VooDo.Parsing
             return new UnaryExpression(kind, Get<Expression>(_c.mExpr));
         }
         public override Node VisitUnnamedArgument([NotNull] VooDoParser.UnnamedArgumentContext _c)
-            => Variant<InvocationExpression.Argument>(_c);
+            => Variant<Argument>(_c);
         public override Node VisitUsingNamespaceDirective([NotNull] VooDoParser.UsingNamespaceDirectiveContext _c)
             => new UsingNamespaceDirective(TryGet<Identifier>(_c.mAlias), Get<Namespace>(_c.mName));
         public override Node VisitUsingStaticDirective([NotNull] VooDoParser.UsingStaticDirectiveContext _c)
             => new UsingStaticDirective(Get<QualifiedType>(_c.mType));
         public override Node VisitValueArgument([NotNull] VooDoParser.ValueArgumentContext _c)
-            => new InvocationExpression.ValueArgument(null, Get<Expression>(_c.mValue));
+            => new ValueArgument(null, Get<Expression>(_c.mValue));
 
         public override Node VisitScript_Greedy([NotNull] VooDoParser.Script_GreedyContext _c) => Variant<Script>(_c);
         public override Node VisitUsingDirective_Greedy([NotNull] VooDoParser.UsingDirective_GreedyContext _c) => Variant<UsingDirective>(_c);

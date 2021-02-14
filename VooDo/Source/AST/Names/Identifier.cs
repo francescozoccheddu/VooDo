@@ -9,6 +9,7 @@ using System.Linq;
 
 using VooDo.Compiling.Emission;
 using VooDo.Problems;
+using VooDo.Utils;
 
 namespace VooDo.AST.Names
 {
