@@ -3,9 +3,9 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 using System;
 
-using VooDo.Compilation;
-using VooDo.Compilation.Emission;
-using VooDo.Errors.Problems;
+using VooDo.Compiling;
+using VooDo.Compiling.Emission;
+using VooDo.Problems;
 
 namespace VooDo.AST.Expressions
 {
@@ -104,7 +104,7 @@ namespace VooDo.AST.Expressions
 
         protected override EPrecedence m_Precedence => EPrecedence.Primary;
 
-        public override LiteralExpression ReplaceNodes(Func<NodeOrIdentifier?, NodeOrIdentifier?> _map) => this;
+        public override LiteralExpression ReplaceNodes(Func<Node?, Node?> _map) => this;
 
         private LiteralExpressionSyntax EmitNode()
         {

@@ -5,8 +5,8 @@ using System;
 using System.Collections.Generic;
 
 using VooDo.AST.Names;
-using VooDo.Compilation;
-using VooDo.Compilation.Emission;
+using VooDo.Compiling;
+using VooDo.Compiling.Emission;
 using VooDo.Runtime;
 using VooDo.Utils;
 
@@ -20,7 +20,7 @@ namespace VooDo.AST.Expressions
 
         protected override EPrecedence m_Precedence => EPrecedence.Primary;
 
-        public override NameExpression ReplaceNodes(Func<NodeOrIdentifier?, NodeOrIdentifier?> _map)
+        public override NameExpression ReplaceNodes(Func<Node?, Node?> _map)
         {
             Identifier newName = (Identifier) _map(Name).NonNull();
             if (ReferenceEquals(newName, Name))

@@ -13,14 +13,14 @@ using System.Runtime.InteropServices;
 using VooDo.AST.Names;
 using VooDo.Utils;
 
-namespace VooDo.Compilation
+namespace VooDo.Compiling
 {
 
     public sealed record Reference
     {
 
         public static Reference RuntimeReference { get; }
-            = FromAssembly(Assembly.GetExecutingAssembly(), Compiler.runtimeReferenceAlias);
+            = FromAssembly(Assembly.GetExecutingAssembly(), Compilation.runtimeReferenceAlias);
 
         private sealed class MetadataEqualityComparerImpl : IEqualityComparer<Reference>
         {

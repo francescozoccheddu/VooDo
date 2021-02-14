@@ -7,14 +7,13 @@ using System;
 using System.Collections.Immutable;
 using System.Linq;
 
-using VooDo.Compilation;
-using VooDo.Compilation.Emission;
-using VooDo.Errors.Problems;
+using VooDo.Compiling.Emission;
+using VooDo.Problems;
 
 namespace VooDo.AST.Names
 {
 
-    public sealed record Identifier : NodeOrIdentifier
+    public sealed record Identifier : BodyNodeOrIdentifier
     {
 
         #region Creation
@@ -71,7 +70,7 @@ namespace VooDo.AST.Names
 
         #region Overrides
 
-        public override Identifier ReplaceNodes(Func<NodeOrIdentifier?, NodeOrIdentifier?> _map) => this;
+        public override Identifier ReplaceNodes(Func<Node?, Node?> _map) => this;
 
         private static readonly ImmutableDictionary<string, SyntaxToken> s_predefinedTypesTokens =
             new SyntaxKind[] {

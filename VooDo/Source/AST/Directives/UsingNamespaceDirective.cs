@@ -8,8 +8,7 @@ using System.Collections.Generic;
 
 using VooDo.AST.Names;
 using VooDo.AST.Statements;
-using VooDo.Compilation;
-using VooDo.Compilation.Emission;
+using VooDo.Compiling.Emission;
 using VooDo.Utils;
 
 namespace VooDo.AST.Directives
@@ -32,7 +31,7 @@ namespace VooDo.AST.Directives
 
         #region Overrides
 
-        public override UsingNamespaceDirective ReplaceNodes(Func<NodeOrIdentifier?, NodeOrIdentifier?> _map)
+        public override UsingNamespaceDirective ReplaceNodes(Func<Node?, Node?> _map)
         {
             Identifier? newAlias = (Identifier?) _map(Alias);
             Namespace newNamespace = (Namespace) _map(Namespace).NonNull();
@@ -67,7 +66,7 @@ namespace VooDo.AST.Directives
             return result.Own(_tagger, this);
         }
 
-        public override IEnumerable<NodeOrIdentifier> Children => HasAlias ? new NodeOrIdentifier[] { Alias!, Namespace } : new NodeOrIdentifier[] { Namespace };
+        public override IEnumerable<Node> Children => HasAlias ? new Node[] { Alias!, Namespace } : new Node[] { Namespace };
 
         public override string ToString() => $"{GrammarConstants.usingKeyword} "
             + (HasAlias ? $"{Alias} {AssignmentStatement.EKind.Simple.Token()} " : "")

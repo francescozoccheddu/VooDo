@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 
 using VooDo.AST.Expressions;
-using VooDo.Compilation.Emission;
+using VooDo.Compiling.Emission;
 using VooDo.Utils;
 
 namespace VooDo.AST.Statements
@@ -16,7 +16,7 @@ namespace VooDo.AST.Statements
 
         #region Overrides
 
-        public override ExpressionStatement ReplaceNodes(Func<NodeOrIdentifier?, NodeOrIdentifier?> _map)
+        public override ExpressionStatement ReplaceNodes(Func<Node?, Node?> _map)
         {
             InvocationOrObjectCreationExpression newType = (InvocationOrObjectCreationExpression) _map(Expression).NonNull();
             if (ReferenceEquals(newType, Expression))

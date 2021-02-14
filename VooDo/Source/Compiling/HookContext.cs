@@ -9,7 +9,7 @@ using System.Collections.Generic;
 using VooDo.Hooks;
 using VooDo.AST.Expressions;
 
-namespace VooDo.Compilation
+namespace VooDo.Compiling
 {
 
     internal sealed class HookContext

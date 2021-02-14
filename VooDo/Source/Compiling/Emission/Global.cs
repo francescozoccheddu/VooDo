@@ -1,10 +1,11 @@
 ﻿using System;
 
+using VooDo.AST;
 using VooDo.AST.Expressions;
 using VooDo.AST.Names;
 using VooDo.AST.Statements;
 
-namespace VooDo.Compilation.Emission
+namespace VooDo.Compiling.Emission
 {
 
     public sealed record Global(ComplexTypeOrVar Type, Identifier? Name, Expression? Initializer = null)
@@ -18,7 +19,7 @@ namespace VooDo.Compilation.Emission
     public sealed record GlobalPrototype
     {
 
-        public GlobalPrototype(Global _global, DeclarationStatement _declaration, DeclarationStatement.Declarator _declarator)
+        public GlobalPrototype(Global _global, DeclarationStatement.Declarator _declarator)
         {
             if (_global.IsAnonymous)
             {
@@ -26,7 +27,6 @@ namespace VooDo.Compilation.Emission
             }
             Global = _global;
             Declarator = _declarator;
-            Declaration = _declaration;
         }
 
         public GlobalPrototype(Global _global, GlobalExpression _expression)
@@ -40,9 +40,9 @@ namespace VooDo.Compilation.Emission
         }
 
         public Global Global { get; }
-        public DeclarationStatement? Declaration { get; }
         public DeclarationStatement.Declarator? Declarator { get; }
         public GlobalExpression? Expression { get; }
+        public Node Source => Expression ?? (Node) Declarator!;
 
     }
 

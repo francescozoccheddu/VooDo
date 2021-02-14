@@ -8,21 +8,22 @@ using System.Collections.Immutable;
 using System.Linq;
 
 using VooDo.AST.Names;
-using VooDo.Compilation.Emission;
+using VooDo.Compiling.Emission;
 using VooDo.Utils;
 
 namespace VooDo.AST.Expressions
 {
 
-    public sealed record InvocationExpression(InvocationExpression.Callable Source, ImmutableArray<InvocationExpression.Argument> Arguments = default) : InvocationOrObjectCreationExpression
+    public record InvocationExpression(InvocationExpression.Callable Source, ImmutableArray<Argument> Arguments = default) : InvocationOrObjectCreationExpression
     {
 
         #region Nested types
 
-        public abstract record Callable : Node
+        public abstract record Callable : BodyNode
         {
 
-            public abstract override Callable ReplaceNodes(Func<NodeOrIdentifier?, NodeOrIdentifier?> _map);
+            public sealed override InvocationExpression? Parent => (InvocationExpression?) base.Parent;
+            public abstract override Callable ReplaceNodes(Func<Node?, Node?> _map);
             internal abstract override ExpressionSyntax EmitNode(Scope _scope, Tagger _tagger);
             public abstract override IEnumerable<Expression> Children { get; }
 
@@ -48,7 +49,7 @@ namespace VooDo.AST.Expressions
 
             public bool IsGeneric => !TypeArguments.IsEmpty;
 
-            public override Method ReplaceNodes(Func<NodeOrIdentifier?, NodeOrIdentifier?> _map)
+            public override Method ReplaceNodes(Func<Node?, Node?> _map)
             {
                 NameOrMemberAccessExpression newSource = (NameOrMemberAccessExpression) _map(Source).NonNull();
                 ImmutableArray<ComplexType> newArguments = TypeArguments.Map(_map).NonNull();
@@ -98,7 +99,7 @@ namespace VooDo.AST.Expressions
         public sealed record SimpleCallable(Expression Source) : Callable
         {
 
-            public override SimpleCallable ReplaceNodes(Func<NodeOrIdentifier?, NodeOrIdentifier?> _map)
+            public override SimpleCallable ReplaceNodes(Func<Node?, Node?> _map)
             {
                 NameOrMemberAccessExpression newSource = (NameOrMemberAccessExpression) _map(Source).NonNull();
                 if (ReferenceEquals(newSource, Source))
@@ -120,128 +121,7 @@ namespace VooDo.AST.Expressions
 
         }
 
-        public abstract record Argument(Identifier? Parameter) : Node
-        {
 
-            public enum EKind
-            {
-                Value, Ref, Out, In
-            }
-
-            public abstract EKind Kind { get; }
-
-            protected abstract Argument ReplaceArgumentNodes(Func<NodeOrIdentifier?, NodeOrIdentifier?> _map);
-
-            public sealed override Argument ReplaceNodes(Func<NodeOrIdentifier?, NodeOrIdentifier?> _map)
-            {
-                Identifier? newParameter = (Identifier?) _map(Parameter);
-                if (ReferenceEquals(newParameter, Parameter))
-                {
-                    return ReplaceArgumentNodes(_map);
-                }
-                else
-                {
-                    return ReplaceArgumentNodes(_map) with
-                    {
-                        Parameter = newParameter
-                    };
-                }
-            }
-
-
-            private protected abstract ExpressionSyntax EmitArgumentExpression(Scope _scope, Tagger _tagger);
-            internal sealed override ArgumentSyntax EmitNode(Scope _scope, Tagger _tagger)
-                => SyntaxFactory.Argument(EmitArgumentExpression(_scope, _tagger))
-                    .WithRefKindKeyword(SyntaxFactory.Token(Kind switch
-                    {
-                        EKind.Value => SyntaxKind.None,
-                        EKind.Ref => SyntaxKind.RefKeyword,
-                        EKind.Out => SyntaxKind.OutKeyword,
-                        EKind.In => SyntaxKind.InKeyword,
-                        _ => throw new InvalidOperationException(),
-                    }))
-                .Own(_tagger, this);
-
-        }
-
-        public sealed record ValueArgument(Identifier? Parameter, Expression Expression) : Argument(Parameter)
-        {
-            public override EKind Kind => EKind.Value;
-
-            protected override ValueArgument ReplaceArgumentNodes(Func<NodeOrIdentifier?, NodeOrIdentifier?> _map)
-            {
-                Expression newExpression = (Expression) _map(Expression).NonNull();
-                if (ReferenceEquals(newExpression, Expression))
-                {
-                    return this;
-                }
-                else
-                {
-                    return this with
-                    {
-                        Expression = newExpression
-                    };
-                }
-            }
-
-            private protected override ExpressionSyntax EmitArgumentExpression(Scope _scope, Tagger _tagger)
-                => Expression.EmitNode(_scope, _tagger).Own(_tagger, this);
-            public override IEnumerable<Expression> Children => new[] { Expression };
-            public override string ToString() => $"{Kind.Token()} {Expression}".TrimStart();
-        }
-
-        public sealed record AssignableArgument(Identifier? Parameter, Argument.EKind AssignableKind, AssignableExpression Expression) : Argument(Parameter)
-        {
-            public override EKind Kind => AssignableKind;
-            protected override AssignableArgument ReplaceArgumentNodes(Func<NodeOrIdentifier?, NodeOrIdentifier?> _map)
-            {
-                AssignableExpression newExpression = (AssignableExpression) _map(Expression).NonNull();
-                if (ReferenceEquals(newExpression, Expression))
-                {
-                    return this;
-                }
-                else
-                {
-                    return this with
-                    {
-                        Expression = newExpression
-                    };
-                }
-            }
-            private protected override ExpressionSyntax EmitArgumentExpression(Scope _scope, Tagger _tagger)
-                => Expression.EmitNode(_scope, _tagger).Own(_tagger, this);
-            public override IEnumerable<AssignableExpression> Children => new[] { Expression };
-            public override string ToString() => $"{Kind.Token()} {Expression}".TrimStart();
-        }
-
-        public sealed record OutDeclarationArgument(Identifier? Parameter, ComplexTypeOrVar Type, IdentifierOrDiscard Name) : Argument(Parameter)
-        {
-            public override EKind Kind => EKind.Out;
-            protected override OutDeclarationArgument ReplaceArgumentNodes(Func<NodeOrIdentifier?, NodeOrIdentifier?> _map)
-            {
-                ComplexTypeOrVar newType = (ComplexTypeOrVar) _map(Type).NonNull();
-                IdentifierOrDiscard newName = (IdentifierOrDiscard) _map(Parameter).NonNull();
-                if (ReferenceEquals(newType, Type) && ReferenceEquals(newName, Name))
-                {
-                    return this;
-                }
-                else
-                {
-                    return this with
-                    {
-                        Type = newType,
-                        Name = newName
-                    };
-                }
-            }
-            private protected override ExpressionSyntax EmitArgumentExpression(Scope _scope, Tagger _tagger)
-                => SyntaxFactory.DeclarationExpression(
-                        Type.EmitNode(_scope, _tagger),
-                        Name.EmitNode(_scope, _tagger))
-                .Own(_tagger, this);
-            public override IEnumerable<NodeOrIdentifier> Children => new NodeOrIdentifier[] { Type, Name };
-            public override string ToString() => $"{Kind.Token()} {Type} {Name}".TrimStart();
-        }
 
         #endregion
 
@@ -260,7 +140,7 @@ namespace VooDo.AST.Expressions
 
         protected override EPrecedence m_Precedence => EPrecedence.Primary;
 
-        public override InvocationExpression ReplaceNodes(Func<NodeOrIdentifier?, NodeOrIdentifier?> _map)
+        public override InvocationExpression ReplaceNodes(Func<Node?, Node?> _map)
         {
             Callable newSource = (Callable) _map(Source).NonNull();
             ImmutableArray<Argument> newArguments = Arguments.Map(_map).NonNull();
@@ -283,7 +163,7 @@ namespace VooDo.AST.Expressions
                 Source.EmitNode(_scope, _tagger),
                 Arguments.Select(_a => _a.EmitNode(_scope, _tagger)))
             .Own(_tagger, this);
-        public override IEnumerable<Node> Children => new Node[] { Source }.Concat(Arguments);
+        public override IEnumerable<BodyNode> Children => new BodyNode[] { Source }.Concat(Arguments);
         public override string ToString() => $"{Source}({string.Join(", ", Arguments)})";
 
         #endregion

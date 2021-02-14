@@ -4,8 +4,8 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
 
-using VooDo.Compilation;
-using VooDo.Compilation.Emission;
+using VooDo.Compiling;
+using VooDo.Compiling.Emission;
 using VooDo.Utils;
 
 namespace VooDo.AST.Expressions
@@ -29,7 +29,7 @@ namespace VooDo.AST.Expressions
 
         protected override EPrecedence m_Precedence => EPrecedence.Unary;
 
-        public override UnaryExpression ReplaceNodes(Func<NodeOrIdentifier?, NodeOrIdentifier?> _map)
+        public override UnaryExpression ReplaceNodes(Func<Node?, Node?> _map)
         {
             Expression newExpression = (Expression) _map(Expression).NonNull();
             if (ReferenceEquals(newExpression, Expression))

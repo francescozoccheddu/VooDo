@@ -41,8 +41,8 @@ namespace VooDo.Parsing
             return parser;
         }
 
-        private static TNodeOrIdentifier Parse<TNodeOrIdentifier>(string _source, Func<VooDoParser, ParserRuleContext> _ruleProvider) where TNodeOrIdentifier : NodeOrIdentifier
-            => (TNodeOrIdentifier) new Visitor(_source).Visit(_ruleProvider(MakeParser(_source)));
+        private static TNode Parse<TNode>(string _source, Func<VooDoParser, ParserRuleContext> _ruleProvider) where TNode : Node
+            => (TNode) new Visitor(_source).Visit(_ruleProvider(MakeParser(_source)));
 
         // Script
         public static Script Script(string _source) => Parse<Script>(_source, _p => _p.script_Greedy());

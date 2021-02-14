@@ -6,8 +6,8 @@ using System.Collections.Generic;
 using System.Linq;
 
 using VooDo.AST.Names;
-using VooDo.Compilation;
-using VooDo.Compilation.Emission;
+using VooDo.Compiling;
+using VooDo.Compiling.Emission;
 using VooDo.Runtime;
 
 using SF = Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
@@ -20,27 +20,27 @@ namespace VooDo.Utils
 
         private static readonly QualifiedNameSyntax s_programType = (QualifiedNameSyntax) (QualifiedType.FromType<Program>() with
         {
-            Alias = Compiler.runtimeReferenceAlias
+            Alias = Compiling.Compilation.runtimeReferenceAlias
         }).ToTypeSyntax();
 
         private static readonly QualifiedNameSyntax s_genericProgramType = (QualifiedNameSyntax) (QualifiedType.FromType<Program<object>>() with
         {
-            Alias = Compiler.runtimeReferenceAlias
+            Alias = Compiling.Compilation.runtimeReferenceAlias
         }).ToTypeSyntax();
 
         private static readonly QualifiedNameSyntax s_variableType = (QualifiedNameSyntax) (QualifiedType.FromType<Variable>() with
         {
-            Alias = Compiler.runtimeReferenceAlias
+            Alias = Compiling.Compilation.runtimeReferenceAlias
         }).ToTypeSyntax();
 
         private static readonly QualifiedNameSyntax s_genericVariableType = (QualifiedNameSyntax) (QualifiedType.FromType<Variable<object>>() with
         {
-            Alias = Compiler.runtimeReferenceAlias
+            Alias = Compiling.Compilation.runtimeReferenceAlias
         }).ToTypeSyntax();
 
         private static readonly QualifiedNameSyntax s_runtimeHelpersType = (QualifiedNameSyntax) (QualifiedType.FromType(typeof(RuntimeHelpers)) with
         {
-            Alias = Compiler.runtimeReferenceAlias
+            Alias = Compiling.Compilation.runtimeReferenceAlias
         }).ToTypeSyntax();
 
         internal static TypeSyntax ToTypeSyntax(this ComplexType _type)

@@ -8,9 +8,9 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Runtime.CompilerServices;
 
-using VooDo.Compilation;
-using VooDo.Compilation.Emission;
-using VooDo.Errors.Problems;
+using VooDo.Compiling;
+using VooDo.Compiling.Emission;
+using VooDo.Problems;
 using VooDo.Utils;
 
 namespace VooDo.AST.Names
@@ -89,7 +89,7 @@ namespace VooDo.AST.Names
 
         #region Nested types
 
-        public sealed record Element(ComplexType Type, Identifier? Name = null) : Node
+        public sealed record Element(ComplexType Type, Identifier? Name = null) : BodyNode
         {
 
             public static implicit operator Element(string _type) => Parse(_type);
@@ -100,7 +100,7 @@ namespace VooDo.AST.Names
 
             public bool IsNamed => Name is not null;
 
-            public override Element ReplaceNodes(Func<NodeOrIdentifier?, NodeOrIdentifier?> _map)
+            public override Element ReplaceNodes(Func<Node?, Node?> _map)
             {
                 ComplexType newType = (ComplexType) _map(Type).NonNull();
                 Identifier? newName = (Identifier?) _map(Name).NonNull();
@@ -124,7 +124,7 @@ namespace VooDo.AST.Names
                     ? Name!.EmitToken(_tagger)
                     : SyntaxFactory.Token(SyntaxKind.None))
                 .Own(_tagger, this);
-            public override IEnumerable<NodeOrIdentifier> Children => IsNamed ? new NodeOrIdentifier[] { Type, Name! } : new NodeOrIdentifier[] { Type };
+            public override IEnumerable<Node> Children => IsNamed ? new Node[] { Type, Name! } : new Node[] { Type };
             public override string ToString() => IsNamed ? $"{Type} {Name}" : $"{Type}";
 
         }
@@ -163,7 +163,7 @@ namespace VooDo.AST.Names
 
         #region Overrides
 
-        public override TupleType ReplaceNodes(Func<NodeOrIdentifier?, NodeOrIdentifier?> _map)
+        public override TupleType ReplaceNodes(Func<Node?, Node?> _map)
         {
             ImmutableArray<Element> newElements = m_Elements.Map(_map).NonNull();
             TupleType newThis = (TupleType) base.ReplaceNodes(_map);

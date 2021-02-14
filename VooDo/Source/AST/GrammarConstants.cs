@@ -59,11 +59,11 @@ namespace VooDo.AST
             _ => throw new NotImplementedException(),
         };
 
-        internal static string Token(this InvocationExpression.Argument.EKind _kind) => _kind switch
+        internal static string Token(this Argument.EKind _kind) => _kind switch
         {
-            InvocationExpression.Argument.EKind.Value => "",
-            InvocationExpression.Argument.EKind.Ref => "ref",
-            InvocationExpression.Argument.EKind.Out => "out",
+            Argument.EKind.Value => "",
+            Argument.EKind.Ref => "ref",
+            Argument.EKind.Out => "out",
             _ => throw new NotImplementedException(),
         };
 

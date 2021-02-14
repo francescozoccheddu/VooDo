@@ -78,7 +78,7 @@ namespace VooDo.Utils
         }
 
         internal static ImmutableArray<TItem?> Map<TItem>(this ImmutableArray<TItem> _array, Func<TItem, TItem?> _map)
-            => _array.Map(_map, new Identity.ReferenceComparer<TItem>());
+            => _array.Map(_map, new ReferenceComparer<TItem>());
 
         internal static ImmutableArray<TItem?> Map<TItem>(this ImmutableArray<TItem> _array, Func<TItem, TItem?> _map, IEqualityComparer<TItem> _comparer)
         {
@@ -113,7 +113,7 @@ namespace VooDo.Utils
         }
 
         internal static ImmutableArray<TItem?> Map<TItem>(this ImmutableArray<TItem> _array, Func<TItem, object?> _map)
-            => _array.Map(_map, new Identity.ReferenceComparer<TItem>());
+            => _array.Map(_map, new ReferenceComparer<TItem>());
 
         internal static ImmutableArray<TItem?> Map<TItem>(this ImmutableArray<TItem> _array, Func<TItem, object?> _map, IEqualityComparer<TItem> _comparer)
             => _array.Map(_a => (TItem?) _map(_a), _comparer);

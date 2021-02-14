@@ -2,19 +2,21 @@
 using System.Collections.Immutable;
 using System.Linq;
 
-using static VooDo.Errors.Problems.Problem;
+using VooDo.Problems;
 
-namespace VooDo.Errors.Problems
+using static VooDo.Problems.Problem;
+
+namespace VooDo.Utils
 {
 
     public static class ProblemExtensions
     {
 
-        internal static ProblemsException AsThrowable(this IEnumerable<Problem> _problems)
-            => new ProblemsException(_problems.ToImmutableArray());
+        internal static VooDoException AsThrowable(this IEnumerable<Problem> _problems)
+            => new VooDoException(_problems.ToImmutableArray());
 
-        internal static ProblemsException AsThrowable(this Problem _problem)
-            => new ProblemsException(_problem);
+        internal static VooDoException AsThrowable(this Problem _problem)
+            => new VooDoException(_problem);
 
         public static void ThrowErrors(this IEnumerable<Problem> _problems)
         {

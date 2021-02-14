@@ -5,6 +5,7 @@ using System.Linq;
 using VooDo.AST.Expressions;
 using VooDo.AST.Names;
 using VooDo.AST.Statements;
+using VooDo.Compiling;
 
 namespace VooDo.AST
 {
@@ -12,13 +13,13 @@ namespace VooDo.AST
     public static class Tree
     {
 
-        public static bool IsStatementAncestor(NodeOrIdentifier _node)
+        public static bool IsStatementAncestor(Node _node)
             => _node is Script or IfStatement or GlobalStatement or BlockStatement;
 
-        public static bool IsExpressionAncestor(NodeOrIdentifier _node)
-            => _node is Script or Statement or Expression or InvocationExpression.Argument or InvocationExpression.Callable or TupleExpression.Element or DeclarationStatement.Declarator;
+        public static bool IsExpressionAncestor(Node _node)
+            => _node is Script or Statement or Expression or Argument or InvocationExpression.Callable or TupleExpression.Element or DeclarationStatement.Declarator;
 
-        public static bool IsName(NodeOrIdentifier _node)
+        public static bool IsName(Node _node)
             => _node is Identifier or IdentifierOrDiscard or SimpleType or ComplexType or ComplexTypeOrVar or Namespace;
 
         public enum ETraversal
@@ -26,21 +27,21 @@ namespace VooDo.AST
             BreadthFirst, PreDepthFirst, PostDepthFirst
         }
 
-        private static IEnumerable<NodeOrIdentifier> VisitDepthFirstPostorder(NodeOrIdentifier _node, Predicate<NodeOrIdentifier> _shouldVisitChildren)
+        private static IEnumerable<Node> VisitDepthFirstPostorder(Node _node, Predicate<Node> _shouldVisitChildren)
         {
             if (!_shouldVisitChildren(_node))
             {
                 yield return _node;
                 yield break;
             }
-            Stack<(IEnumerator<NodeOrIdentifier> children, NodeOrIdentifier node)> stack = new();
+            Stack<(IEnumerator<Node> children, Node node)> stack = new();
             stack.Push((_node.Children.GetEnumerator(), _node));
             while (stack.Count > 0)
             {
-                (IEnumerator<NodeOrIdentifier> children, NodeOrIdentifier node) = stack.Peek();
+                (IEnumerator<Node> children, Node node) = stack.Peek();
                 if (children.MoveNext())
                 {
-                    NodeOrIdentifier child = children.Current;
+                    Node child = children.Current;
                     if (_shouldVisitChildren(child))
                     {
                         stack.Push((child.Children.GetEnumerator(), child));
@@ -58,17 +59,17 @@ namespace VooDo.AST
             }
         }
 
-        private static IEnumerable<NodeOrIdentifier> VisitDepthFirstPreorder(NodeOrIdentifier _node, Predicate<NodeOrIdentifier> _shouldVisitChildren)
+        private static IEnumerable<Node> VisitDepthFirstPreorder(Node _node, Predicate<Node> _shouldVisitChildren)
         {
-            Stack<NodeOrIdentifier> stack = new();
+            Stack<Node> stack = new();
             stack.Push(_node);
             while (stack.Count > 0)
             {
-                NodeOrIdentifier node = stack.Pop();
+                Node node = stack.Pop();
                 yield return node;
                 if (_shouldVisitChildren(node))
                 {
-                    foreach (NodeOrIdentifier child in node.Children.Reverse())
+                    foreach (Node child in node.Children.Reverse())
                     {
                         stack.Push(child);
                     }
@@ -76,17 +77,17 @@ namespace VooDo.AST
             }
         }
 
-        private static IEnumerable<NodeOrIdentifier> VisitBreadthFirst(NodeOrIdentifier _node, Predicate<NodeOrIdentifier> _shouldVisitChildren)
+        private static IEnumerable<Node> VisitBreadthFirst(Node _node, Predicate<Node> _shouldVisitChildren)
         {
-            Queue<NodeOrIdentifier> queue = new();
+            Queue<Node> queue = new();
             queue.Enqueue(_node);
             while (queue.Count > 0)
             {
-                NodeOrIdentifier node = queue.Dequeue();
+                Node node = queue.Dequeue();
                 yield return node;
                 if (_shouldVisitChildren(node))
                 {
-                    foreach (NodeOrIdentifier child in node.Children)
+                    foreach (Node child in node.Children)
                     {
                         queue.Enqueue(child);
                     }
@@ -94,10 +95,10 @@ namespace VooDo.AST
             }
         }
 
-        public static IEnumerable<NodeOrIdentifier> DescendantNodes(this NodeOrIdentifier _node, ETraversal _traversal = ETraversal.PostDepthFirst)
+        public static IEnumerable<Node> DescendantNodes(this Node _node, ETraversal _traversal = ETraversal.PostDepthFirst)
             => DescendantNodes(_node, _ => true, _traversal);
 
-        public static IEnumerable<NodeOrIdentifier> DescendantNodes(this NodeOrIdentifier _node, Predicate<NodeOrIdentifier> _shouldVisitChildren, ETraversal _traversal = ETraversal.PostDepthFirst)
+        public static IEnumerable<Node> DescendantNodes(this Node _node, Predicate<Node> _shouldVisitChildren, ETraversal _traversal = ETraversal.PostDepthFirst)
             => _traversal switch
             {
                 ETraversal.BreadthFirst => VisitBreadthFirst(_node, _shouldVisitChildren),
@@ -106,10 +107,10 @@ namespace VooDo.AST
                 _ => throw new InvalidOperationException(),
             };
 
-        public static IEnumerable<NodeOrIdentifier> DescendantNodesAndSelf(this NodeOrIdentifier _node, ETraversal _traversal = ETraversal.PostDepthFirst)
+        public static IEnumerable<Node> DescendantNodesAndSelf(this Node _node, ETraversal _traversal = ETraversal.PostDepthFirst)
             => DescendantNodesAndSelf(_node, _ => true, _traversal);
 
-        public static IEnumerable<NodeOrIdentifier> DescendantNodesAndSelf(this NodeOrIdentifier _node, Predicate<NodeOrIdentifier> _shouldVisitChildren, ETraversal _traversal = ETraversal.PostDepthFirst)
+        public static IEnumerable<Node> DescendantNodesAndSelf(this Node _node, Predicate<Node> _shouldVisitChildren, ETraversal _traversal = ETraversal.PostDepthFirst)
             => _traversal switch
             {
                 ETraversal.BreadthFirst or ETraversal.PreDepthFirst => DescendantNodes(_node, _shouldVisitChildren, _traversal).Skip(1),
@@ -119,7 +120,7 @@ namespace VooDo.AST
 
         public readonly struct ReplaceInfo
         {
-            public ReplaceInfo(Node? _parent, NodeOrIdentifier? _original, NodeOrIdentifier? _replaced)
+            public ReplaceInfo(Node? _parent, Node? _original, Node? _replaced)
             {
                 Parent = _parent;
                 Original = _original;
@@ -127,11 +128,11 @@ namespace VooDo.AST
             }
 
             public Node? Parent { get; }
-            public NodeOrIdentifier? Original { get; }
-            public NodeOrIdentifier? Replaced { get; }
+            public Node? Original { get; }
+            public Node? Replaced { get; }
         }
 
-        private static NodeOrIdentifier? ReplaceNodeRecursive(NodeOrIdentifier? _node, Node? _parent, Func<ReplaceInfo, NodeOrIdentifier?> _map, Predicate<NodeOrIdentifier> _shouldVisitChildren)
+        private static Node? ReplaceNodeRecursive(Node? _node, Node? _parent, Func<ReplaceInfo, Node?> _map, Predicate<Node> _shouldVisitChildren)
         {
             if (_node is not null && _shouldVisitChildren(_node) && _node.Children.Any())
             {
@@ -143,18 +144,23 @@ namespace VooDo.AST
             }
         }
 
-        public static TNodeOrIdentifier? ReplaceDescendantNodes<TNodeOrIdentifier>(this TNodeOrIdentifier _node, Func<NodeOrIdentifier?, NodeOrIdentifier?> _map) where TNodeOrIdentifier : NodeOrIdentifier
+        public static TNode? ReplaceDescendantNodes<TNode>(this TNode _node, Func<Node?, Node?> _map) where TNode : Node
             => ReplaceDescendantNodes(_node, _map, _ => true);
 
-        public static TNodeOrIdentifier? ReplaceDescendantNodes<TNodeOrIdentifier>(this TNodeOrIdentifier _node, Func<NodeOrIdentifier?, NodeOrIdentifier?> _map, Predicate<NodeOrIdentifier> _shouldVisitChildren) where TNodeOrIdentifier : NodeOrIdentifier
+        public static TNode? ReplaceDescendantNodes<TNode>(this TNode _node, Func<Node?, Node?> _map, Predicate<Node> _shouldVisitChildren) where TNode : Node
             => ReplaceDescendantNodes(_node, _i => _map(_i.Replaced), _shouldVisitChildren);
 
-
-        public static TNodeOrIdentifier? ReplaceDescendantNodes<TNodeOrIdentifier>(this TNodeOrIdentifier _node, Func<ReplaceInfo, NodeOrIdentifier?> _map) where TNodeOrIdentifier : NodeOrIdentifier
+        public static TNode? ReplaceDescendantNodes<TNode>(this TNode _node, Func<ReplaceInfo, Node?> _map) where TNode : Node
             => ReplaceDescendantNodes(_node, _map, _ => true);
 
-        public static TNodeOrIdentifier? ReplaceDescendantNodes<TNodeOrIdentifier>(this TNodeOrIdentifier _node, Func<ReplaceInfo, NodeOrIdentifier?> _map, Predicate<NodeOrIdentifier> _shouldVisitChildren) where TNodeOrIdentifier : NodeOrIdentifier
-            => (TNodeOrIdentifier?) ReplaceNodeRecursive(_node, null, _map, _shouldVisitChildren);
+        public static TNode? ReplaceDescendantNodes<TNode>(this TNode _node, Func<ReplaceInfo, Node?> _map, Predicate<Node> _shouldVisitChildren) where TNode : Node
+            => (TNode?) ReplaceNodeRecursive(_node, null, _map, _shouldVisitChildren);
+
+        public static TNode SetAsRoot<TNode>(this TNode _node) where TNode : Node
+            => (TNode) _node.SetAsRootInternal(null);
+
+        internal static TNode SetAsRoot<TNode>(this TNode _node, Compilation _compilation) where TNode : Node
+            => (TNode) _node.SetAsRootInternal(_compilation);
 
     }
 

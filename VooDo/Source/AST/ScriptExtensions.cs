@@ -7,7 +7,7 @@ using VooDo.AST.Directives;
 using VooDo.AST.Expressions;
 using VooDo.AST.Names;
 using VooDo.AST.Statements;
-using VooDo.Compilation.Emission;
+using VooDo.Compiling.Emission;
 using VooDo.Utils;
 
 namespace VooDo.AST
@@ -27,7 +27,7 @@ namespace VooDo.AST
                 .SelectMany(_c => _c switch
                 {
                     GlobalExpression expr => new[] { new GlobalPrototype(new Global(ComplexTypeOrVar.Var, null, expr.Initializer), expr) },
-                    GlobalStatement stat => stat.SelectMany(_d => _d.Declarators.Select(_l => new GlobalPrototype(new Global(_d.Type, _l.Name, _l.Initializer), _d, _l))),
+                    GlobalStatement stat => stat.SelectMany(_d => _d.Declarators.Select(_l => new GlobalPrototype(new Global(_d.Type, _l.Name, _l.Initializer), _l))),
                     _ => Enumerable.Empty<GlobalPrototype>()
                 }).ToImmutableArray();
 

@@ -2,16 +2,16 @@
 using Microsoft.CodeAnalysis;
 
 using VooDo.AST;
-using VooDo.Compilation.Emission;
+using VooDo.Compiling.Emission;
 
-namespace VooDo.Errors.Problems
+namespace VooDo.Problems
 {
 
-    public class RoslynProblem : Problem
+    public class RoslynProblem : SourceProblem
     {
 
-        private RoslynProblem(EKind _kind, ESeverity _severity, NodeOrIdentifier? _source, string _description)
-            : base(_kind, _severity, _source, _description)
+        private RoslynProblem(EKind _kind, ESeverity _severity, Node? _source, string _description)
+            : base(_kind, _severity, _description, _source)
         {
         }
 
@@ -21,7 +21,7 @@ namespace VooDo.Errors.Problems
             {
                 return null;
             }
-            NodeOrIdentifier? syntax = null;
+            Node? syntax = null;
             {
                 SyntaxNode? root = _diagnostic.Location.SourceTree?.GetRoot();
                 if (root is not null)

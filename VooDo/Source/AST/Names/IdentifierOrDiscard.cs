@@ -5,13 +5,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-using VooDo.Compilation;
-using VooDo.Compilation.Emission;
+using VooDo.Compiling.Emission;
 
 namespace VooDo.AST.Names
 {
 
-    public sealed record IdentifierOrDiscard : Node
+    public sealed record IdentifierOrDiscard : BodyNode
     {
 
         #region Creation
@@ -51,7 +50,7 @@ namespace VooDo.AST.Names
 
         #region Overrides
 
-        public override IdentifierOrDiscard ReplaceNodes(Func<NodeOrIdentifier?, NodeOrIdentifier?> _map)
+        public override IdentifierOrDiscard ReplaceNodes(Func<Node?, Node?> _map)
         {
             if (IsDiscard)
             {

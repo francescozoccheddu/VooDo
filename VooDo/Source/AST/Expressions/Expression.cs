@@ -106,7 +106,7 @@ namespace VooDo.AST.Expressions
             }
         }
 
-        public abstract override Expression ReplaceNodes(Func<NodeOrIdentifier?, NodeOrIdentifier?> _map);
+        public abstract override Expression ReplaceNodes(Func<Node?, Node?> _map);
 
     }
 

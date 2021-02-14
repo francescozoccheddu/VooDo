@@ -2,74 +2,25 @@
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-using System;
 using System.Collections.Immutable;
 using System.Linq;
 
-using VooDo.AST;
-using VooDo.AST.Names;
-using VooDo.Compilation.Emission;
-using VooDo.Compilation.Transformation;
-using VooDo.Errors;
-using VooDo.Errors.Problems;
+using VooDo.Compiling.Emission;
+using VooDo.Compiling.Transformation;
+using VooDo.Problems;
 using VooDo.Utils;
 
-namespace VooDo.Compilation
+namespace VooDo.Compiling
 {
 
-    public static class Compiler
+    internal static class Compiler
     {
-
-        public sealed record Options
-        {
-
-            public static Options Default { get; } = new Options(null, Reference.GetSystemReferences().Add(Reference.RuntimeReference));
-
-            public Options(ComplexType? _returnType = null, ImmutableArray<Reference> _references = default)
-            {
-                ReturnType = _returnType;
-                References = _references;
-            }
-
-            public ComplexType? ReturnType { get; init; }
-
-            private ImmutableArray<Reference> m_references;
-            public ImmutableArray<Reference> References
-            {
-                get => m_references;
-                set
-                {
-                    if (value.IsDefault)
-                    {
-                        m_references = Default.References;
-                    }
-                    else
-                    {
-                        m_references = Reference.Merge(value);
-                        int runtimeIndex = m_references.IndexOf(Reference.RuntimeReference, Reference.MetadataEqualityComparer);
-                        if (runtimeIndex < 0)
-                        {
-                            throw new CompilerOptionsException("No runtime reference", nameof(References));
-                        }
-                        if (!m_references[runtimeIndex].Aliases.Contains(runtimeReferenceAlias))
-                        {
-                            throw new CompilerOptionsException($"Runtime reference must define '{runtimeReferenceAlias}' alias", nameof(References));
-                        }
-                        if (m_references.SelectMany(_r => _r.Aliases).FirstDuplicate(out Identifier? duplicateAlias))
-                        {
-                            throw new CompilerOptionsException($"Duplicate reference alias '{duplicateAlias}'", nameof(References));
-                        }
-                    }
-                }
-            }
-
-        }
 
         public const string runtimeReferenceAlias = "VooDoRuntime";
         public const string generatedClassName = "GeneratedProgram";
         public const string globalFieldPrefix = "field_";
 
-        public static CompiledScript Compile(Script _script, Options _options)
+        internal static void Compile(Session _session)
         {
             Tagger tagger = new Tagger();
             Scope scope = new Scope();
@@ -94,7 +45,7 @@ namespace VooDo.Compilation
             }
             {
                 // Global type inference
-                CompilationUnitSyntax newSyntax = ImplicitGlobalTypeRewriter.Rewrite(semantics, scope.GetGlobalDefinitions());
+                CompilationUnitSyntax newSyntax = ImplicitGlobalTypeRewriter.Rewrite(semantics, );
                 if (newSyntax != syntax)
                 {
                     SyntaxTree newTree = CSharpSyntaxTree.Create(newSyntax, parseOptions);
@@ -113,9 +64,10 @@ namespace VooDo.Compilation
             }
             compilation.GetDiagnostics().SelectNonNull(_d => RoslynProblem.FromDiagnostic(_d, tagger, Problem.EKind.Semantic)).ThrowErrors();
             ImmutableArray<GlobalPrototype> globalPrototypes = scope.GetGlobalDefinitions().Select(_g => _g.Prototype).ToImmutableArray();
-            return new CompiledScript(compilation, _script, _options, globalPrototypes, tagger);
         }
 
+
     }
+
 
 }

@@ -7,14 +7,13 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 
-using VooDo.Compilation;
-using VooDo.Compilation.Emission;
+using VooDo.Compiling.Emission;
 using VooDo.Utils;
 
 namespace VooDo.AST.Names
 {
 
-    public sealed record SimpleType : Node
+    public sealed record SimpleType : BodyNode
     {
 
         #region Creation
@@ -152,7 +151,9 @@ namespace VooDo.AST.Names
 
         #region Overrides
 
-        public override SimpleType ReplaceNodes(Func<NodeOrIdentifier?, NodeOrIdentifier?> _map)
+        public override QualifiedType? Parent => (QualifiedType?) base.Parent;
+
+        public override SimpleType ReplaceNodes(Func<Node?, Node?> _map)
         {
             Identifier newName = (Identifier) _map(Name).NonNull();
             ImmutableArray<ComplexType> newTypeArguments = TypeArguments.Map(_map).NonNull();
@@ -170,9 +171,9 @@ namespace VooDo.AST.Names
             }
         }
 
-        internal TypeSyntax EmitNode(Scope _scope, Tagger _tagger, bool _allowPredefined)
+        internal override TypeSyntax EmitNode(Scope _scope, Tagger _tagger)
         {
-            if (_allowPredefined && !IsGeneric)
+            if (Parent is not null && Parent.IsSimple && !IsGeneric)
             {
                 SyntaxToken? keyword = Name.EmitPredefinedTypeKeywordToken(_tagger);
                 if (keyword is not null)
@@ -180,17 +181,15 @@ namespace VooDo.AST.Names
                     return SyntaxFactory.PredefinedType(keyword.Value).Own(_tagger, this);
                 }
             }
-            return EmitNode(_scope, _tagger);
-        }
-
-        internal override SimpleNameSyntax EmitNode(Scope _scope, Tagger _tagger)
-            => (IsGeneric
+            return (IsGeneric
             ? (SimpleNameSyntax) SyntaxFactoryHelper.GenericName(
                 Name.EmitToken(_tagger),
                 TypeArguments.Select(_a => _a.EmitNode(_scope, _tagger)))
             : SyntaxFactory.IdentifierName(Name.EmitToken(_tagger)))
             .Own(_tagger, this);
-        public override IEnumerable<NodeOrIdentifier> Children => new NodeOrIdentifier[] { Name }.Concat(TypeArguments);
+        }
+
+        public override IEnumerable<Node> Children => new Node[] { Name }.Concat(TypeArguments);
         public override string ToString() => IsGeneric ? $"{Name}<{string.Join(", ", TypeArguments)}>" : $"{Name}";
 
         #endregion

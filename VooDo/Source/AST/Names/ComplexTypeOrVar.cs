@@ -5,13 +5,13 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-using VooDo.Compilation;
-using VooDo.Compilation.Emission;
+using VooDo.Compiling;
+using VooDo.Compiling.Emission;
 
 namespace VooDo.AST.Names
 {
 
-    public sealed record ComplexTypeOrVar : Node
+    public sealed record ComplexTypeOrVar : BodyNode
     {
 
         #region Creation
@@ -62,7 +62,7 @@ namespace VooDo.AST.Names
 
         #region Overrides
 
-        public override ComplexTypeOrVar ReplaceNodes(Func<NodeOrIdentifier?, NodeOrIdentifier?> _map)
+        public override ComplexTypeOrVar ReplaceNodes(Func<Node?, Node?> _map)
         {
             if (IsVar)
             {

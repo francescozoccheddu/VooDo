@@ -7,7 +7,7 @@ using System.Collections.Immutable;
 
 using VooDo.AST.Names;
 
-namespace VooDo.Compilation.Emission
+namespace VooDo.Compiling.Emission
 {
 
     internal sealed class Scope
@@ -51,7 +51,7 @@ namespace VooDo.Compilation.Emission
             => m_globals.ToImmutableArray();
 
         private static GlobalDefinition CreateGlobalDefinition(GlobalPrototype _global, int _index)
-            => new GlobalDefinition(_global, Compiler.globalFieldPrefix + _index);
+            => new GlobalDefinition(_global, Compilation.globalFieldPrefix + _index);
 
         public void AddLocal(Identifier _name)
         {

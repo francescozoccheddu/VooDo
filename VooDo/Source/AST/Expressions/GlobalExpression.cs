@@ -5,9 +5,9 @@ using System.Collections.Generic;
 using System.Linq;
 
 using VooDo.AST.Names;
-using VooDo.Compilation;
-using VooDo.Compilation.Emission;
-using VooDo.Errors.Problems;
+using VooDo.Compiling;
+using VooDo.Compiling.Emission;
+using VooDo.Problems;
 using VooDo.Utils;
 
 namespace VooDo.AST.Expressions
@@ -52,7 +52,7 @@ namespace VooDo.AST.Expressions
 
         protected override EPrecedence m_Precedence => EPrecedence.Global;
 
-        public override GlobalExpression ReplaceNodes(Func<NodeOrIdentifier?, NodeOrIdentifier?> _map)
+        public override GlobalExpression ReplaceNodes(Func<Node?, Node?> _map)
         {
             Expression newController = (Expression) _map(Controller).NonNull();
             Expression? newInitializer = (Expression?) _map(Initializer);

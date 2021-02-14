@@ -2,13 +2,12 @@
 
 using System.Collections.Immutable;
 
-using VooDo.AST;
-using VooDo.Compilation.Emission;
+using VooDo.Compiling.Emission;
 
-namespace VooDo.Errors.Problems
+namespace VooDo.Problems
 {
 
-    public sealed class GlobalTypeInferenceProblem : Problem
+    public sealed class GlobalTypeInferenceProblem : SourceProblem
     {
 
         private static string GetMessage(bool _hasCandidates, string? _name) => _hasCandidates switch
@@ -23,7 +22,7 @@ namespace VooDo.Errors.Problems
         public GlobalPrototype Prototype { get; }
 
         public GlobalTypeInferenceProblem(ImmutableArray<ITypeSymbol> _candidateTypes, GlobalPrototype _prototype)
-            : base(EKind.Semantic, ESeverity.Error, (Node?) _prototype.Expression ?? _prototype.Declaration!, GetMessage(!_candidateTypes.IsEmpty, _prototype.Global.Name?.ToString()))
+            : base(EKind.Semantic, ESeverity.Error, GetMessage(!_candidateTypes.IsEmpty, _prototype.Global.Name?.ToString()), _prototype.Source)
         {
             CandidateTypes = _candidateTypes;
             Prototype = _prototype;

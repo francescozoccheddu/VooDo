@@ -4,8 +4,8 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
 
-using VooDo.Compilation;
-using VooDo.Compilation.Emission;
+using VooDo.Compiling;
+using VooDo.Compiling.Emission;
 using VooDo.Utils;
 
 namespace VooDo.AST.Expressions
@@ -18,7 +18,7 @@ namespace VooDo.AST.Expressions
 
         protected override EPrecedence m_Precedence => EPrecedence.Conditional;
 
-        public override ConditionalExpression ReplaceNodes(Func<NodeOrIdentifier?, NodeOrIdentifier?> _map)
+        public override ConditionalExpression ReplaceNodes(Func<Node?, Node?> _map)
         {
             Expression newCondition = (Expression) _map(Condition).NonNull();
             Expression newTrue = (Expression) _map(True).NonNull();

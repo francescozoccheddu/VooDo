@@ -7,8 +7,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 
-using VooDo.Compilation;
-using VooDo.Compilation.Emission;
+using VooDo.Compiling.Emission;
 using VooDo.Utils;
 
 namespace VooDo.AST.Statements
@@ -32,7 +31,7 @@ namespace VooDo.AST.Statements
 
         #region Overrides
 
-        public override GlobalStatement ReplaceNodes(Func<NodeOrIdentifier?, NodeOrIdentifier?> _map)
+        public override GlobalStatement ReplaceNodes(Func<Node?, Node?> _map)
         {
             ImmutableArray<DeclarationStatement> newDeclarations = m_Declarations.Map(_map).NonNull();
             if (newDeclarations == m_Declarations)
@@ -53,7 +52,7 @@ namespace VooDo.AST.Statements
         public IEnumerator<DeclarationStatement> GetEnumerator() => ((IEnumerable<DeclarationStatement>) m_Declarations).GetEnumerator();
         IEnumerator IEnumerable.GetEnumerator() => ((IEnumerable) m_Declarations).GetEnumerator();
         internal override BlockSyntax EmitNode(Scope _scope, Tagger _tagger)
-            => SyntaxFactory.Block(this.Select(_s => _s.EmitNode(_scope, _tagger, true)).ToSyntaxList()).Own(_tagger, this);
+            => SyntaxFactory.Block(this.Select(_s => _s.EmitNode(_scope, _tagger)).ToSyntaxList()).Own(_tagger, this);
         public override IEnumerable<DeclarationStatement> Children => m_Declarations;
         public override string ToString() => GrammarConstants.globalKeyword + Count switch
         {

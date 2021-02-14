@@ -7,12 +7,13 @@ using System.Collections.Immutable;
 using System.Linq;
 
 using VooDo.AST.Directives;
-using VooDo.AST.Names;
 using VooDo.AST.Statements;
-using VooDo.Compilation;
-using VooDo.Compilation.Emission;
+using VooDo.Compiling;
+using VooDo.Compiling.Emission;
 using VooDo.Runtime;
 using VooDo.Utils;
+
+using static VooDo.Compiling.Emission.Scope;
 
 using SF = Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 using SFH = VooDo.Utils.SyntaxFactoryHelper;
@@ -36,7 +37,7 @@ namespace VooDo.AST
 
         #region Overrides
 
-        public override Script ReplaceNodes(Func<NodeOrIdentifier?, NodeOrIdentifier?> _map)
+        public override Script ReplaceNodes(Func<Node?, Node?> _map)
         {
             ImmutableArray<UsingDirective> newUsings = Usings.Map(_map).NonNull();
             ImmutableArray<Statement> newStatements = Statements.Map(_map).NonNull();
@@ -54,17 +55,17 @@ namespace VooDo.AST
             }
         }
 
-        internal override CompilationUnitSyntax EmitNode(Scope _scope, Tagger _tagger)
-            => EmitNode(_scope, _tagger, ImmutableArray.Create(new Identifier(Compiler.runtimeReferenceAlias)), null);
-
-        internal CompilationUnitSyntax EmitNode(Scope _scope, Tagger _tagger, ImmutableArray<Identifier> _externAliases, ComplexType? _returnType)
+        internal (CompilationUnitSyntax, ImmutableArray<GlobalDefinition>) EmitNode(Session _session)
         {
-            TypeSyntax? returnType = _returnType?.EmitNode(_scope, _tagger);
+            Scope scope = new Scope();
+            Tagger tagger = _session.Tagger;
+            TypeSyntax? returnType = _session.Compilation.Options.ReturnType?.EmitNode(scope, tagger);
             TypeSyntax variableType = SFH.VariableType();
-            IEnumerable<ExternAliasDirectiveSyntax> aliases = _externAliases
-                .EmptyIfDefault()
-                .Select(_i => SF.ExternAliasDirective(_i).Own(_tagger, _i));
-            IEnumerable<UsingDirectiveSyntax> usings = Usings.Select(_u => _u.EmitNode(_scope, _tagger));
+            IEnumerable<ExternAliasDirectiveSyntax> aliases =
+                _session.Compilation.Options.References
+                .SelectMany(_r => _r.Aliases)
+                .Select(_r => SF.ExternAliasDirective(_r).Own(tagger, _r));
+            IEnumerable<UsingDirectiveSyntax> usings = Usings.Select(_u => _u.EmitNode(scope, tagger));
             MethodDeclarationSyntax? runMethod = SF.MethodDeclaration(
                                 returnType ?? SFH.Void(),
                                 SF.Identifier(returnType is null
@@ -76,16 +77,16 @@ namespace VooDo.AST
                                     SyntaxKind.OverrideKeyword))
                             .WithBody(
                                 SF.Block(
-                                    Statements.Select(_s => _s.EmitNode(_scope, _tagger)).ToSeparatedList()));
+                                    Statements.Select(_s => _s.EmitNode(scope, tagger)).ToSeparatedList()));
 
-            ImmutableArray<Scope.GlobalDefinition> globals = _scope.GetGlobalDefinitions();
+            ImmutableArray<Scope.GlobalDefinition> globals = scope.GetGlobalDefinitions();
             VariableDeclarationSyntax EmitGlobalDeclaration(Scope.GlobalDefinition _definition)
             {
                 TypeSyntax? type = _definition.Prototype.Global.Type.IsVar
                     ? null
-                    : _definition.Prototype.Global.Type.EmitNode(_scope, _tagger);
+                    : _definition.Prototype.Global.Type.EmitNode(scope, tagger);
                 return SF.VariableDeclaration(
-                            SFH.VariableType(type),
+                            SFH.VariableType(type).Own(tagger, _definition.Prototype.Global.Type),
                             SF.VariableDeclarator(
                                 _definition.Identifier,
                                 null,
@@ -98,11 +99,12 @@ namespace VooDo.AST
                                         SyntaxKind.StringLiteralExpression,
                                         SF.Literal(_definition.Prototype.Global.Name!)),
                                     _definition.Prototype.Global.HasInitializer
-                                    ? _definition.Prototype.Global.Initializer!.EmitNode(new Scope(), _tagger)
+                                    ? _definition.Prototype.Global.Initializer!.EmitNode(new Scope(), tagger)
                                     : SF.LiteralExpression(
                                         SyntaxKind.DefaultLiteralExpression))
                                 .ToEqualsValueClause())
-                            .ToSeparatedList());
+                            .ToSeparatedList())
+                    .Own(tagger, _definition.Prototype.Source);
             }
             PropertyDeclarationSyntax variablesProperty = SFH.ArrowProperty(
                 SF.ArrayType(
@@ -131,7 +133,7 @@ namespace VooDo.AST
                             SyntaxKind.ReadOnlyKeyword),
                         EmitGlobalDeclaration(_g)));
             ClassDeclarationSyntax? classDeclaration =
-                SF.ClassDeclaration(Compiler.generatedClassName)
+                SF.ClassDeclaration(Compilation.generatedClassName)
                     .WithModifiers(
                         SFH.Tokens(
                             SyntaxKind.PublicKeyword,
@@ -146,15 +148,17 @@ namespace VooDo.AST
                         .Append(variablesProperty)
                         .Append(runMethod)
                         .ToSyntaxList());
-            return SF.CompilationUnit(
+            CompilationUnitSyntax root
+                = SF.CompilationUnit(
                     aliases.ToSyntaxList(),
                     usings.ToSyntaxList(),
                     SF.List<AttributeListSyntax>(),
                     classDeclaration.ToSyntaxList<MemberDeclarationSyntax>())
-                .Own(_tagger, this);
+                .Own(tagger, this);
+            return (root, globals);
         }
 
-        public override IEnumerable<Node> Children => ((IEnumerable<Node>) Usings).Concat(Statements);
+        public override IEnumerable<BodyNode> Children => ((IEnumerable<BodyNode>) Usings).Concat(Statements);
         public override string ToString() => (string.Join('\n', Usings) + "\n\n" + string.Join('\n', Statements)).Trim();
 
         #endregion

@@ -8,9 +8,9 @@ using System.Collections.Immutable;
 using System.Linq;
 
 using VooDo.AST.Names;
-using VooDo.Compilation;
-using VooDo.Compilation.Emission;
-using VooDo.Errors.Problems;
+using VooDo.Compiling;
+using VooDo.Compiling.Emission;
+using VooDo.Problems;
 using VooDo.Utils;
 
 namespace VooDo.AST.Expressions
@@ -21,10 +21,10 @@ namespace VooDo.AST.Expressions
 
         #region Nested types
 
-        public abstract record ElementBase : Node
+        public abstract record ElementBase : BodyNode
         {
 
-            public abstract override ElementBase ReplaceNodes(Func<NodeOrIdentifier?, NodeOrIdentifier?> _map);
+            public abstract override ElementBase ReplaceNodes(Func<Node?, Node?> _map);
             internal abstract override ArgumentSyntax EmitNode(Scope _scope, Tagger _tagger);
 
         }
@@ -56,7 +56,7 @@ namespace VooDo.AST.Expressions
 
         #region Overrides
 
-        public sealed override TupleExpressionBase<TElement> ReplaceNodes(Func<NodeOrIdentifier?, NodeOrIdentifier?> _map)
+        public sealed override TupleExpressionBase<TElement> ReplaceNodes(Func<Node?, Node?> _map)
         {
             ImmutableArray<TElement> newSizes = m_Elements.Map(_map).NonNull();
             if (newSizes == m_Elements)
@@ -98,7 +98,7 @@ namespace VooDo.AST.Expressions
 
             public bool IsNamed => Name is not null;
 
-            public override Element ReplaceNodes(Func<NodeOrIdentifier?, NodeOrIdentifier?> _map)
+            public override Element ReplaceNodes(Func<Node?, Node?> _map)
             {
                 Identifier? newName = (Identifier?) _map(Name);
                 Expression newExpression = (Expression) _map(Expression).NonNull();
@@ -122,7 +122,7 @@ namespace VooDo.AST.Expressions
                     ? SyntaxFactory.NameColon(SyntaxFactory.IdentifierName(Name!.EmitToken(_tagger)).Own(_tagger, Name))
                     : null)
                 .Own(_tagger, this);
-            public override IEnumerable<NodeOrIdentifier> Children => IsNamed ? new NodeOrIdentifier[] { Name!, Expression } : new NodeOrIdentifier[] { Expression };
+            public override IEnumerable<Node> Children => IsNamed ? new Node[] { Name!, Expression } : new Node[] { Expression };
             public override string ToString() => IsNamed ? $"{Name}: {Expression}" : $"{Expression}";
 
         }
@@ -137,7 +137,7 @@ namespace VooDo.AST.Expressions
         public sealed record Element(ComplexTypeOrVar Type, IdentifierOrDiscard Name) : ElementBase
         {
 
-            public override Element ReplaceNodes(Func<NodeOrIdentifier?, NodeOrIdentifier?> _map)
+            public override Element ReplaceNodes(Func<Node?, Node?> _map)
             {
                 ComplexTypeOrVar newType = (ComplexTypeOrVar) _map(Type).NonNull();
                 IdentifierOrDiscard newName = (IdentifierOrDiscard) _map(Name).NonNull();
@@ -168,7 +168,7 @@ namespace VooDo.AST.Expressions
                             .Own(_tagger, this);
             }
 
-            public override IEnumerable<NodeOrIdentifier> Children => new NodeOrIdentifier[] { Type, Name };
+            public override IEnumerable<Node> Children => new Node[] { Type, Name };
             public override string ToString() => $"{Type} {Name}";
 
         }

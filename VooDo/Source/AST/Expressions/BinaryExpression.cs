@@ -4,8 +4,8 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
 
-using VooDo.Compilation;
-using VooDo.Compilation.Emission;
+using VooDo.Compiling;
+using VooDo.Compiling.Emission;
 using VooDo.Utils;
 
 namespace VooDo.AST.Expressions
@@ -56,7 +56,7 @@ namespace VooDo.AST.Expressions
             _ => throw new InvalidOperationException(),
         };
 
-        public override BinaryExpression ReplaceNodes(Func<NodeOrIdentifier?, NodeOrIdentifier?> _map)
+        public override BinaryExpression ReplaceNodes(Func<Node?, Node?> _map)
         {
             Expression newLeft = (Expression) _map(Left).NonNull();
             Expression newRight = (Expression) _map(Right).NonNull();

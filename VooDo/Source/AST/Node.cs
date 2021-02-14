@@ -1,29 +1,49 @@
-﻿using Microsoft.CodeAnalysis;
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 
-using VooDo.Compilation.Emission;
-using VooDo.Errors.Problems;
+using VooDo.Compiling;
+using VooDo.Compiling.Emission;
+using VooDo.Problems;
+
+using Roslyn = Microsoft.CodeAnalysis;
 
 namespace VooDo.AST
 {
 
-    public abstract record NodeOrIdentifier
+    public abstract record Node
     {
 
-        public virtual bool Equals(NodeOrIdentifier? _other) => true;
+        public virtual bool Equals(Node? _other) => true;
         public override int GetHashCode() => 0;
 
-        internal NodeOrIdentifier() { }
+        internal Node() { }
+
+        protected Node(Node _copy)
+        {
+            Root = null;
+            Compilation = null;
+            m_Parent = null;
+            Origin = _copy.Origin;
+            UserData = _copy.UserData;
+        }
+
+        public enum ERootKind
+        {
+            Free, Script, HookInitializer
+        }
+
+        public Node? Root { get; private set; }
+        public Compilation? Compilation { get; private init; }
 
         public Origin Origin { get; init; } = Origin.Unknown;
+        public object? UserData { get; init; }
 
-        internal abstract SyntaxNodeOrToken EmitNodeOrToken(Scope _scope, Tagger _tagger);
+        private Node? m_Parent { get; init; }
+        public virtual Node? Parent => m_Parent;
 
-        public virtual IEnumerable<NodeOrIdentifier> Children
-            => Enumerable.Empty<NodeOrIdentifier>();
+        public virtual IEnumerable<Node> Children
+            => Enumerable.Empty<Node>();
 
         public IEnumerable<Problem> GetSyntaxProblems()
             => GetSelfSyntaxProblems().Concat(Children.SelectMany(_c => _c.GetSyntaxProblems()));
@@ -31,17 +51,40 @@ namespace VooDo.AST
         protected virtual IEnumerable<Problem> GetSelfSyntaxProblems()
             => Enumerable.Empty<Problem>();
 
-        public abstract NodeOrIdentifier ReplaceNodes(Func<NodeOrIdentifier?, NodeOrIdentifier?> _map);
+        public abstract Node ReplaceNodes(Func<Node?, Node?> _map);
+
+        internal Node SetAsRootInternal(Compilation? _compilation)
+        {
+            Node root = this.ReplaceDescendantNodes(_t =>
+                _t.Replaced is null ? null : _t.Replaced with
+                {
+                    m_Parent = _t.Parent,
+                    Compilation = _compilation
+                }
+            )!;
+            foreach (Node node in root.DescendantNodesAndSelf())
+            {
+                node.Root = root;
+            }
+            return root;
+        }
 
     }
 
-    public abstract record Node : NodeOrIdentifier
+    public abstract record BodyNodeOrIdentifier : Node
     {
 
-        public abstract override Node ReplaceNodes(Func<NodeOrIdentifier?, NodeOrIdentifier?> _map);
+        public abstract override BodyNodeOrIdentifier ReplaceNodes(Func<Node?, Node?> _map);
+        internal abstract Roslyn::SyntaxNodeOrToken EmitNodeOrToken(Scope _scope, Tagger _tagger);
 
-        internal sealed override SyntaxNodeOrToken EmitNodeOrToken(Scope _scope, Tagger _tagger) => EmitNode(_scope, _tagger);
-        internal abstract SyntaxNode EmitNode(Scope _scope, Tagger _tagger);
+    }
+
+    public abstract record BodyNode : BodyNodeOrIdentifier
+    {
+
+        public abstract override BodyNode ReplaceNodes(Func<Node?, Node?> _map);
+        internal sealed override Roslyn::SyntaxNodeOrToken EmitNodeOrToken(Scope _scope, Tagger _tagger) => EmitNode(_scope, _tagger);
+        internal abstract Roslyn::SyntaxNode EmitNode(Scope _scope, Tagger _tagger);
 
     }
 

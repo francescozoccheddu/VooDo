@@ -4,8 +4,8 @@ using System;
 using System.Collections.Generic;
 
 using VooDo.AST.Names;
-using VooDo.Compilation;
-using VooDo.Compilation.Emission;
+using VooDo.Compiling;
+using VooDo.Compiling.Emission;
 using VooDo.Utils;
 
 namespace VooDo.AST.Expressions
@@ -18,7 +18,7 @@ namespace VooDo.AST.Expressions
 
         protected override EPrecedence m_Precedence => EPrecedence.Primary;
 
-        public override MemberAccessExpression ReplaceNodes(Func<NodeOrIdentifier?, NodeOrIdentifier?> _map)
+        public override MemberAccessExpression ReplaceNodes(Func<Node?, Node?> _map)
         {
             ComplexTypeOrExpression newSource = (ComplexTypeOrExpression) _map(Source).NonNull();
             Identifier newMember = (Identifier) _map(Member).NonNull();
@@ -41,7 +41,7 @@ namespace VooDo.AST.Expressions
                 Source.EmitNode(_scope, _tagger),
                 Member.EmitToken(_tagger).Own(_tagger, Member))
             .Own(_tagger, this);
-        public override IEnumerable<NodeOrIdentifier> Children => new NodeOrIdentifier[] { Source, Member };
+        public override IEnumerable<Node> Children => new Node[] { Source, Member };
         public override string ToString() => $"{LeftCode(Source)}.{Member}";
 
         #endregion

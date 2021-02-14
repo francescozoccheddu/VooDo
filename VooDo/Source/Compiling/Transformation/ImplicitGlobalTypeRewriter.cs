@@ -2,17 +2,19 @@
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
+using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 
-using VooDo.Errors.Problems;
+using VooDo.Compiling.Emission;
+using VooDo.Problems;
 using VooDo.Runtime;
 using VooDo.Utils;
 
-using static VooDo.Compilation.Emission.Scope;
+using static VooDo.Compiling.Emission.Scope;
 
-namespace VooDo.Compilation.Transformation
+namespace VooDo.Compiling.Transformation
 {
 
     internal static class ImplicitGlobalTypeRewriter
@@ -20,18 +22,16 @@ namespace VooDo.Compilation.Transformation
 
         private sealed record Field(GlobalDefinition Definition, VariableDeclarationSyntax Syntax);
 
-        private static void GetRuntimeSymbols(SemanticModel _semantics, out INamedTypeSymbol _variableSymbol, out INamedTypeSymbol _controllerFactorySymbol)
+        private static void GetRuntimeSymbols(SemanticModel _semantics, out INamedTypeSymbol _controllerFactorySymbol)
         {
             CSharpCompilation compilation = (CSharpCompilation) _semantics.Compilation;
-            MetadataReference runtime = compilation.References.First(_r => _r.Properties.Aliases.Contains(Compiler.runtimeReferenceAlias));
+            MetadataReference runtime = compilation.References.First(_r => _r.Properties.Aliases.Contains(Compilation.runtimeReferenceAlias));
             IAssemblySymbol runtimeSymbol = (IAssemblySymbol) compilation.GetAssemblyOrModuleSymbol(runtime)!;
-            INamedTypeSymbol? variableSymbol = runtimeSymbol.GetTypeByMetadataName(typeof(Variable).FullName!);
             INamedTypeSymbol? controllerFactorySymbol = runtimeSymbol.GetTypeByMetadataName(typeof(IControllerFactory<>).FullName!);
-            if (variableSymbol is null || controllerFactorySymbol is null)
+            if (controllerFactorySymbol is null)
             {
                 throw new NoSemanticsProblem().AsThrowable();
             }
-            _variableSymbol = variableSymbol;
             _controllerFactorySymbol = controllerFactorySymbol;
         }
 
@@ -111,54 +111,30 @@ namespace VooDo.Compilation.Transformation
             return initializers.SelectIndexed((_a, _i) => Conciliate(_a, controllers.GetValueOrDefault(_i))).ToImmutableArray();
         }
 
-        internal static CompilationUnitSyntax Rewrite(SemanticModel _semantics, ImmutableArray<GlobalDefinition> _globals)
+        private static ImmutableArray<VariableDeclarationSyntax> GetFieldDeclarations(ClassDeclarationSyntax _class, ImmutableArray<GlobalDefinition> _globals)
         {
-            ImmutableDictionary<string, GlobalDefinition> globalsMap = _globals.ToImmutableDictionary(_g => _g.Identifier.ValueText);
+            ImmutableDictionary<string, int> globalsMap = _globals.Enumerate().ToImmutableDictionary(_e => _e.item.Identifier.ValueText, _e => _e.index);
+            VariableDeclarationSyntax[] declarations = new VariableDeclarationSyntax[_globals.Length];
+            foreach (VariableDeclarationSyntax declaration in _class.Members.OfType<FieldDeclarationSyntax>().Select(_f => _f.Declaration))
+            {
+                SyntaxToken name = declaration.Variables.Single().Identifier;
+                if (globalsMap.TryGetValue(name.ValueText, out int index))
+                {
+                    declarations[index] = declaration;
+                }
+            }
+            return declarations.ToImmutableArray();
+        }
+
+        internal static CompilationUnitSyntax Rewrite(SemanticModel _semantics, ImmutableArray<GlobalDefinition> _globals, Tagger _tagger)
+        {
+            _globals = _globals.Where(_g => _g.Prototype.Global.Type.IsVar).ToImmutableArray();
             CompilationUnitSyntax root = (CompilationUnitSyntax) _semantics.SyntaxTree.GetRoot();
-            GetRuntimeSymbols(_semantics, out INamedTypeSymbol variableSymbol, out INamedTypeSymbol controllerFactorySymbol);
-            Field? ZipGlobal(FieldDeclarationSyntax _field)
-            {
-                SyntaxToken name = _field.Declaration.Variables.Single().Identifier;
-                if (globalsMap.TryGetValue(name.ValueText, out GlobalDefinition? definition))
-                {
-                    ITypeSymbol symbol = _semantics.GetTypeInfo(_field.Declaration.Type).Type!;
-                    if (symbol.Equals(variableSymbol, SymbolEqualityComparer.Default))
-                    {
-                        return new(definition, _field.Declaration);
-                    }
-                }
-                return null;
-            }
-            ImmutableArray<Field> fields = root
-                .DescendantNodes()
-                .OfType<FieldDeclarationSyntax>()
-                .SelectNonNull(ZipGlobal)
-                .ToImmutableArray();
-            ImmutableArray<ImmutableArray<ITypeSymbol>> candidateTypes = InferTypes(fields, _semantics, controllerFactorySymbol);
-            candidateTypes
-                .Zip(fields)
-                .Where(_z => _z.First.Length != 1)
-                .Select(_z => new GlobalTypeInferenceProblem(_z.First, _z.Second.Definition.Prototype))
-                .ThrowErrors();
-            IEnumerable<ITypeSymbol> types = candidateTypes.Select(_c => _c.Single());
-            ImmutableDictionary<VariableDeclarationSyntax, ITypeSymbol> map = fields.Zip(types, (_f, _t) => KeyValuePair.Create(_f.Syntax, _t!)).ToImmutableDictionary();
-            VariableDeclarationSyntax Replace(VariableDeclarationSyntax _original, VariableDeclarationSyntax _updated)
-            {
-                ITypeSymbol symbol = map[_original];
-                TypeSyntax type = SyntaxFactory.ParseTypeName(symbol.ToDisplayString());
-                TypeArgumentListSyntax typeArguments = SyntaxFactoryHelper.TypeArguments(type);
-                {
-                    QualifiedNameSyntax name = (QualifiedNameSyntax) _updated.Type;
-                    _updated = _updated.WithType(name.WithRight(SyntaxFactory.GenericName(name.Right.Identifier, typeArguments)));
-                }
-                {
-                    InvocationExpressionSyntax initializer = (InvocationExpressionSyntax) _updated.Variables.Single().Initializer!.Value;
-                    GenericNameSyntax methodName = (GenericNameSyntax) ((MemberAccessExpressionSyntax) initializer.Expression).Name;
-                    _updated = _updated.ReplaceNode(methodName, methodName.WithTypeArgumentList(typeArguments));
-                }
-                return _updated;
-            }
-            return root.ReplaceNodes(fields.Select(_f => _f.Syntax), Replace);
+            ClassDeclarationSyntax classDeclaration = root.Members.OfType<ClassDeclarationSyntax>().Single();
+
+
+
+            throw new NotImplementedException();
         }
 
     }

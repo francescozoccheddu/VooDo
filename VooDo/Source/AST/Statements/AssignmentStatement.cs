@@ -5,8 +5,8 @@ using System;
 using System.Collections.Generic;
 
 using VooDo.AST.Expressions;
-using VooDo.Compilation;
-using VooDo.Compilation.Emission;
+using VooDo.Compiling;
+using VooDo.Compiling.Emission;
 using VooDo.Utils;
 
 namespace VooDo.AST.Statements
@@ -31,7 +31,7 @@ namespace VooDo.AST.Statements
 
         #region Overrides
 
-        public override AssignmentStatement ReplaceNodes(Func<NodeOrIdentifier?, NodeOrIdentifier?> _map)
+        public override AssignmentStatement ReplaceNodes(Func<Node?, Node?> _map)
         {
             AssignableExpression newTarget = (AssignableExpression) _map(Target).NonNull();
             Expression newExpression = (Expression) _map(Source).NonNull();

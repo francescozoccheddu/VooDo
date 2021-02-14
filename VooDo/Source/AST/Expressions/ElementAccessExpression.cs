@@ -6,9 +6,9 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 
-using VooDo.Compilation;
-using VooDo.Compilation.Emission;
-using VooDo.Errors.Problems;
+using VooDo.Compiling;
+using VooDo.Compiling.Emission;
+using VooDo.Problems;
 using VooDo.Utils;
 
 namespace VooDo.AST.Expressions
@@ -47,7 +47,7 @@ namespace VooDo.AST.Expressions
 
         protected override EPrecedence m_Precedence => EPrecedence.Primary;
 
-        public override ElementAccessExpression ReplaceNodes(Func<NodeOrIdentifier?, NodeOrIdentifier?> _map)
+        public override ElementAccessExpression ReplaceNodes(Func<Node?, Node?> _map)
         {
             Expression newSource = (Expression) _map(Source).NonNull();
             ImmutableArray<Expression> newArguments = Arguments.Map(_map).NonNull();

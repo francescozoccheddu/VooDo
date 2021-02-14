@@ -6,9 +6,9 @@ using System;
 using System.Collections.Generic;
 
 using VooDo.AST.Names;
-using VooDo.Compilation;
-using VooDo.Compilation.Emission;
-using VooDo.Errors.Problems;
+using VooDo.Compiling;
+using VooDo.Compiling.Emission;
+using VooDo.Problems;
 using VooDo.Utils;
 
 namespace VooDo.AST.Directives
@@ -42,7 +42,7 @@ namespace VooDo.AST.Directives
 
         #region Overrides
 
-        public override UsingStaticDirective ReplaceNodes(Func<NodeOrIdentifier?, NodeOrIdentifier?> _map)
+        public override UsingStaticDirective ReplaceNodes(Func<Node?, Node?> _map)
         {
             QualifiedType newType = (QualifiedType) _map(Type).NonNull();
             if (ReferenceEquals(newType, Type))

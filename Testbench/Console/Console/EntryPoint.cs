@@ -3,7 +3,7 @@ using System;
 using System.Collections.Immutable;
 
 using VooDo.AST;
-using VooDo.Compilation;
+using VooDo.Compiling;
 using VooDo.Parsing;
 using VooDo.Runtime;
 
@@ -15,19 +15,16 @@ namespace VooDo.ConsoleTestbench
         public static void Run()
         {
             string code = @"
-
-using System;
-
 global var x = 7;
-int y = 8;
-y += x;
-$x = null;
-y = glob 7 * 4 + 2;
-z = (7 + 4) * 2;
+global {
+    var y = 5, z = 6;
+}
+int q = glob 7;
+int p = glob 6 init 5;
             ";
             Script script = Parser.Script(code);
             ImmutableArray<Reference> references = Reference.GetSystemReferences().Add(Reference.RuntimeReference).Add(Reference.FromAssembly(typeof(Culo).Assembly));
-            CompiledScript compilation = Compiler.Compile(script, new Compiler.Options() with { References = references });
+            CompiledScript compilation = Compiling.Compilation.Create(script, new Compiling.Compilation.Options() with { References = references });
             Console.WriteLine(compilation.Code);
         }
 

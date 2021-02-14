@@ -8,9 +8,8 @@ using System.Linq;
 
 using VooDo.AST.Expressions;
 using VooDo.AST.Names;
-using VooDo.Compilation;
-using VooDo.Compilation.Emission;
-using VooDo.Errors.Problems;
+using VooDo.Compiling.Emission;
+using VooDo.Problems;
 using VooDo.Utils;
 
 namespace VooDo.AST.Statements
@@ -21,17 +20,17 @@ namespace VooDo.AST.Statements
 
         #region Nested types
 
-        public sealed record Declarator(Identifier Name, Expression? Initializer = null) : Node
+        public sealed record Declarator(Identifier Name, Expression? Initializer = null) : BodyNode
         {
 
             public bool HasInitializer => Initializer is not null;
 
-            internal VariableDeclaratorSyntax EmitNode(Scope _scope, Tagger _tagger, DeclarationStatement? _declarationStatement)
+            internal override VariableDeclaratorSyntax EmitNode(Scope _scope, Tagger _tagger)
             {
                 ExpressionSyntax? initializer;
-                if (_declarationStatement is not null)
+                if (Parent is not null)
                 {
-                    Scope.GlobalDefinition globalDefinition = _scope.AddGlobal(new GlobalPrototype(new Global(_declarationStatement.Type, Name, Initializer), _declarationStatement, this));
+                    Scope.GlobalDefinition globalDefinition = _scope.AddGlobal(new GlobalPrototype(new Global(Parent.Type, Name, Initializer), this));
                     initializer = SyntaxFactoryHelper.ThisMemberAccess(globalDefinition.Identifier);
                 }
                 else
@@ -43,7 +42,7 @@ namespace VooDo.AST.Statements
                 return SyntaxFactory.VariableDeclarator(Name.EmitToken(_tagger), null, initializerClause).Own(_tagger, this);
             }
 
-            public override Declarator ReplaceNodes(Func<NodeOrIdentifier?, NodeOrIdentifier?> _map)
+            public override Declarator ReplaceNodes(Func<Node?, Node?> _map)
             {
                 Identifier newName = (Identifier) _map(Name).NonNull();
                 Expression? newInitializer = (Expression?) _map(Initializer);
@@ -61,9 +60,10 @@ namespace VooDo.AST.Statements
                 }
             }
 
-            internal override VariableDeclaratorSyntax EmitNode(Scope _scope, Tagger _tagger) => EmitNode(_scope, _tagger, null);
-            public override IEnumerable<NodeOrIdentifier> Children
-                => HasInitializer ? new NodeOrIdentifier[] { Name, Initializer! } : new NodeOrIdentifier[] { Name };
+            public override DeclarationStatement? Parent => (DeclarationStatement?) base.Parent;
+
+            public override IEnumerable<Node> Children
+                => HasInitializer ? new Node[] { Name, Initializer! } : new Node[] { Name };
             public override string ToString() => HasInitializer ? $"{Name} {AssignmentStatement.EKind.Simple.Token()} {Initializer}" : $"{Name}";
 
         }
@@ -117,7 +117,7 @@ namespace VooDo.AST.Statements
             }
         }
 
-        public override DeclarationStatement ReplaceNodes(Func<NodeOrIdentifier?, NodeOrIdentifier?> _map)
+        public override DeclarationStatement ReplaceNodes(Func<Node?, Node?> _map)
         {
             ComplexTypeOrVar newType = (ComplexTypeOrVar) _map(Type).NonNull();
             ImmutableArray<Declarator> newDeclarators = Declarators.Map(_map).NonNull();
@@ -135,21 +135,20 @@ namespace VooDo.AST.Statements
             }
         }
 
-        internal LocalDeclarationStatementSyntax EmitNode(Scope _scope, Tagger _tagger, bool _global)
+        internal override LocalDeclarationStatementSyntax EmitNode(Scope _scope, Tagger _tagger)
         {
             TypeSyntax type = Type.EmitNode(_scope, _tagger);
-            if (_global && !Type.IsVar)
+            if (Parent is GlobalStatement && !Type.IsVar)
             {
                 type = SyntaxFactoryHelper.VariableType(type);
             }
             return SyntaxFactory.LocalDeclarationStatement(
                            SyntaxFactory.VariableDeclaration(type,
-                               Declarators.Select(_d => _d.EmitNode(_scope, _tagger, _global ? this : null)).ToSeparatedList()))
+                               Declarators.Select(_d => _d.EmitNode(_scope, _tagger)).ToSeparatedList()))
                        .Own(_tagger, this);
         }
 
-        internal override LocalDeclarationStatementSyntax EmitNode(Scope _scope, Tagger _tagger) => EmitNode(_scope, _tagger, false);
-        public override IEnumerable<Node> Children => new Node[] { Type }.Concat(Declarators);
+        public override IEnumerable<BodyNode> Children => new BodyNode[] { Type }.Concat(Declarators);
         public override string ToString() => $"{Type} {string.Join(", ", Declarators)}{GrammarConstants.statementEndToken}";
 
         #endregion

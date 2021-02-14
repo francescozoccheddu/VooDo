@@ -5,8 +5,8 @@ using System;
 using System.Collections.Generic;
 
 using VooDo.AST.Names;
-using VooDo.Compilation;
-using VooDo.Compilation.Emission;
+using VooDo.Compiling;
+using VooDo.Compiling.Emission;
 using VooDo.Utils;
 
 namespace VooDo.AST.Expressions
@@ -19,7 +19,7 @@ namespace VooDo.AST.Expressions
 
         protected override EPrecedence m_Precedence => EPrecedence.Cast;
 
-        public override CastExpression ReplaceNodes(Func<NodeOrIdentifier?, NodeOrIdentifier?> _map)
+        public override CastExpression ReplaceNodes(Func<Node?, Node?> _map)
         {
             ComplexType newType = (ComplexType) _map(Type).NonNull();
             Expression newExpression = (Expression) _map(Type).NonNull();

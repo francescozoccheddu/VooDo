@@ -7,8 +7,8 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 
-using VooDo.Compilation;
-using VooDo.Compilation.Emission;
+using VooDo.Compiling;
+using VooDo.Compiling.Emission;
 using VooDo.Utils;
 
 namespace VooDo.AST.Statements
@@ -32,7 +32,7 @@ namespace VooDo.AST.Statements
 
         #region Overrides
 
-        public override BlockStatement ReplaceNodes(Func<NodeOrIdentifier?, NodeOrIdentifier?> _map)
+        public override BlockStatement ReplaceNodes(Func<Node?, Node?> _map)
         {
             ImmutableArray<Statement> newStatements = m_statements.Map(_map).NonNull();
             if (newStatements == m_statements)

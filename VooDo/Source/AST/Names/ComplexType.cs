@@ -8,9 +8,8 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Runtime.CompilerServices;
 
-using VooDo.Compilation;
-using VooDo.Compilation.Emission;
-using VooDo.Errors.Problems;
+using VooDo.Compiling.Emission;
+using VooDo.Problems;
 using VooDo.Utils;
 
 namespace VooDo.AST.Names
@@ -117,7 +116,7 @@ namespace VooDo.AST.Names
 
         #region Nested types
 
-        public sealed record RankSpecifier : Node
+        public sealed record RankSpecifier : BodyNode
         {
 
             public static implicit operator RankSpecifier(int _rank) => new(_rank);
@@ -141,7 +140,7 @@ namespace VooDo.AST.Names
                 }
             }
 
-            public override RankSpecifier ReplaceNodes(Func<NodeOrIdentifier?, NodeOrIdentifier?> _map) => this;
+            public override RankSpecifier ReplaceNodes(Func<Node?, Node?> _map) => this;
 
             internal override ArrayRankSpecifierSyntax EmitNode(Scope _scope, Tagger _tagger)
                 => SyntaxFactoryHelper.ArrayRank(m_rank).Own(_tagger, this);
@@ -176,7 +175,7 @@ namespace VooDo.AST.Names
 
         #region Overrides
 
-        public override ComplexType ReplaceNodes(Func<NodeOrIdentifier?, NodeOrIdentifier?> _map)
+        public override ComplexType ReplaceNodes(Func<Node?, Node?> _map)
         {
             ImmutableArray<RankSpecifier> newRanks = Ranks.Map(_map).NonNull();
             if (newRanks == Ranks)

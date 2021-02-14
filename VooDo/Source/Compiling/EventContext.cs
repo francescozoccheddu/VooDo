@@ -1,4 +1,4 @@
-﻿namespace VooDo.Compilation
+﻿namespace VooDo.Compiling
 {
 
     internal sealed class EventContext

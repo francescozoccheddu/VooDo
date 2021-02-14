@@ -6,8 +6,8 @@ using System.Collections.Generic;
 using System.Linq;
 
 using VooDo.AST.Expressions;
-using VooDo.Compilation;
-using VooDo.Compilation.Emission;
+using VooDo.Compiling;
+using VooDo.Compiling.Emission;
 using VooDo.Utils;
 
 namespace VooDo.AST.Statements
@@ -24,7 +24,7 @@ namespace VooDo.AST.Statements
 
         #region Overrides
 
-        public override IfStatement ReplaceNodes(Func<NodeOrIdentifier?, NodeOrIdentifier?> _map)
+        public override IfStatement ReplaceNodes(Func<Node?, Node?> _map)
         {
             Expression newCondition = (Expression) _map(Condition).NonNull();
             Statement newThen = (Statement) _map(Then).NonNull();
@@ -54,7 +54,7 @@ namespace VooDo.AST.Statements
                 .Own(_tagger, this);
         }
 
-        public override IEnumerable<Node> Children => new Node[] { Condition, Then }.Concat(HasElse ? new[] { Else! } : Enumerable.Empty<Node>());
+        public override IEnumerable<BodyNode> Children => new BodyNode[] { Condition, Then }.Concat(HasElse ? new[] { Else! } : Enumerable.Empty<BodyNode>());
         public override string ToString() => $"{GrammarConstants.ifKeyword} ({Condition})\n"
             + (Then is BlockStatement ? "" : "\t") + Then
             + (Else is null ? "" : $"\n{GrammarConstants.elseKeyword}\n" + (Else is BlockStatement ? "" : "\t") + Else);

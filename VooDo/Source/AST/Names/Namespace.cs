@@ -6,15 +6,15 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 
-using VooDo.Compilation;
-using VooDo.Compilation.Emission;
-using VooDo.Errors.Problems;
+using VooDo.AST.Directives;
+using VooDo.Compiling.Emission;
+using VooDo.Problems;
 using VooDo.Utils;
 
 namespace VooDo.AST.Names
 {
 
-    public sealed record Namespace : Node
+    public sealed record Namespace : BodyNode
     {
 
         #region Creation
@@ -105,7 +105,9 @@ namespace VooDo.AST.Names
 
         #region Overrides
 
-        public override Namespace ReplaceNodes(Func<NodeOrIdentifier?, NodeOrIdentifier?> _map)
+        public override UsingNamespaceDirective? Parent => (UsingNamespaceDirective?) base.Parent;
+
+        public override Namespace ReplaceNodes(Func<Node?, Node?> _map)
         {
             Identifier? newAlias = (Identifier?) _map(Alias);
             ImmutableArray<Identifier> newPath = Path.Map(_map).NonNull();
@@ -135,12 +137,12 @@ namespace VooDo.AST.Names
             }
             foreach (SimpleType name in Path.Skip(1))
             {
-                type = SyntaxFactory.QualifiedName(type, name.EmitNode(_scope, _tagger));
+                type = SyntaxFactory.QualifiedName(type, (SimpleNameSyntax) name.EmitNode(_scope, _tagger));
             }
             return type.Own(_tagger, this);
         }
 
-        public override IEnumerable<NodeOrIdentifier> Children => (IsAliasQualified ? new NodeOrIdentifier[] { Alias! } : Enumerable.Empty<NodeOrIdentifier>()).Concat(Path);
+        public override IEnumerable<Node> Children => (IsAliasQualified ? new Node[] { Alias! } : Enumerable.Empty<Node>()).Concat(Path);
         public override string ToString() => (IsAliasQualified ? $"{Alias}::" : "") + string.Join('.', Path);
 
         #endregion

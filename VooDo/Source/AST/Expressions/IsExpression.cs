@@ -8,8 +8,8 @@ using System.Collections.Generic;
 using System.Linq;
 
 using VooDo.AST.Names;
-using VooDo.Compilation;
-using VooDo.Compilation.Emission;
+using VooDo.Compiling;
+using VooDo.Compiling.Emission;
 using VooDo.Utils;
 
 namespace VooDo.AST.Expressions
@@ -28,7 +28,7 @@ namespace VooDo.AST.Expressions
 
         protected override EPrecedence m_Precedence => EPrecedence.Relational;
 
-        public override IsExpression ReplaceNodes(Func<NodeOrIdentifier?, NodeOrIdentifier?> _map)
+        public override IsExpression ReplaceNodes(Func<Node?, Node?> _map)
         {
             ComplexType newType = (ComplexType) _map(Type).NonNull();
             IdentifierOrDiscard? newName = (IdentifierOrDiscard?) _map(Name);
@@ -58,8 +58,8 @@ namespace VooDo.AST.Expressions
                 Expression.EmitNode(_scope, _tagger),
                 Type.EmitNode(_scope, _tagger)))
             .Own(_tagger, this);
-        public override IEnumerable<NodeOrIdentifier> Children
-            => new NodeOrIdentifier[] { Expression, Type }.Concat(IsDeclaration ? new NodeOrIdentifier[] { Name! } : Enumerable.Empty<NodeOrIdentifier>());
+        public override IEnumerable<Node> Children
+            => new Node[] { Expression, Type }.Concat(IsDeclaration ? new Node[] { Name! } : Enumerable.Empty<Node>());
         public override string ToString() => $"{LeftCode(Expression)} {GrammarConstants.isKeyword} {Type}" + (IsDeclaration ? $" {Name}" : "");
 
         #endregion
