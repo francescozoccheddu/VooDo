@@ -41,11 +41,11 @@ namespace VooDo.AST.Expressions
             }
         }
 
-        internal override ExpressionSyntax EmitNode(Scope _scope, Marker _marker)
+        internal override ExpressionSyntax EmitNode(Scope _scope, Tagger _tagger)
             => (HasType
-            ? SyntaxFactory.DefaultExpression(Type!.EmitNode(_scope, _marker))
+            ? SyntaxFactory.DefaultExpression(Type!.EmitNode(_scope, _tagger))
             : (ExpressionSyntax) SyntaxFactory.LiteralExpression(SyntaxKind.DefaultExpression))
-            .Own(_marker, this);
+            .Own(_tagger, this);
         public override IEnumerable<ComplexType> Children => HasType ? new ComplexType[] { Type! } : Enumerable.Empty<ComplexType>();
         public override string ToString() => GrammarConstants.defaultKeyword + (HasType ? $"({Type})" : "");
 

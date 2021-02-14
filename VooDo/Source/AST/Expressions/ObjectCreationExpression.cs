@@ -62,13 +62,13 @@ namespace VooDo.AST.Expressions
             }
         }
 
-        internal override ExpressionSyntax EmitNode(Scope _scope, Marker _marker)
+        internal override ExpressionSyntax EmitNode(Scope _scope, Tagger _tagger)
         {
-            ArgumentListSyntax argumentList = SyntaxFactoryHelper.Arguments(Arguments.Select(_a => _a.EmitNode(_scope, _marker)));
+            ArgumentListSyntax argumentList = SyntaxFactoryHelper.Arguments(Arguments.Select(_a => _a.EmitNode(_scope, _tagger)));
             return (IsTypeImplicit
                 ? (ExpressionSyntax) SyntaxFactory.ImplicitObjectCreationExpression(argumentList, null)
-                : SyntaxFactory.ObjectCreationExpression(Type!.EmitNode(_scope, _marker), argumentList, null))
-                .Own(_marker, this);
+                : SyntaxFactory.ObjectCreationExpression(Type!.EmitNode(_scope, _tagger), argumentList, null))
+                .Own(_tagger, this);
         }
 
         public override IEnumerable<Node> Children => IsTypeImplicit ? Arguments : new Node[] { Type! }.Concat(Arguments);

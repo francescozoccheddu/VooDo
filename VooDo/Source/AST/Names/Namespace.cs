@@ -123,21 +123,21 @@ namespace VooDo.AST.Names
             }
         }
 
-        internal override NameSyntax EmitNode(Scope _scope, Marker _marker)
+        internal override NameSyntax EmitNode(Scope _scope, Tagger _tagger)
         {
-            IdentifierNameSyntax[] path = Path.Select(_i => SyntaxFactory.IdentifierName(_i.EmitToken(_marker)).Own(_marker, _i)).ToArray();
+            IdentifierNameSyntax[] path = Path.Select(_i => SyntaxFactory.IdentifierName(_i.EmitToken(_tagger)).Own(_tagger, _i)).ToArray();
             NameSyntax type = path[0];
             if (IsAliasQualified)
             {
                 type = SyntaxFactory.AliasQualifiedName(
-                    SyntaxFactory.IdentifierName(Alias!.EmitToken(_marker)),
+                    SyntaxFactory.IdentifierName(Alias!.EmitToken(_tagger)),
                     (SimpleNameSyntax) type);
             }
             foreach (SimpleType name in Path.Skip(1))
             {
-                type = SyntaxFactory.QualifiedName(type, name.EmitNode(_scope, _marker));
+                type = SyntaxFactory.QualifiedName(type, name.EmitNode(_scope, _tagger));
             }
-            return type.Own(_marker, this);
+            return type.Own(_tagger, this);
         }
 
         public override IEnumerable<NodeOrIdentifier> Children => (IsAliasQualified ? new NodeOrIdentifier[] { Alias! } : Enumerable.Empty<NodeOrIdentifier>()).Concat(Path);

@@ -15,7 +15,7 @@ namespace VooDo.Errors.Problems
         {
         }
 
-        internal static RoslynProblem? FromDiagnostic(Diagnostic _diagnostic, Marker _marker, EKind _kind = EKind.Semantic)
+        internal static RoslynProblem? FromDiagnostic(Diagnostic _diagnostic, Tagger _tagger, EKind _kind = EKind.Semantic)
         {
             if (_diagnostic.Severity is DiagnosticSeverity.Info or DiagnosticSeverity.Hidden)
             {
@@ -27,7 +27,7 @@ namespace VooDo.Errors.Problems
                 if (root is not null)
                 {
                     SyntaxNode? node = root.FindNode(_diagnostic.Location.SourceSpan);
-                    syntax = _marker.GetOwner(node);
+                    syntax = _tagger.GetOwner(node);
                 }
             }
             ESeverity severity = _diagnostic.Severity == DiagnosticSeverity.Error ? ESeverity.Error : ESeverity.Warning;

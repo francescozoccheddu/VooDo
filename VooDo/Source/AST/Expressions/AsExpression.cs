@@ -7,7 +7,6 @@ using System;
 using System.Collections.Generic;
 
 using VooDo.AST.Names;
-using VooDo.Compilation;
 using VooDo.Compilation.Emission;
 using VooDo.Utils;
 
@@ -39,12 +38,12 @@ namespace VooDo.AST.Expressions
             }
         }
 
-        internal override BinaryExpressionSyntax EmitNode(Scope _scope, Marker _marker)
+        internal override BinaryExpressionSyntax EmitNode(Scope _scope, Tagger _tagger)
             => SyntaxFactory.BinaryExpression(
                 SyntaxKind.AsExpression,
-                Expression.EmitNode(_scope, _marker),
-                Type.EmitNode(_scope, _marker))
-            .Own(_marker, this);
+                Expression.EmitNode(_scope, _tagger),
+                Type.EmitNode(_scope, _tagger))
+            .Own(_tagger, this);
         public override IEnumerable<ComplexTypeOrExpression> Children => new ComplexTypeOrExpression[] { Expression, Type };
         public override string ToString() => $"{LeftCode(Expression)} {GrammarConstants.asKeyword} {Type}";
 

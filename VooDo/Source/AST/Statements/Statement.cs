@@ -7,7 +7,7 @@ namespace VooDo.AST.Statements
 
     public abstract record Statement : Node
     {
-        internal abstract override StatementSyntax EmitNode(Scope _scope, Marker _marker);
+        internal abstract override StatementSyntax EmitNode(Scope _scope, Tagger _tagger);
     }
 
 }

@@ -50,21 +50,21 @@ namespace VooDo.AST.Directives
             }
         }
 
-        internal override UsingDirectiveSyntax EmitNode(Scope _scope, Marker _marker)
+        internal override UsingDirectiveSyntax EmitNode(Scope _scope, Tagger _tagger)
         {
-            NameSyntax name = Namespace.EmitNode(_scope, _marker);
+            NameSyntax name = Namespace.EmitNode(_scope, _tagger);
             UsingDirectiveSyntax result;
             if (HasAlias)
             {
-                SyntaxToken alias = Alias!.EmitToken(_marker);
-                NameEqualsSyntax aliasName = SyntaxFactory.NameEquals(SyntaxFactory.IdentifierName(alias)).Own(_marker, Alias);
+                SyntaxToken alias = Alias!.EmitToken(_tagger);
+                NameEqualsSyntax aliasName = SyntaxFactory.NameEquals(SyntaxFactory.IdentifierName(alias)).Own(_tagger, Alias);
                 result = SyntaxFactory.UsingDirective(aliasName, name);
             }
             else
             {
                 result = SyntaxFactory.UsingDirective(name);
             }
-            return result.Own(_marker, this);
+            return result.Own(_tagger, this);
         }
 
         public override IEnumerable<NodeOrIdentifier> Children => HasAlias ? new NodeOrIdentifier[] { Alias!, Namespace } : new NodeOrIdentifier[] { Namespace };

@@ -191,24 +191,24 @@ namespace VooDo.AST.Names
             }
         }
 
-        private protected override TypeSyntax EmitNonArrayNonNullableType(Scope _scope, Marker _marker)
+        private protected override TypeSyntax EmitNonArrayNonNullableType(Scope _scope, Tagger _tagger)
         {
             if (IsSimple)
             {
-                return Path[0].EmitNode(_scope, _marker, true);
+                return Path[0].EmitNode(_scope, _tagger, true);
             }
-            NameSyntax type = Path[0].EmitNode(_scope, _marker);
+            NameSyntax type = Path[0].EmitNode(_scope, _tagger);
             if (IsAliasQualified)
             {
                 type = SyntaxFactory.AliasQualifiedName(
-                    SyntaxFactory.IdentifierName(Alias!.EmitToken(_marker)).Own(_marker, Alias!),
+                    SyntaxFactory.IdentifierName(Alias!.EmitToken(_tagger)).Own(_tagger, Alias!),
                     (SimpleNameSyntax) type);
             }
             foreach (SimpleType name in Path.Skip(1))
             {
-                type = SyntaxFactory.QualifiedName(type, name.EmitNode(_scope, _marker));
+                type = SyntaxFactory.QualifiedName(type, name.EmitNode(_scope, _tagger));
             }
-            return type.Own(_marker, this);
+            return type.Own(_tagger, this);
         }
 
         public override IEnumerable<NodeOrIdentifier> Children =>

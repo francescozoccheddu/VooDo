@@ -36,7 +36,7 @@ namespace VooDo.AST.Expressions
             }
         }
 
-        internal override ExpressionSyntax EmitNode(Scope _scope, Marker _marker)
+        internal override ExpressionSyntax EmitNode(Scope _scope, Tagger _tagger)
         {
             bool isGlobal = _scope.IsGlobal(Name);
             if (!isGlobal && IsControllerOf)
@@ -44,11 +44,11 @@ namespace VooDo.AST.Expressions
                 throw new InvalidOperationException();
             }
             ExpressionSyntax result;
-            IdentifierNameSyntax name = SyntaxFactory.IdentifierName(Name.EmitToken(_marker));
+            IdentifierNameSyntax name = SyntaxFactory.IdentifierName(Name.EmitToken(_tagger));
             result = isGlobal
                 ? SyntaxFactoryHelper.MemberAccess(name, IsControllerOf ? nameof(Variable<object>.ControllerFactory) : nameof(Variable<object>.Value))
                 : (ExpressionSyntax) name;
-            return result.Own(_marker, this);
+            return result.Own(_tagger, this);
         }
 
         public override IEnumerable<Identifier> Children => new[] { Name };

@@ -12,7 +12,7 @@ namespace VooDo.AST
 
         public abstract override ComplexTypeOrExpression ReplaceNodes(Func<NodeOrIdentifier?, NodeOrIdentifier?> _map);
 
-        internal abstract override ExpressionSyntax EmitNode(Scope _scope, Marker _marker);
+        internal abstract override ExpressionSyntax EmitNode(Scope _scope, Tagger _tagger);
 
     }
 

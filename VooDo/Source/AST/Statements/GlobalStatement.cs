@@ -52,8 +52,8 @@ namespace VooDo.AST.Statements
         public int Count => ((IReadOnlyCollection<Statement>) m_Declarations).Count;
         public IEnumerator<DeclarationStatement> GetEnumerator() => ((IEnumerable<DeclarationStatement>) m_Declarations).GetEnumerator();
         IEnumerator IEnumerable.GetEnumerator() => ((IEnumerable) m_Declarations).GetEnumerator();
-        internal override BlockSyntax EmitNode(Scope _scope, Marker _marker)
-            => SyntaxFactory.Block(this.Select(_s => _s.EmitNode(_scope, _marker, true)).ToSyntaxList()).Own(_marker, this);
+        internal override BlockSyntax EmitNode(Scope _scope, Tagger _tagger)
+            => SyntaxFactory.Block(this.Select(_s => _s.EmitNode(_scope, _tagger, true)).ToSyntaxList()).Own(_tagger, this);
         public override IEnumerable<DeclarationStatement> Children => m_Declarations;
         public override string ToString() => GrammarConstants.globalKeyword + Count switch
         {

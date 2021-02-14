@@ -68,11 +68,11 @@ namespace VooDo.AST.Names
             }
         }
 
-        internal override VariableDesignationSyntax EmitNode(Scope _scope, Marker _marker)
+        internal override VariableDesignationSyntax EmitNode(Scope _scope, Tagger _tagger)
             => (IsDiscard
             ? (VariableDesignationSyntax) SyntaxFactory.DiscardDesignation()
-            : SyntaxFactory.SingleVariableDesignation(Identifier!.EmitToken(_marker)))
-            .Own(_marker, this);
+            : SyntaxFactory.SingleVariableDesignation(Identifier!.EmitToken(_tagger)))
+            .Own(_tagger, this);
         public override IEnumerable<Identifier> Children => IsDiscard ? Enumerable.Empty<Identifier>() : new[] { Identifier! };
         public override string ToString() => IsDiscard ? "_" : Identifier!.ToString();
 

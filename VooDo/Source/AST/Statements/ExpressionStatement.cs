@@ -32,8 +32,8 @@ namespace VooDo.AST.Statements
             }
         }
 
-        internal override ExpressionStatementSyntax EmitNode(Scope _scope, Marker _marker)
-            => SyntaxFactory.ExpressionStatement(Expression.EmitNode(_scope, _marker)).Own(_marker, this);
+        internal override ExpressionStatementSyntax EmitNode(Scope _scope, Tagger _tagger)
+            => SyntaxFactory.ExpressionStatement(Expression.EmitNode(_scope, _tagger)).Own(_tagger, this);
         public override IEnumerable<InvocationOrObjectCreationExpression> Children => new[] { Expression };
         public override string ToString() => $"{Expression}{GrammarConstants.statementEndToken}";
 

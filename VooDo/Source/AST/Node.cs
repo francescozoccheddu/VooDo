@@ -20,7 +20,7 @@ namespace VooDo.AST
 
         public Origin Origin { get; init; } = Origin.Unknown;
 
-        internal abstract SyntaxNodeOrToken EmitNodeOrToken(Scope _scope, Marker _marker);
+        internal abstract SyntaxNodeOrToken EmitNodeOrToken(Scope _scope, Tagger _tagger);
 
         public virtual IEnumerable<NodeOrIdentifier> Children
             => Enumerable.Empty<NodeOrIdentifier>();
@@ -40,8 +40,8 @@ namespace VooDo.AST
 
         public abstract override Node ReplaceNodes(Func<NodeOrIdentifier?, NodeOrIdentifier?> _map);
 
-        internal sealed override SyntaxNodeOrToken EmitNodeOrToken(Scope _scope, Marker _marker) => EmitNode(_scope, _marker);
-        internal abstract SyntaxNode EmitNode(Scope _scope, Marker _marker);
+        internal sealed override SyntaxNodeOrToken EmitNodeOrToken(Scope _scope, Tagger _tagger) => EmitNode(_scope, _tagger);
+        internal abstract SyntaxNode EmitNode(Scope _scope, Tagger _tagger);
 
     }
 

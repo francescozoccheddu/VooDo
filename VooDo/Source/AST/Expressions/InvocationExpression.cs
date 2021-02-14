@@ -23,7 +23,7 @@ namespace VooDo.AST.Expressions
         {
 
             public abstract override Callable ReplaceNodes(Func<NodeOrIdentifier?, NodeOrIdentifier?> _map);
-            internal abstract override ExpressionSyntax EmitNode(Scope _scope, Marker _marker);
+            internal abstract override ExpressionSyntax EmitNode(Scope _scope, Tagger _tagger);
             public abstract override IEnumerable<Expression> Children { get; }
 
         }
@@ -66,28 +66,28 @@ namespace VooDo.AST.Expressions
                 }
             }
 
-            internal override ExpressionSyntax EmitNode(Scope _scope, Marker _marker)
+            internal override ExpressionSyntax EmitNode(Scope _scope, Tagger _tagger)
             {
                 ExpressionSyntax source;
-                TypeArgumentListSyntax typeArgumentList = SyntaxFactoryHelper.TypeArguments(TypeArguments.Select(_a => _a.EmitNode(_scope, _marker)));
+                TypeArgumentListSyntax typeArgumentList = SyntaxFactoryHelper.TypeArguments(TypeArguments.Select(_a => _a.EmitNode(_scope, _tagger)));
                 if (Source is NameExpression name)
                 {
-                    SyntaxToken identifier = name.Name.EmitToken(_marker);
+                    SyntaxToken identifier = name.Name.EmitToken(_tagger);
                     source = SyntaxFactory.GenericName(identifier, typeArgumentList);
                 }
                 else if (Source is MemberAccessExpression member)
                 {
 
-                    SyntaxToken identifier = member.Member.EmitToken(_marker);
+                    SyntaxToken identifier = member.Member.EmitToken(_tagger);
                     source = SyntaxFactoryHelper.MemberAccess(
-                        member.Source.EmitNode(_scope, _marker),
+                        member.Source.EmitNode(_scope, _tagger),
                         SyntaxFactory.GenericName(identifier, typeArgumentList));
                 }
                 else
                 {
                     throw new InvalidOperationException("Not a method");
                 }
-                return source.Own(_marker, this);
+                return source.Own(_tagger, this);
             }
 
             public override IEnumerable<NameOrMemberAccessExpression> Children => new[] { Source };
@@ -114,7 +114,7 @@ namespace VooDo.AST.Expressions
                 }
             }
 
-            internal override ExpressionSyntax EmitNode(Scope _scope, Marker _marker) => Source.EmitNode(_scope, _marker);
+            internal override ExpressionSyntax EmitNode(Scope _scope, Tagger _tagger) => Source.EmitNode(_scope, _tagger);
             public override IEnumerable<Expression> Children => new[] { Source };
             public override string ToString() => LeftCode(Source, EPrecedence.Primary);
 
@@ -149,9 +149,9 @@ namespace VooDo.AST.Expressions
             }
 
 
-            private protected abstract ExpressionSyntax EmitArgumentExpression(Scope _scope, Marker _marker);
-            internal sealed override ArgumentSyntax EmitNode(Scope _scope, Marker _marker)
-                => SyntaxFactory.Argument(EmitArgumentExpression(_scope, _marker))
+            private protected abstract ExpressionSyntax EmitArgumentExpression(Scope _scope, Tagger _tagger);
+            internal sealed override ArgumentSyntax EmitNode(Scope _scope, Tagger _tagger)
+                => SyntaxFactory.Argument(EmitArgumentExpression(_scope, _tagger))
                     .WithRefKindKeyword(SyntaxFactory.Token(Kind switch
                     {
                         EKind.Value => SyntaxKind.None,
@@ -160,7 +160,7 @@ namespace VooDo.AST.Expressions
                         EKind.In => SyntaxKind.InKeyword,
                         _ => throw new InvalidOperationException(),
                     }))
-                .Own(_marker, this);
+                .Own(_tagger, this);
 
         }
 
@@ -184,8 +184,8 @@ namespace VooDo.AST.Expressions
                 }
             }
 
-            private protected override ExpressionSyntax EmitArgumentExpression(Scope _scope, Marker _marker)
-                => Expression.EmitNode(_scope, _marker).Own(_marker, this);
+            private protected override ExpressionSyntax EmitArgumentExpression(Scope _scope, Tagger _tagger)
+                => Expression.EmitNode(_scope, _tagger).Own(_tagger, this);
             public override IEnumerable<Expression> Children => new[] { Expression };
             public override string ToString() => $"{Kind.Token()} {Expression}".TrimStart();
         }
@@ -208,8 +208,8 @@ namespace VooDo.AST.Expressions
                     };
                 }
             }
-            private protected override ExpressionSyntax EmitArgumentExpression(Scope _scope, Marker _marker)
-                => Expression.EmitNode(_scope, _marker).Own(_marker, this);
+            private protected override ExpressionSyntax EmitArgumentExpression(Scope _scope, Tagger _tagger)
+                => Expression.EmitNode(_scope, _tagger).Own(_tagger, this);
             public override IEnumerable<AssignableExpression> Children => new[] { Expression };
             public override string ToString() => $"{Kind.Token()} {Expression}".TrimStart();
         }
@@ -234,11 +234,11 @@ namespace VooDo.AST.Expressions
                     };
                 }
             }
-            private protected override ExpressionSyntax EmitArgumentExpression(Scope _scope, Marker _marker)
+            private protected override ExpressionSyntax EmitArgumentExpression(Scope _scope, Tagger _tagger)
                 => SyntaxFactory.DeclarationExpression(
-                        Type.EmitNode(_scope, _marker),
-                        Name.EmitNode(_scope, _marker))
-                .Own(_marker, this);
+                        Type.EmitNode(_scope, _tagger),
+                        Name.EmitNode(_scope, _tagger))
+                .Own(_tagger, this);
             public override IEnumerable<NodeOrIdentifier> Children => new NodeOrIdentifier[] { Type, Name };
             public override string ToString() => $"{Kind.Token()} {Type} {Name}".TrimStart();
         }
@@ -278,11 +278,11 @@ namespace VooDo.AST.Expressions
             }
         }
 
-        internal override InvocationExpressionSyntax EmitNode(Scope _scope, Marker _marker)
+        internal override InvocationExpressionSyntax EmitNode(Scope _scope, Tagger _tagger)
             => SyntaxFactoryHelper.Invocation(
-                Source.EmitNode(_scope, _marker),
-                Arguments.Select(_a => _a.EmitNode(_scope, _marker)))
-            .Own(_marker, this);
+                Source.EmitNode(_scope, _tagger),
+                Arguments.Select(_a => _a.EmitNode(_scope, _tagger)))
+            .Own(_tagger, this);
         public override IEnumerable<Node> Children => new Node[] { Source }.Concat(Arguments);
         public override string ToString() => $"{Source}({string.Join(", ", Arguments)})";
 

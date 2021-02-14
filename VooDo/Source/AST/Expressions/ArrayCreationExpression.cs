@@ -87,14 +87,14 @@ namespace VooDo.AST.Expressions
             }
         }
 
-        internal override ExpressionSyntax EmitNode(Scope _scope, Marker _marker)
+        internal override ExpressionSyntax EmitNode(Scope _scope, Tagger _tagger)
         {
-            ArrayTypeSyntax type = (ArrayTypeSyntax) Type.EmitNode(_scope, _marker);
+            ArrayTypeSyntax type = (ArrayTypeSyntax) Type.EmitNode(_scope, _tagger);
             SyntaxList<ArrayRankSpecifierSyntax> rankSpecifiers = type.RankSpecifiers;
-            ArrayRankSpecifierSyntax rank = rankSpecifiers[0].WithSizes(Sizes.Select(_s => _s.EmitNode(_scope, _marker)).ToSeparatedList());
+            ArrayRankSpecifierSyntax rank = rankSpecifiers[0].WithSizes(Sizes.Select(_s => _s.EmitNode(_scope, _tagger)).ToSeparatedList());
             rankSpecifiers = new[] { rank }.Concat(rankSpecifiers.Skip(1)).ToSyntaxList();
             type = type.WithRankSpecifiers(rankSpecifiers);
-            return SyntaxFactory.ArrayCreationExpression(type).Own(_marker, this);
+            return SyntaxFactory.ArrayCreationExpression(type).Own(_tagger, this);
         }
         public override IEnumerable<ComplexTypeOrExpression> Children => new ComplexTypeOrExpression[] { Type }.Concat(Sizes);
         public override string ToString() => $"{GrammarConstants.newKeyword} {Type with { Ranks = default }}[{string.Join(", ", Sizes)}]";

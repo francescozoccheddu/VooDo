@@ -170,26 +170,26 @@ namespace VooDo.AST.Names
             }
         }
 
-        internal TypeSyntax EmitNode(Scope _scope, Marker _marker, bool _allowPredefined)
+        internal TypeSyntax EmitNode(Scope _scope, Tagger _tagger, bool _allowPredefined)
         {
             if (_allowPredefined && !IsGeneric)
             {
-                SyntaxToken? keyword = Name.EmitPredefinedTypeKeywordToken(_marker);
+                SyntaxToken? keyword = Name.EmitPredefinedTypeKeywordToken(_tagger);
                 if (keyword is not null)
                 {
-                    return SyntaxFactory.PredefinedType(keyword.Value).Own(_marker, this);
+                    return SyntaxFactory.PredefinedType(keyword.Value).Own(_tagger, this);
                 }
             }
-            return EmitNode(_scope, _marker);
+            return EmitNode(_scope, _tagger);
         }
 
-        internal override SimpleNameSyntax EmitNode(Scope _scope, Marker _marker)
+        internal override SimpleNameSyntax EmitNode(Scope _scope, Tagger _tagger)
             => (IsGeneric
             ? (SimpleNameSyntax) SyntaxFactoryHelper.GenericName(
-                Name.EmitToken(_marker),
-                TypeArguments.Select(_a => _a.EmitNode(_scope, _marker)))
-            : SyntaxFactory.IdentifierName(Name.EmitToken(_marker)))
-            .Own(_marker, this);
+                Name.EmitToken(_tagger),
+                TypeArguments.Select(_a => _a.EmitNode(_scope, _tagger)))
+            : SyntaxFactory.IdentifierName(Name.EmitToken(_tagger)))
+            .Own(_tagger, this);
         public override IEnumerable<NodeOrIdentifier> Children => new NodeOrIdentifier[] { Name }.Concat(TypeArguments);
         public override string ToString() => IsGeneric ? $"{Name}<{string.Join(", ", TypeArguments)}>" : $"{Name}";
 

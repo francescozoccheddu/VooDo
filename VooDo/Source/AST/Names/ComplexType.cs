@@ -143,8 +143,8 @@ namespace VooDo.AST.Names
 
             public override RankSpecifier ReplaceNodes(Func<NodeOrIdentifier?, NodeOrIdentifier?> _map) => this;
 
-            internal override ArrayRankSpecifierSyntax EmitNode(Scope _scope, Marker _marker)
-                => SyntaxFactoryHelper.ArrayRank(m_rank).Own(_marker, this);
+            internal override ArrayRankSpecifierSyntax EmitNode(Scope _scope, Tagger _tagger)
+                => SyntaxFactoryHelper.ArrayRank(m_rank).Own(_tagger, this);
 
             public override string ToString()
                 => $"[{new string(',', m_rank - 1)}]";
@@ -192,21 +192,21 @@ namespace VooDo.AST.Names
             }
         }
 
-        internal sealed override TypeSyntax EmitNode(Scope _scope, Marker _marker)
+        internal sealed override TypeSyntax EmitNode(Scope _scope, Tagger _tagger)
         {
-            TypeSyntax? type = EmitNonArrayNonNullableType(_scope, _marker);
+            TypeSyntax? type = EmitNonArrayNonNullableType(_scope, _tagger);
             if (IsNullable)
             {
                 type = SyntaxFactory.NullableType(type);
             }
             if (IsArray)
             {
-                type = SyntaxFactory.ArrayType(type, Ranks.Select(_r => _r.EmitNode(_scope, _marker)).ToSyntaxList());
+                type = SyntaxFactory.ArrayType(type, Ranks.Select(_r => _r.EmitNode(_scope, _tagger)).ToSyntaxList());
             }
-            return type.Own(_marker, this);
+            return type.Own(_tagger, this);
         }
 
-        private protected abstract TypeSyntax EmitNonArrayNonNullableType(Scope _scope, Marker _marker);
+        private protected abstract TypeSyntax EmitNonArrayNonNullableType(Scope _scope, Tagger _tagger);
 
         public override string ToString()
             => $"{(IsNullable ? "?" : "")}{string.Concat(Ranks)}";

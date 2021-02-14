@@ -26,7 +26,7 @@ namespace VooDo.AST.Statements
 
             public bool HasInitializer => Initializer is not null;
 
-            internal VariableDeclaratorSyntax EmitNode(Scope _scope, Marker _marker, DeclarationStatement? _declarationStatement)
+            internal VariableDeclaratorSyntax EmitNode(Scope _scope, Tagger _tagger, DeclarationStatement? _declarationStatement)
             {
                 ExpressionSyntax? initializer;
                 if (_declarationStatement is not null)
@@ -37,10 +37,10 @@ namespace VooDo.AST.Statements
                 else
                 {
                     _scope.AddLocal(Name);
-                    initializer = Initializer?.EmitNode(_scope, _marker);
+                    initializer = Initializer?.EmitNode(_scope, _tagger);
                 }
                 EqualsValueClauseSyntax? initializerClause = initializer?.ToEqualsValueClause();
-                return SyntaxFactory.VariableDeclarator(Name.EmitToken(_marker), null, initializerClause).Own(_marker, this);
+                return SyntaxFactory.VariableDeclarator(Name.EmitToken(_tagger), null, initializerClause).Own(_tagger, this);
             }
 
             public override Declarator ReplaceNodes(Func<NodeOrIdentifier?, NodeOrIdentifier?> _map)
@@ -61,7 +61,7 @@ namespace VooDo.AST.Statements
                 }
             }
 
-            internal override VariableDeclaratorSyntax EmitNode(Scope _scope, Marker _marker) => EmitNode(_scope, _marker, null);
+            internal override VariableDeclaratorSyntax EmitNode(Scope _scope, Tagger _tagger) => EmitNode(_scope, _tagger, null);
             public override IEnumerable<NodeOrIdentifier> Children
                 => HasInitializer ? new NodeOrIdentifier[] { Name, Initializer! } : new NodeOrIdentifier[] { Name };
             public override string ToString() => HasInitializer ? $"{Name} {AssignmentStatement.EKind.Simple.Token()} {Initializer}" : $"{Name}";
@@ -135,20 +135,20 @@ namespace VooDo.AST.Statements
             }
         }
 
-        internal LocalDeclarationStatementSyntax EmitNode(Scope _scope, Marker _marker, bool _global)
+        internal LocalDeclarationStatementSyntax EmitNode(Scope _scope, Tagger _tagger, bool _global)
         {
-            TypeSyntax type = Type.EmitNode(_scope, _marker);
+            TypeSyntax type = Type.EmitNode(_scope, _tagger);
             if (_global && !Type.IsVar)
             {
                 type = SyntaxFactoryHelper.VariableType(type);
             }
             return SyntaxFactory.LocalDeclarationStatement(
                            SyntaxFactory.VariableDeclaration(type,
-                               Declarators.Select(_d => _d.EmitNode(_scope, _marker, _global ? this : null)).ToSeparatedList()))
-                       .Own(_marker, this);
+                               Declarators.Select(_d => _d.EmitNode(_scope, _tagger, _global ? this : null)).ToSeparatedList()))
+                       .Own(_tagger, this);
         }
 
-        internal override LocalDeclarationStatementSyntax EmitNode(Scope _scope, Marker _marker) => EmitNode(_scope, _marker, false);
+        internal override LocalDeclarationStatementSyntax EmitNode(Scope _scope, Tagger _tagger) => EmitNode(_scope, _tagger, false);
         public override IEnumerable<Node> Children => new Node[] { Type }.Concat(Declarators);
         public override string ToString() => $"{Type} {string.Join(", ", Declarators)}{GrammarConstants.statementEndToken}";
 

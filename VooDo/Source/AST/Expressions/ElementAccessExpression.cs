@@ -65,12 +65,12 @@ namespace VooDo.AST.Expressions
             }
         }
 
-        internal override ElementAccessExpressionSyntax EmitNode(Scope _scope, Marker _marker)
+        internal override ElementAccessExpressionSyntax EmitNode(Scope _scope, Tagger _tagger)
             => SyntaxFactory.ElementAccessExpression(
-                Source.EmitNode(_scope, _marker),
+                Source.EmitNode(_scope, _tagger),
                 SyntaxFactoryHelper.BracketedArguments(
-                        Arguments.Select(_a => SyntaxFactory.Argument(_a.EmitNode(_scope, _marker)).Own(_marker, _a))))
-            .Own(_marker, this);
+                        Arguments.Select(_a => SyntaxFactory.Argument(_a.EmitNode(_scope, _tagger)).Own(_tagger, _a))))
+            .Own(_tagger, this);
         public override IEnumerable<Expression> Children => new Expression[] { Source }.Concat(Arguments);
         public override string ToString() => $"{Source}[{string.Join(",", Arguments)}]";
 

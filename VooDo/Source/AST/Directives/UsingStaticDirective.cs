@@ -58,12 +58,12 @@ namespace VooDo.AST.Directives
             }
         }
 
-        internal override UsingDirectiveSyntax EmitNode(Scope _scope, Marker _marker)
+        internal override UsingDirectiveSyntax EmitNode(Scope _scope, Tagger _tagger)
             => SyntaxFactory.UsingDirective(
                     SyntaxFactory.Token(SyntaxKind.StaticKeyword),
                     null,
-                    (NameSyntax) Type.EmitNode(_scope, _marker))
-                .Own(_marker, this);
+                    (NameSyntax) Type.EmitNode(_scope, _tagger))
+                .Own(_tagger, this);
         public override IEnumerable<QualifiedType> Children => new QualifiedType[] { Type };
         public override string ToString() => $"{GrammarConstants.usingKeyword} {GrammarConstants.staticKeyword} {Type}{GrammarConstants.statementEndToken}";
 

@@ -93,11 +93,11 @@ namespace VooDo.AST.Names
             }.Select(_k => SyntaxFactory.Token(_k))
             .ToImmutableDictionary(_t => _t.ValueText);
 
-        internal SyntaxToken? EmitPredefinedTypeKeywordToken(Marker _marker)
+        internal SyntaxToken? EmitPredefinedTypeKeywordToken(Tagger _tagger)
             => s_predefinedTypesTokens.TryGetValue(this, out SyntaxToken token)
-            ? token.Own(_marker, this) : null;
-        internal override SyntaxNodeOrToken EmitNodeOrToken(Scope _scope, Marker _marker) => EmitToken(_marker);
-        internal SyntaxToken EmitToken(Marker _marker) => SyntaxFactory.Identifier(this).Own(_marker, this);
+            ? token.Own(_tagger, this) : null;
+        internal override SyntaxNodeOrToken EmitNodeOrToken(Scope _scope, Tagger _tagger) => EmitToken(_tagger);
+        internal SyntaxToken EmitToken(Tagger _tagger) => SyntaxFactory.Identifier(this).Own(_tagger, this);
         public override string ToString() => m_identifier;
 
         #endregion

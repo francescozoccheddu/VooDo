@@ -133,7 +133,7 @@ namespace VooDo.AST.Expressions
                     _ => throw new InvalidOperationException()
                 });
         }
-        internal override LiteralExpressionSyntax EmitNode(Scope _scope, Marker _marker) => EmitNode().Own(_marker, this);
+        internal override LiteralExpressionSyntax EmitNode(Scope _scope, Tagger _tagger) => EmitNode().Own(_tagger, this);
         public override string ToString() => EmitNode().ToFullString();
 
         #endregion

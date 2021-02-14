@@ -36,11 +36,11 @@ namespace VooDo.AST.Expressions
             }
         }
 
-        internal override MemberAccessExpressionSyntax EmitNode(Scope _scope, Marker _marker)
+        internal override MemberAccessExpressionSyntax EmitNode(Scope _scope, Tagger _tagger)
             => SyntaxFactoryHelper.MemberAccess(
-                Source.EmitNode(_scope, _marker),
-                Member.EmitToken(_marker).Own(_marker, Member))
-            .Own(_marker, this);
+                Source.EmitNode(_scope, _tagger),
+                Member.EmitToken(_tagger).Own(_tagger, Member))
+            .Own(_tagger, this);
         public override IEnumerable<NodeOrIdentifier> Children => new NodeOrIdentifier[] { Source, Member };
         public override string ToString() => $"{LeftCode(Source)}.{Member}";
 

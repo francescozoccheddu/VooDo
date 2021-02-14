@@ -70,13 +70,13 @@ namespace VooDo.AST.Expressions
             }
         }
 
-        internal override InvocationExpressionSyntax EmitNode(Scope _scope, Marker _marker)
+        internal override InvocationExpressionSyntax EmitNode(Scope _scope, Tagger _tagger)
         {
             Scope.GlobalDefinition globalDefinition = _scope.AddGlobal(new GlobalPrototype(new Global(ComplexTypeOrVar.Var, null, Initializer), this));
             return SyntaxFactoryHelper.SetControllerAndGetValueInvocation(
                     SyntaxFactoryHelper.ThisMemberAccess(globalDefinition.Identifier),
-                    Controller.EmitNode(_scope, _marker).Own(_marker, Controller))
-                .Own(_marker, this);
+                    Controller.EmitNode(_scope, _tagger).Own(_tagger, Controller))
+                .Own(_tagger, this);
         }
         public override IEnumerable<Expression> Children => HasInitializer ? new Expression[] { Controller, Initializer! } : new Expression[] { Controller };
         public override string ToString() => $"{GrammarConstants.globKeyword} {Controller}" + (HasInitializer ? $" {GrammarConstants.initKeyword} {Initializer}" : "");

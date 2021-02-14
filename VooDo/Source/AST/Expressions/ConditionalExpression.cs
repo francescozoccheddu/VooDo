@@ -38,12 +38,12 @@ namespace VooDo.AST.Expressions
             }
         }
 
-        internal override ConditionalExpressionSyntax EmitNode(Scope _scope, Marker _marker)
+        internal override ConditionalExpressionSyntax EmitNode(Scope _scope, Tagger _tagger)
             => SyntaxFactory.ConditionalExpression(
-                Condition.EmitNode(_scope, _marker),
-                True.EmitNode(_scope, _marker),
-                False.EmitNode(_scope, _marker))
-            .Own(_marker, this);
+                Condition.EmitNode(_scope, _tagger),
+                True.EmitNode(_scope, _tagger),
+                False.EmitNode(_scope, _tagger))
+            .Own(_tagger, this);
         public override IEnumerable<Expression> Children => new Expression[] { Condition, True, False };
         public override string ToString() => $"{LeftCode(Condition)} ? {True} : {RightCode(False)}";
 

@@ -54,17 +54,17 @@ namespace VooDo.AST
             }
         }
 
-        internal override CompilationUnitSyntax EmitNode(Scope _scope, Marker _marker)
-            => EmitNode(_scope, _marker, ImmutableArray.Create(new Identifier(Compiler.runtimeReferenceAlias)), null);
+        internal override CompilationUnitSyntax EmitNode(Scope _scope, Tagger _tagger)
+            => EmitNode(_scope, _tagger, ImmutableArray.Create(new Identifier(Compiler.runtimeReferenceAlias)), null);
 
-        internal CompilationUnitSyntax EmitNode(Scope _scope, Marker _marker, ImmutableArray<Identifier> _externAliases, ComplexType? _returnType)
+        internal CompilationUnitSyntax EmitNode(Scope _scope, Tagger _tagger, ImmutableArray<Identifier> _externAliases, ComplexType? _returnType)
         {
-            TypeSyntax? returnType = _returnType?.EmitNode(_scope, _marker);
+            TypeSyntax? returnType = _returnType?.EmitNode(_scope, _tagger);
             TypeSyntax variableType = SFH.VariableType();
             IEnumerable<ExternAliasDirectiveSyntax> aliases = _externAliases
                 .EmptyIfDefault()
-                .Select(_i => SF.ExternAliasDirective(_i).Own(_marker, _i));
-            IEnumerable<UsingDirectiveSyntax> usings = Usings.Select(_u => _u.EmitNode(_scope, _marker));
+                .Select(_i => SF.ExternAliasDirective(_i).Own(_tagger, _i));
+            IEnumerable<UsingDirectiveSyntax> usings = Usings.Select(_u => _u.EmitNode(_scope, _tagger));
             MethodDeclarationSyntax? runMethod = SF.MethodDeclaration(
                                 returnType ?? SFH.Void(),
                                 SF.Identifier(returnType is null
@@ -76,14 +76,14 @@ namespace VooDo.AST
                                     SyntaxKind.OverrideKeyword))
                             .WithBody(
                                 SF.Block(
-                                    Statements.Select(_s => _s.EmitNode(_scope, _marker)).ToSeparatedList()));
+                                    Statements.Select(_s => _s.EmitNode(_scope, _tagger)).ToSeparatedList()));
 
             ImmutableArray<Scope.GlobalDefinition> globals = _scope.GetGlobalDefinitions();
             VariableDeclarationSyntax EmitGlobalDeclaration(Scope.GlobalDefinition _definition)
             {
                 TypeSyntax? type = _definition.Prototype.Global.Type.IsVar
                     ? null
-                    : _definition.Prototype.Global.Type.EmitNode(_scope, _marker);
+                    : _definition.Prototype.Global.Type.EmitNode(_scope, _tagger);
                 return SF.VariableDeclaration(
                             SFH.VariableType(type),
                             SF.VariableDeclarator(
@@ -98,7 +98,7 @@ namespace VooDo.AST
                                         SyntaxKind.StringLiteralExpression,
                                         SF.Literal(_definition.Prototype.Global.Name!)),
                                     _definition.Prototype.Global.HasInitializer
-                                    ? _definition.Prototype.Global.Initializer!.EmitNode(new Scope(), _marker)
+                                    ? _definition.Prototype.Global.Initializer!.EmitNode(new Scope(), _tagger)
                                     : SF.LiteralExpression(
                                         SyntaxKind.DefaultLiteralExpression))
                                 .ToEqualsValueClause())
@@ -151,7 +151,7 @@ namespace VooDo.AST
                     usings.ToSyntaxList(),
                     SF.List<AttributeListSyntax>(),
                     classDeclaration.ToSyntaxList<MemberDeclarationSyntax>())
-                .Own(_marker, this);
+                .Own(_tagger, this);
         }
 
         public override IEnumerable<Node> Children => ((IEnumerable<Node>) Usings).Concat(Statements);

@@ -71,7 +71,7 @@ namespace VooDo.Compilation
 
         public static CompiledScript Compile(Script _script, Options _options)
         {
-            Marker marker = new Marker();
+            Tagger tagger = new Tagger();
             Scope scope = new Scope();
             CompilationUnitSyntax syntax;
             SyntaxTree tree;
@@ -85,9 +85,9 @@ namespace VooDo.Compilation
                 .WithMetadataImportOptions(MetadataImportOptions.Public);
             {
                 // Emission
-                syntax = _script.EmitNode(scope, marker, _options.References.SelectMany(_r => _r.Aliases).ToImmutableArray(), _options.ReturnType);
+                syntax = _script.EmitNode(scope, tagger, _options.References.SelectMany(_r => _r.Aliases).ToImmutableArray(), _options.ReturnType);
                 tree = CSharpSyntaxTree.Create(syntax, parseOptions);
-                tree.GetDiagnostics().SelectNonNull(_d => RoslynProblem.FromDiagnostic(_d, marker, Problem.EKind.Syntactic)).ThrowErrors();
+                tree.GetDiagnostics().SelectNonNull(_d => RoslynProblem.FromDiagnostic(_d, tagger, Problem.EKind.Syntactic)).ThrowErrors();
                 syntax = (CompilationUnitSyntax) tree.GetRoot();
                 compilation = CSharpCompilation.Create(null, new[] { tree }, _options.References.Select(_r => _r.GetMetadataReference()), compilationOptions);
                 semantics = compilation.GetSemanticModel(tree);
@@ -100,7 +100,7 @@ namespace VooDo.Compilation
                     SyntaxTree newTree = CSharpSyntaxTree.Create(newSyntax, parseOptions);
                     compilation = compilation.ReplaceSyntaxTree(tree, newTree);
                     tree = newTree;
-                    tree.GetDiagnostics().SelectNonNull(_d => RoslynProblem.FromDiagnostic(_d, marker, Problem.EKind.Syntactic)).ThrowErrors();
+                    tree.GetDiagnostics().SelectNonNull(_d => RoslynProblem.FromDiagnostic(_d, tagger, Problem.EKind.Syntactic)).ThrowErrors();
                     semantics = compilation.GetSemanticModel(tree);
                     syntax = (CompilationUnitSyntax) tree.GetRoot();
                 }
@@ -111,9 +111,9 @@ namespace VooDo.Compilation
             {
                 // Hooks
             }
-            compilation.GetDiagnostics().SelectNonNull(_d => RoslynProblem.FromDiagnostic(_d, marker, Problem.EKind.Semantic)).ThrowErrors();
+            compilation.GetDiagnostics().SelectNonNull(_d => RoslynProblem.FromDiagnostic(_d, tagger, Problem.EKind.Semantic)).ThrowErrors();
             ImmutableArray<GlobalPrototype> globalPrototypes = scope.GetGlobalDefinitions().Select(_g => _g.Prototype).ToImmutableArray();
-            return new CompiledScript(compilation, _script, _options, globalPrototypes, marker);
+            return new CompiledScript(compilation, _script, _options, globalPrototypes, tagger);
         }
 
     }

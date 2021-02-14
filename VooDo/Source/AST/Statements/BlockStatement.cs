@@ -52,13 +52,13 @@ namespace VooDo.AST.Statements
         public int Count => ((IReadOnlyCollection<Statement>) m_Statements).Count;
         public IEnumerator<Statement> GetEnumerator() => ((IEnumerable<Statement>) m_Statements).GetEnumerator();
         IEnumerator IEnumerable.GetEnumerator() => ((IEnumerable) m_Statements).GetEnumerator();
-        internal override BlockSyntax EmitNode(Scope _scope, Marker _marker)
+        internal override BlockSyntax EmitNode(Scope _scope, Tagger _tagger)
         {
             Scope nestedScope = _scope.CreateNested();
             IEnumerable<StatementSyntax> statements = this.SelectMany(_s => _s is GlobalStatement globals
-                        ? globals.EmitNode(nestedScope, _marker).Statements
-                        : _s.EmitNode(nestedScope, _marker).ToSyntaxList());
-            return SyntaxFactory.Block(statements.ToSyntaxList()).Own(_marker, this);
+                        ? globals.EmitNode(nestedScope, _tagger).Statements
+                        : _s.EmitNode(nestedScope, _tagger).ToSyntaxList());
+            return SyntaxFactory.Block(statements.ToSyntaxList()).Own(_tagger, this);
         }
 
         public override IEnumerable<Statement> Children => m_Statements;

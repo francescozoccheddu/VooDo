@@ -12,7 +12,7 @@ namespace VooDo.AST.Directives
 
         public abstract override UsingDirective ReplaceNodes(Func<NodeOrIdentifier?, NodeOrIdentifier?> _map);
 
-        internal abstract override UsingDirectiveSyntax EmitNode(Scope _scope, Marker _marker);
+        internal abstract override UsingDirectiveSyntax EmitNode(Scope _scope, Tagger _tagger);
 
     }
 

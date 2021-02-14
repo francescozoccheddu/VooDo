@@ -117,13 +117,13 @@ namespace VooDo.AST.Names
                     };
                 }
             }
-            internal override TupleElementSyntax EmitNode(Scope _scope, Marker _marker)
+            internal override TupleElementSyntax EmitNode(Scope _scope, Tagger _tagger)
                 => SyntaxFactory.TupleElement(
-                    Type.EmitNode(_scope, _marker),
+                    Type.EmitNode(_scope, _tagger),
                     IsNamed
-                    ? Name!.EmitToken(_marker)
+                    ? Name!.EmitToken(_tagger)
                     : SyntaxFactory.Token(SyntaxKind.None))
-                .Own(_marker, this);
+                .Own(_tagger, this);
             public override IEnumerable<NodeOrIdentifier> Children => IsNamed ? new NodeOrIdentifier[] { Type, Name! } : new NodeOrIdentifier[] { Type };
             public override string ToString() => IsNamed ? $"{Type} {Name}" : $"{Type}";
 
@@ -184,8 +184,8 @@ namespace VooDo.AST.Names
         public Element this[int _index] => ((IReadOnlyList<Element>) m_Elements)[_index];
         public IEnumerator<Element> GetEnumerator() => ((IEnumerable<Element>) m_Elements).GetEnumerator();
         IEnumerator IEnumerable.GetEnumerator() => ((IEnumerable) m_Elements).GetEnumerator();
-        private protected override TypeSyntax EmitNonArrayNonNullableType(Scope _scope, Marker _marker)
-            => SyntaxFactory.TupleType(this.Select(_e => _e.EmitNode(_scope, _marker)).ToSeparatedList()).Own(_marker, this);
+        private protected override TypeSyntax EmitNonArrayNonNullableType(Scope _scope, Tagger _tagger)
+            => SyntaxFactory.TupleType(this.Select(_e => _e.EmitNode(_scope, _tagger)).ToSeparatedList()).Own(_tagger, this);
         public override IEnumerable<Element> Children => m_Elements;
         public override string ToString() => $"({string.Join(',', m_Elements)})" + base.ToString();
 

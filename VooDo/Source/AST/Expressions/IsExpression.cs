@@ -46,18 +46,18 @@ namespace VooDo.AST.Expressions
             }
         }
 
-        internal override ExpressionSyntax EmitNode(Scope _scope, Marker _marker)
+        internal override ExpressionSyntax EmitNode(Scope _scope, Tagger _tagger)
             => (IsDeclaration
             ? SyntaxFactory.IsPatternExpression(
-                Expression.EmitNode(_scope, _marker),
+                Expression.EmitNode(_scope, _tagger),
                 SyntaxFactory.DeclarationPattern(
-                    Type.EmitNode(_scope, _marker),
-                    Name!.EmitNode(_scope, _marker)))
+                    Type.EmitNode(_scope, _tagger),
+                    Name!.EmitNode(_scope, _tagger)))
             : (ExpressionSyntax) SyntaxFactory.BinaryExpression(
                 SyntaxKind.IsExpression,
-                Expression.EmitNode(_scope, _marker),
-                Type.EmitNode(_scope, _marker)))
-            .Own(_marker, this);
+                Expression.EmitNode(_scope, _tagger),
+                Type.EmitNode(_scope, _tagger)))
+            .Own(_tagger, this);
         public override IEnumerable<NodeOrIdentifier> Children
             => new NodeOrIdentifier[] { Expression, Type }.Concat(IsDeclaration ? new NodeOrIdentifier[] { Name! } : Enumerable.Empty<NodeOrIdentifier>());
         public override string ToString() => $"{LeftCode(Expression)} {GrammarConstants.isKeyword} {Type}" + (IsDeclaration ? $" {Name}" : "");

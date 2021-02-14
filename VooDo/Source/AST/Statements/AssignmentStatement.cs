@@ -49,7 +49,7 @@ namespace VooDo.AST.Statements
             }
         }
 
-        internal override StatementSyntax EmitNode(Scope _scope, Marker _marker)
+        internal override StatementSyntax EmitNode(Scope _scope, Tagger _tagger)
             => SyntaxFactory.ExpressionStatement(
                 SyntaxFactory.AssignmentExpression(
                     Kind switch
@@ -68,9 +68,9 @@ namespace VooDo.AST.Statements
                         EKind.Coalesce => SyntaxKind.CoalesceAssignmentExpression,
                         _ => throw new InvalidOperationException(),
                     },
-                    Target.EmitNode(_scope, _marker),
-                    Source.EmitNode(_scope, _marker)))
-            .Own(_marker, this);
+                    Target.EmitNode(_scope, _tagger),
+                    Source.EmitNode(_scope, _tagger)))
+            .Own(_tagger, this);
         public override IEnumerable<Expression> Children => new[] { Target, Source };
         public override string ToString() => $"{Target} {Kind.Token()} {Source}{GrammarConstants.statementEndToken}";
 

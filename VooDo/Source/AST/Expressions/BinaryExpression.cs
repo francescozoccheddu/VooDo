@@ -74,7 +74,7 @@ namespace VooDo.AST.Expressions
             }
         }
 
-        internal override BinaryExpressionSyntax EmitNode(Scope _scope, Marker _marker)
+        internal override BinaryExpressionSyntax EmitNode(Scope _scope, Tagger _tagger)
             => SyntaxFactory.BinaryExpression(
                 Kind switch
                 {
@@ -99,9 +99,9 @@ namespace VooDo.AST.Expressions
                     EKind.BitwiseXor => SyntaxKind.ExclusiveOrExpression,
                     _ => throw new InvalidOperationException(),
                 },
-                Left.EmitNode(_scope, _marker),
-                Right.EmitNode(_scope, _marker))
-            .Own(_marker, this);
+                Left.EmitNode(_scope, _tagger),
+                Right.EmitNode(_scope, _tagger))
+            .Own(_tagger, this);
         public override IEnumerable<Expression> Children => new Expression[] { Left, Right };
         public override string ToString() => $"{LeftCode(Left)} {Kind.Token()} {RightCode(Right)}";
 

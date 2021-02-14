@@ -33,8 +33,8 @@ namespace VooDo.AST.Statements
             }
         }
 
-        internal override StatementSyntax EmitNode(Scope _scope, Marker _marker)
-            => SyntaxFactory.ReturnStatement(Expression.EmitNode(_scope, _marker)).Own(_marker, this);
+        internal override StatementSyntax EmitNode(Scope _scope, Tagger _tagger)
+            => SyntaxFactory.ReturnStatement(Expression.EmitNode(_scope, _tagger)).Own(_tagger, this);
         public override IEnumerable<Expression> Children => new[] { Expression };
         public override string ToString() => $"{GrammarConstants.returnKeyword} {Expression}{GrammarConstants.statementEndToken}";
 

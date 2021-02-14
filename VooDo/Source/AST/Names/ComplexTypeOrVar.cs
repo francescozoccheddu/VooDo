@@ -79,11 +79,11 @@ namespace VooDo.AST.Names
             }
         }
 
-        internal override TypeSyntax EmitNode(Scope _scope, Marker _marker)
+        internal override TypeSyntax EmitNode(Scope _scope, Tagger _tagger)
             => (IsVar
             ? SyntaxFactory.IdentifierName("var")
-            : Type!.EmitNode(_scope, _marker))
-            .Own(_marker, this);
+            : Type!.EmitNode(_scope, _tagger))
+            .Own(_tagger, this);
         public override IEnumerable<ComplexType> Children => IsVar ? Enumerable.Empty<ComplexType>() : new[] { Type! };
         public override string ToString() => IsVar ? "var" : Type!.ToString();
 

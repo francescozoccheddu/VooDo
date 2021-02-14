@@ -44,14 +44,14 @@ namespace VooDo.AST.Statements
             }
         }
 
-        internal override IfStatementSyntax EmitNode(Scope _scope, Marker _marker)
+        internal override IfStatementSyntax EmitNode(Scope _scope, Tagger _tagger)
         {
-            ExpressionSyntax condition = Condition.EmitNode(_scope, _marker);
-            StatementSyntax then = Then.EmitNode(_scope, _marker);
+            ExpressionSyntax condition = Condition.EmitNode(_scope, _tagger);
+            StatementSyntax then = Then.EmitNode(_scope, _tagger);
             return (HasElse
-                ? SyntaxFactory.IfStatement(condition, then, SyntaxFactory.ElseClause(Else!.EmitNode(_scope, _marker)))
+                ? SyntaxFactory.IfStatement(condition, then, SyntaxFactory.ElseClause(Else!.EmitNode(_scope, _tagger)))
                 : SyntaxFactory.IfStatement(condition, then))
-                .Own(_marker, this);
+                .Own(_tagger, this);
         }
 
         public override IEnumerable<Node> Children => new Node[] { Condition, Then }.Concat(HasElse ? new[] { Else! } : Enumerable.Empty<Node>());

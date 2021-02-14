@@ -45,7 +45,7 @@ namespace VooDo.AST.Expressions
             }
         }
 
-        internal override ExpressionSyntax EmitNode(Scope _scope, Marker _marker)
+        internal override ExpressionSyntax EmitNode(Scope _scope, Tagger _tagger)
             => SyntaxFactory.PrefixUnaryExpression(
                 Kind switch
                 {
@@ -55,8 +55,8 @@ namespace VooDo.AST.Expressions
                     EKind.BitwiseNot => SyntaxKind.BitwiseNotExpression,
                     _ => throw new InvalidOperationException()
                 },
-                Expression.EmitNode(_scope, _marker))
-            .Own(_marker, this);
+                Expression.EmitNode(_scope, _tagger))
+            .Own(_tagger, this);
         public override IEnumerable<Expression> Children => new[] { Expression };
         public override string ToString() => $"{Kind.Token()}{Expression}";
 

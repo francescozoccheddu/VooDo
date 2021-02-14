@@ -37,11 +37,11 @@ namespace VooDo.AST.Expressions
             }
         }
 
-        internal override CastExpressionSyntax EmitNode(Scope _scope, Marker _marker)
+        internal override CastExpressionSyntax EmitNode(Scope _scope, Tagger _tagger)
             => SyntaxFactory.CastExpression(
-                Type.EmitNode(_scope, _marker),
-                Expression.EmitNode(_scope, _marker))
-            .Own(_marker, this);
+                Type.EmitNode(_scope, _tagger),
+                Expression.EmitNode(_scope, _tagger))
+            .Own(_tagger, this);
         public override IEnumerable<ComplexTypeOrExpression> Children => new ComplexTypeOrExpression[] { Expression, Type };
         public override string ToString() => $"({Type}) {RightCode(Expression)}";
 
