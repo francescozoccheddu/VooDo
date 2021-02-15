@@ -13,7 +13,6 @@
     <PackageReference Include="Antlr4BuildTasks" Version="8.13.0" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="3.8.0" />
     <PackageReference Include="Microsoft.CodeAnalysis.Features" Version="3.8.0" />
-    <PackageReference Include="Microsoft.WinUI" Version="3.0.0-preview3.201113.0" />
   </ItemGroup>
 
 
