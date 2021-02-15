@@ -6,14 +6,13 @@ using System.Collections.Generic;
 using System.Linq;
 
 using VooDo.AST.Expressions;
-using VooDo.Compiling;
 using VooDo.Compiling.Emission;
 using VooDo.Utils;
 
 namespace VooDo.AST.Statements
 {
 
-    public sealed record IfStatement(Expression Condition, Statement Then, Statement? Else = null) : Statement
+    public sealed record IfStatement(Expression Condition, Statement Then, Statement? Else = null) : SingleStatement
     {
 
         #region Members

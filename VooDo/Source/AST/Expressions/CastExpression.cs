@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 
 using VooDo.AST.Names;
-using VooDo.Compiling;
 using VooDo.Compiling.Emission;
 using VooDo.Utils;
 
@@ -22,7 +21,7 @@ namespace VooDo.AST.Expressions
         public override CastExpression ReplaceNodes(Func<Node?, Node?> _map)
         {
             ComplexType newType = (ComplexType) _map(Type).NonNull();
-            Expression newExpression = (Expression) _map(Type).NonNull();
+            Expression newExpression = (Expression) _map(Expression).NonNull();
             if (ReferenceEquals(newType, Type) && ReferenceEquals(newExpression, Expression))
             {
                 return this;

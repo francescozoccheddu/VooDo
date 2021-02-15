@@ -1,5 +1,4 @@
-﻿using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
+﻿using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 using System;
 using System.Collections;
@@ -13,7 +12,7 @@ using VooDo.Utils;
 namespace VooDo.AST.Statements
 {
 
-    public sealed record GlobalStatement : Statement, IReadOnlyList<DeclarationStatement>
+    public sealed record GlobalStatement : MultipleStatements, IReadOnlyList<DeclarationStatement>
     {
 
         #region Members
@@ -51,8 +50,8 @@ namespace VooDo.AST.Statements
         public int Count => ((IReadOnlyCollection<Statement>) m_Declarations).Count;
         public IEnumerator<DeclarationStatement> GetEnumerator() => ((IEnumerable<DeclarationStatement>) m_Declarations).GetEnumerator();
         IEnumerator IEnumerable.GetEnumerator() => ((IEnumerable) m_Declarations).GetEnumerator();
-        internal override BlockSyntax EmitNode(Scope _scope, Tagger _tagger)
-            => SyntaxFactory.Block(this.Select(_s => _s.EmitNode(_scope, _tagger)).ToSyntaxList()).Own(_tagger, this);
+        internal override IEnumerable<LocalDeclarationStatementSyntax> EmitNodes(Scope _scope, Tagger _tagger)
+            => this.SelectMany(_s => _s.EmitNodes(_scope, _tagger));
         public override IEnumerable<DeclarationStatement> Children => m_Declarations;
         public override string ToString() => GrammarConstants.globalKeyword + Count switch
         {

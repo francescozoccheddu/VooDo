@@ -13,7 +13,7 @@ using VooDo.Utils;
 namespace VooDo.AST.Statements
 {
 
-    public sealed record BlockStatement : Statement, IReadOnlyList<Statement>
+    public sealed record BlockStatement : SingleStatement, IReadOnlyList<Statement>
     {
 
         #region Members
@@ -54,10 +54,7 @@ namespace VooDo.AST.Statements
         internal override BlockSyntax EmitNode(Scope _scope, Tagger _tagger)
         {
             Scope nestedScope = _scope.CreateNested();
-            IEnumerable<StatementSyntax> statements = this.SelectMany(
-                _s => _s is GlobalStatement global
-                    ? global.EmitNode(nestedScope, _tagger).Statements
-                    : _s.EmitNode(nestedScope, _tagger).ToSyntaxList());
+            IEnumerable<StatementSyntax> statements = this.SelectMany(_s => _s.EmitNodes(nestedScope, _tagger));
             return SyntaxFactory.Block(statements.ToSyntaxList()).Own(_tagger, this);
         }
 

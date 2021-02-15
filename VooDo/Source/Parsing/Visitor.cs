@@ -17,6 +17,8 @@ using VooDo.AST.Expressions;
 using VooDo.AST.Names;
 using VooDo.AST.Statements;
 using VooDo.Parsing.Generated;
+using VooDo.Problems;
+using VooDo.Utils;
 
 namespace VooDo.Parsing
 {
@@ -172,7 +174,17 @@ namespace VooDo.Parsing
         public override Node VisitElementAccessExpression([NotNull] VooDoParser.ElementAccessExpressionContext _c)
             => new ElementAccessExpression(Get<Expression>(_c.mSource), Get<Expression>(_c._mArgs));
         public override Node VisitExpressionStatement([NotNull] VooDoParser.ExpressionStatementContext _c)
-            => new ExpressionStatement(Get<InvocationOrObjectCreationExpression>(_c.mExpr));
+        {
+            Expression expression = Get<Expression>(_c.mExpr);
+            if (expression is InvocationOrObjectCreationExpression validExpression)
+            {
+                return new ExpressionStatement(validExpression);
+            }
+            else
+            {
+                throw new SyntaxError(expression, "ExpressionStatement expression must be an InvocationExpression or an ObjectCreationExpression").AsThrowable();
+            }
+        }
         public override Node VisitFalseLiteralExpression([NotNull] VooDoParser.FalseLiteralExpressionContext _c)
             => LiteralExpression.False;
         public override Node VisitFullScript([NotNull] VooDoParser.FullScriptContext _c)

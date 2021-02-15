@@ -49,6 +49,20 @@ namespace VooDo.Compiling.Transformation
             return controllerFactorySymbol;
         }
 
+        private static ITypeSymbol? GetExpressionType(ExpressionSyntax? _syntax, SemanticModel _semantics)
+        {
+            if (_syntax is null)
+            {
+                return null;
+            }
+            ITypeSymbol? type = _semantics.GetTypeInfo(_syntax).Type;
+            if (type is null || type.TypeKind == TypeKind.Error)
+            {
+                return null;
+            }
+            return type;
+        }
+
         private static ImmutableArray<GlobalSyntax> GetSyntax(ClassDeclarationSyntax _class, IEnumerable<GlobalDefinition> _globals, Tagger _tagger)
         {
             ImmutableDictionary<Tagger.Tag, int> globalsMap = _globals
@@ -86,8 +100,7 @@ namespace VooDo.Compiling.Transformation
             {
                 return type.AllInterfaces
                     .Append(type)
-                    .Select(_i => _i.ConstructedFrom)
-                    .Where(_i => _i.Equals(_controllerFactory, SymbolEqualityComparer.Default))
+                    .Where(_i => _i.ConstructedFrom.Equals(_controllerFactory, SymbolEqualityComparer.Default))
                     .Select(_i => _i.TypeArguments.Single())
                     .Distinct<ITypeSymbol>(SymbolEqualityComparer.Default)
                     .ToImmutableArray();
@@ -99,9 +112,7 @@ namespace VooDo.Compiling.Transformation
         {
             INamedTypeSymbol controllerFactorySymbol = GetControllerFactorySymbol(_semantics);
             return _controllers
-                .Select(_c => _c is null
-                    ? null
-                    : _semantics.GetTypeInfo(_c).Type)
+                .Select(_c => GetExpressionType(_c, _semantics))
                 .Select(_t => _t is null
                     ? ImmutableArray.Create<ITypeSymbol>()
                     : GetVariableTypesFromControllerType(_t, controllerFactorySymbol))
@@ -110,7 +121,7 @@ namespace VooDo.Compiling.Transformation
 
         private static ImmutableArray<ITypeSymbol?> GetInitialValueTypes(IEnumerable<ExpressionSyntax?> _initialValue, SemanticModel _semantics)
             => _initialValue
-                .Select(_c => _semantics.GetTypeInfo(_c).Type)
+                .Select(_c => GetExpressionType(_c, _semantics))
                 .ToImmutableArray();
 
         private static ImmutableArray<ITypeSymbol> ConciliateTypes(ITypeSymbol? _initialValue, ImmutableArray<ITypeSymbol> _controllerValues)

@@ -5,14 +5,13 @@ using System;
 using System.Collections.Generic;
 
 using VooDo.AST.Expressions;
-using VooDo.Compiling;
 using VooDo.Compiling.Emission;
 using VooDo.Utils;
 
 namespace VooDo.AST.Statements
 {
 
-    public sealed record ReturnStatement(Expression Expression) : Statement
+    public sealed record ReturnStatement(Expression Expression) : SingleStatement
     {
 
         #region Overrides

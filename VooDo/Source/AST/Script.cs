@@ -77,10 +77,7 @@ namespace VooDo.AST
                                     SyntaxKind.OverrideKeyword))
                             .WithBody(
                                 SF.Block(
-                                    Statements.SelectMany(
-                                        _s => _s is GlobalStatement global
-                                            ? global.EmitNode(scope, tagger).Statements
-                                            : _s.EmitNode(scope, tagger).ToSyntaxList())));
+                                    Statements.SelectMany(_s => _s.EmitNodes(scope, tagger))));
 
             ImmutableArray<Scope.GlobalDefinition> globals = scope.GetGlobalDefinitions();
             VariableDeclarationSyntax EmitGlobalDeclaration(Scope.GlobalDefinition _definition)

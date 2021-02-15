@@ -5,14 +5,13 @@ using System;
 using System.Collections.Generic;
 
 using VooDo.AST.Expressions;
-using VooDo.Compiling;
 using VooDo.Compiling.Emission;
 using VooDo.Utils;
 
 namespace VooDo.AST.Statements
 {
 
-    public sealed record AssignmentStatement(AssignableExpression Target, AssignmentStatement.EKind Kind, Expression Source) : Statement
+    public sealed record AssignmentStatement(AssignableExpression Target, AssignmentStatement.EKind Kind, Expression Source) : SingleStatement
     {
 
         #region Nested types

@@ -19,13 +19,20 @@ global var x = 7;
 global {
     var y = 5, z = 6;
 }
-int q = glob 7;
-int p = glob 6 init 5;
+bool q = glob (VooDo.ConsoleTestbench.Culo) null;
+int p = glob null init 5;
             ";
             Script script = Parser.Script(code);
             ImmutableArray<Reference> references = CompilationOptions.Default.References.Add(Reference.FromAssembly(typeof(Culo).Assembly));
             Compilation compilation = Compilation.Create(script, new CompilationOptions() with { References = references });
-            Console.WriteLine(compilation.CSharpCode);
+            if (compilation.Succeded)
+            {
+                Console.WriteLine(compilation.CSharpCode);
+            }
+            else
+            {
+                Console.WriteLine(string.Join('\n', compilation.Problems));
+            }
         }
 
     }

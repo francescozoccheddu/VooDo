@@ -61,7 +61,7 @@ namespace VooDo.AST
                     lastNewLine = i;
                 }
             }
-            _startColumn = Start - lastNewLine;
+            _startColumn = Start - lastNewLine - 1;
             _endLine = _startLine;
             for (int i = Start; i < End; i++)
             {
@@ -71,35 +71,30 @@ namespace VooDo.AST
                     lastNewLine = i;
                 }
             }
-            _endColumn = End - lastNewLine;
+            _endColumn = End - lastNewLine - 1;
         }
 
         public override string GetDisplayMessage()
         {
-            string snippet = SourcePart;
-            if (Length > 20)
-            {
-                snippet = snippet[0..10] + "…" + snippet[^10..];
-            }
             GetLinePosition(out int startLine, out int startCol, out int endLine, out int endCol);
             string position;
             if (startLine == endLine)
             {
-                position = $"line {startLine} ";
+                position = $"LN {startLine + 1} ";
                 if (Length < 2)
                 {
-                    position += $"column {startCol}";
+                    position += $"COL {startCol + 1}";
                 }
                 else
                 {
-                    position += $"columns {startCol}…{endCol}";
+                    position += $"COLs {startCol + 1} to {endCol + 1}";
                 }
             }
             else
             {
-                position = $"from line {startLine} column {startCol} to line {endLine} column {endCol}";
+                position = $"LN {startLine + 1} COL {startCol + 1} to LN {endLine + 1} COL {endCol + 1}";
             }
-            return (SourcePath is null ? "" : $"'{SourcePath}' ") + $"{position} «{snippet}»";
+            return (SourcePath is null ? "" : $"'{SourcePath}' ") + position;
         }
 
     }

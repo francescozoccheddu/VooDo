@@ -31,6 +31,8 @@ namespace VooDo.Problems
         public virtual string GetDisplayMessage()
             => $"{Kind} {Severity}: {Description}";
 
+        public sealed override string ToString() => $"{GetType().Name}: {GetDisplayMessage()}";
+
     }
 
     public class SourceProblem : Problem
@@ -47,15 +49,15 @@ namespace VooDo.Problems
         private string GetSourceMessage()
         {
             string code = Source!.ToString();
-            object snippet = code.Length > 20 ? $"{code[0..10]}…{code[^1..^10]}" : code;
+            object snippet = code.Length > 20 ? $"{code[..10]}...{code[^10..]}" : code;
             string origin = Source.Origin.GetDisplayMessage();
             string type = Source.GetType().Name;
-            return $"{type} ❮{snippet}❯ @ {origin}";
+            return $"{type} «{snippet}» @ {origin}";
         }
 
         public override string GetDisplayMessage()
             => Source is null ? base.GetDisplayMessage()
-            : $"{Kind} {Severity} in {Source.GetType().Name} {GetSourceMessage()} : {Description}";
+            : $"{Kind} {Severity} in {GetSourceMessage()}: {Description}";
 
     }
 

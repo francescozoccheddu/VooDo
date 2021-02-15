@@ -11,7 +11,7 @@ using VooDo.Utils;
 namespace VooDo.AST.Statements
 {
 
-    public sealed record ExpressionStatement(InvocationOrObjectCreationExpression Expression) : Statement
+    public sealed record ExpressionStatement(InvocationOrObjectCreationExpression Expression) : SingleStatement
     {
 
         #region Overrides

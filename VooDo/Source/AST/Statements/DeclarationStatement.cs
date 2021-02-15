@@ -15,7 +15,7 @@ using VooDo.Utils;
 namespace VooDo.AST.Statements
 {
 
-    public record DeclarationStatement : Statement
+    public record DeclarationStatement : MultipleStatements
     {
 
         #region Nested types
@@ -135,17 +135,17 @@ namespace VooDo.AST.Statements
             }
         }
 
-        internal override LocalDeclarationStatementSyntax EmitNode(Scope _scope, Tagger _tagger)
+        internal override IEnumerable<LocalDeclarationStatementSyntax> EmitNodes(Scope _scope, Tagger _tagger)
         {
             TypeSyntax type = Type.EmitNode(_scope, _tagger);
             if (Parent is GlobalStatement && !Type.IsVar)
             {
                 type = SyntaxFactoryHelper.VariableType(type);
             }
-            return SyntaxFactory.LocalDeclarationStatement(
-                           SyntaxFactory.VariableDeclaration(type,
-                               Declarators.Select(_d => _d.EmitNode(_scope, _tagger)).ToSeparatedList()))
-                       .Own(_tagger, this);
+            return Declarators.Select(_d =>
+                SyntaxFactory.LocalDeclarationStatement(
+                        SyntaxFactory.VariableDeclaration(type, _d.EmitNode(_scope, _tagger).ToSeparatedList()))
+                       .Own(_tagger, this));
         }
 
         public override IEnumerable<BodyNode> Children => new BodyNode[] { Type }.Concat(Declarators);

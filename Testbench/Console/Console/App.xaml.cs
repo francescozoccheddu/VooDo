@@ -47,6 +47,7 @@ namespace VooDo.ConsoleTestbench
             };
             Console.SetOut(standardOutput);
             Console.Title = "VooDo Console Testbench";
+            Console.CursorSize = 6;
             Stopwatch stopwatch = new Stopwatch();
             stopwatch.Start();
             EntryPoint.Run();
