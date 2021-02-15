@@ -13,13 +13,22 @@ namespace VooDo.Compiling
     public sealed record CompilationOptions
     {
 
-        public static CompilationOptions Default { get; } = new CompilationOptions(null, Reference.GetSystemReferences().Add(Reference.RuntimeReference));
+        public static CompilationOptions Default { get; } = new CompilationOptions();
 
-        public CompilationOptions(ComplexType? _returnType = null, ImmutableArray<Reference> _references = default)
+        private CompilationOptions()
         {
-            ReturnType = _returnType;
-            References = _references;
+            References = Reference.GetSystemReferences().Add(Reference.RuntimeReference);
+            Namespace = "VooDo.Generated";
+            ClassName = "GeneratedProgram";
+            ReturnType = null;
+            AssemblyName = null;
         }
+
+        public string? AssemblyName { get; init; }
+
+        public Namespace Namespace { get; init; }
+
+        public Identifier ClassName { get; init; }
 
         public ComplexType? ReturnType { get; init; }
 
@@ -29,26 +38,19 @@ namespace VooDo.Compiling
             get => m_references;
             set
             {
-                if (value.IsDefault)
+                m_references = Reference.Merge(value.EmptyIfDefault());
+                int runtimeIndex = m_references.IndexOf(Reference.RuntimeReference, Reference.MetadataEqualityComparer);
+                if (runtimeIndex < 0)
                 {
-                    m_references = Default.References;
+                    throw new CompilationOptionsPropertyProblem("No runtime reference", this, nameof(References)).AsThrowable();
                 }
-                else
+                if (!m_references[runtimeIndex].Aliases.Contains(CompilationConstants.runtimeReferenceAlias))
                 {
-                    m_references = Reference.Merge(value);
-                    int runtimeIndex = m_references.IndexOf(Reference.RuntimeReference, Reference.MetadataEqualityComparer);
-                    if (runtimeIndex < 0)
-                    {
-                        throw new CompilationOptionsPropertyProblem("No runtime reference", this, nameof(References)).AsThrowable();
-                    }
-                    if (!m_references[runtimeIndex].Aliases.Contains(CompilationConstants.runtimeReferenceAlias))
-                    {
-                        throw new CompilationOptionsPropertyProblem($"Runtime reference must define '{CompilationConstants.runtimeReferenceAlias}' alias", this, nameof(References)).AsThrowable();
-                    }
-                    if (m_references.SelectMany(_r => _r.Aliases).FirstDuplicate(out Identifier? duplicateAlias))
-                    {
-                        throw new CompilationOptionsPropertyProblem($"Duplicate reference alias '{duplicateAlias}'", this, nameof(References)).AsThrowable();
-                    }
+                    throw new CompilationOptionsPropertyProblem($"Runtime reference must define '{CompilationConstants.runtimeReferenceAlias}' alias", this, nameof(References)).AsThrowable();
+                }
+                if (m_references.SelectMany(_r => _r.Aliases).FirstDuplicate(out Identifier? duplicateAlias))
+                {
+                    throw new CompilationOptionsPropertyProblem($"Duplicate reference alias '{duplicateAlias}'", this, nameof(References)).AsThrowable();
                 }
             }
         }

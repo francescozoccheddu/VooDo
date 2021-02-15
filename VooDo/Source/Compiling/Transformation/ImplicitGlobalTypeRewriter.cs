@@ -176,7 +176,8 @@ namespace VooDo.Compiling.Transformation
         internal static CompilationUnitSyntax Rewrite(Session _session)
         {
             CompilationUnitSyntax root = _session.Syntax!;
-            ClassDeclarationSyntax classDeclaration = root!.Members.OfType<ClassDeclarationSyntax>().Single();
+            NamespaceDeclarationSyntax namespaceDeclaration = root.Members.OfType<NamespaceDeclarationSyntax>().Single();
+            ClassDeclarationSyntax classDeclaration = namespaceDeclaration.Members.OfType<ClassDeclarationSyntax>().Single();
             ImmutableArray<GlobalDefinition> globals = _session.Globals.Where(_g => _g.Prototype.Global.Type.IsVar).ToImmutableArray();
             ImmutableArray<GlobalSyntax> syntax = GetSyntax(classDeclaration, globals, _session.Tagger);
             ImmutableArray<ITypeSymbol> types = InferSingleType(syntax, globals.Select(_g => _g.Prototype), _session.Semantics!);

@@ -1,13 +1,18 @@
 ﻿
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.Emit;
 
+using System;
 using System.Collections.Immutable;
+using System.IO;
 using System.Linq;
+using System.Reflection;
 
 using VooDo.AST;
 using VooDo.Compiling.Emission;
 using VooDo.Problems;
+using VooDo.Runtime;
 using VooDo.Utils;
 
 namespace VooDo.Compiling
@@ -21,9 +26,9 @@ namespace VooDo.Compiling
         public bool Succeded { get; }
         public ImmutableArray<Problem> Problems { get; }
         public ImmutableArray<GlobalPrototype> Globals { get; }
-        public string? CSharpCode { get; }
 
         private readonly CSharpCompilation? m_cSharpCompilation;
+        private readonly string? m_cSharpCode;
 
         public static Compilation Create(Script _script, CompilationOptions _options)
             => new Compilation(_script, _options);
@@ -40,10 +45,56 @@ namespace VooDo.Compiling
             if (Succeded)
             {
                 m_cSharpCompilation = session.CSharpCompilation;
-                CSharpCode = m_cSharpCompilation?.SyntaxTrees.Single().GetRoot().NormalizeWhitespace().ToFullString();
+                m_cSharpCode = m_cSharpCompilation?.SyntaxTrees.Single().GetRoot().NormalizeWhitespace().ToFullString();
             }
         }
 
+        public Loader Load()
+        {
+            if (!Succeded)
+            {
+                throw new InvalidOperationException("Compilation did not succeed");
+            }
+            using MemoryStream stream = new();
+            EmitResult result = m_cSharpCompilation!.Emit(stream);
+            if (!result.Success)
+            {
+                throw result.Diagnostics.SelectNonNull(_d => RoslynProblem.FromDiagnostic(_d, null, Problem.EKind.Emission)).AsThrowable();
+            }
+            Assembly assembly = Assembly.Load(stream.ToArray());
+            return Loader.FromAssembly(assembly, Options.Namespace, Options.ClassName);
+        }
+
+        public void SaveLibraryFile(string _file)
+        {
+            if (!Succeded)
+            {
+                throw new InvalidOperationException("Compilation did not succeed");
+            }
+            EmitResult result = m_cSharpCompilation!.Emit(_file);
+            if (!result.Success)
+            {
+                throw result.Diagnostics.SelectNonNull(_d => RoslynProblem.FromDiagnostic(_d, null, Problem.EKind.Emission)).AsThrowable();
+            }
+        }
+
+        public void SaveCSharpSourceFile(string _file)
+        {
+            if (!Succeded)
+            {
+                throw new InvalidOperationException("Compilation did not succeed");
+            }
+            File.WriteAllText(_file, m_cSharpCode);
+        }
+
+        public string GetCSharpSourceCode()
+        {
+            if (!Succeded)
+            {
+                throw new InvalidOperationException("Compilation did not succeed");
+            }
+            return m_cSharpCode!;
+        }
 
     }
 

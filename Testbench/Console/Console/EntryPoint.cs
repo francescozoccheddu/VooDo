@@ -24,10 +24,10 @@ int p = glob null init 8;
             ";
             Script script = Parser.Script(code);
             ImmutableArray<Reference> references = CompilationOptions.Default.References.Add(Reference.FromAssembly(typeof(Culo).Assembly));
-            Compilation compilation = Compilation.Create(script, new CompilationOptions() with { References = references });
+            Compilation compilation = Compilation.Create(script, CompilationOptions.Default with { References = references });
             if (compilation.Succeded)
             {
-                Console.WriteLine(compilation.CSharpCode);
+                Console.WriteLine(compilation.GetCSharpSourceCode());
             }
             else
             {

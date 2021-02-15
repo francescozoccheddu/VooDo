@@ -15,13 +15,14 @@ namespace VooDo.Problems
         {
         }
 
-        internal static RoslynProblem? FromDiagnostic(Diagnostic _diagnostic, Tagger _tagger, EKind _kind = EKind.Semantic)
+        internal static RoslynProblem? FromDiagnostic(Diagnostic _diagnostic, Tagger? _tagger, EKind _kind = EKind.Semantic)
         {
             if (_diagnostic.Severity is DiagnosticSeverity.Info or DiagnosticSeverity.Hidden)
             {
                 return null;
             }
             Node? syntax = null;
+            if (_tagger is not null)
             {
                 SyntaxNode? root = _diagnostic.Location.SourceTree?.GetRoot();
                 if (root is not null)

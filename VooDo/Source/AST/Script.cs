@@ -133,7 +133,7 @@ namespace VooDo.AST
                             SyntaxKind.ReadOnlyKeyword),
                         EmitGlobalDeclaration(_g)));
             ClassDeclarationSyntax? classDeclaration =
-                SF.ClassDeclaration(CompilationConstants.generatedClassName)
+                SF.ClassDeclaration(_session.Compilation.Options.ClassName)
                     .WithModifiers(
                         SFH.Tokens(
                             SyntaxKind.PublicKeyword,
@@ -153,7 +153,11 @@ namespace VooDo.AST
                     aliases.ToSyntaxList(),
                     usings.ToSyntaxList(),
                     SF.List<AttributeListSyntax>(),
-                    classDeclaration.ToSyntaxList<MemberDeclarationSyntax>())
+                    SF.NamespaceDeclaration(
+                        _session.Compilation.Options.Namespace.ToNameSyntax())
+                    .WithMembers(
+                        classDeclaration.ToSyntaxList<MemberDeclarationSyntax>())
+                    .ToSyntaxList<MemberDeclarationSyntax>())
                 .Own(tagger, this);
             return (root, globals);
         }

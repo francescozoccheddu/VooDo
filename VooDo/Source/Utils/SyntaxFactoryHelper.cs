@@ -46,6 +46,9 @@ namespace VooDo.Utils
         internal static TypeSyntax ToTypeSyntax(this ComplexType _type)
             => _type.EmitNode(new Scope(), new Tagger());
 
+        internal static NameSyntax ToNameSyntax(this Namespace _namespace)
+            => _namespace.EmitNode(new Scope(), new Tagger());
+
         internal static InvocationExpressionSyntax CreateVariableInvocation(TypeSyntax? _type, LiteralExpressionSyntax _name, ExpressionSyntax _initialValue)
             => Invocation(
                 MemberAccess(
