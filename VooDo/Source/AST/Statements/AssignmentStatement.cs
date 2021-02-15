@@ -65,7 +65,6 @@ namespace VooDo.AST.Statements
                         EKind.BitwiseOr => SyntaxKind.OrAssignmentExpression,
                         EKind.BitwiseXor => SyntaxKind.ExclusiveOrAssignmentExpression,
                         EKind.Coalesce => SyntaxKind.CoalesceAssignmentExpression,
-                        _ => throw new InvalidOperationException(),
                     },
                     Target.EmitNode(_scope, _tagger),
                     Source.EmitNode(_scope, _tagger)))

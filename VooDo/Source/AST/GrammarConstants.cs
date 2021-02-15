@@ -1,5 +1,4 @@
-﻿using System;
-
+﻿
 using VooDo.AST.Expressions;
 using VooDo.AST.Statements;
 
@@ -23,7 +22,6 @@ namespace VooDo.AST
             AssignmentStatement.EKind.BitwiseOr => "|=",
             AssignmentStatement.EKind.BitwiseXor => "^=",
             AssignmentStatement.EKind.Coalesce => "??=",
-            _ => throw new NotImplementedException(),
         };
 
         internal static string Token(this BinaryExpression.EKind _kind) => _kind switch
@@ -47,7 +45,6 @@ namespace VooDo.AST
             BinaryExpression.EKind.BitwiseAnd => "&",
             BinaryExpression.EKind.BitwiseOr => "|",
             BinaryExpression.EKind.BitwiseXor => "^",
-            _ => throw new NotImplementedException(),
         };
 
         internal static string Token(this UnaryExpression.EKind _kind) => _kind switch
@@ -56,7 +53,6 @@ namespace VooDo.AST
             UnaryExpression.EKind.Minus => "-",
             UnaryExpression.EKind.LogicNot => "!",
             UnaryExpression.EKind.BitwiseNot => "~",
-            _ => throw new NotImplementedException(),
         };
 
         internal static string Token(this Argument.EKind _kind) => _kind switch
@@ -64,7 +60,6 @@ namespace VooDo.AST
             Argument.EKind.Value => "",
             Argument.EKind.Ref => "ref",
             Argument.EKind.Out => "out",
-            _ => throw new NotImplementedException(),
         };
 
         internal const string globalKeyword = "global";

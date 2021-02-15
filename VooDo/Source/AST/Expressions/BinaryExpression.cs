@@ -4,7 +4,6 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
 
-using VooDo.Compiling;
 using VooDo.Compiling.Emission;
 using VooDo.Utils;
 
@@ -53,7 +52,6 @@ namespace VooDo.AST.Expressions
             EKind.BitwiseAnd => EPrecedence.BitwiseAnd,
             EKind.BitwiseOr => EPrecedence.BitwiseOr,
             EKind.BitwiseXor => EPrecedence.BitwiseXor,
-            _ => throw new InvalidOperationException(),
         };
 
         public override BinaryExpression ReplaceNodes(Func<Node?, Node?> _map)
@@ -97,7 +95,6 @@ namespace VooDo.AST.Expressions
                     EKind.BitwiseAnd => SyntaxKind.BitwiseAndExpression,
                     EKind.BitwiseOr => SyntaxKind.BitwiseOrExpression,
                     EKind.BitwiseXor => SyntaxKind.ExclusiveOrExpression,
-                    _ => throw new InvalidOperationException(),
                 },
                 Left.EmitNode(_scope, _tagger),
                 Right.EmitNode(_scope, _tagger))

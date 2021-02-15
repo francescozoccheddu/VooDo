@@ -67,6 +67,7 @@ namespace VooDo.Compiling
 
         private void RunUnhandled()
         {
+            Compilation.Script.GetSyntaxProblems().ThrowErrors();
             SyntaxTree tree;
             CSharpParseOptions parseOptions = CSharpParseOptions.Default.WithLanguageVersion(LanguageVersion.CSharp9);
             CSharpCompilationOptions compilationOptions = new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary)

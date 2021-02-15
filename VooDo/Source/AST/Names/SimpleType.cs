@@ -38,31 +38,8 @@ namespace VooDo.AST.Names
                 { typeof(string), "string" },
             };
 
-        public static SimpleType FromSyntax(TypeSyntax _syntax, bool _ignoreUnboundGenerics = false) => _syntax switch
-        {
-            SimpleNameSyntax simple => FromSyntax(simple, _ignoreUnboundGenerics),
-            PredefinedTypeSyntax predefined => FromSyntax(predefined),
-            _ => throw new ArgumentException("Not a simple type", nameof(_syntax)),
-        };
-
-        public static SimpleType FromSyntax(PredefinedTypeSyntax _syntax)
-            => new SimpleType(Identifier.FromSyntax(_syntax.Keyword));
-
-        public static SimpleType FromSyntax(SimpleNameSyntax _syntax, bool _ignoreUnboundGenerics = false) => _syntax switch
-        {
-            IdentifierNameSyntax name
-                => new SimpleType(Identifier.FromSyntax(name.Identifier)),
-            GenericNameSyntax genericName when genericName.IsUnboundGenericName && _ignoreUnboundGenerics
-                => new SimpleType(Identifier.FromSyntax(genericName.Identifier)),
-            GenericNameSyntax genericName when !genericName.IsUnboundGenericName
-                => new SimpleType(
-                    Identifier.FromSyntax(genericName.Identifier),
-                    genericName.TypeArgumentList.Arguments.Select(_a => ComplexType.FromSyntax(_a, _ignoreUnboundGenerics)).ToImmutableArray()),
-            _ => throw new ArgumentException("Not a simple type", nameof(_syntax))
-        };
-
-        public static SimpleType Parse(string _type, bool _ignoreUnboundGenerics = false)
-            => FromSyntax(SyntaxFactory.ParseTypeName(_type), _ignoreUnboundGenerics);
+        public static SimpleType Parse(string _type)
+            => SimpleType.Parse(_type);
 
         public static SimpleType FromType<TType>(bool _ignoreUnboundGenerics = false)
             => FromType(typeof(TType), _ignoreUnboundGenerics);

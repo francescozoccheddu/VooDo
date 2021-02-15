@@ -8,6 +8,7 @@ using System.Linq;
 
 using VooDo.AST.Directives;
 using VooDo.Compiling.Emission;
+using VooDo.Parsing;
 using VooDo.Problems;
 using VooDo.Utils;
 
@@ -19,38 +20,8 @@ namespace VooDo.AST.Names
 
         #region Creation
 
-        public static Namespace FromSyntax(AliasQualifiedNameSyntax _syntax)
-            => new Namespace(Identifier.FromSyntax(_syntax.Alias.Identifier), ImmutableArray.Create(Identifier.FromSyntax(_syntax.Name.Identifier)));
-
-        public static Namespace FromSyntax(IdentifierNameSyntax _syntax)
-            => new Namespace(null, ImmutableArray.Create(Identifier.FromSyntax(_syntax.Identifier)));
-
-        public static Namespace FromSyntax(QualifiedNameSyntax _syntax)
-        {
-            if (_syntax.Right is IdentifierNameSyntax name)
-            {
-                Namespace left = FromSyntax(_syntax.Left);
-                return left with
-                {
-                    Path = left.Path.Add(Identifier.FromSyntax(name.Identifier))
-                };
-            }
-            else
-            {
-                throw new ArgumentException("Not a namespace type", nameof(_syntax));
-            }
-        }
-
-        public static Namespace FromSyntax(TypeSyntax _syntax) => _syntax switch
-        {
-            IdentifierNameSyntax name => FromSyntax(name),
-            QualifiedNameSyntax qualified => FromSyntax(qualified),
-            AliasQualifiedNameSyntax aliased => FromSyntax(aliased),
-            _ => throw new ArgumentException("Not a namespace type", nameof(_syntax))
-        };
-
         public static Namespace Parse(string _namespace)
-            => FromSyntax(SyntaxFactory.ParseTypeName(_namespace));
+            => Parser.Namespace(_namespace);
 
         #endregion
 

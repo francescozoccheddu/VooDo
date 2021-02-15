@@ -5,8 +5,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-using VooDo.Compiling;
 using VooDo.Compiling.Emission;
+using VooDo.Parsing;
 
 namespace VooDo.AST.Names
 {
@@ -18,19 +18,14 @@ namespace VooDo.AST.Names
 
         public static ComplexTypeOrVar Var { get; } = new ComplexTypeOrVar(null);
 
-        public static ComplexTypeOrVar Parse(string _type, bool _ignoreUnbound = false)
-            => FromSyntax(SyntaxFactory.ParseTypeName(_type), _ignoreUnbound);
+        public static ComplexTypeOrVar Parse(string _type)
+            => Parser.ComplexTypeOrVar(_type);
 
         public static ComplexTypeOrVar FromType(Type _type, bool _ignoreUnbound = false)
             => ComplexType.FromType(_type, _ignoreUnbound);
 
         public static ComplexTypeOrVar FromType<TType>()
             => FromType(typeof(TType));
-
-        public static ComplexTypeOrVar FromSyntax(TypeSyntax _type, bool _ignoreUnbound = false) =>
-            _type is IdentifierNameSyntax name && name.IsVar
-            ? Var
-            : ComplexType.FromSyntax(_type, _ignoreUnbound);
 
         public static ComplexTypeOrVar FromComplexType(ComplexType _type)
             => new ComplexTypeOrVar(_type);

@@ -8,7 +8,6 @@ using System.Collections.Immutable;
 using System.Linq;
 
 using VooDo.AST.Names;
-using VooDo.Compiling;
 using VooDo.Compiling.Emission;
 using VooDo.Problems;
 using VooDo.Utils;
@@ -159,7 +158,7 @@ namespace VooDo.AST.Expressions
             {
                 if (!Name.IsDiscard)
                 {
-                    _scope.AddLocal(Name.Identifier!);
+                    _scope.AddLocal(this, Name.Identifier!);
                 }
                 return SyntaxFactory.Argument(
                             SyntaxFactory.DeclarationExpression(

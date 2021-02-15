@@ -50,8 +50,7 @@ namespace VooDo.AST.Expressions
                     EKind.Value => SyntaxKind.None,
                     EKind.Ref => SyntaxKind.RefKeyword,
                     EKind.Out => SyntaxKind.OutKeyword,
-                    EKind.In => SyntaxKind.InKeyword,
-                    _ => throw new InvalidOperationException(),
+                    EKind.In => SyntaxKind.InKeyword
                 }))
             .Own(_tagger, this);
 

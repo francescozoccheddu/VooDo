@@ -35,8 +35,6 @@ namespace VooDo.AST.Names
         public static Identifier Double { get; } = "double";
         public static Identifier Object { get; } = "object";
 
-        public static Identifier FromSyntax(SyntaxToken _token) => new Identifier(_token.ValueText);
-
         #endregion
 
         #region Conversion

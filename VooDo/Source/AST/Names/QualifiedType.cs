@@ -9,6 +9,7 @@ using System.Collections.Immutable;
 using System.Linq;
 
 using VooDo.Compiling.Emission;
+using VooDo.Parsing;
 using VooDo.Problems;
 using VooDo.Utils;
 
@@ -20,43 +21,8 @@ namespace VooDo.AST.Names
 
         #region Creation
 
-        public static new QualifiedType FromSyntax(TypeSyntax _type, bool _ignoreUnbound = false)
-        {
-            QualifiedType type = Unwrap(_type, out bool nullable, out ImmutableArray<RankSpecifier> ranks) switch
-            {
-                QualifiedNameSyntax qualified => FromSyntax(qualified, _ignoreUnbound),
-                AliasQualifiedNameSyntax aliased => FromSyntax(aliased, _ignoreUnbound),
-                SimpleNameSyntax simple => FromSyntax(simple),
-                PredefinedTypeSyntax predefined => FromSyntax(predefined),
-                _ => throw new ArgumentException("Not a qualified type", nameof(_type)),
-            };
-            return type with
-            {
-                IsNullable = nullable,
-                Ranks = ranks
-            };
-        }
-
-        public static QualifiedType FromSyntax(SimpleNameSyntax _type, bool _ignoreUnbound = false)
-            => SimpleType.FromSyntax(_type, _ignoreUnbound);
-
-        public static QualifiedType FromSyntax(QualifiedNameSyntax _type, bool _ignoreUnbound = false)
-        {
-            QualifiedType left = FromSyntax(_type.Left);
-            return left with
-            {
-                Path = left.Path.Add(SimpleType.FromSyntax(_type.Right, _ignoreUnbound))
-            };
-        }
-
-        public static QualifiedType FromSyntax(AliasQualifiedNameSyntax _type, bool _ignoreUnbound = false)
-            => new QualifiedType(Identifier.FromSyntax(_type.Alias.Identifier), SimpleType.FromSyntax(_type.Name, _ignoreUnbound));
-
-        public static QualifiedType FromSyntax(PredefinedTypeSyntax _type)
-            => SimpleType.FromSyntax(_type);
-
-        public static new QualifiedType Parse(string _type, bool _ignoreUnbound = false)
-            => FromSyntax(SyntaxFactory.ParseTypeName(_type), _ignoreUnbound);
+        public static new QualifiedType Parse(string _type)
+            => Parser.QualifiedType(_type);
 
         public static new QualifiedType FromType(Type _type, bool _ignoreUnbound = false)
         {

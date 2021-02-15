@@ -86,7 +86,7 @@ namespace VooDo.AST.Expressions
                 }
                 else
                 {
-                    throw new InvalidOperationException("Not a method");
+                    throw new InvalidCastException("Unknown Source type");
                 }
                 return source.Own(_tagger, this);
             }

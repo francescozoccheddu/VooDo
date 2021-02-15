@@ -36,10 +36,14 @@ namespace VooDo.Compiling
             session.Run();
             Succeded = session.Succeeded;
             Problems = session.GetProblems();
-            m_cSharpCompilation = session.CSharpCompilation;
             Globals = session.Globals.EmptyIfDefault().Select(_g => _g.Prototype).ToImmutableArray();
-            CSharpCode = m_cSharpCompilation?.SyntaxTrees.Single().GetRoot().NormalizeWhitespace().ToFullString();
+            if (Succeded)
+            {
+                m_cSharpCompilation = session.CSharpCompilation;
+                CSharpCode = m_cSharpCompilation?.SyntaxTrees.Single().GetRoot().NormalizeWhitespace().ToFullString();
+            }
         }
+
 
     }
 

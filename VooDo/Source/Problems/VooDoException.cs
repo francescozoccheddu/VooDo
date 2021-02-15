@@ -7,7 +7,7 @@ using VooDo.Utils;
 namespace VooDo.Problems
 {
 
-    public class VooDoException : Exception
+    public sealed class VooDoException : Exception
     {
 
         private static string GetMessage(ImmutableArray<Problem> _problems)
@@ -37,9 +37,11 @@ namespace VooDo.Problems
 
         public ImmutableArray<Problem> Problems { get; }
 
-        internal VooDoException(Problem _problem) : this(ImmutableArray.Create(_problem)) { }
+        public override string Message => GetMessage(Problems);
 
-        internal VooDoException(ImmutableArray<Problem> _problems) : base(GetMessage(_problems))
+        internal VooDoException(Problem _problem, Exception? _innerException = null) : this(ImmutableArray.Create(_problem), _innerException) { }
+
+        internal VooDoException(ImmutableArray<Problem> _problems, Exception? _innerException = null) : base(GetMessage(_problems), _innerException)
         {
             Problems = _problems;
         }

@@ -116,7 +116,6 @@ namespace VooDo.AST
                 ETraversal.BreadthFirst => VisitBreadthFirst(_node, _shouldVisitChildren),
                 ETraversal.PreDepthFirst => VisitDepthFirstPreorder(_node, _shouldVisitChildren),
                 ETraversal.PostDepthFirst => VisitDepthFirstPostorder(_node, _shouldVisitChildren),
-                _ => throw new InvalidOperationException(),
             };
 
         public static IEnumerable<(Node node, Node? parent)> DescendantNodesAndSelfWithParents(this Node _node, ETraversal _traversal = ETraversal.PostDepthFirst)
@@ -127,7 +126,6 @@ namespace VooDo.AST
             {
                 ETraversal.BreadthFirst or ETraversal.PreDepthFirst => DescendantNodesWithParents(_node, _shouldVisitChildren, _traversal).Skip(1),
                 ETraversal.PostDepthFirst => DescendantNodesWithParents(_node, _shouldVisitChildren, _traversal).SkipLast(1),
-                _ => throw new InvalidOperationException(),
             };
 
         public readonly struct ReplaceInfo

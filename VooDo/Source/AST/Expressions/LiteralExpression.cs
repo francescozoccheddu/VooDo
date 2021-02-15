@@ -130,7 +130,6 @@ namespace VooDo.AST.Expressions
                     ulong v => SyntaxFactory.Literal(v),
                     long v => SyntaxFactory.Literal(v),
                     int v => SyntaxFactory.Literal(v),
-                    _ => throw new InvalidOperationException()
                 });
         }
         internal override LiteralExpressionSyntax EmitNode(Scope _scope, Tagger _tagger) => EmitNode().Own(_tagger, this);

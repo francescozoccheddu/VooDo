@@ -84,7 +84,6 @@ namespace VooDo.Compiling.Emission
                 EMode.Single => (TNode) SetIndex(_node, _index, true)?.AsNode()!,
                 EMode.AllDescendants => (TNode) new IndexRewriter(_index, true).Visit(_node)!,
                 EMode.UnownedDescendants => (TNode) new IndexRewriter(_index, false).Visit(_node)!,
-                _ => throw new ArgumentOutOfRangeException(nameof(_mode)),
             };
         private static SyntaxToken Own(SyntaxToken _token, int _index)
             => SetIndex(_token, _index, true)!.Value.AsToken();

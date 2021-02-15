@@ -79,10 +79,6 @@ namespace VooDo.Compiling
         private Reference(PortableExecutableReference _metadata, IEnumerable<Identifier>? _aliases = null)
         {
             Aliases = _aliases.EmptyIfNull().ToImmutableHashSet();
-            if (Aliases.AnyNull())
-            {
-                throw new ArgumentException("Null alias", nameof(_aliases));
-            }
             m_metadata = _metadata;
             FilePath = m_metadata.FilePath is not null ? new Uri(m_metadata.FilePath).AbsolutePath : null;
         }

@@ -9,6 +9,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 
 using VooDo.Compiling.Emission;
+using VooDo.Parsing;
 using VooDo.Problems;
 using VooDo.Utils;
 
@@ -39,51 +40,8 @@ namespace VooDo.AST.Names
             return type;
         }
 
-        protected static TypeSyntax Unwrap(TypeSyntax _type, out bool _nullable, out ImmutableArray<RankSpecifier> _ranks)
-        {
-            TypeSyntax? newType = _type;
-            _nullable = false;
-            List<RankSpecifier> ranks = new List<RankSpecifier>();
-            while (true)
-            {
-                if (newType is ArrayTypeSyntax arraytype)
-                {
-                    if (arraytype.RankSpecifiers.Any(_r => _r.Sizes.Any(_s => _s is not OmittedArraySizeExpressionSyntax)))
-                    {
-                        throw new ArgumentException("Explicit array size expression", nameof(_type));
-                    }
-                    ranks.AddRange(arraytype.RankSpecifiers.Select(_r => new RankSpecifier(_r.Rank)));
-                    newType = arraytype.ElementType;
-                }
-                else if (newType is NullableTypeSyntax nullableType)
-                {
-                    _nullable |= true;
-                    newType = nullableType.ElementType;
-                }
-                else
-                {
-                    _ranks = ranks.ToImmutableArray();
-                    return newType;
-                }
-            }
-        }
-
-        public static ComplexType FromSyntax(TypeSyntax _type, bool _ignoreUnbound = false)
-        {
-            ComplexType type = Unwrap(_type, out bool nullable, out ImmutableArray<RankSpecifier> ranks) switch
-            {
-                TupleTypeSyntax tupleType => TupleType.FromSyntax(tupleType, _ignoreUnbound),
-                _ => QualifiedType.FromSyntax(_type, _ignoreUnbound),
-            };
-            return type with
-            {
-                IsNullable = nullable,
-                Ranks = ranks
-            };
-        }
-
-        public static ComplexType Parse(string _type, bool _ignoreUnbound = false)
-            => FromSyntax(SyntaxFactory.ParseTypeName(_type), _ignoreUnbound);
+        public static ComplexType Parse(string _type)
+            => Parser.ComplexType(_type);
 
         public static ComplexType FromType(Type _type, bool _ignoreUnbound = false)
         {

@@ -6,7 +6,6 @@ using Antlr4.Runtime.Tree;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -56,22 +55,32 @@ namespace VooDo.Parsing
 
         public override Node Visit(IParseTree _tree)
         {
-            Node result = base.Visit(_tree);
+            Origin origin = Origin.Unknown;
             if (_tree is ParserRuleContext context)
             {
-                result = result with
-                {
-                    Origin = GetOrigin(context)
-                };
+                origin = GetOrigin(context);
             }
             else if (_tree is IToken token)
             {
-                result = result with
-                {
-                    Origin = GetOrigin(token)
-                };
+                origin = GetOrigin(token);
             }
-            return result;
+            Node result;
+            try
+            {
+                result = base.Visit(_tree);
+            }
+            catch (VooDoException exception)
+            {
+                foreach (SourceProblem problem in exception.Problems.OfType<SourceProblem>())
+                {
+                    if (problem.Source is null || problem.Source.Origin == Origin.Unknown)
+                    {
+                        problem.AttachOrigin(origin);
+                    }
+                }
+                throw;
+            }
+            return result with { Origin = origin };
         }
 
         public override Node VisitArgument([NotNull] VooDoParser.ArgumentContext _c)
@@ -97,7 +106,6 @@ namespace VooDo.Parsing
                 VooDoParser.OUT => Argument.EKind.Out,
                 VooDoParser.REF => Argument.EKind.Ref,
                 null => Argument.EKind.Value,
-                _ => throw new FormatException("Unexpected argument kind")
             };
             return new AssignableArgument(null, kind, Get<AssignableExpression>(_c.mValue));
         }
@@ -119,7 +127,6 @@ namespace VooDo.Parsing
                 VooDoParser.ASSIGN_RSH => AssignmentStatement.EKind.RightShift,
                 VooDoParser.ASSIGN_SUB => AssignmentStatement.EKind.Subtract,
                 VooDoParser.ASSIGN_XOR => AssignmentStatement.EKind.BitwiseXor,
-                _ => throw new FormatException("Unexpected operation kind")
 
             };
             return new AssignmentStatement(Get<AssignableExpression>(_c.mTarget), kind, Get<Expression>(_c.mSource));
@@ -147,7 +154,6 @@ namespace VooDo.Parsing
                 VooDoParser.LE => BinaryExpression.EKind.LessThanOrEqual,
                 VooDoParser.EQ => BinaryExpression.EKind.Equals,
                 VooDoParser.NEQ => BinaryExpression.EKind.NotEquals,
-                _ => throw new FormatException("Unexpected operation kind")
             };
             return new BinaryExpression(Get<Expression>(_c.mLeft), kind, Get<Expression>(_c.mRight));
         }
@@ -271,7 +277,6 @@ namespace VooDo.Parsing
                 VooDoParser.MINUS => UnaryExpression.EKind.Minus,
                 VooDoParser.NOT => UnaryExpression.EKind.LogicNot,
                 VooDoParser.BNOT => UnaryExpression.EKind.BitwiseNot,
-                _ => throw new FormatException("Unexpected operation kind")
             };
             return new UnaryExpression(kind, Get<Expression>(_c.mExpr));
         }

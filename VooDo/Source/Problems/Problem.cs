@@ -44,7 +44,18 @@ namespace VooDo.Problems
             Source = _source;
         }
 
-        public Node? Source { get; }
+        public Node? Source { get; private set; }
+
+        internal void AttachOrigin(Origin _origin)
+        {
+            if (Source is not null)
+            {
+                Source = Source with
+                {
+                    Origin = _origin
+                };
+            }
+        }
 
         private string GetSourceMessage()
         {

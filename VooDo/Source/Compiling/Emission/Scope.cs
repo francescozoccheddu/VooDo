@@ -1,11 +1,13 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 
-using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 
+using VooDo.AST;
 using VooDo.AST.Names;
+using VooDo.Problems;
+using VooDo.Utils;
 
 namespace VooDo.Compiling.Emission
 {
@@ -53,11 +55,11 @@ namespace VooDo.Compiling.Emission
         private static GlobalDefinition CreateGlobalDefinition(GlobalPrototype _global, int _index)
             => new GlobalDefinition(_global, CompilationConstants.globalFieldPrefix + _index);
 
-        public void AddLocal(Identifier _name)
+        public void AddLocal(Node _source, Identifier _name)
         {
             if (IsNameTaken(_name))
             {
-                throw new InvalidOperationException($"Redefinition of {_name}");
+                throw new VariableRedefinitionProblem(_source, _name).AsThrowable();
             }
             m_names.Add(_name, false);
         }
@@ -68,7 +70,7 @@ namespace VooDo.Compiling.Emission
             {
                 if (IsNameTaken(_global.Global.Name))
                 {
-                    throw new InvalidOperationException($"Redefinition of {_global.Global.Name}");
+                    throw new VariableRedefinitionProblem(_global.Source, _global.Global.Name).AsThrowable();
                 }
                 m_names.Add(_global.Global.Name, true);
             }

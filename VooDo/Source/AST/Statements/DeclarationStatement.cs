@@ -35,7 +35,7 @@ namespace VooDo.AST.Statements
                 }
                 else
                 {
-                    _scope.AddLocal(Name);
+                    _scope.AddLocal(this, Name);
                     initializer = Initializer?.EmitNode(_scope, _tagger);
                 }
                 EqualsValueClauseSyntax? initializerClause = initializer?.ToEqualsValueClause();

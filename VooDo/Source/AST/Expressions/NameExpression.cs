@@ -5,8 +5,8 @@ using System;
 using System.Collections.Generic;
 
 using VooDo.AST.Names;
-using VooDo.Compiling;
 using VooDo.Compiling.Emission;
+using VooDo.Problems;
 using VooDo.Runtime;
 using VooDo.Utils;
 
@@ -41,7 +41,7 @@ namespace VooDo.AST.Expressions
             bool isGlobal = _scope.IsGlobal(Name);
             if (!isGlobal && IsControllerOf)
             {
-                throw new InvalidOperationException();
+                throw new ControllerOfNonGlobalProblem(this).AsThrowable();
             }
             ExpressionSyntax result;
             IdentifierNameSyntax name = SyntaxFactory.IdentifierName(Name.EmitToken(_tagger));

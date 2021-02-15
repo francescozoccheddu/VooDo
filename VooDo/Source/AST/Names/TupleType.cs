@@ -8,8 +8,8 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Runtime.CompilerServices;
 
-using VooDo.Compiling;
 using VooDo.Compiling.Emission;
+using VooDo.Parsing;
 using VooDo.Problems;
 using VooDo.Utils;
 
@@ -28,20 +28,8 @@ namespace VooDo.AST.Names
             typeof(ValueTuple<,,,,,,>), typeof(ValueTuple<,,,,,,,>)
         }.ToImmutableHashSet();
 
-        public static new TupleType FromSyntax(TypeSyntax _syntax, bool _ignoreUnbound = false)
-            => FromSyntax((TupleTypeSyntax) Unwrap(_syntax, out bool nullable, out ImmutableArray<RankSpecifier> ranks), _ignoreUnbound) with
-            {
-                IsNullable = nullable,
-                Ranks = ranks
-            };
-
-        public static TupleType FromSyntax(TupleTypeSyntax _syntax, bool _ignoreUnbound = false)
-            => new TupleType(_syntax.Elements.Select(_e => new Element(
-                FromSyntax(_e.Type, _ignoreUnbound),
-                Identifier.FromSyntax(_e.Identifier))));
-
-        public static new TupleType Parse(string _type, bool _ignoreUnbound = false)
-            => FromSyntax(SyntaxFactory.ParseTypeName(_type), _ignoreUnbound);
+        public static new TupleType Parse(string _type)
+            => Parser.TupleType(_type);
 
         public static TupleType FromTypes(IEnumerable<Type> _types, bool _ignoreUnbound = false)
             => new TupleType(_types.Select(_t => new Element(ComplexType.FromType(_t, _ignoreUnbound))));

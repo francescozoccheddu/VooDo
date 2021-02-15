@@ -4,7 +4,6 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
 
-using VooDo.Compiling;
 using VooDo.Compiling.Emission;
 using VooDo.Utils;
 
@@ -53,7 +52,6 @@ namespace VooDo.AST.Expressions
                     EKind.Minus => SyntaxKind.UnaryMinusExpression,
                     EKind.LogicNot => SyntaxKind.LogicalNotExpression,
                     EKind.BitwiseNot => SyntaxKind.BitwiseNotExpression,
-                    _ => throw new InvalidOperationException()
                 },
                 Expression.EmitNode(_scope, _tagger))
             .Own(_tagger, this);
