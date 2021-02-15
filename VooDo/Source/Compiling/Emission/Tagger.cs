@@ -72,7 +72,11 @@ namespace VooDo.Compiling.Emission
                 }
                 _node = _node.WithoutAnnotations(annotation);
             }
-            return _node.WithAdditionalAnnotations(CreateAnnotation(_index));
+            if (_index >= 0)
+            {
+                _node = _node.WithAdditionalAnnotations(CreateAnnotation(_index));
+            }
+            return _node;
         }
         private static TNode Own<TNode>(TNode _node, int _index, EMode _mode = EMode.UnownedDescendants) where TNode : SyntaxNode
             => _mode switch
@@ -168,10 +172,29 @@ namespace VooDo.Compiling.Emission
         internal Node? GetOwner(SyntaxNodeOrToken _nodeOrToken)
             => GetOwner(GetIndex(_nodeOrToken));
 
+        internal static TNode OwnAs<TNode>(TNode _node, SyntaxNodeOrToken _owner, EMode _mode = EMode.UnownedDescendants) where TNode : SyntaxNode
+            => Own(_node, GetIndex(_owner), _mode);
+
+        internal static SyntaxToken OwnAs(SyntaxToken _token, SyntaxNodeOrToken _owner)
+            => Own(_token, GetIndex(_owner));
+
+        internal static SyntaxNodeOrToken OwnAs(SyntaxNodeOrToken _nodeOrToken, SyntaxNodeOrToken _owner, EMode _mode = EMode.UnownedDescendants)
+            => Own(_nodeOrToken, GetIndex(_owner), _mode);
+
     }
 
     internal static class MarkerExtensions
     {
+
+
+        internal static TNode OwnAs<TNode>(this TNode _node, SyntaxNodeOrToken _owner, Tagger.EMode _mode = Tagger.EMode.UnownedDescendants) where TNode : SyntaxNode
+            => Tagger.OwnAs(_node, _owner, _mode);
+
+        internal static SyntaxToken OwnAs(this SyntaxToken _token, SyntaxNodeOrToken _owner)
+            => Tagger.OwnAs(_token, _owner);
+
+        internal static SyntaxNodeOrToken OwnAs(this SyntaxNodeOrToken _nodeOrToken, SyntaxNodeOrToken _owner, Tagger.EMode _mode = Tagger.EMode.UnownedDescendants)
+            => Tagger.OwnAs(_nodeOrToken, _owner, _mode);
 
         internal static TNode Own<TNode>(this TNode _node, Tagger.Tag _tag, Tagger.EMode _mode = Tagger.EMode.UnownedDescendants) where TNode : SyntaxNode
             => _tag.Own(_node, _mode);

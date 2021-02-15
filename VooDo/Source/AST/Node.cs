@@ -23,7 +23,7 @@ namespace VooDo.AST
         {
             Root = null;
             Compilation = null;
-            m_Parent = null;
+            m_parent = null;
             Origin = _copy.Origin;
             UserData = _copy.UserData;
         }
@@ -39,8 +39,8 @@ namespace VooDo.AST
         public Origin Origin { get; init; } = Origin.Unknown;
         public object? UserData { get; init; }
 
-        private Node? m_Parent { get; init; }
-        public virtual Node? Parent => m_Parent;
+        private Node? m_parent;
+        public virtual Node? Parent => m_parent;
 
         public virtual IEnumerable<Node> Children
             => Enumerable.Empty<Node>();
@@ -55,15 +55,13 @@ namespace VooDo.AST
 
         internal Node SetAsRootInternal(Compilation? _compilation)
         {
-            Node root = this.ReplaceDescendantNodes(_t =>
-                _t.Replaced is null ? null : _t.Replaced with
-                {
-                    m_Parent = _t.Parent,
-                    Compilation = _compilation
-                }
-            )!;
-            foreach (Node node in root.DescendantNodesAndSelf())
+            Node root = this.ReplaceNonNullDescendantNodes(_n => _n with
             {
+                Compilation = _compilation
+            })!;
+            foreach ((Node node, Node? parent) in root.DescendantNodesAndSelfWithParents())
+            {
+                node.m_parent = parent;
                 node.Root = root;
             }
             return root;

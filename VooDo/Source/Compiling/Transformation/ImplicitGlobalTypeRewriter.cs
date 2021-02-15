@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 
+using VooDo.Compiling.Emission;
 using VooDo.Problems;
 using VooDo.Runtime;
 using VooDo.Utils;
@@ -19,9 +20,23 @@ namespace VooDo.Compiling.Transformation
     internal static class ImplicitGlobalTypeRewriter
     {
 
-        private sealed record Field(GlobalDefinition Definition, VariableDeclarationSyntax Syntax);
+        private readonly struct GlobalSyntax
+        {
 
-        private static void GetRuntimeSymbols(SemanticModel _semantics, out INamedTypeSymbol _controllerFactorySymbol)
+            public VariableDeclarationSyntax Declaration { get; }
+            public ExpressionSyntax InitialValue { get; }
+            public ExpressionSyntax? Controller { get; }
+
+            public GlobalSyntax(VariableDeclarationSyntax _declaration, ExpressionSyntax _initialValue, ExpressionSyntax? _controller)
+            {
+                Declaration = _declaration;
+                InitialValue = _initialValue;
+                Controller = _controller;
+            }
+
+        }
+
+        private static INamedTypeSymbol GetControllerFactorySymbol(SemanticModel _semantics)
         {
             CSharpCompilation compilation = (CSharpCompilation) _semantics.Compilation;
             MetadataReference runtime = compilation.References.First(_r => _r.Properties.Aliases.Contains(CompilationConstants.runtimeReferenceAlias));
@@ -31,103 +46,130 @@ namespace VooDo.Compiling.Transformation
             {
                 throw new NoSemanticsProblem().AsThrowable();
             }
-            _controllerFactorySymbol = controllerFactorySymbol;
+            return controllerFactorySymbol;
         }
 
-        private static ImmutableArray<ITypeSymbol> Conciliate(ITypeSymbol? _a, ImmutableArray<ITypeSymbol> _b)
+        private static ImmutableArray<GlobalSyntax> GetSyntax(ClassDeclarationSyntax _class, IEnumerable<GlobalDefinition> _globals, Tagger _tagger)
         {
-            IEnumerable<ITypeSymbol> candidates = _b;
-            if (_a is not null)
+            ImmutableDictionary<Tagger.Tag, int> globalsMap = _globals
+                .Enumerate()
+                .ToImmutableDictionary(_e => _e.item.Prototype.Source.GetTag(_tagger)!, _e => _e.index);
+            GlobalSyntax[] syntax = new GlobalSyntax[globalsMap.Count];
+            foreach (VariableDeclarationSyntax declaration in _class.Members.OfType<FieldDeclarationSyntax>().Select(_f => _f.Declaration))
             {
-                candidates = candidates.Append(_a);
+                if (globalsMap.TryGetValue(declaration.GetTag()!, out int index))
+                {
+                    InvocationExpressionSyntax invocation = (InvocationExpressionSyntax) declaration.Variables.Single().Initializer!.Value;
+                    ExpressionSyntax initialValue = invocation.ArgumentList.Arguments[1].Expression;
+                    syntax[index] = new GlobalSyntax(declaration, initialValue, null);
+                }
             }
-            return candidates.Distinct<ITypeSymbol>(SymbolEqualityComparer.Default).ToImmutableArray();
-        }
-
-        private static ITypeSymbol? GetInitializerType(VariableDeclarationSyntax _syntax, SemanticModel _semantics)
-        {
-            InvocationExpressionSyntax invocation = (InvocationExpressionSyntax) _syntax.Variables.Single().Initializer!.Value;
-            ExpressionSyntax argument = invocation.ArgumentList.Arguments[1].Expression;
-            return _semantics.GetTypeInfo(argument).ConvertedType;
-        }
-
-        private static ImmutableArray<ITypeSymbol> GetControllerTypes(ExpressionSyntax _syntax, SemanticModel _semantics, INamedTypeSymbol _controllerFactorySymbol)
-        {
-            ITypeSymbol? symbol = _semantics.GetTypeInfo(_syntax).ConvertedType;
-            if (symbol is INamedTypeSymbol namedSymbol)
+            ExpressionSyntax?[] controllers = new ExpressionSyntax?[globalsMap.Count];
+            MethodDeclarationSyntax method = _class.Members
+                .OfType<MethodDeclarationSyntax>()
+                .Where(_m => _m.Identifier.ValueText is nameof(Program.Run) or nameof(Program<object>.TypedRun) && _m.Modifiers.Any(_d => _d.IsKind(SyntaxKind.OverrideKeyword)))
+                .Single();
+            foreach (InvocationExpressionSyntax invocation in method.Body!.DescendantNodes().OfType<InvocationExpressionSyntax>())
             {
-                if (_controllerFactorySymbol.Equals(namedSymbol.ConstructedFrom, SymbolEqualityComparer.Default))
+                if (globalsMap.TryGetValue(invocation.GetTag()!, out int index))
                 {
-                    return ImmutableArray.Create(namedSymbol.TypeArguments[0]);
+                    ExpressionSyntax? controller = invocation.ArgumentList.Arguments[1].Expression;
+                    syntax[index] = new GlobalSyntax(syntax[index].Declaration, syntax[index].InitialValue, controller);
                 }
-                else
-                {
-                    return namedSymbol.AllInterfaces
-                        .Where(_i => _i is INamedTypeSymbol ni && ni.ConstructedFrom.Equals(_controllerFactorySymbol, SymbolEqualityComparer.Default))
-                        .Select(_i => _i.TypeArguments[0])
-                        .ToImmutableArray();
-                }
+            }
+            return syntax.ToImmutableArray();
+        }
+
+        private static ImmutableArray<ITypeSymbol> GetVariableTypesFromControllerType(ITypeSymbol _controller, INamedTypeSymbol _controllerFactory)
+        {
+            if (_controller is INamedTypeSymbol type)
+            {
+                return type.AllInterfaces
+                    .Append(type)
+                    .Select(_i => _i.ConstructedFrom)
+                    .Where(_i => _i.Equals(_controllerFactory, SymbolEqualityComparer.Default))
+                    .Select(_i => _i.TypeArguments.Single())
+                    .Distinct<ITypeSymbol>(SymbolEqualityComparer.Default)
+                    .ToImmutableArray();
             }
             return ImmutableArray.Create<ITypeSymbol>();
         }
 
-        private static ImmutableArray<ImmutableArray<ITypeSymbol>> InferTypes(ImmutableArray<Field> _fields, SemanticModel _semantics, INamedTypeSymbol _controllerFactorySymbol)
+        private static ImmutableArray<ImmutableArray<ITypeSymbol>> GetControllerTypes(IEnumerable<ExpressionSyntax?> _controllers, SemanticModel _semantics)
         {
-            CompilationUnitSyntax root = (CompilationUnitSyntax) _semantics.SyntaxTree.GetRoot();
-            ImmutableArray<ITypeSymbol?> initializers = _fields
-                .Select(_f => GetInitializerType(_f.Syntax, _semantics))
+            INamedTypeSymbol controllerFactorySymbol = GetControllerFactorySymbol(_semantics);
+            return _controllers
+                .Select(_c => _c is null
+                    ? null
+                    : _semantics.GetTypeInfo(_c).Type)
+                .Select(_t => _t is null
+                    ? ImmutableArray.Create<ITypeSymbol>()
+                    : GetVariableTypesFromControllerType(_t, controllerFactorySymbol))
                 .ToImmutableArray();
-            ImmutableDictionary<string, int> anonFieldsMap = _fields
-                .SelectIndexed((_f, _i) => (field: _f, index: _i))
-                .Where(_z => _z.field.Definition.Prototype.Global.IsAnonymous)
-                .ToImmutableDictionary(_z => _z.field.Definition.Identifier.ValueText, _z => _z.index);
-
-            bool TryGetControllerExpression(InvocationExpressionSyntax _syntax, out ExpressionSyntax? _expression, out int _index)
-            {
-                SeparatedSyntaxList<ArgumentSyntax> arguments = _syntax.ArgumentList.Arguments;
-                if (arguments.Count == 2)
-                {
-                    if (arguments[0].Expression is MemberAccessExpressionSyntax ma
-                        && ma.Expression is ThisExpressionSyntax
-                        && anonFieldsMap.TryGetValue(ma.Name.Identifier.ValueText, out _index))
-                    {
-                        _expression = arguments[1].Expression;
-                        return true;
-                    }
-                }
-                _index = -1;
-                _expression = null;
-                return false;
-            }
-
-            ImmutableDictionary<int, ImmutableArray<ITypeSymbol>>? controllers = root
-                .DescendantNodes()
-                .OfType<InvocationExpressionSyntax>()
-                .SelectNonNull(_e => TryGetControllerExpression(_e, out ExpressionSyntax? expression, out int index)
-                    ? (index, GetControllerTypes(expression!, _semantics, _controllerFactorySymbol))
-                    : ((int index, ImmutableArray<ITypeSymbol> types)?) null)
-                .ToImmutableDictionary(_e => _e!.Value.index, _e => _e!.Value.types);
-            return initializers.SelectIndexed((_a, _i) => Conciliate(_a, controllers.GetValueOrDefault(_i))).ToImmutableArray();
         }
 
-        private static ImmutableArray<VariableDeclarationSyntax> GetFieldDeclarations(ClassDeclarationSyntax _class, ImmutableArray<GlobalDefinition> _globals)
+        private static ImmutableArray<ITypeSymbol?> GetInitialValueTypes(IEnumerable<ExpressionSyntax?> _initialValue, SemanticModel _semantics)
+            => _initialValue
+                .Select(_c => _semantics.GetTypeInfo(_c).Type)
+                .ToImmutableArray();
+
+        private static ImmutableArray<ITypeSymbol> ConciliateTypes(ITypeSymbol? _initialValue, ImmutableArray<ITypeSymbol> _controllerValues)
         {
-            ImmutableDictionary<string, int> globalsMap = _globals.Enumerate().ToImmutableDictionary(_e => _e.item.Identifier.ValueText, _e => _e.index);
-            VariableDeclarationSyntax[] declarations = new VariableDeclarationSyntax[_globals.Length];
-            foreach (VariableDeclarationSyntax declaration in _class.Members.OfType<FieldDeclarationSyntax>().Select(_f => _f.Declaration))
+            if (_initialValue is null)
             {
-                SyntaxToken name = declaration.Variables.Single().Identifier;
-                if (globalsMap.TryGetValue(name.ValueText, out int index))
-                {
-                    declarations[index] = declaration;
-                }
+                return _controllerValues;
             }
-            return declarations.ToImmutableArray();
+            if (_controllerValues.IsDefaultOrEmpty || _controllerValues.Contains(_initialValue, SymbolEqualityComparer.Default))
+            {
+                return ImmutableArray.Create(_initialValue);
+            }
+            return ImmutableArray.Create<ITypeSymbol>();
+        }
+
+        private static ImmutableArray<ImmutableArray<ITypeSymbol>> InferTypes(IEnumerable<GlobalSyntax> _syntax, SemanticModel _semantics)
+        {
+            ImmutableArray<ImmutableArray<ITypeSymbol>> controllerTypes = GetControllerTypes(_syntax.Select(_c => _c.Controller), _semantics);
+            ImmutableArray<ITypeSymbol?> initialValueTypes = GetInitialValueTypes(_syntax.Select(_iv => _iv.InitialValue), _semantics);
+            return initialValueTypes.Zip(controllerTypes, (_iv, _c) => ConciliateTypes(_iv, _c)).ToImmutableArray();
+        }
+
+        private static ImmutableArray<ITypeSymbol> InferSingleType(IEnumerable<GlobalSyntax> _syntax, IEnumerable<GlobalPrototype> _prototypes, SemanticModel _semantics)
+        {
+            ImmutableArray<ImmutableArray<ITypeSymbol>> types = InferTypes(_syntax, _semantics);
+            types.Zip(_prototypes).Where(_t => _t.First.Length != 1).Select(_t => new GlobalTypeInferenceProblem(_t.First, _t.Second)).ThrowErrors();
+            return types.Select(_t => _t.Single()).ToImmutableArray();
+        }
+
+        private static VariableDeclarationSyntax Replace(VariableDeclarationSyntax _declaration, ITypeSymbol _type)
+        {
+            TypeSyntax type = SyntaxFactory.ParseTypeName(_type.ToDisplayString());
+            TypeArgumentListSyntax typeArguments = SyntaxFactoryHelper.TypeArguments(type).OwnAs(_declaration.Type);
+            {
+                QualifiedNameSyntax name = (QualifiedNameSyntax) _declaration.Type;
+                _declaration = _declaration.WithType(name.WithRight(SyntaxFactory.GenericName(name.Right.Identifier, typeArguments)));
+            }
+            {
+                InvocationExpressionSyntax initializer = (InvocationExpressionSyntax) _declaration.Variables.Single().Initializer!.Value;
+                GenericNameSyntax methodName = (GenericNameSyntax) ((MemberAccessExpressionSyntax) initializer.Expression).Name;
+                _declaration = _declaration.ReplaceNode(methodName, methodName.WithTypeArgumentList(typeArguments));
+            }
+            return _declaration.OwnAs(_declaration);
+        }
+
+        private static CompilationUnitSyntax ReplaceAll(CompilationUnitSyntax _root, ImmutableArray<VariableDeclarationSyntax> _declarations, IEnumerable<ITypeSymbol> _types)
+        {
+            ImmutableDictionary<VariableDeclarationSyntax, ITypeSymbol> map = _declarations.Zip(_types).ToImmutableDictionary(_e => _e.First, _e => _e.Second);
+            return _root.ReplaceNodes(_declarations, (_old, _new) => Replace(_new, map[_old]));
         }
 
         internal static CompilationUnitSyntax Rewrite(Session _session)
         {
-            throw new NotImplementedException();
+            CompilationUnitSyntax root = _session.Syntax!;
+            ClassDeclarationSyntax classDeclaration = root!.Members.OfType<ClassDeclarationSyntax>().Single();
+            ImmutableArray<GlobalDefinition> globals = _session.Globals.Where(_g => _g.Prototype.Global.Type.IsVar).ToImmutableArray();
+            ImmutableArray<GlobalSyntax> syntax = GetSyntax(classDeclaration, globals, _session.Tagger);
+            ImmutableArray<ITypeSymbol> types = InferSingleType(syntax, globals.Select(_g => _g.Prototype), _session.Semantics!);
+            return ReplaceAll(root, syntax.Select(_s => _s.Declaration).ToImmutableArray(), types);
         }
 
     }

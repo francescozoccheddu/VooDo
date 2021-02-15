@@ -7,7 +7,6 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 
-using VooDo.Compiling;
 using VooDo.Compiling.Emission;
 using VooDo.Utils;
 
@@ -55,9 +54,10 @@ namespace VooDo.AST.Statements
         internal override BlockSyntax EmitNode(Scope _scope, Tagger _tagger)
         {
             Scope nestedScope = _scope.CreateNested();
-            IEnumerable<StatementSyntax> statements = this.SelectMany(_s => _s is GlobalStatement globals
-                        ? globals.EmitNode(nestedScope, _tagger).Statements
-                        : _s.EmitNode(nestedScope, _tagger).ToSyntaxList());
+            IEnumerable<StatementSyntax> statements = this.SelectMany(
+                _s => _s is GlobalStatement global
+                    ? global.EmitNode(nestedScope, _tagger).Statements
+                    : _s.EmitNode(nestedScope, _tagger).ToSyntaxList());
             return SyntaxFactory.Block(statements.ToSyntaxList()).Own(_tagger, this);
         }
 

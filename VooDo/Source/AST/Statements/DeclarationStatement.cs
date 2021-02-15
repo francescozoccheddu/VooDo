@@ -28,7 +28,7 @@ namespace VooDo.AST.Statements
             internal override VariableDeclaratorSyntax EmitNode(Scope _scope, Tagger _tagger)
             {
                 ExpressionSyntax? initializer;
-                if (Parent is not null)
+                if (Parent is not null && Parent.Parent is GlobalStatement)
                 {
                     Scope.GlobalDefinition globalDefinition = _scope.AddGlobal(new GlobalPrototype(new Global(Parent.Type, Name, Initializer), this));
                     initializer = SyntaxFactoryHelper.ThisMemberAccess(globalDefinition.Identifier);

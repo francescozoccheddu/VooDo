@@ -41,8 +41,6 @@ namespace VooDo.Compiling
             CSharpCode = m_cSharpCompilation?.SyntaxTrees.Single().GetRoot().NormalizeWhitespace().ToFullString();
         }
 
-
-
     }
 
 }

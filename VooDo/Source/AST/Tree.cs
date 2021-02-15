@@ -27,78 +27,90 @@ namespace VooDo.AST
             BreadthFirst, PreDepthFirst, PostDepthFirst
         }
 
-        private static IEnumerable<Node> VisitDepthFirstPostorder(Node _node, Predicate<Node> _shouldVisitChildren)
+        private static IEnumerable<(Node node, Node? parent)> VisitDepthFirstPostorder(Node _node, Predicate<Node> _shouldVisitChildren)
         {
             if (!_shouldVisitChildren(_node))
             {
-                yield return _node;
+                yield return (_node, null);
                 yield break;
             }
-            Stack<(IEnumerator<Node> children, Node node)> stack = new();
-            stack.Push((_node.Children.GetEnumerator(), _node));
+            Stack<(IEnumerator<Node> children, (Node node, Node? parent))> stack = new();
+            stack.Push((_node.Children.GetEnumerator(), (_node, null)));
             while (stack.Count > 0)
             {
-                (IEnumerator<Node> children, Node node) = stack.Peek();
+                (IEnumerator<Node> children, (Node node, Node? parent)) = stack.Peek();
                 if (children.MoveNext())
                 {
                     Node child = children.Current;
                     if (_shouldVisitChildren(child))
                     {
-                        stack.Push((child.Children.GetEnumerator(), child));
+                        stack.Push((child.Children.GetEnumerator(), (child, node)));
                     }
                     else
                     {
-                        yield return child;
+                        yield return (child, node);
                     }
                 }
                 else
                 {
                     _ = stack.Pop();
-                    yield return node;
+                    yield return (node, parent);
                 }
             }
         }
 
-        private static IEnumerable<Node> VisitDepthFirstPreorder(Node _node, Predicate<Node> _shouldVisitChildren)
+        private static IEnumerable<(Node node, Node? parent)> VisitDepthFirstPreorder(Node _node, Predicate<Node> _shouldVisitChildren)
         {
-            Stack<Node> stack = new();
-            stack.Push(_node);
+            Stack<(Node node, Node? parent)> stack = new();
+            stack.Push((_node, null));
             while (stack.Count > 0)
             {
-                Node node = stack.Pop();
-                yield return node;
+                (Node node, Node? parent) = stack.Pop();
+                yield return (node, parent);
                 if (_shouldVisitChildren(node))
                 {
                     foreach (Node child in node.Children.Reverse())
                     {
-                        stack.Push(child);
+                        stack.Push((child, node));
                     }
                 }
             }
         }
 
-        private static IEnumerable<Node> VisitBreadthFirst(Node _node, Predicate<Node> _shouldVisitChildren)
+        private static IEnumerable<(Node node, Node? parent)> VisitBreadthFirst(Node _node, Predicate<Node> _shouldVisitChildren)
         {
-            Queue<Node> queue = new();
-            queue.Enqueue(_node);
+            Queue<(Node node, Node? parent)> queue = new();
+            queue.Enqueue((_node, null));
             while (queue.Count > 0)
             {
-                Node node = queue.Dequeue();
-                yield return node;
+                (Node node, Node? parent) = queue.Dequeue();
+                yield return (node, parent);
                 if (_shouldVisitChildren(node))
                 {
                     foreach (Node child in node.Children)
                     {
-                        queue.Enqueue(child);
+                        queue.Enqueue((child, node));
                     }
                 }
             }
         }
 
-        public static IEnumerable<Node> DescendantNodes(this Node _node, ETraversal _traversal = ETraversal.PostDepthFirst)
-            => DescendantNodes(_node, _ => true, _traversal);
+        public static IEnumerable<Node> DescendantNodesAndSelf(this Node _node, Predicate<Node> _shouldVisitChildren, ETraversal _traversal = ETraversal.PostDepthFirst)
+            => DescendantNodesAndSelfWithParents(_node, _shouldVisitChildren, _traversal).Select(_e => _e.node);
+
+        public static IEnumerable<Node> DescendantNodesAndSelf(this Node _node, ETraversal _traversal = ETraversal.PostDepthFirst)
+            => DescendantNodesAndSelfWithParents(_node, _traversal).Select(_e => _e.node);
 
         public static IEnumerable<Node> DescendantNodes(this Node _node, Predicate<Node> _shouldVisitChildren, ETraversal _traversal = ETraversal.PostDepthFirst)
+            => DescendantNodesWithParents(_node, _shouldVisitChildren, _traversal).Select(_e => _e.node);
+
+        public static IEnumerable<Node> DescendantNodes(this Node _node, ETraversal _traversal = ETraversal.PostDepthFirst)
+            => DescendantNodesWithParents(_node, _traversal).Select(_e => _e.node);
+
+        public static IEnumerable<(Node node, Node? parent)> DescendantNodesWithParents(this Node _node, ETraversal _traversal = ETraversal.PostDepthFirst)
+            => DescendantNodesWithParents(_node, _ => true, _traversal);
+
+        public static IEnumerable<(Node node, Node? parent)> DescendantNodesWithParents(this Node _node, Predicate<Node> _shouldVisitChildren, ETraversal _traversal = ETraversal.PostDepthFirst)
             => _traversal switch
             {
                 ETraversal.BreadthFirst => VisitBreadthFirst(_node, _shouldVisitChildren),
@@ -107,20 +119,20 @@ namespace VooDo.AST
                 _ => throw new InvalidOperationException(),
             };
 
-        public static IEnumerable<Node> DescendantNodesAndSelf(this Node _node, ETraversal _traversal = ETraversal.PostDepthFirst)
-            => DescendantNodesAndSelf(_node, _ => true, _traversal);
+        public static IEnumerable<(Node node, Node? parent)> DescendantNodesAndSelfWithParents(this Node _node, ETraversal _traversal = ETraversal.PostDepthFirst)
+            => DescendantNodesAndSelfWithParents(_node, _ => true, _traversal);
 
-        public static IEnumerable<Node> DescendantNodesAndSelf(this Node _node, Predicate<Node> _shouldVisitChildren, ETraversal _traversal = ETraversal.PostDepthFirst)
+        public static IEnumerable<(Node node, Node? parent)> DescendantNodesAndSelfWithParents(this Node _node, Predicate<Node> _shouldVisitChildren, ETraversal _traversal = ETraversal.PostDepthFirst)
             => _traversal switch
             {
-                ETraversal.BreadthFirst or ETraversal.PreDepthFirst => DescendantNodes(_node, _shouldVisitChildren, _traversal).Skip(1),
-                ETraversal.PostDepthFirst => DescendantNodes(_node, _shouldVisitChildren, _traversal).SkipLast(1),
+                ETraversal.BreadthFirst or ETraversal.PreDepthFirst => DescendantNodesWithParents(_node, _shouldVisitChildren, _traversal).Skip(1),
+                ETraversal.PostDepthFirst => DescendantNodesWithParents(_node, _shouldVisitChildren, _traversal).SkipLast(1),
                 _ => throw new InvalidOperationException(),
             };
 
         public readonly struct ReplaceInfo
         {
-            public ReplaceInfo(Node? _parent, Node? _original, Node? _replaced)
+            internal ReplaceInfo(Node? _parent, Node? _original, Node? _replaced)
             {
                 Parent = _parent;
                 Original = _original;
@@ -134,15 +146,25 @@ namespace VooDo.AST
 
         private static Node? ReplaceNodeRecursive(Node? _node, Node? _parent, Func<ReplaceInfo, Node?> _map, Predicate<Node> _shouldVisitChildren)
         {
+            Node? replaced = _node;
             if (_node is not null && _shouldVisitChildren(_node) && _node.Children.Any())
             {
-                return _node.ReplaceNodes(_c => ReplaceNodeRecursive(_c, _parent, _map, _shouldVisitChildren));
+                replaced = _node.ReplaceNodes(_c => ReplaceNodeRecursive(_c, _node, _map, _shouldVisitChildren));
             }
-            else
-            {
-                return _map(new ReplaceInfo(_parent, _node, _node));
-            }
+            return _map(new ReplaceInfo(_parent, _node, replaced));
         }
+
+        public static TNode? ReplaceNonNullDescendantNodes<TNode>(this TNode _node, Func<Node, Node?> _map) where TNode : Node
+            => ReplaceNonNullDescendantNodes(_node, _map, _ => true);
+
+        public static TNode? ReplaceNonNullDescendantNodes<TNode>(this TNode _node, Func<Node, Node?> _map, Predicate<Node> _shouldVisitChildren) where TNode : Node
+            => ReplaceDescendantNodes(_node, _i => _i.Replaced is null ? null : _map(_i.Replaced), _shouldVisitChildren);
+
+        public static TNode? ReplaceNonNullDescendantNodes<TNode>(this TNode _node, Func<ReplaceInfo, Node?> _map) where TNode : Node
+            => ReplaceNonNullDescendantNodes(_node, _map, _ => true);
+
+        public static TNode? ReplaceNonNullDescendantNodes<TNode>(this TNode _node, Func<ReplaceInfo, Node?> _map, Predicate<Node> _shouldVisitChildren) where TNode : Node
+            => ReplaceDescendantNodes(_node, _i => _i.Replaced is null ? null : _map(_i), _shouldVisitChildren);
 
         public static TNode? ReplaceDescendantNodes<TNode>(this TNode _node, Func<Node?, Node?> _map) where TNode : Node
             => ReplaceDescendantNodes(_node, _map, _ => true);
