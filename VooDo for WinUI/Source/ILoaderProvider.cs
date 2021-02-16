@@ -11,7 +11,7 @@ namespace VooDo.WinUI
     {
 
         Loader GetLoader(Script _script, Target _target);
-        ComplexType GetTypeNode(Type _type);
+        ComplexType GetTypeNode(Type _type, Target _target);
 
     }
 

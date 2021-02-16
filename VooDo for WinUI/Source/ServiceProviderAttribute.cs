@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Reflection;
@@ -27,7 +28,7 @@ namespace VooDo.WinUI
             {
                 candidate = candidates[0].type;
             }
-            else if (candidates.Length > 2)
+            else if (candidates.Length > 1)
             {
                 if (candidates[0].priority == candidates[1].priority)
                 {
@@ -42,7 +43,7 @@ namespace VooDo.WinUI
             return null;
         }
 
-        private static TService Instantiate<TService>(Type _type)
+        private protected static TService Instantiate<TService>(Type _type)
         {
             try
             {
@@ -92,11 +93,44 @@ namespace VooDo.WinUI
 
         public EKind Kind { get; set; } = EKind.Combinable;
 
-        internal static (TService provider, int priority)? GetProvider<TService, TAttribute>()
+        internal static (TService provider, int priority)? GetProvider<TService, TAttribute>(Func<IEnumerable<TService>, TService> _combine)
             where TService : notnull
-            where TAttribute : ServiceProviderAttribute
-        {
+            where TAttribute : CombinableServiceProviderAttribute
+            => GetProvider<TService, TAttribute>(_combine, _p => _p.Max());
 
+        internal static (TService provider, int priority)? GetProvider<TService, TAttribute>(Func<IEnumerable<TService>, TService> _combine, Func<IEnumerable<int>, int> _combinePriority)
+            where TService : notnull
+            where TAttribute : CombinableServiceProviderAttribute
+        {
+            (Type type, TAttribute attribute)[] types = GetProviderTypes<TService, TAttribute>().ToArray();
+            (Type type, int priority)[] standalone = types
+                .Where(_t => _t.attribute.Kind == EKind.Standalone)
+                .Select(_e => (_e.type, _e.attribute.Priority))
+                .ToArray();
+            if (standalone.Length > 0)
+            {
+                Type candidate = standalone[0].type;
+                if (standalone.Length == 1)
+                {
+                    candidate = standalone[0].type;
+                }
+                else if (standalone.Length > 1)
+                {
+                    if (standalone[0].priority == standalone[1].priority)
+                    {
+                        throw new InvalidOperationException($"Cannot choose {typeof(TService).Name} between {standalone[0].type.Name} and {standalone[1].type.Name} because they have the same priority");
+                    }
+                    candidate = standalone[0].type;
+                }
+                return (Instantiate<TService>(candidate), standalone[0].priority);
+            }
+            else
+            {
+                IEnumerable<int> priorities = types.Select(_e => _e.attribute.Priority);
+                IEnumerable<TService> providers = types.Select(_e => Instantiate<TService>(_e.type));
+                return (_combine(providers), _combinePriority(priorities));
+            }
         }
 
     }
+}

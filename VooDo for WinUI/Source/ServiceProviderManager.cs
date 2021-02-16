@@ -6,11 +6,21 @@
     public sealed class ServiceProviderManager<TService> where TService : notnull
     {
 
-        public int Priority { get; private set; } = int.MinValue;
+        public int Priority { get; private set; }
         public TService? Provider { get; private set; }
         public event ServiceProviderChangedEventHandler<TService>? OnProviderChanged;
 
-        internal ServiceProviderManager() { }
+        internal ServiceProviderManager()
+        {
+            Provider = default;
+            Priority = int.MinValue;
+        }
+
+        internal ServiceProviderManager(TService _default, int _priority = int.MinValue)
+        {
+            Provider = _default;
+            Priority = _priority;
+        }
 
         public void RegisterProvider(TService _provider)
             => RegisterProvider(_provider, Priority);

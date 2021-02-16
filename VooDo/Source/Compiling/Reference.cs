@@ -24,8 +24,8 @@ namespace VooDo.Compiling
 
         private sealed class MetadataEqualityComparerImpl : IEqualityComparer<Reference>
         {
-            public bool Equals(Reference? _x, Reference? _y) => AreSameMetadata(_x, _y);
-            public int GetHashCode(Reference _obj) => _obj.GetHashCode();
+            public bool Equals(Reference? _x, Reference? _y) => _x is not null && _y is not null && AreSameMetadata(_x, _y);
+            public int GetHashCode(Reference _obj) => _obj.DisplayName?.GetHashCode() ?? 0;
         }
 
         public static IEqualityComparer<Reference> MetadataEqualityComparer { get; } = new MetadataEqualityComparerImpl();
@@ -57,30 +57,24 @@ namespace VooDo.Compiling
             => FromAssembly(_assembly, (IEnumerable<Identifier>) _aliases);
 
         public static Reference FromStream(Stream _stream, IEnumerable<Identifier>? _aliases = null)
-        {
-            return new Reference(MetadataReference.CreateFromStream(_stream), _aliases);
-        }
+            => new Reference(MetadataReference.CreateFromStream(_stream), null, _aliases);
 
         public static Reference FromFile(string _path, IEnumerable<Identifier>? _aliases = null)
-        {
-            return new Reference(MetadataReference.CreateFromFile(_path), _aliases);
-        }
+            => new Reference(MetadataReference.CreateFromFile(_path), null, _aliases);
 
         public static Reference FromImage(IEnumerable<byte> _bytes, IEnumerable<Identifier>? _aliases = null)
-        {
-            return new Reference(MetadataReference.CreateFromImage(_bytes), _aliases);
-        }
+            => new Reference(MetadataReference.CreateFromImage(_bytes), null, _aliases);
 
         public static Reference FromAssembly(Assembly _assembly, IEnumerable<Identifier>? _aliases = null)
-        {
-            return FromFile(_assembly.Location, _aliases ?? Enumerable.Empty<Identifier>());
-        }
+            => new Reference(MetadataReference.CreateFromFile(_assembly.Location), _assembly, _aliases);
 
-        private Reference(PortableExecutableReference _metadata, IEnumerable<Identifier>? _aliases = null)
+        private Reference(PortableExecutableReference _metadata, Assembly? _assembly, IEnumerable<Identifier>? _aliases = null)
         {
             Aliases = _aliases.EmptyIfNull().ToImmutableHashSet();
             m_metadata = _metadata;
-            FilePath = m_metadata.FilePath is not null ? new Uri(m_metadata.FilePath).AbsolutePath : null;
+            string? path = m_metadata.FilePath ?? _assembly?.Location;
+            FilePath = path is not null ? new Uri(path).AbsolutePath : null;
+            Assembly = _assembly;
         }
 
         private readonly PortableExecutableReference m_metadata;
@@ -88,11 +82,12 @@ namespace VooDo.Compiling
         public ImmutableHashSet<Identifier> Aliases { get; init; }
         public string? FilePath { get; }
         public string? DisplayName => m_metadata.Display;
+        public Assembly? Assembly { get; }
 
         internal MetadataReference GetMetadataReference() => m_metadata.WithAliases(Aliases.Select(_a => _a.ToString()));
 
         public static bool AreSameMetadata(Reference _a, Reference _b)
-            => _a is not null && (_a.m_metadata.Equals(_b.m_metadata) || _a.FilePath == _b.FilePath);
+            => _a is not null && (_a.m_metadata.Equals(_b.m_metadata) || _a.FilePath == _b.FilePath || (_a.Assembly is not null && _a.Assembly.Equals(_b.Assembly)));
 
         public static ImmutableArray<Reference> Merge(IEnumerable<Reference> _references)
             => _references

@@ -8,10 +8,11 @@
 
     }
 
-    public sealed class TargetProviderAttribute : ServiceProviderAttribute
+    public sealed class TargetProviderAttribute : CombinableServiceProviderAttribute
     {
 
-        public bool CanCooperate { get; set; }
+        internal static (ITargetProvider provider, int priority)? GetTargetProvider()
+            => GetProvider<ITargetProvider, TargetProviderAttribute>(_h => new TargetProviderList(_h));
 
     }
 
