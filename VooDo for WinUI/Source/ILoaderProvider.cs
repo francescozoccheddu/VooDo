@@ -10,7 +10,7 @@ namespace VooDo.WinUI
     public interface ILoaderProvider
     {
 
-        Loader GetLoader(Script _script, Type _target);
+        Loader GetLoader(Script _script, Target _target);
         ComplexType GetTypeNode(Type _type);
 
     }

@@ -16,10 +16,10 @@ namespace VooDo.WinUI
 
         internal Target() { }
 
-        protected virtual void AttachVariable(Variable _variable) { }
-        protected virtual void DetachVariable() { }
-        protected virtual Script ProcessScript(Script _script) => _script;
-        protected virtual Type? m_ReturnType => null;
+        protected internal virtual void AttachProgram(Program _program) { }
+        protected internal virtual void DetachProgram() { }
+        protected internal virtual Script ProcessScript(Script _script) => _script;
+        public virtual Type ReturnType => typeof(void);
 
         public event TargetDiscontinuedEventHandler? OnTargetDiscontinued;
 
@@ -40,23 +40,30 @@ namespace VooDo.WinUI
         private readonly IReturnTarget? m_returnTarget;
         private readonly ImmutableArray<IConstantValue> m_constants;
 
-        private Variable? m_variable;
+        private Program? m_program;
 
-
-        protected sealed override void AttachVariable(Variable _variable)
+        protected internal sealed override void AttachProgram(Program _program)
         {
-            m_variable = _variable;
+            m_program = _program;
+            if (m_returnTarget is not null)
+            {
+                ((TypedProgram) m_program).OnReturn += m_returnTarget.SetReturnValue;
+            }
         }
 
-        protected sealed override void DetachVariable()
+        protected internal sealed override void DetachProgram()
         {
-            m_variable = null;
+            m_program = null;
+            if (m_returnTarget is not null)
+            {
+                ((TypedProgram) m_program!).OnReturn -= m_returnTarget.SetReturnValue;
+            }
         }
 
-        protected sealed override Type? m_ReturnType => m_returnTarget?.ReturnType;
-        protected sealed override Script ProcessScript(Script _script)
+        public sealed override Type? ReturnType => m_returnTarget?.ReturnType;
+        protected internal sealed override Script ProcessScript(Script _script)
         {
-            throw new NotImplementedException();
+            return _script; // TODO Add constants
         }
 
     }

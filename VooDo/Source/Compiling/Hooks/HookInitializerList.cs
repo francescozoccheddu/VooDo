@@ -16,9 +16,9 @@ namespace VooDo.Hooks
             m_hookInitializers = _collection.ToImmutableArray();
         }
 
-        public IHookInitializerProvider this[int _index] => ((IReadOnlyList<IHookInitializerProvider>) m_hookInitializers)[_index];
+        public IHookInitializerProvider this[int _index] => m_hookInitializers[_index];
 
-        public int Count => ((IReadOnlyCollection<IHookInitializerProvider>) m_hookInitializers).Count;
+        public int Count => m_hookInitializers.Length;
 
         public IEnumerator<IHookInitializerProvider> GetEnumerator() => ((IEnumerable<IHookInitializerProvider>) m_hookInitializers).GetEnumerator();
         IEnumerator IEnumerable.GetEnumerator() => ((IEnumerable) m_hookInitializers).GetEnumerator();

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Reflection;
 
@@ -17,17 +18,10 @@ namespace VooDo.WinUI
             where TService : notnull
             where TAttribute : ServiceProviderAttribute
         {
-            Assembly attributeAssembly = typeof(TService).Assembly;
-            AssemblyName attributeAssemblyName = attributeAssembly.GetName();
-            (Type type, int priority)[] candidates = (
-                from assembly in AppDomain.CurrentDomain.GetAssemblies().AsParallel()
-                where assembly == attributeAssembly || assembly.GetReferencedAssemblies().Contains(attributeAssemblyName)
-                from type in assembly.GetTypes()
-                where IsDefined(type, typeof(TService)) && type.IsAssignableTo(typeof(TService))
-                let priority = ((TAttribute) type.GetCustomAttributes(typeof(TAttribute), false).Single()).Priority
-                orderby priority descending
-                select (type, priority))
-                .Take(2).ToArray();
+            (Type type, int priority)[] candidates = GetProviderTypes<TService, TAttribute>()
+                .Take(2)
+                .Select(_e => (_e.type, _e.attribute.Priority))
+                .ToArray();
             Type? candidate = null;
             if (candidates.Length == 1)
             {
@@ -43,18 +37,66 @@ namespace VooDo.WinUI
             }
             if (candidate is not null)
             {
-                try
-                {
-                    return ((TService) Activator.CreateInstance(candidate)!, candidates[0].priority);
-                }
-                catch
-                {
-                    throw new InvalidOperationException($"Failed to instantiate {typeof(TService).Name} of type {candidate.Name} via parameterless constructor");
-                }
+                return (Instantiate<TService>(candidate), candidates[0].priority);
             }
             return null;
         }
 
+        private static TService Instantiate<TService>(Type _type)
+        {
+            try
+            {
+                return (TService) Activator.CreateInstance(_type)!;
+            }
+            catch (Exception exception)
+            {
+                throw new InvalidOperationException($"Failed to instantiate {typeof(TService).Name} of type {_type.Name} via parameterless constructor", exception);
+            }
+        }
+
+        internal static ImmutableArray<(TService provider, int priority)> GetProviders<TService, TAttribute>()
+            where TService : notnull
+            where TAttribute : ServiceProviderAttribute
+            => GetProviderTypes<TService, TAttribute>()
+                .Select(_e => (Instantiate<TService>(_e.type), _e.attribute.Priority))
+                .ToImmutableArray();
+
+        private protected static ParallelQuery<(Type type, TAttribute attribute)> GetProviderTypes<TService, TAttribute>()
+            where TService : notnull
+            where TAttribute : ServiceProviderAttribute
+        {
+            Assembly attributeAssembly = typeof(TService).Assembly;
+            AssemblyName attributeAssemblyName = attributeAssembly.GetName();
+            return
+                from assembly in AppDomain.CurrentDomain.GetAssemblies().AsParallel()
+                where assembly == attributeAssembly || assembly.GetReferencedAssemblies().Contains(attributeAssemblyName)
+                from type in assembly.GetTypes()
+                where IsDefined(type, typeof(TService)) && type.IsAssignableTo(typeof(TService))
+                let attribute = (TAttribute) type.GetCustomAttributes(typeof(TAttribute), false).Single()
+                let priority = ((TAttribute) type.GetCustomAttributes(typeof(TAttribute), false).Single()).Priority
+                orderby priority descending
+                select (type, attribute);
+        }
+
     }
 
-}
+    public abstract class CombinableServiceProviderAttribute : ServiceProviderAttribute
+    {
+
+        public enum EKind
+        {
+            Combinable, Standalone
+        }
+
+        internal CombinableServiceProviderAttribute() { }
+
+        public EKind Kind { get; set; } = EKind.Combinable;
+
+        internal static (TService provider, int priority)? GetProvider<TService, TAttribute>()
+            where TService : notnull
+            where TAttribute : ServiceProviderAttribute
+        {
+
+        }
+
+    }

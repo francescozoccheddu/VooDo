@@ -52,7 +52,11 @@ namespace VooDo.AST.Expressions
                     EKind.Out => SyntaxKind.OutKeyword,
                     EKind.In => SyntaxKind.InKeyword
                 }))
-            .Own(_tagger, this);
+                .WithNameColon(Parameter is null
+                    ? null
+                    : SyntaxFactory.NameColon(
+                        SyntaxFactory.IdentifierName(Parameter.EmitToken(_tagger))))
+                .Own(_tagger, this);
 
     }
 

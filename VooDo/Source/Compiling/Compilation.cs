@@ -33,6 +33,16 @@ namespace VooDo.Compiling
         public static Compilation Create(Script _script, CompilationOptions _options)
             => new Compilation(_script, _options);
 
+        public static Compilation SucceedOrThrow(Script _script, CompilationOptions _options)
+        {
+            Compilation compilation = Create(_script, _options);
+            if (!compilation.Succeded)
+            {
+                throw compilation.Problems.AsThrowable();
+            }
+            return compilation;
+        }
+
         private Compilation(Script _script, CompilationOptions _options)
         {
             Script = _script.SetAsRoot(this);

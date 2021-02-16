@@ -10,21 +10,7 @@
         public TService? Provider { get; private set; }
         public event ServiceProviderChangedEventHandler<TService>? OnProviderChanged;
 
-        internal static ServiceProviderManager<TService> CreateFromAttribute<TAttribute>() where TAttribute : ServiceProviderAttribute
-        {
-            ServiceProviderManager<TService> manager = Create();
-            (TService provider, int priority)? result = ServiceProviderAttribute.GetProvider<TService, TAttribute>();
-            if (result is not null)
-            {
-                manager.RegisterProvider(result.Value.provider, result.Value.priority);
-            }
-            return manager;
-        }
-
-        internal static ServiceProviderManager<TService> Create()
-            => new ServiceProviderManager<TService>();
-
-        private ServiceProviderManager() { }
+        internal ServiceProviderManager() { }
 
         public void RegisterProvider(TService _provider)
             => RegisterProvider(_provider, Priority);

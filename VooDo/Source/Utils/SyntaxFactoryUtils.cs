@@ -23,7 +23,7 @@ namespace VooDo.Utils
             Alias = CompilationConstants.runtimeReferenceAlias
         }).ToTypeSyntax();
 
-        private static readonly QualifiedNameSyntax s_genericProgramType = (QualifiedNameSyntax) (QualifiedType.FromType<Program<object>>() with
+        private static readonly QualifiedNameSyntax s_genericProgramType = (QualifiedNameSyntax) (QualifiedType.FromType<TypedProgram<object>>() with
         {
             Alias = CompilationConstants.runtimeReferenceAlias
         }).ToTypeSyntax();

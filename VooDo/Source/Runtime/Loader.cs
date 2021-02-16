@@ -39,7 +39,7 @@ namespace VooDo.Runtime
             ReturnType = m_type
                 .GetMethods(BindingFlags.Instance | BindingFlags.NonPublic)
                 .Single(_m => _m.IsVirtual
-                    && _m.Name is nameof(Program.Run) or nameof(Program<object>.TypedRun)
+                    && _m.Name is nameof(Program.Run) or nameof(TypedProgram<object>.TypedRun)
                     && _m.GetBaseDefinition().DeclaringType!.IsSubclassOf(typeof(Program)))
                 .ReturnType;
         }
@@ -47,8 +47,8 @@ namespace VooDo.Runtime
         public Program Create()
             => (Program) Activator.CreateInstance(m_type)!;
 
-        public Program<TReturn> Create<TReturn>()
-            => (Program<TReturn>) Create();
+        public TypedProgram<TReturn> Create<TReturn>()
+            => (TypedProgram<TReturn>) Create();
 
         public override bool Equals(object? _obj) => Equals(_obj as Loader);
         public bool Equals(Loader? _other) => _other is not null && m_type == _other.m_type;

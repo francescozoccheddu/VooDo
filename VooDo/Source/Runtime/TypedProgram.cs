@@ -1,7 +1,7 @@
 ﻿
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
+using System.Collections.Immutable;
 using System.Linq;
 
 using VooDo.Hooks;
@@ -9,13 +9,35 @@ using VooDo.Hooks;
 namespace VooDo.Runtime
 {
 
-    public abstract class Program<TReturn> : Program
+    public delegate void ProgramReturnedEventHandler<TReturn>(TReturn _value);
+
+    public abstract class TypedProgram<TReturn> : TypedProgram
     {
+
+        public new event ProgramReturnedEventHandler<TReturn>? OnReturn;
 
         protected internal abstract TReturn TypedRun();
 
+        public sealed override Type ReturnType => typeof(TReturn);
+
         protected internal sealed override void Run()
-            => throw new NotImplementedException();
+        {
+            TReturn value = TypedRun();
+            OnReturn?.Invoke(value);
+            NotifyValueReturned(value);
+        }
+
+    }
+
+    public abstract class TypedProgram : Program
+    {
+
+        public event ProgramReturnedEventHandler<object?>? OnReturn;
+
+        private protected void NotifyValueReturned(object? _value)
+        {
+            OnReturn?.Invoke(_value);
+        }
 
     }
 
@@ -24,10 +46,29 @@ namespace VooDo.Runtime
 
         protected Program()
         {
-            Variables = new ReadOnlyDictionary<string, Variable>(m_Variables.ToDictionary(_v => _v.Name, _v => _v));
+            Variables = m_Variables.ToImmutableArray();
+            m_variableMap = Variables
+                .Where(_v => _v.Name is not null)
+                .GroupBy(_v => _v.Name)
+                .ToImmutableDictionary(_g => _g.Key, _g => _g.ToImmutableArray());
         }
 
-        public IReadOnlyDictionary<string, Variable> Variables { get; }
+        private readonly ImmutableDictionary<string, ImmutableArray<Variable>> m_variableMap;
+        public ImmutableArray<Variable> Variables { get; }
+
+        public IEnumerable<Variable> GetVariables(string _name)
+            => m_variableMap.TryGetValue(_name, out ImmutableArray<Variable> variables) ? variables : Enumerable.Empty<Variable>();
+
+        public IEnumerable<Variable<TValue>> GetVariables<TValue>(string _name)
+            => GetVariables(_name)
+            .Where(_v => _v.Type.IsAssignableTo(typeof(TValue)))
+            .Cast<Variable<TValue>>();
+
+        public Variable? GetVariable(string _name)
+            => GetVariables(_name).SingleOrDefault();
+
+        public Variable<TValue>? GetVariable<TValue>(string _name)
+            => GetVariables<TValue>(_name).SingleOrDefault();
 
         private bool m_running;
         private bool m_runRequested;
@@ -35,6 +76,8 @@ namespace VooDo.Runtime
 
         protected internal abstract void Run();
         protected internal abstract Variable[] m_Variables { get; }
+
+        public virtual Type ReturnType => typeof(void);
 
         private void PrepareAndRun()
         {

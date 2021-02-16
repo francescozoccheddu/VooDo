@@ -70,7 +70,7 @@ namespace VooDo.AST
                                 returnType ?? SFH.Void(),
                                 SF.Identifier(returnType is null
                                     ? nameof(Program.Run)
-                                    : nameof(Program<object>.TypedRun)))
+                                    : nameof(TypedProgram<object>.TypedRun)))
                             .WithModifiers(
                                 SFH.Tokens(
                                     SyntaxKind.ProtectedKeyword,
