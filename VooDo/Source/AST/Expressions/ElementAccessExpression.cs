@@ -68,7 +68,7 @@ namespace VooDo.AST.Expressions
         internal override ElementAccessExpressionSyntax EmitNode(Scope _scope, Tagger _tagger)
             => SyntaxFactory.ElementAccessExpression(
                 Source.EmitNode(_scope, _tagger),
-                SyntaxFactoryHelper.BracketedArguments(
+                SyntaxFactoryUtils.BracketedArguments(
                         Arguments.Select(_a => SyntaxFactory.Argument(_a.EmitNode(_scope, _tagger)).Own(_tagger, _a))))
             .Own(_tagger, this);
         public override IEnumerable<Expression> Children => new Expression[] { Source }.Concat(Arguments);

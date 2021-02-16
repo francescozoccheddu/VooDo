@@ -31,7 +31,7 @@ namespace VooDo.AST.Statements
                 if (Parent is not null && Parent.Parent is GlobalStatement)
                 {
                     Scope.GlobalDefinition globalDefinition = _scope.AddGlobal(new GlobalPrototype(new Global(Parent.Type, Name, Initializer), this));
-                    initializer = SyntaxFactoryHelper.ThisMemberAccess(globalDefinition.Identifier);
+                    initializer = SyntaxFactoryUtils.ThisMemberAccess(globalDefinition.Identifier);
                 }
                 else
                 {
@@ -140,7 +140,7 @@ namespace VooDo.AST.Statements
             TypeSyntax type = Type.EmitNode(_scope, _tagger);
             if (Parent is GlobalStatement && !Type.IsVar)
             {
-                type = SyntaxFactoryHelper.VariableType(type);
+                type = SyntaxFactoryUtils.VariableType(type);
             }
             return Declarators.Select(_d =>
                 SyntaxFactory.LocalDeclarationStatement(

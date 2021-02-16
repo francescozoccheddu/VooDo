@@ -10,16 +10,14 @@ namespace VooDo.DesktopTestbench
             InitializeComponent();
         }
 
-        protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs _args)
+        protected override void OnLaunched(LaunchActivatedEventArgs _args)
         {
-            m_window = new MainWindow
+            new MainWindow
             {
                 Title = "VooDo Desktop Testbench"
-            };
-            m_window.Activate();
+            }.Activate();
         }
 
-        private Window m_window;
 
     }
 }

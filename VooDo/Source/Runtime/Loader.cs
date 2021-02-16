@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
@@ -7,7 +8,7 @@ using VooDo.AST.Names;
 namespace VooDo.Runtime
 {
 
-    public sealed class Loader
+    public sealed class Loader : IEquatable<Loader?>
     {
 
         public static Loader FromType(Type _type)
@@ -21,6 +22,9 @@ namespace VooDo.Runtime
 
         private readonly Type m_type;
 
+        public Type ReturnType { get; }
+        public bool IsTyped => ReturnType != typeof(void);
+
         private Loader(Type _type)
         {
             if (!_type.IsSubclassOf(typeof(Program)))
@@ -32,6 +36,12 @@ namespace VooDo.Runtime
                 throw new ArgumentException("Type does not have a parameterless constructor", nameof(_type));
             }
             m_type = _type;
+            ReturnType = m_type
+                .GetMethods(BindingFlags.Instance | BindingFlags.NonPublic)
+                .Single(_m => _m.IsVirtual
+                    && _m.Name is nameof(Program.Run) or nameof(Program<object>.TypedRun)
+                    && _m.GetBaseDefinition().DeclaringType!.IsSubclassOf(typeof(Program)))
+                .ReturnType;
         }
 
         public Program Create()
@@ -39,6 +49,13 @@ namespace VooDo.Runtime
 
         public Program<TReturn> Create<TReturn>()
             => (Program<TReturn>) Create();
+
+        public override bool Equals(object? _obj) => Equals(_obj as Loader);
+        public bool Equals(Loader? _other) => _other is not null && m_type == _other.m_type;
+        public override int GetHashCode() => HashCode.Combine(m_type);
+
+        public static bool operator ==(Loader? _left, Loader? _right) => EqualityComparer<Loader>.Default.Equals(_left, _right);
+        public static bool operator !=(Loader? _left, Loader? _right) => !(_left == _right);
 
     }
 

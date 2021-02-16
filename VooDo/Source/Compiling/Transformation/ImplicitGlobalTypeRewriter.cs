@@ -154,7 +154,7 @@ namespace VooDo.Compiling.Transformation
         private static VariableDeclarationSyntax Replace(VariableDeclarationSyntax _declaration, ITypeSymbol _type)
         {
             TypeSyntax type = SyntaxFactory.ParseTypeName(_type.ToDisplayString());
-            TypeArgumentListSyntax typeArguments = SyntaxFactoryHelper.TypeArguments(type).OwnAs(_declaration.Type);
+            TypeArgumentListSyntax typeArguments = SyntaxFactoryUtils.TypeArguments(type).OwnAs(_declaration.Type);
             {
                 QualifiedNameSyntax name = (QualifiedNameSyntax) _declaration.Type;
                 _declaration = _declaration.WithType(name.WithRight(SyntaxFactory.GenericName(name.Right.Identifier, typeArguments)));

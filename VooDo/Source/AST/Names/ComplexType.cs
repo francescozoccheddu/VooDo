@@ -101,7 +101,7 @@ namespace VooDo.AST.Names
             public override RankSpecifier ReplaceNodes(Func<Node?, Node?> _map) => this;
 
             internal override ArrayRankSpecifierSyntax EmitNode(Scope _scope, Tagger _tagger)
-                => SyntaxFactoryHelper.ArrayRank(m_rank).Own(_tagger, this);
+                => SyntaxFactoryUtils.ArrayRank(m_rank).Own(_tagger, this);
 
             public override string ToString()
                 => $"[{new string(',', m_rank - 1)}]";

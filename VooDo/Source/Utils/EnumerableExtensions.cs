@@ -7,7 +7,7 @@ using System.Linq;
 
 namespace VooDo.Utils
 {
-    internal static class EnumerableHelper
+    internal static class EnumerableExtensions
     {
 
         internal static ImmutableArray<TItem> EmptyIfDefault<TItem>(this ImmutableArray<TItem> _array)

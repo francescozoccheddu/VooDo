@@ -64,7 +64,7 @@ namespace VooDo.AST.Expressions
 
         internal override ExpressionSyntax EmitNode(Scope _scope, Tagger _tagger)
         {
-            ArgumentListSyntax argumentList = SyntaxFactoryHelper.Arguments(Arguments.Select(_a => _a.EmitNode(_scope, _tagger)));
+            ArgumentListSyntax argumentList = SyntaxFactoryUtils.Arguments(Arguments.Select(_a => _a.EmitNode(_scope, _tagger)));
             return (IsTypeImplicit
                 ? (ExpressionSyntax) SyntaxFactory.ImplicitObjectCreationExpression(argumentList, null)
                 : SyntaxFactory.ObjectCreationExpression(Type!.EmitNode(_scope, _tagger), argumentList, null))

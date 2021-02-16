@@ -4,6 +4,7 @@ using System.Collections.Immutable;
 using System.Linq;
 
 using VooDo.AST.Names;
+using VooDo.Hooks;
 using VooDo.Problems;
 using VooDo.Utils;
 
@@ -22,6 +23,7 @@ namespace VooDo.Compiling
             ClassName = "GeneratedProgram";
             ReturnType = null;
             AssemblyName = null;
+            HookInitializerProvider = null!; // TODO implement
         }
 
         public string? AssemblyName { get; init; }
@@ -29,6 +31,8 @@ namespace VooDo.Compiling
         public Namespace Namespace { get; init; }
 
         public Identifier ClassName { get; init; }
+
+        public IHookInitializerProvider HookInitializerProvider { get; init; }
 
         public ComplexType? ReturnType { get; init; }
 

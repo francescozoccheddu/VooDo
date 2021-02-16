@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <TargetFramework>net5.0-windows10.0.18362</TargetFramework>
@@ -13,11 +13,11 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.VCRTForwarders.140" Version="1.0.7" />
-    <PackageReference Include="Microsoft.WinUI" Version="3.0.0-preview3.201113.0" />
+    <PackageReference Include="Microsoft.WinUI" Version="3.0.0-preview4.210210.4" />
     <Manifest Include="$(ApplicationManifest)" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\VooDo\VooDo.csproj" />
+    <ProjectReference Include="..\..\..\VooDo for WinUI\VooDo for WinUI.csproj" />
   </ItemGroup>
 </Project>

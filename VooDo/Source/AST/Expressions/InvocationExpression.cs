@@ -70,7 +70,7 @@ namespace VooDo.AST.Expressions
             internal override ExpressionSyntax EmitNode(Scope _scope, Tagger _tagger)
             {
                 ExpressionSyntax source;
-                TypeArgumentListSyntax typeArgumentList = SyntaxFactoryHelper.TypeArguments(TypeArguments.Select(_a => _a.EmitNode(_scope, _tagger)));
+                TypeArgumentListSyntax typeArgumentList = SyntaxFactoryUtils.TypeArguments(TypeArguments.Select(_a => _a.EmitNode(_scope, _tagger)));
                 if (Source is NameExpression name)
                 {
                     SyntaxToken identifier = name.Name.EmitToken(_tagger);
@@ -80,7 +80,7 @@ namespace VooDo.AST.Expressions
                 {
 
                     SyntaxToken identifier = member.Member.EmitToken(_tagger);
-                    source = SyntaxFactoryHelper.MemberAccess(
+                    source = SyntaxFactoryUtils.MemberAccess(
                         member.Source.EmitNode(_scope, _tagger),
                         SyntaxFactory.GenericName(identifier, typeArgumentList));
                 }
@@ -159,7 +159,7 @@ namespace VooDo.AST.Expressions
         }
 
         internal override InvocationExpressionSyntax EmitNode(Scope _scope, Tagger _tagger)
-            => SyntaxFactoryHelper.Invocation(
+            => SyntaxFactoryUtils.Invocation(
                 Source.EmitNode(_scope, _tagger),
                 Arguments.Select(_a => _a.EmitNode(_scope, _tagger)))
             .Own(_tagger, this);

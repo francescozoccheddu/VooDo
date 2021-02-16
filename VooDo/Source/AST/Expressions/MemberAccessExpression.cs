@@ -37,7 +37,7 @@ namespace VooDo.AST.Expressions
         }
 
         internal override MemberAccessExpressionSyntax EmitNode(Scope _scope, Tagger _tagger)
-            => SyntaxFactoryHelper.MemberAccess(
+            => SyntaxFactoryUtils.MemberAccess(
                 Source.EmitNode(_scope, _tagger),
                 Member.EmitToken(_tagger).Own(_tagger, Member))
             .Own(_tagger, this);

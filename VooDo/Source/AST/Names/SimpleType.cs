@@ -159,7 +159,7 @@ namespace VooDo.AST.Names
                 }
             }
             return (IsGeneric
-            ? (SimpleNameSyntax) SyntaxFactoryHelper.GenericName(
+            ? (SimpleNameSyntax) SyntaxFactoryUtils.GenericName(
                 Name.EmitToken(_tagger),
                 TypeArguments.Select(_a => _a.EmitNode(_scope, _tagger)))
             : SyntaxFactory.IdentifierName(Name.EmitToken(_tagger)))

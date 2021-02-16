@@ -12,10 +12,10 @@ namespace VooDo.Utils
     public static class ProblemExtensions
     {
 
-        internal static VooDoException AsThrowable(this IEnumerable<Problem> _problems)
+        public static VooDoException AsThrowable(this IEnumerable<Problem> _problems)
             => new VooDoException(_problems.ToImmutableArray());
 
-        internal static VooDoException AsThrowable(this Problem _problem)
+        public static VooDoException AsThrowable(this Problem _problem)
             => new VooDoException(_problem);
 
         public static void ThrowErrors(this IEnumerable<Problem> _problems)

@@ -1,4 +1,17 @@
 ﻿<Window
     x:Class="VooDo.DesktopTestbench.MainWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" />
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:voodo="using:VooDo.WinUI">
+
+    <Grid>
+
+        <Button HorizontalAlignment="Center" VerticalAlignment="Center">
+            <Button.Content>
+                <voodo:MyMarkup Text="Ciao!" />
+            </Button.Content>
+        </Button>
+
+    </Grid>
+
+</Window>

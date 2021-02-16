@@ -46,7 +46,7 @@ namespace VooDo.AST.Expressions
             ExpressionSyntax result;
             IdentifierNameSyntax name = SyntaxFactory.IdentifierName(Name.EmitToken(_tagger));
             result = isGlobal
-                ? SyntaxFactoryHelper.MemberAccess(name, IsControllerOf ? nameof(Variable<object>.ControllerFactory) : nameof(Variable<object>.Value))
+                ? SyntaxFactoryUtils.MemberAccess(name, IsControllerOf ? nameof(Variable<object>.ControllerFactory) : nameof(Variable<object>.Value))
                 : (ExpressionSyntax) name;
             return result.Own(_tagger, this);
         }

@@ -15,7 +15,7 @@ using SF = Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 namespace VooDo.Utils
 {
 
-    internal static class SyntaxFactoryHelper
+    internal static class SyntaxFactoryUtils
     {
 
         private static readonly QualifiedNameSyntax s_programType = (QualifiedNameSyntax) (QualifiedType.FromType<Program>() with

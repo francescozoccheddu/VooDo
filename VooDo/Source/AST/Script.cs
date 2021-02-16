@@ -16,7 +16,7 @@ using VooDo.Utils;
 using static VooDo.Compiling.Emission.Scope;
 
 using SF = Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
-using SFH = VooDo.Utils.SyntaxFactoryHelper;
+using SFH = VooDo.Utils.SyntaxFactoryUtils;
 
 namespace VooDo.AST
 {

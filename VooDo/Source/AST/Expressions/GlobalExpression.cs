@@ -73,8 +73,8 @@ namespace VooDo.AST.Expressions
         internal override InvocationExpressionSyntax EmitNode(Scope _scope, Tagger _tagger)
         {
             Scope.GlobalDefinition globalDefinition = _scope.AddGlobal(new GlobalPrototype(new Global(ComplexTypeOrVar.Var, null, Initializer), this));
-            return SyntaxFactoryHelper.SetControllerAndGetValueInvocation(
-                    SyntaxFactoryHelper.ThisMemberAccess(globalDefinition.Identifier),
+            return SyntaxFactoryUtils.SetControllerAndGetValueInvocation(
+                    SyntaxFactoryUtils.ThisMemberAccess(globalDefinition.Identifier),
                     Controller.EmitNode(_scope, _tagger).Own(_tagger, Controller))
                 .Own(_tagger, this);
         }
