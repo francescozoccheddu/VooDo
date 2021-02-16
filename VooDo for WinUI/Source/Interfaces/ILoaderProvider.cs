@@ -3,8 +3,9 @@
 using VooDo.AST;
 using VooDo.AST.Names;
 using VooDo.Runtime;
+using VooDo.WinUI.Utils;
 
-namespace VooDo.WinUI
+namespace VooDo.WinUI.Interfaces
 {
 
     public interface ILoaderProvider

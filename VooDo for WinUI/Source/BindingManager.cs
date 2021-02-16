@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using VooDo.AST;
 using VooDo.Caching;
 using VooDo.Runtime;
+using VooDo.WinUI.Interfaces;
 
 namespace VooDo.WinUI
 {

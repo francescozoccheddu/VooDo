@@ -1,4 +1,4 @@
-﻿namespace VooDo.WinUI
+﻿namespace VooDo.WinUI.Utils
 {
 
     public delegate void ServiceProviderChangedEventHandler<TService>(ServiceProviderManager<TService> _manager, TService? _old) where TService : notnull;

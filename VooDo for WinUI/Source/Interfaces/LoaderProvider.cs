@@ -9,7 +9,7 @@ using VooDo.Compiling;
 using VooDo.Hooks;
 using VooDo.Runtime;
 
-namespace VooDo.WinUI
+namespace VooDo.WinUI.Interfaces
 {
 
     public abstract class LoaderProvider : ILoaderProvider

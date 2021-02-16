@@ -4,7 +4,7 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Reflection;
 
-namespace VooDo.WinUI
+namespace VooDo.WinUI.Utils
 {
 
     [AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = false)]
@@ -93,12 +93,12 @@ namespace VooDo.WinUI
 
         public EKind Kind { get; set; } = EKind.Combinable;
 
-        internal static (TService provider, int priority)? GetProvider<TService, TAttribute>(Func<IEnumerable<TService>, TService> _combine)
+        internal static (TService provider, int priority) GetProvider<TService, TAttribute>(Func<IEnumerable<TService>, TService> _combine)
             where TService : notnull
             where TAttribute : CombinableServiceProviderAttribute
             => GetProvider<TService, TAttribute>(_combine, _p => _p.Max());
 
-        internal static (TService provider, int priority)? GetProvider<TService, TAttribute>(Func<IEnumerable<TService>, TService> _combine, Func<IEnumerable<int>, int> _combinePriority)
+        internal static (TService provider, int priority) GetProvider<TService, TAttribute>(Func<IEnumerable<TService>, TService> _combine, Func<IEnumerable<int>, int> _combinePriority)
             where TService : notnull
             where TAttribute : CombinableServiceProviderAttribute
         {

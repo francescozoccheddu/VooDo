@@ -1,4 +1,6 @@
-﻿namespace VooDo.WinUI
+﻿using VooDo.WinUI.Utils;
+
+namespace VooDo.WinUI.Interfaces
 {
 
     public interface ITargetProvider
@@ -11,7 +13,7 @@
     public sealed class TargetProviderAttribute : CombinableServiceProviderAttribute
     {
 
-        internal static (ITargetProvider provider, int priority)? GetTargetProvider()
+        internal static (ITargetProvider provider, int priority) GetTargetProvider()
             => GetProvider<ITargetProvider, TargetProviderAttribute>(_h => new TargetProviderList(_h));
 
     }

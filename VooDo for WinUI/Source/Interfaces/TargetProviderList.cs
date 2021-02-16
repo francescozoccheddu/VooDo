@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 
-namespace VooDo.WinUI
+namespace VooDo.WinUI.Interfaces
 {
 
     public sealed class TargetProviderList : IReadOnlyList<ITargetProvider>, ITargetProvider

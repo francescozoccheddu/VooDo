@@ -5,8 +5,10 @@ using System.Linq;
 using VooDo.Caching;
 using VooDo.Compiling;
 using VooDo.Hooks;
+using VooDo.WinUI.Interfaces;
+using VooDo.WinUI.Utils;
 
-namespace VooDo.WinUI
+namespace VooDo.WinUI.Components
 {
 
     public sealed class DefaultLoaderProvider : LoaderProvider
@@ -15,7 +17,7 @@ namespace VooDo.WinUI
         public sealed class HookInitializerProviderAttribute : CombinableServiceProviderAttribute
         {
 
-            internal static (IHookInitializerProvider provider, int priority)? GetHookInitializerProvider()
+            internal static (IHookInitializerProvider provider, int priority) GetHookInitializerProvider()
                 => GetProvider<IHookInitializerProvider, HookInitializerProviderAttribute>(_h => new HookInitializerList(_h));
 
         }
@@ -32,11 +34,8 @@ namespace VooDo.WinUI
             if (s_instance is null)
             {
                 s_instance = new();
-                (IHookInitializerProvider provider, int priority)? result = HookInitializerProviderAttribute.GetHookInitializerProvider();
-                if (result is not null)
-                {
-                    HookInitializerProviderServiceManager.RegisterProvider(result.Value.provider, result.Value.priority);
-                }
+                (IHookInitializerProvider provider, int priority) = HookInitializerProviderAttribute.GetHookInitializerProvider();
+                HookInitializerProviderServiceManager.RegisterProvider(provider, priority);
             }
             return s_instance;
         }

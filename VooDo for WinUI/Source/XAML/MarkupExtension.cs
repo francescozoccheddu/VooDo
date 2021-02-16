@@ -1,11 +1,10 @@
 ﻿using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Markup;
 
-namespace VooDo.WinUI
+namespace VooDo.WinUI.Xaml
 {
 
-    [MarkupExtensionReturnType(ReturnType = typeof(bool?))]
-    public sealed class MyMarkup : MarkupExtension
+    public sealed class VooDo : MarkupExtension
     {
 
         public string? Text { get; set; }
