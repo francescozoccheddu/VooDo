@@ -30,7 +30,7 @@ namespace VooDo.AST.Statements
 
         #region Overrides
 
-        public override GlobalStatement ReplaceNodes(Func<Node?, Node?> _map)
+        protected internal override Node ReplaceNodes(Func<Node?, Node?> _map)
         {
             ImmutableArray<DeclarationStatement> newDeclarations = m_Declarations.Map(_map).NonNull();
             if (newDeclarations == m_Declarations)
@@ -50,14 +50,14 @@ namespace VooDo.AST.Statements
         public int Count => ((IReadOnlyCollection<Statement>) m_Declarations).Count;
         public IEnumerator<DeclarationStatement> GetEnumerator() => ((IEnumerable<DeclarationStatement>) m_Declarations).GetEnumerator();
         IEnumerator IEnumerable.GetEnumerator() => ((IEnumerable) m_Declarations).GetEnumerator();
-        internal override IEnumerable<LocalDeclarationStatementSyntax> EmitNodes(Scope _scope, Tagger _tagger)
+        internal override IEnumerable<StatementSyntax> EmitNodes(Scope _scope, Tagger _tagger)
             => this.SelectMany(_s => _s.EmitNodes(_scope, _tagger));
-        public override IEnumerable<DeclarationStatement> Children => m_Declarations;
+        public override IEnumerable<Node> Children => m_Declarations;
         public override string ToString() => GrammarConstants.globalKeyword + Count switch
         {
             0 => " {}",
             1 => $" {this[0]}",
-            _ => $"{{{("\n" + string.Join('\n', this)).Replace("\n", "\n\t")}\n}}"
+            _ => $"{{{("\n" + string.Join("\n", this)).Replace("\n", "\n\t")}\n}}"
         };
 
         #endregion

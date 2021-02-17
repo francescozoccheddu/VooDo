@@ -22,10 +22,9 @@ namespace VooDo.AST.Expressions
         public abstract record Callable : BodyNode
         {
 
+#if NET5_0
             public sealed override InvocationExpression? Parent => (InvocationExpression?) base.Parent;
-            public abstract override Callable ReplaceNodes(Func<Node?, Node?> _map);
-            internal abstract override ExpressionSyntax EmitNode(Scope _scope, Tagger _tagger);
-            public abstract override IEnumerable<Expression> Children { get; }
+#endif
 
         }
 
@@ -49,7 +48,7 @@ namespace VooDo.AST.Expressions
 
             public bool IsGeneric => !TypeArguments.IsEmpty;
 
-            public override Method ReplaceNodes(Func<Node?, Node?> _map)
+            protected internal override Node ReplaceNodes(Func<Node?, Node?> _map)
             {
                 NameOrMemberAccessExpression newSource = (NameOrMemberAccessExpression) _map(Source).NonNull();
                 ImmutableArray<ComplexType> newArguments = TypeArguments.Map(_map).NonNull();
@@ -67,10 +66,10 @@ namespace VooDo.AST.Expressions
                 }
             }
 
-            internal override ExpressionSyntax EmitNode(Scope _scope, Tagger _tagger)
+            internal override SyntaxNode EmitNode(Scope _scope, Tagger _tagger)
             {
                 ExpressionSyntax source;
-                TypeArgumentListSyntax typeArgumentList = SyntaxFactoryUtils.TypeArguments(TypeArguments.Select(_a => _a.EmitNode(_scope, _tagger)));
+                TypeArgumentListSyntax typeArgumentList = SyntaxFactoryUtils.TypeArguments(TypeArguments.Select(_a => (TypeSyntax) _a.EmitNode(_scope, _tagger)));
                 if (Source is NameExpression name)
                 {
                     SyntaxToken identifier = name.Name.EmitToken(_tagger);
@@ -81,7 +80,7 @@ namespace VooDo.AST.Expressions
 
                     SyntaxToken identifier = member.Member.EmitToken(_tagger);
                     source = SyntaxFactoryUtils.MemberAccess(
-                        member.Source.EmitNode(_scope, _tagger),
+                        (ExpressionSyntax) member.Source.EmitNode(_scope, _tagger),
                         SyntaxFactory.GenericName(identifier, typeArgumentList));
                 }
                 else
@@ -91,7 +90,7 @@ namespace VooDo.AST.Expressions
                 return source.Own(_tagger, this);
             }
 
-            public override IEnumerable<NameOrMemberAccessExpression> Children => new[] { Source };
+            public override IEnumerable<Node> Children => new[] { Source };
             public override string ToString() => LeftCode(Source, EPrecedence.Primary) + (IsGeneric ? $"<{string.Join(", ", TypeArguments)}>" : "");
 
         }
@@ -99,7 +98,7 @@ namespace VooDo.AST.Expressions
         public sealed record SimpleCallable(Expression Source) : Callable
         {
 
-            public override SimpleCallable ReplaceNodes(Func<Node?, Node?> _map)
+            protected internal override Node ReplaceNodes(Func<Node?, Node?> _map)
             {
                 NameOrMemberAccessExpression newSource = (NameOrMemberAccessExpression) _map(Source).NonNull();
                 if (ReferenceEquals(newSource, Source))
@@ -115,8 +114,8 @@ namespace VooDo.AST.Expressions
                 }
             }
 
-            internal override ExpressionSyntax EmitNode(Scope _scope, Tagger _tagger) => Source.EmitNode(_scope, _tagger);
-            public override IEnumerable<Expression> Children => new[] { Source };
+            internal override SyntaxNode EmitNode(Scope _scope, Tagger _tagger) => Source.EmitNode(_scope, _tagger);
+            public override IEnumerable<Node> Children => new[] { Source };
             public override string ToString() => LeftCode(Source, EPrecedence.Primary);
 
         }
@@ -140,7 +139,7 @@ namespace VooDo.AST.Expressions
 
         protected override EPrecedence m_Precedence => EPrecedence.Primary;
 
-        public override InvocationExpression ReplaceNodes(Func<Node?, Node?> _map)
+        protected internal override Node ReplaceNodes(Func<Node?, Node?> _map)
         {
             Callable newSource = (Callable) _map(Source).NonNull();
             ImmutableArray<Argument> newArguments = Arguments.Map(_map).NonNull();
@@ -158,12 +157,12 @@ namespace VooDo.AST.Expressions
             }
         }
 
-        internal override InvocationExpressionSyntax EmitNode(Scope _scope, Tagger _tagger)
+        internal override SyntaxNode EmitNode(Scope _scope, Tagger _tagger)
             => SyntaxFactoryUtils.Invocation(
-                Source.EmitNode(_scope, _tagger),
-                Arguments.Select(_a => _a.EmitNode(_scope, _tagger)))
+                (ExpressionSyntax) Source.EmitNode(_scope, _tagger),
+                Arguments.Select(_a => (ArgumentSyntax) _a.EmitNode(_scope, _tagger)))
             .Own(_tagger, this);
-        public override IEnumerable<BodyNode> Children => new BodyNode[] { Source }.Concat(Arguments);
+        public override IEnumerable<Node> Children => new BodyNode[] { Source }.Concat(Arguments);
         public override string ToString() => $"{Source}({string.Join(", ", Arguments)})";
 
         #endregion

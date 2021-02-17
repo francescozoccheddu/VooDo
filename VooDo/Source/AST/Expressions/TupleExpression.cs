@@ -1,4 +1,5 @@
-﻿using Microsoft.CodeAnalysis.CSharp;
+﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 using System;
@@ -22,9 +23,6 @@ namespace VooDo.AST.Expressions
 
         public abstract record ElementBase : BodyNode
         {
-
-            public abstract override ElementBase ReplaceNodes(Func<Node?, Node?> _map);
-            internal abstract override ArgumentSyntax EmitNode(Scope _scope, Tagger _tagger);
 
         }
 
@@ -55,7 +53,7 @@ namespace VooDo.AST.Expressions
 
         #region Overrides
 
-        public sealed override TupleExpressionBase<TElement> ReplaceNodes(Func<Node?, Node?> _map)
+        protected internal sealed override Node ReplaceNodes(Func<Node?, Node?> _map)
         {
             ImmutableArray<TElement> newSizes = m_Elements.Map(_map).NonNull();
             if (newSizes == m_Elements)
@@ -77,10 +75,10 @@ namespace VooDo.AST.Expressions
         IEnumerator IEnumerable.GetEnumerator() => ((IEnumerable) m_Elements).GetEnumerator();
 
         protected sealed override EPrecedence m_Precedence => EPrecedence.Primary;
-        internal sealed override TupleExpressionSyntax EmitNode(Scope _scope, Tagger _tagger)
+        internal sealed override SyntaxNode EmitNode(Scope _scope, Tagger _tagger)
             => SyntaxFactory.TupleExpression(this.Select(_e => _e.EmitNode(_scope, _tagger)).ToSeparatedList())
             .Own(_tagger, this);
-        public override IEnumerable<TElement> Children => m_Elements;
+        public override IEnumerable<Node> Children => m_Elements;
         public override string ToString() => $"({string.Join(", ", m_Elements)})";
 
         #endregion
@@ -97,7 +95,7 @@ namespace VooDo.AST.Expressions
 
             public bool IsNamed => Name is not null;
 
-            public override Element ReplaceNodes(Func<Node?, Node?> _map)
+            protected internal override Node ReplaceNodes(Func<Node?, Node?> _map)
             {
                 Identifier? newName = (Identifier?) _map(Name);
                 Expression newExpression = (Expression) _map(Expression).NonNull();
@@ -115,8 +113,8 @@ namespace VooDo.AST.Expressions
                 }
             }
 
-            internal override ArgumentSyntax EmitNode(Scope _scope, Tagger _tagger)
-                => SyntaxFactory.Argument(Expression.EmitNode(_scope, _tagger))
+            internal override SyntaxNode EmitNode(Scope _scope, Tagger _tagger)
+                => SyntaxFactory.Argument((ExpressionSyntax) Expression.EmitNode(_scope, _tagger))
                 .WithNameColon(IsNamed
                     ? SyntaxFactory.NameColon(SyntaxFactory.IdentifierName(Name!.EmitToken(_tagger)).Own(_tagger, Name))
                     : null)
@@ -136,7 +134,7 @@ namespace VooDo.AST.Expressions
         public sealed record Element(ComplexTypeOrVar Type, IdentifierOrDiscard Name) : ElementBase
         {
 
-            public override Element ReplaceNodes(Func<Node?, Node?> _map)
+            protected internal override Node ReplaceNodes(Func<Node?, Node?> _map)
             {
                 ComplexTypeOrVar newType = (ComplexTypeOrVar) _map(Type).NonNull();
                 IdentifierOrDiscard newName = (IdentifierOrDiscard) _map(Name).NonNull();
@@ -154,7 +152,7 @@ namespace VooDo.AST.Expressions
                 }
             }
 
-            internal override ArgumentSyntax EmitNode(Scope _scope, Tagger _tagger)
+            internal override SyntaxNode EmitNode(Scope _scope, Tagger _tagger)
             {
                 if (!Name.IsDiscard)
                 {
@@ -162,8 +160,8 @@ namespace VooDo.AST.Expressions
                 }
                 return SyntaxFactory.Argument(
                             SyntaxFactory.DeclarationExpression(
-                                Type.EmitNode(_scope, _tagger),
-                                Name.EmitNode(_scope, _tagger).Own(_tagger, Name)))
+                                (TypeSyntax) Type.EmitNode(_scope, _tagger),
+                                (VariableDesignationSyntax) Name.EmitNode(_scope, _tagger).Own(_tagger, Name)))
                             .Own(_tagger, this);
             }
 

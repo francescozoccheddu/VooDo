@@ -1,4 +1,5 @@
-﻿using Microsoft.CodeAnalysis.CSharp;
+﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 using System;
@@ -50,7 +51,7 @@ namespace VooDo.AST.Names
 
         #region Overrides
 
-        public override IdentifierOrDiscard ReplaceNodes(Func<Node?, Node?> _map)
+        protected internal override Node ReplaceNodes(Func<Node?, Node?> _map)
         {
             if (IsDiscard)
             {
@@ -67,12 +68,12 @@ namespace VooDo.AST.Names
             }
         }
 
-        internal override VariableDesignationSyntax EmitNode(Scope _scope, Tagger _tagger)
+        internal override SyntaxNode EmitNode(Scope _scope, Tagger _tagger)
             => (IsDiscard
             ? (VariableDesignationSyntax) SyntaxFactory.DiscardDesignation()
             : SyntaxFactory.SingleVariableDesignation(Identifier!.EmitToken(_tagger)))
             .Own(_tagger, this);
-        public override IEnumerable<Identifier> Children => IsDiscard ? Enumerable.Empty<Identifier>() : new[] { Identifier! };
+        public override IEnumerable<Node> Children => IsDiscard ? Enumerable.Empty<Identifier>() : new[] { Identifier! };
         public override string ToString() => IsDiscard ? "_" : Identifier!.ToString();
 
         #endregion

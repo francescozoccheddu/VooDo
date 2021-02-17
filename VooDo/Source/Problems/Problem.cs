@@ -60,7 +60,7 @@ namespace VooDo.Problems
         private string GetSourceMessage()
         {
             string code = Source!.ToString();
-            object snippet = code.Length > 20 ? $"{code[..10]}...{code[^10..]}" : code;
+            object snippet = code.Length > 20 ? $"{code.Substring(0, 10)}...{code.Substring(code.Length - 10, 10)}" : code;
             string origin = Source.Origin.GetDisplayMessage();
             string type = Source.GetType().Name;
             return $"{type} «{snippet}» @ {origin}";

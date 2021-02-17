@@ -31,7 +31,7 @@ namespace VooDo.AST.Directives
 
         #region Overrides
 
-        public override UsingNamespaceDirective ReplaceNodes(Func<Node?, Node?> _map)
+        protected internal override Node ReplaceNodes(Func<Node?, Node?> _map)
         {
             Identifier? newAlias = (Identifier?) _map(Alias);
             Namespace newNamespace = (Namespace) _map(Namespace).NonNull();
@@ -49,9 +49,9 @@ namespace VooDo.AST.Directives
             }
         }
 
-        internal override UsingDirectiveSyntax EmitNode(Scope _scope, Tagger _tagger)
+        internal override SyntaxNode EmitNode(Scope _scope, Tagger _tagger)
         {
-            NameSyntax name = Namespace.EmitNode(_scope, _tagger);
+            NameSyntax name = (NameSyntax) Namespace.EmitNode(_scope, _tagger);
             UsingDirectiveSyntax result;
             if (HasAlias)
             {

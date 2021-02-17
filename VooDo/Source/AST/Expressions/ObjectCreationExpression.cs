@@ -1,4 +1,5 @@
-﻿using Microsoft.CodeAnalysis.CSharp;
+﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 using System;
@@ -44,7 +45,7 @@ namespace VooDo.AST.Expressions
 
         protected override EPrecedence m_Precedence => EPrecedence.Primary;
 
-        public override ObjectCreationExpression ReplaceNodes(Func<Node?, Node?> _map)
+        protected internal override Node ReplaceNodes(Func<Node?, Node?> _map)
         {
             ComplexType? newType = (ComplexType?) _map(Type);
             ImmutableArray<Argument> newArguments = Arguments.Map(_map).NonNull();
@@ -62,16 +63,16 @@ namespace VooDo.AST.Expressions
             }
         }
 
-        internal override ExpressionSyntax EmitNode(Scope _scope, Tagger _tagger)
+        internal override SyntaxNode EmitNode(Scope _scope, Tagger _tagger)
         {
-            ArgumentListSyntax argumentList = SyntaxFactoryUtils.Arguments(Arguments.Select(_a => _a.EmitNode(_scope, _tagger)));
+            ArgumentListSyntax argumentList = SyntaxFactoryUtils.Arguments(Arguments.Select(_a => (ArgumentSyntax) _a.EmitNode(_scope, _tagger)));
             return (IsTypeImplicit
                 ? (ExpressionSyntax) SyntaxFactory.ImplicitObjectCreationExpression(argumentList, null)
-                : SyntaxFactory.ObjectCreationExpression(Type!.EmitNode(_scope, _tagger), argumentList, null))
+                : SyntaxFactory.ObjectCreationExpression((TypeSyntax) Type!.EmitNode(_scope, _tagger), argumentList, null))
                 .Own(_tagger, this);
         }
 
-        public override IEnumerable<BodyNode> Children => IsTypeImplicit ? Arguments : new BodyNode[] { Type! }.Concat(Arguments);
+        public override IEnumerable<Node> Children => IsTypeImplicit ? Arguments : new BodyNode[] { Type! }.Concat(Arguments);
         public override string ToString() => $"{GrammarConstants.newKeyword} " + (IsTypeImplicit ? $"{Type} " : "") + $"({string.Join(", ", Arguments)})";
 
         #endregion

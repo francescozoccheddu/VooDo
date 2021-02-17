@@ -1,4 +1,5 @@
-﻿using Microsoft.CodeAnalysis.CSharp;
+﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 using System;
@@ -6,7 +7,6 @@ using System.Collections.Generic;
 using System.Linq;
 
 using VooDo.AST.Names;
-using VooDo.Compiling;
 using VooDo.Compiling.Emission;
 
 namespace VooDo.AST.Expressions
@@ -25,7 +25,7 @@ namespace VooDo.AST.Expressions
 
         protected override EPrecedence m_Precedence => EPrecedence.Primary;
 
-        public override DefaultExpression ReplaceNodes(Func<Node?, Node?> _map)
+        protected internal override Node ReplaceNodes(Func<Node?, Node?> _map)
         {
             ComplexType? newType = (ComplexType?) _map(Type);
             if (ReferenceEquals(newType, Type))
@@ -41,12 +41,12 @@ namespace VooDo.AST.Expressions
             }
         }
 
-        internal override ExpressionSyntax EmitNode(Scope _scope, Tagger _tagger)
+        internal override SyntaxNode EmitNode(Scope _scope, Tagger _tagger)
             => (HasType
-            ? SyntaxFactory.DefaultExpression(Type!.EmitNode(_scope, _tagger))
+            ? SyntaxFactory.DefaultExpression((TypeSyntax) Type!.EmitNode(_scope, _tagger))
             : (ExpressionSyntax) SyntaxFactory.LiteralExpression(SyntaxKind.DefaultExpression))
             .Own(_tagger, this);
-        public override IEnumerable<ComplexType> Children => HasType ? new ComplexType[] { Type! } : Enumerable.Empty<ComplexType>();
+        public override IEnumerable<Node> Children => HasType ? new ComplexType[] { Type! } : Enumerable.Empty<ComplexType>();
         public override string ToString() => GrammarConstants.defaultKeyword + (HasType ? $"({Type})" : "");
 
         #endregion

@@ -1,73 +1,8 @@
-﻿using System;
-
-namespace VooDo.AST.Expressions
+﻿namespace VooDo.AST.Expressions
 {
 
     public abstract record Expression : ComplexTypeOrExpression
     {
-
-        /*
-            {
-                SimpleAssignmentExpression:
-                AddAssignmentExpression:
-                SubtractAssignmentExpression:
-                MultiplyAssignmentExpression:
-                DivideAssignmentExpression:
-                ModuloAssignmentExpression:
-                AndAssignmentExpression:
-                ExclusiveOrAssignmentExpression:
-                OrAssignmentExpression:
-                LeftShiftAssignmentExpression:
-                RightShiftAssignmentExpression:
-                CoalesceAssignmentExpression:
-                    Assignment;
-                CoalesceExpression:
-                    Coalescing;
-                LogicalOrExpression:
-                    ConditionalOr;
-                LogicalAndExpression:
-                    ConditionalAnd;
-                BitwiseOrExpression:
-                    LogicalOr;
-                ExclusiveOrExpression:
-                    LogicalXor;
-                BitwiseAndExpression:
-                    LogicalAnd;
-                EqualsExpression:
-                NotEqualsExpression:
-                    Equality;
-                LessThanExpression:
-                LessThanOrEqualExpression:
-                GreaterThanExpression:
-                GreaterThanOrEqualExpression:
-                IsExpression:
-                AsExpression:
-                IsPatternExpression:
-                    Relational;
-                LeftShiftExpression:
-                RightShiftExpression:
-                    Shift;
-                AddExpression:
-                SubtractExpression:
-                    Additive;
-                MultiplyExpression:
-                DivideExpression:
-                ModuloExpression:
-                    Mutiplicative;
-                UnaryPlusExpression:
-                UnaryMinusExpression:
-                BitwiseNotExpression:
-                LogicalNotExpression:
-                PreIncrementExpression:
-                PreDecrementExpression:
-                    Unary;
-                CastExpression:
-                    Cast;
-                ConditionalExpression:
-                    Expression;
-                default:
-                    Primary;
-        */
 
         protected enum EPrecedence
         {
@@ -105,8 +40,6 @@ namespace VooDo.AST.Expressions
                 return _expression.ToString();
             }
         }
-
-        public abstract override Expression ReplaceNodes(Func<Node?, Node?> _map);
 
     }
 

@@ -30,7 +30,7 @@ namespace VooDo.Problems
                     .Select(_g => $"{_g.count} {_g.kind} error{(_g.count > 1 ? "s" : "")}")
                     .ToArray();
                 return groups.Length > 1
-                    ? $"{string.Join(", ", groups)} and {groups[^1]}"
+                    ? $"{string.Join(", ", groups)} and {groups.Last()}"
                     : groups[0];
             }
         }

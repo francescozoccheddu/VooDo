@@ -1,4 +1,5 @@
-﻿using Microsoft.CodeAnalysis.CSharp;
+﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 using System;
@@ -6,7 +7,6 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 
-using VooDo.Compiling;
 using VooDo.Compiling.Emission;
 using VooDo.Problems;
 using VooDo.Utils;
@@ -47,7 +47,7 @@ namespace VooDo.AST.Expressions
 
         protected override EPrecedence m_Precedence => EPrecedence.Primary;
 
-        public override ElementAccessExpression ReplaceNodes(Func<Node?, Node?> _map)
+        protected internal override Node ReplaceNodes(Func<Node?, Node?> _map)
         {
             Expression newSource = (Expression) _map(Source).NonNull();
             ImmutableArray<Expression> newArguments = Arguments.Map(_map).NonNull();
@@ -65,13 +65,13 @@ namespace VooDo.AST.Expressions
             }
         }
 
-        internal override ElementAccessExpressionSyntax EmitNode(Scope _scope, Tagger _tagger)
+        internal override SyntaxNode EmitNode(Scope _scope, Tagger _tagger)
             => SyntaxFactory.ElementAccessExpression(
-                Source.EmitNode(_scope, _tagger),
+                (ExpressionSyntax) Source.EmitNode(_scope, _tagger),
                 SyntaxFactoryUtils.BracketedArguments(
-                        Arguments.Select(_a => SyntaxFactory.Argument(_a.EmitNode(_scope, _tagger)).Own(_tagger, _a))))
+                        Arguments.Select(_a => SyntaxFactory.Argument((ExpressionSyntax) _a.EmitNode(_scope, _tagger)).Own(_tagger, _a))))
             .Own(_tagger, this);
-        public override IEnumerable<Expression> Children => new Expression[] { Source }.Concat(Arguments);
+        public override IEnumerable<Node> Children => new Node[] { Source }.Concat(Arguments);
         public override string ToString() => $"{Source}[{string.Join(",", Arguments)}]";
 
         #endregion

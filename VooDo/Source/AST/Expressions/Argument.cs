@@ -1,4 +1,5 @@
-﻿using Microsoft.CodeAnalysis.CSharp;
+﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 using System;
@@ -23,9 +24,11 @@ namespace VooDo.AST.Expressions
 
         protected abstract Argument ReplaceArgumentNodes(Func<Node?, Node?> _map);
 
+#if NET5_0
         public override InvocationOrObjectCreationExpression? Parent => (InvocationOrObjectCreationExpression?) base.Parent;
+#endif
 
-        public sealed override Argument ReplaceNodes(Func<Node?, Node?> _map)
+        protected internal sealed override Node ReplaceNodes(Func<Node?, Node?> _map)
         {
             Identifier? newParameter = (Identifier?) _map(Parameter);
             if (ReferenceEquals(newParameter, Parameter))
@@ -43,7 +46,8 @@ namespace VooDo.AST.Expressions
 
 
         private protected abstract ExpressionSyntax EmitArgumentExpression(Scope _scope, Tagger _tagger);
-        internal sealed override ArgumentSyntax EmitNode(Scope _scope, Tagger _tagger)
+
+        internal sealed override SyntaxNode EmitNode(Scope _scope, Tagger _tagger)
             => SyntaxFactory.Argument(EmitArgumentExpression(_scope, _tagger))
                 .WithRefKindKeyword(SyntaxFactory.Token(Kind switch
                 {
@@ -64,7 +68,7 @@ namespace VooDo.AST.Expressions
     {
         public override EKind Kind => EKind.Value;
 
-        protected override ValueArgument ReplaceArgumentNodes(Func<Node?, Node?> _map)
+        protected override Argument ReplaceArgumentNodes(Func<Node?, Node?> _map)
         {
             Expression newExpression = (Expression) _map(Expression).NonNull();
             if (ReferenceEquals(newExpression, Expression))
@@ -81,15 +85,15 @@ namespace VooDo.AST.Expressions
         }
 
         private protected override ExpressionSyntax EmitArgumentExpression(Scope _scope, Tagger _tagger)
-            => Expression.EmitNode(_scope, _tagger).Own(_tagger, this);
-        public override IEnumerable<Expression> Children => new[] { Expression };
+            => (ExpressionSyntax) Expression.EmitNode(_scope, _tagger).Own(_tagger, this);
+        public override IEnumerable<Node> Children => new[] { Expression };
         public override string ToString() => $"{Kind.Token()} {Expression}".TrimStart();
     }
 
     public sealed record AssignableArgument(Identifier? Parameter, Argument.EKind AssignableKind, AssignableExpression Expression) : Argument(Parameter)
     {
         public override EKind Kind => AssignableKind;
-        protected override AssignableArgument ReplaceArgumentNodes(Func<Node?, Node?> _map)
+        protected override Argument ReplaceArgumentNodes(Func<Node?, Node?> _map)
         {
             AssignableExpression newExpression = (AssignableExpression) _map(Expression).NonNull();
             if (ReferenceEquals(newExpression, Expression))
@@ -105,15 +109,15 @@ namespace VooDo.AST.Expressions
             }
         }
         private protected override ExpressionSyntax EmitArgumentExpression(Scope _scope, Tagger _tagger)
-            => Expression.EmitNode(_scope, _tagger).Own(_tagger, this);
-        public override IEnumerable<AssignableExpression> Children => new[] { Expression };
+            => (ExpressionSyntax) Expression.EmitNode(_scope, _tagger).Own(_tagger, this);
+        public override IEnumerable<Node> Children => new[] { Expression };
         public override string ToString() => $"{Kind.Token()} {Expression}".TrimStart();
     }
 
     public sealed record OutDeclarationArgument(Identifier? Parameter, ComplexTypeOrVar Type, IdentifierOrDiscard Name) : Argument(Parameter)
     {
         public override EKind Kind => EKind.Out;
-        protected override OutDeclarationArgument ReplaceArgumentNodes(Func<Node?, Node?> _map)
+        protected override Argument ReplaceArgumentNodes(Func<Node?, Node?> _map)
         {
             ComplexTypeOrVar newType = (ComplexTypeOrVar) _map(Type).NonNull();
             IdentifierOrDiscard newName = (IdentifierOrDiscard) _map(Parameter).NonNull();
@@ -132,8 +136,8 @@ namespace VooDo.AST.Expressions
         }
         private protected override ExpressionSyntax EmitArgumentExpression(Scope _scope, Tagger _tagger)
             => SyntaxFactory.DeclarationExpression(
-                    Type.EmitNode(_scope, _tagger),
-                    Name.EmitNode(_scope, _tagger))
+                    (TypeSyntax) Type.EmitNode(_scope, _tagger),
+                    (VariableDesignationSyntax) Name.EmitNode(_scope, _tagger))
             .Own(_tagger, this);
         public override IEnumerable<Node> Children => new Node[] { Type, Name };
         public override string ToString() => $"{Kind.Token()} {Type} {Name}".TrimStart();

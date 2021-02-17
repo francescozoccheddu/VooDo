@@ -113,9 +113,9 @@ namespace VooDo.AST
         public static IEnumerable<(Node node, Node? parent)> DescendantNodesWithParents(this Node _node, Predicate<Node> _shouldVisitChildren, ETraversal _traversal = ETraversal.PostDepthFirst)
             => _traversal switch
             {
-                ETraversal.BreadthFirst => VisitBreadthFirst(_node, _shouldVisitChildren),
-                ETraversal.PreDepthFirst => VisitDepthFirstPreorder(_node, _shouldVisitChildren),
-                ETraversal.PostDepthFirst => VisitDepthFirstPostorder(_node, _shouldVisitChildren),
+                ETraversal.BreadthFirst => VisitBreadthFirst(_node, _shouldVisitChildren).Skip(1),
+                ETraversal.PreDepthFirst => VisitDepthFirstPreorder(_node, _shouldVisitChildren).Skip(1),
+                ETraversal.PostDepthFirst => VisitDepthFirstPostorder(_node, _shouldVisitChildren).Where(_n => !ReferenceEquals(_n, _node)),
             };
 
         public static IEnumerable<(Node node, Node? parent)> DescendantNodesAndSelfWithParents(this Node _node, ETraversal _traversal = ETraversal.PostDepthFirst)
@@ -124,8 +124,8 @@ namespace VooDo.AST
         public static IEnumerable<(Node node, Node? parent)> DescendantNodesAndSelfWithParents(this Node _node, Predicate<Node> _shouldVisitChildren, ETraversal _traversal = ETraversal.PostDepthFirst)
             => _traversal switch
             {
-                ETraversal.BreadthFirst or ETraversal.PreDepthFirst => DescendantNodesWithParents(_node, _shouldVisitChildren, _traversal).Skip(1),
-                ETraversal.PostDepthFirst => DescendantNodesWithParents(_node, _shouldVisitChildren, _traversal).SkipLast(1),
+                ETraversal.BreadthFirst or ETraversal.PreDepthFirst => DescendantNodesWithParents(_node, _shouldVisitChildren, _traversal),
+                ETraversal.PostDepthFirst => DescendantNodesWithParents(_node, _shouldVisitChildren, _traversal),
             };
 
         public readonly struct ReplaceInfo

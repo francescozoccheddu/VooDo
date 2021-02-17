@@ -137,7 +137,7 @@ namespace VooDo.AST.Names
 
         #region Overrides
 
-        public override QualifiedType ReplaceNodes(Func<Node?, Node?> _map)
+        protected internal override Node ReplaceNodes(Func<Node?, Node?> _map)
         {
             Identifier? newAlias = (Identifier?) _map(Alias);
             ImmutableArray<SimpleType> newPath = Path.Map(_map).NonNull();
@@ -160,7 +160,7 @@ namespace VooDo.AST.Names
         {
             if (IsSimple)
             {
-                return Path[0].EmitNode(_scope, _tagger);
+                return (TypeSyntax) Path[0].EmitNode(_scope, _tagger);
             }
             NameSyntax type = (NameSyntax) Path[0].EmitNode(_scope, _tagger);
             if (IsAliasQualified)
@@ -179,7 +179,7 @@ namespace VooDo.AST.Names
         public override IEnumerable<Node> Children =>
             (IsAliasQualified ? new Node[] { Alias! } : Enumerable.Empty<Node>())
             .Concat(Path);
-        public override string ToString() => (IsAliasQualified ? $"{Alias}::" : "") + string.Join('.', Path) + base.ToString();
+        public override string ToString() => (IsAliasQualified ? $"{Alias}::" : "") + string.Join(".", Path) + base.ToString();
 
         #endregion
 

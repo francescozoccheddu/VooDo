@@ -69,7 +69,7 @@ namespace VooDo.AST.Names
 
         #region Overrides
 
-        public override Identifier ReplaceNodes(Func<Node?, Node?> _map) => this;
+        protected internal override Node ReplaceNodes(Func<Node?, Node?> _map) => this;
 
         private static readonly ImmutableDictionary<string, SyntaxToken> s_predefinedTypesTokens =
             new SyntaxKind[] {

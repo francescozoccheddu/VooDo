@@ -1,4 +1,5 @@
-﻿using Microsoft.CodeAnalysis.CSharp;
+﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 using System;
@@ -104,7 +105,7 @@ namespace VooDo.AST.Expressions
 
         protected override EPrecedence m_Precedence => EPrecedence.Primary;
 
-        public override LiteralExpression ReplaceNodes(Func<Node?, Node?> _map) => this;
+        protected internal override Node ReplaceNodes(Func<Node?, Node?> _map) => this;
 
         private LiteralExpressionSyntax EmitNode()
         {
@@ -117,6 +118,7 @@ namespace VooDo.AST.Expressions
                 string => SyntaxKind.StringLiteralExpression,
                 _ => SyntaxKind.NumericLiteralExpression
             };
+#pragma warning disable CS8509 // The switch expression does not handle all possible values of its input type (it is not exhaustive).
             return m_value is bool or null
                 ? SyntaxFactory.LiteralExpression(kind)
                 : SyntaxFactory.LiteralExpression(kind, m_value switch
@@ -129,10 +131,11 @@ namespace VooDo.AST.Expressions
                     float v => SyntaxFactory.Literal(v),
                     ulong v => SyntaxFactory.Literal(v),
                     long v => SyntaxFactory.Literal(v),
-                    int v => SyntaxFactory.Literal(v),
+                    int v => SyntaxFactory.Literal(v)
                 });
+#pragma warning restore CS8509 // The switch expression does not handle all possible values of its input type (it is not exhaustive).
         }
-        internal override LiteralExpressionSyntax EmitNode(Scope _scope, Tagger _tagger) => EmitNode().Own(_tagger, this);
+        internal override SyntaxNode EmitNode(Scope _scope, Tagger _tagger) => EmitNode().Own(_tagger, this);
         public override string ToString() => EmitNode().ToFullString();
 
         #endregion

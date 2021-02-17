@@ -1,5 +1,5 @@
-﻿using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
+﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 
 using System;
 using System.Collections.Generic;
@@ -57,7 +57,7 @@ namespace VooDo.AST.Names
 
         #region Overrides
 
-        public override ComplexTypeOrVar ReplaceNodes(Func<Node?, Node?> _map)
+        protected internal override Node ReplaceNodes(Func<Node?, Node?> _map)
         {
             if (IsVar)
             {
@@ -74,12 +74,12 @@ namespace VooDo.AST.Names
             }
         }
 
-        internal override TypeSyntax EmitNode(Scope _scope, Tagger _tagger)
+        internal override SyntaxNode EmitNode(Scope _scope, Tagger _tagger)
             => (IsVar
             ? SyntaxFactory.IdentifierName("var")
             : Type!.EmitNode(_scope, _tagger))
             .Own(_tagger, this);
-        public override IEnumerable<ComplexType> Children => IsVar ? Enumerable.Empty<ComplexType>() : new[] { Type! };
+        public override IEnumerable<Node> Children => IsVar ? Enumerable.Empty<ComplexType>() : new[] { Type! };
         public override string ToString() => IsVar ? "var" : Type!.ToString();
 
         #endregion

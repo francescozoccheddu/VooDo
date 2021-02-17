@@ -1,4 +1,5 @@
 ﻿
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
@@ -6,7 +7,6 @@ using System;
 using System.Collections.Generic;
 
 using VooDo.AST.Names;
-using VooDo.Compiling;
 using VooDo.Compiling.Emission;
 using VooDo.Problems;
 using VooDo.Utils;
@@ -42,7 +42,7 @@ namespace VooDo.AST.Directives
 
         #region Overrides
 
-        public override UsingStaticDirective ReplaceNodes(Func<Node?, Node?> _map)
+        protected internal override Node ReplaceNodes(Func<Node?, Node?> _map)
         {
             QualifiedType newType = (QualifiedType) _map(Type).NonNull();
             if (ReferenceEquals(newType, Type))
@@ -58,13 +58,14 @@ namespace VooDo.AST.Directives
             }
         }
 
-        internal override UsingDirectiveSyntax EmitNode(Scope _scope, Tagger _tagger)
+        internal override SyntaxNode EmitNode(Scope _scope, Tagger _tagger)
             => SyntaxFactory.UsingDirective(
                     SyntaxFactory.Token(SyntaxKind.StaticKeyword),
                     null,
                     (NameSyntax) Type.EmitNode(_scope, _tagger))
                 .Own(_tagger, this);
-        public override IEnumerable<QualifiedType> Children => new QualifiedType[] { Type };
+
+        public override IEnumerable<Node> Children => new QualifiedType[] { Type };
         public override string ToString() => $"{GrammarConstants.usingKeyword} {GrammarConstants.staticKeyword} {Type}{GrammarConstants.statementEndToken}";
 
         #endregion

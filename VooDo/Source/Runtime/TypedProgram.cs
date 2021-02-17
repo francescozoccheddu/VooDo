@@ -61,7 +61,7 @@ namespace VooDo.Runtime
 
         public IEnumerable<Variable<TValue>> GetVariables<TValue>(string _name)
             => GetVariables(_name)
-            .Where(_v => _v.Type.IsAssignableTo(typeof(TValue)))
+            .Where(_v => typeof(TValue).IsAssignableFrom(_v.Type))
             .Cast<Variable<TValue>>();
 
         public Variable? GetVariable(string _name)

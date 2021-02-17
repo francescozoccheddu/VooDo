@@ -1,4 +1,5 @@
-﻿using Microsoft.CodeAnalysis.CSharp;
+﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 using System;
@@ -28,7 +29,7 @@ namespace VooDo.AST.Expressions
 
         protected override EPrecedence m_Precedence => EPrecedence.Unary;
 
-        public override UnaryExpression ReplaceNodes(Func<Node?, Node?> _map)
+        protected internal override Node ReplaceNodes(Func<Node?, Node?> _map)
         {
             Expression newExpression = (Expression) _map(Expression).NonNull();
             if (ReferenceEquals(newExpression, Expression))
@@ -44,7 +45,7 @@ namespace VooDo.AST.Expressions
             }
         }
 
-        internal override ExpressionSyntax EmitNode(Scope _scope, Tagger _tagger)
+        internal override SyntaxNode EmitNode(Scope _scope, Tagger _tagger)
             => SyntaxFactory.PrefixUnaryExpression(
                 Kind switch
                 {
@@ -53,9 +54,9 @@ namespace VooDo.AST.Expressions
                     EKind.LogicNot => SyntaxKind.LogicalNotExpression,
                     EKind.BitwiseNot => SyntaxKind.BitwiseNotExpression,
                 },
-                Expression.EmitNode(_scope, _tagger))
+                (ExpressionSyntax) Expression.EmitNode(_scope, _tagger))
             .Own(_tagger, this);
-        public override IEnumerable<Expression> Children => new[] { Expression };
+        public override IEnumerable<Node> Children => new[] { Expression };
         public override string ToString() => $"{Kind.Token()}{Expression}";
 
         #endregion

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
@@ -52,9 +51,9 @@ namespace VooDo.Runtime
 
         public override bool Equals(object? _obj) => Equals(_obj as Loader);
         public bool Equals(Loader? _other) => _other is not null && m_type == _other.m_type;
-        public override int GetHashCode() => HashCode.Combine(m_type);
+        public override int GetHashCode() => m_type.GetHashCode();
 
-        public static bool operator ==(Loader? _left, Loader? _right) => EqualityComparer<Loader>.Default.Equals(_left, _right);
+        public static bool operator ==(Loader? _left, Loader? _right) => _left is not null && _left.Equals(_right);
         public static bool operator !=(Loader? _left, Loader? _right) => !(_left == _right);
 
     }

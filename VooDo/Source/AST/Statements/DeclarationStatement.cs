@@ -1,4 +1,5 @@
-﻿using Microsoft.CodeAnalysis.CSharp;
+﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 using System;
@@ -25,24 +26,24 @@ namespace VooDo.AST.Statements
 
             public bool HasInitializer => Initializer is not null;
 
-            internal override VariableDeclaratorSyntax EmitNode(Scope _scope, Tagger _tagger)
+            internal override SyntaxNode EmitNode(Scope _scope, Tagger _tagger)
             {
                 ExpressionSyntax? initializer;
                 if (Parent is not null && Parent.Parent is GlobalStatement)
                 {
-                    Scope.GlobalDefinition globalDefinition = _scope.AddGlobal(new GlobalPrototype(new Global(Parent.Type, Name, Initializer), this));
+                    Scope.GlobalDefinition globalDefinition = _scope.AddGlobal(new GlobalPrototype(new Global(((DeclarationStatement) Parent).Type, Name, Initializer), this));
                     initializer = SyntaxFactoryUtils.ThisMemberAccess(globalDefinition.Identifier);
                 }
                 else
                 {
                     _scope.AddLocal(this, Name);
-                    initializer = Initializer?.EmitNode(_scope, _tagger);
+                    initializer = (ExpressionSyntax?) (Initializer?.EmitNode(_scope, _tagger));
                 }
                 EqualsValueClauseSyntax? initializerClause = initializer?.ToEqualsValueClause();
                 return SyntaxFactory.VariableDeclarator(Name.EmitToken(_tagger), null, initializerClause).Own(_tagger, this);
             }
 
-            public override Declarator ReplaceNodes(Func<Node?, Node?> _map)
+            protected internal override Node ReplaceNodes(Func<Node?, Node?> _map)
             {
                 Identifier newName = (Identifier) _map(Name).NonNull();
                 Expression? newInitializer = (Expression?) _map(Initializer);
@@ -60,7 +61,9 @@ namespace VooDo.AST.Statements
                 }
             }
 
+#if NET5_0
             public override DeclarationStatement? Parent => (DeclarationStatement?) base.Parent;
+#endif
 
             public override IEnumerable<Node> Children
                 => HasInitializer ? new Node[] { Name, Initializer! } : new Node[] { Name };
@@ -117,7 +120,7 @@ namespace VooDo.AST.Statements
             }
         }
 
-        public override DeclarationStatement ReplaceNodes(Func<Node?, Node?> _map)
+        protected internal override Node ReplaceNodes(Func<Node?, Node?> _map)
         {
             ComplexTypeOrVar newType = (ComplexTypeOrVar) _map(Type).NonNull();
             ImmutableArray<Declarator> newDeclarators = Declarators.Map(_map).NonNull();
@@ -135,9 +138,9 @@ namespace VooDo.AST.Statements
             }
         }
 
-        internal override IEnumerable<LocalDeclarationStatementSyntax> EmitNodes(Scope _scope, Tagger _tagger)
+        internal override IEnumerable<StatementSyntax> EmitNodes(Scope _scope, Tagger _tagger)
         {
-            TypeSyntax type = Type.EmitNode(_scope, _tagger);
+            TypeSyntax type = (TypeSyntax) Type.EmitNode(_scope, _tagger);
             if (Parent is GlobalStatement && !Type.IsVar)
             {
                 type = SyntaxFactoryUtils.VariableType(type);
@@ -148,7 +151,7 @@ namespace VooDo.AST.Statements
                        .Own(_tagger, this));
         }
 
-        public override IEnumerable<BodyNode> Children => new BodyNode[] { Type }.Concat(Declarators);
+        public override IEnumerable<Node> Children => new BodyNode[] { Type }.Concat(Declarators);
         public override string ToString() => $"{Type} {string.Join(", ", Declarators)}{GrammarConstants.statementEndToken}";
 
         #endregion

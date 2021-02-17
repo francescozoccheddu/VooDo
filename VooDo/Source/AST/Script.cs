@@ -37,7 +37,7 @@ namespace VooDo.AST
 
         #region Overrides
 
-        public override Script ReplaceNodes(Func<Node?, Node?> _map)
+        protected internal override Node ReplaceNodes(Func<Node?, Node?> _map)
         {
             ImmutableArray<UsingDirective> newUsings = Usings.Map(_map).NonNull();
             ImmutableArray<Statement> newStatements = Statements.Map(_map).NonNull();
@@ -59,13 +59,13 @@ namespace VooDo.AST
         {
             Scope scope = new Scope();
             Tagger tagger = _session.Tagger;
-            TypeSyntax? returnType = _session.Compilation.Options.ReturnType?.EmitNode(scope, tagger);
+            TypeSyntax? returnType = (TypeSyntax?) (_session.Compilation.Options.ReturnType?.EmitNode(scope, tagger));
             TypeSyntax variableType = SFH.VariableType();
             IEnumerable<ExternAliasDirectiveSyntax> aliases =
                 _session.Compilation.Options.References
                 .SelectMany(_r => _r.Aliases)
                 .Select(_r => SF.ExternAliasDirective(_r).Own(tagger, _r));
-            IEnumerable<UsingDirectiveSyntax> usings = Usings.Select(_u => _u.EmitNode(scope, tagger));
+            IEnumerable<UsingDirectiveSyntax> usings = Usings.Select(_u => (UsingDirectiveSyntax) _u.EmitNode(scope, tagger));
             MethodDeclarationSyntax? runMethod = SF.MethodDeclaration(
                                 returnType ?? SFH.Void(),
                                 SF.Identifier(returnType is null
@@ -84,7 +84,7 @@ namespace VooDo.AST
             {
                 TypeSyntax? type = _definition.Prototype.Global.Type.IsVar
                     ? null
-                    : _definition.Prototype.Global.Type.EmitNode(scope, tagger);
+                    : (TypeSyntax) _definition.Prototype.Global.Type.EmitNode(scope, tagger);
                 return SF.VariableDeclaration(
                             SFH.VariableType(type).Own(tagger, _definition.Prototype.Global.Type),
                             SF.VariableDeclarator(
@@ -98,10 +98,10 @@ namespace VooDo.AST
                                     : SF.LiteralExpression(
                                         SyntaxKind.StringLiteralExpression,
                                         SF.Literal(_definition.Prototype.Global.Name!)),
-                                    _definition.Prototype.Global.HasInitializer
-                                    ? _definition.Prototype.Global.Initializer!.EmitNode(new Scope(), tagger)
+                                    (_definition.Prototype.Global.HasInitializer
+                                    ? (ExpressionSyntax) _definition.Prototype.Global.Initializer!.EmitNode(new Scope(), tagger)
                                     : SF.LiteralExpression(
-                                        SyntaxKind.DefaultLiteralExpression))
+                                        SyntaxKind.DefaultLiteralExpression)))
                                 .ToEqualsValueClause())
                             .ToSeparatedList())
                     .Own(tagger, _definition.Prototype.Source);
@@ -162,8 +162,8 @@ namespace VooDo.AST
             return (root, globals);
         }
 
-        public override IEnumerable<BodyNode> Children => ((IEnumerable<BodyNode>) Usings).Concat(Statements);
-        public override string ToString() => (string.Join('\n', Usings) + "\n\n" + string.Join('\n', Statements)).Trim();
+        public override IEnumerable<Node> Children => ((IEnumerable<Node>) Usings).Concat(Statements);
+        public override string ToString() => (string.Join("\n", Usings) + "\n\n" + string.Join("\n", Statements)).Trim();
 
         #endregion
 

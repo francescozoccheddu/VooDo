@@ -128,9 +128,11 @@ namespace VooDo.AST.Names
 
         #region Overrides
 
+#if NET5_0
         public override QualifiedType? Parent => (QualifiedType?) base.Parent;
+#endif
 
-        public override SimpleType ReplaceNodes(Func<Node?, Node?> _map)
+        protected internal override Node ReplaceNodes(Func<Node?, Node?> _map)
         {
             Identifier newName = (Identifier) _map(Name).NonNull();
             ImmutableArray<ComplexType> newTypeArguments = TypeArguments.Map(_map).NonNull();
@@ -148,9 +150,9 @@ namespace VooDo.AST.Names
             }
         }
 
-        internal override TypeSyntax EmitNode(Scope _scope, Tagger _tagger)
+        internal override SyntaxNode EmitNode(Scope _scope, Tagger _tagger)
         {
-            if (Parent is not null && Parent.IsSimple && !IsGeneric)
+            if (Parent is not null && ((QualifiedType) Parent).IsSimple && !IsGeneric)
             {
                 SyntaxToken? keyword = Name.EmitPredefinedTypeKeywordToken(_tagger);
                 if (keyword is not null)
@@ -161,7 +163,7 @@ namespace VooDo.AST.Names
             return (IsGeneric
             ? (SimpleNameSyntax) SyntaxFactoryUtils.GenericName(
                 Name.EmitToken(_tagger),
-                TypeArguments.Select(_a => _a.EmitNode(_scope, _tagger)))
+                TypeArguments.Select(_a => (TypeSyntax) _a.EmitNode(_scope, _tagger)))
             : SyntaxFactory.IdentifierName(Name.EmitToken(_tagger)))
             .Own(_tagger, this);
         }

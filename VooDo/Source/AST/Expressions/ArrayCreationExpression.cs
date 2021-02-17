@@ -68,7 +68,7 @@ namespace VooDo.AST.Expressions
 
         protected override EPrecedence m_Precedence => EPrecedence.Primary;
 
-        public override ArrayCreationExpression ReplaceNodes(Func<Node?, Node?> _map)
+        protected internal override Node ReplaceNodes(Func<Node?, Node?> _map)
         {
             ComplexType newType = (ComplexType) _map(Type).NonNull();
             ImmutableArray<Expression> newSizes = Sizes.Map(_map).NonNull();
@@ -86,7 +86,7 @@ namespace VooDo.AST.Expressions
             }
         }
 
-        internal override ExpressionSyntax EmitNode(Scope _scope, Tagger _tagger)
+        internal override SyntaxNode EmitNode(Scope _scope, Tagger _tagger)
         {
             ArrayTypeSyntax type = (ArrayTypeSyntax) Type.EmitNode(_scope, _tagger);
             SyntaxList<ArrayRankSpecifierSyntax> rankSpecifiers = type.RankSpecifiers;
@@ -95,7 +95,7 @@ namespace VooDo.AST.Expressions
             type = type.WithRankSpecifiers(rankSpecifiers);
             return SyntaxFactory.ArrayCreationExpression(type).Own(_tagger, this);
         }
-        public override IEnumerable<ComplexTypeOrExpression> Children => new ComplexTypeOrExpression[] { Type }.Concat(Sizes);
+        public override IEnumerable<Node> Children => new ComplexTypeOrExpression[] { Type }.Concat(Sizes);
         public override string ToString() => $"{GrammarConstants.newKeyword} {Type with { Ranks = default }}[{string.Join(", ", Sizes)}]";
 
         #endregion

@@ -1,4 +1,5 @@
 ﻿
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
@@ -6,7 +7,6 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
-using System.Runtime.CompilerServices;
 
 using VooDo.Compiling.Emission;
 using VooDo.Parsing;
@@ -47,7 +47,7 @@ namespace VooDo.AST.Names
         {
             ComplexType type = Unwrap(_type, out bool nullable, out ImmutableArray<RankSpecifier> ranks) switch
             {
-                var t when t.IsAssignableTo(typeof(ITuple)) => TupleType.FromType(_type, _ignoreUnbound),
+                var t when TupleType.IsTuple(t) => TupleType.FromType(_type, _ignoreUnbound),
                 _ => QualifiedType.FromType(_type, _ignoreUnbound)
             };
             return type with
@@ -98,9 +98,9 @@ namespace VooDo.AST.Names
                 }
             }
 
-            public override RankSpecifier ReplaceNodes(Func<Node?, Node?> _map) => this;
+            protected internal override Node ReplaceNodes(Func<Node?, Node?> _map) => this;
 
-            internal override ArrayRankSpecifierSyntax EmitNode(Scope _scope, Tagger _tagger)
+            internal override SyntaxNode EmitNode(Scope _scope, Tagger _tagger)
                 => SyntaxFactoryUtils.ArrayRank(m_rank).Own(_tagger, this);
 
             public override string ToString()
@@ -133,7 +133,7 @@ namespace VooDo.AST.Names
 
         #region Overrides
 
-        public override ComplexType ReplaceNodes(Func<Node?, Node?> _map)
+        protected internal override Node ReplaceNodes(Func<Node?, Node?> _map)
         {
             ImmutableArray<RankSpecifier> newRanks = Ranks.Map(_map).NonNull();
             if (newRanks == Ranks)
@@ -149,7 +149,7 @@ namespace VooDo.AST.Names
             }
         }
 
-        internal sealed override TypeSyntax EmitNode(Scope _scope, Tagger _tagger)
+        internal sealed override SyntaxNode EmitNode(Scope _scope, Tagger _tagger)
         {
             TypeSyntax? type = EmitNonArrayNonNullableType(_scope, _tagger);
             if (IsNullable)

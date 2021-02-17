@@ -1,5 +1,6 @@
 ﻿
 
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
@@ -20,7 +21,7 @@ namespace VooDo.AST.Expressions
 
         protected override EPrecedence m_Precedence => EPrecedence.Relational;
 
-        public override AsExpression ReplaceNodes(Func<Node?, Node?> _map)
+        protected internal override Node ReplaceNodes(Func<Node?, Node?> _map)
         {
             Expression newExpression = (Expression) _map(Expression).NonNull();
             ComplexType newType = (ComplexType) _map(Type).NonNull();
@@ -38,13 +39,13 @@ namespace VooDo.AST.Expressions
             }
         }
 
-        internal override BinaryExpressionSyntax EmitNode(Scope _scope, Tagger _tagger)
+        internal override SyntaxNode EmitNode(Scope _scope, Tagger _tagger)
             => SyntaxFactory.BinaryExpression(
                 SyntaxKind.AsExpression,
-                Expression.EmitNode(_scope, _tagger),
-                Type.EmitNode(_scope, _tagger))
+                (ExpressionSyntax) Expression.EmitNode(_scope, _tagger),
+                (ExpressionSyntax) Type.EmitNode(_scope, _tagger))
             .Own(_tagger, this);
-        public override IEnumerable<ComplexTypeOrExpression> Children => new ComplexTypeOrExpression[] { Expression, Type };
+        public override IEnumerable<Node> Children => new Node[] { Expression, Type };
         public override string ToString() => $"{LeftCode(Expression)} {GrammarConstants.asKeyword} {Type}";
 
         #endregion

@@ -147,7 +147,10 @@ namespace VooDo.Compiling.Transformation
         private static ImmutableArray<ITypeSymbol> InferSingleType(IEnumerable<GlobalSyntax> _syntax, IEnumerable<GlobalPrototype> _prototypes, SemanticModel _semantics)
         {
             ImmutableArray<ImmutableArray<ITypeSymbol>> types = InferTypes(_syntax, _semantics);
-            types.Zip(_prototypes).Where(_t => _t.First.Length != 1).Select(_t => new GlobalTypeInferenceProblem(_t.First, _t.Second)).ThrowErrors();
+            types.Zip(_prototypes, (_t, _p) => (types: _t, prototype: _p))
+                .Where(_t => _t.types.Length != 1)
+                .Select(_t => new GlobalTypeInferenceProblem(_t.types, _t.prototype))
+                .ThrowErrors();
             return types.Select(_t => _t.Single()).ToImmutableArray();
         }
 
@@ -169,7 +172,9 @@ namespace VooDo.Compiling.Transformation
 
         private static CompilationUnitSyntax ReplaceAll(CompilationUnitSyntax _root, ImmutableArray<VariableDeclarationSyntax> _declarations, IEnumerable<ITypeSymbol> _types)
         {
-            ImmutableDictionary<VariableDeclarationSyntax, ITypeSymbol> map = _declarations.Zip(_types).ToImmutableDictionary(_e => _e.First, _e => _e.Second);
+            ImmutableDictionary<VariableDeclarationSyntax, ITypeSymbol> map = _declarations
+                .Zip(_types, (_d, _t) => (declaration: _d, type: _t))
+                .ToImmutableDictionary(_e => _e.declaration, _e => _e.type);
             return _root.ReplaceNodes(_declarations, (_old, _new) => Replace(_new, map[_old]));
         }
 

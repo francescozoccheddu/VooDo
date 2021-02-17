@@ -1,4 +1,5 @@
-﻿using Microsoft.CodeAnalysis.CSharp;
+﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 using System;
@@ -31,7 +32,7 @@ namespace VooDo.AST.Statements
 
         #region Overrides
 
-        public override BlockStatement ReplaceNodes(Func<Node?, Node?> _map)
+        protected internal override Node ReplaceNodes(Func<Node?, Node?> _map)
         {
             ImmutableArray<Statement> newStatements = m_statements.Map(_map).NonNull();
             if (newStatements == m_statements)
@@ -51,17 +52,17 @@ namespace VooDo.AST.Statements
         public int Count => ((IReadOnlyCollection<Statement>) m_Statements).Count;
         public IEnumerator<Statement> GetEnumerator() => ((IEnumerable<Statement>) m_Statements).GetEnumerator();
         IEnumerator IEnumerable.GetEnumerator() => ((IEnumerable) m_Statements).GetEnumerator();
-        internal override BlockSyntax EmitNode(Scope _scope, Tagger _tagger)
+        internal override SyntaxNode EmitNode(Scope _scope, Tagger _tagger)
         {
             Scope nestedScope = _scope.CreateNested();
             IEnumerable<StatementSyntax> statements = this.SelectMany(_s => _s.EmitNodes(nestedScope, _tagger));
             return SyntaxFactory.Block(statements.ToSyntaxList()).Own(_tagger, this);
         }
 
-        public override IEnumerable<Statement> Children => m_Statements;
+        public override IEnumerable<Node> Children => m_Statements;
         public override string ToString() => Count == 0
             ? "{}"
-            : $"{{{("\n" + string.Join('\n', m_Statements)).Replace("\n", "\n\t")}\n}}";
+            : $"{{{("\n" + string.Join("\n", m_Statements)).Replace("\n", "\n\t")}\n}}";
 
         #endregion
 

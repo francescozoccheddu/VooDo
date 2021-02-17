@@ -1,5 +1,6 @@
 ﻿
 
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
@@ -8,7 +9,6 @@ using System.Collections.Generic;
 using System.Linq;
 
 using VooDo.AST.Names;
-using VooDo.Compiling;
 using VooDo.Compiling.Emission;
 using VooDo.Utils;
 
@@ -28,7 +28,7 @@ namespace VooDo.AST.Expressions
 
         protected override EPrecedence m_Precedence => EPrecedence.Relational;
 
-        public override IsExpression ReplaceNodes(Func<Node?, Node?> _map)
+        protected internal override Node ReplaceNodes(Func<Node?, Node?> _map)
         {
             ComplexType newType = (ComplexType) _map(Type).NonNull();
             IdentifierOrDiscard? newName = (IdentifierOrDiscard?) _map(Name);
@@ -46,17 +46,17 @@ namespace VooDo.AST.Expressions
             }
         }
 
-        internal override ExpressionSyntax EmitNode(Scope _scope, Tagger _tagger)
+        internal override SyntaxNode EmitNode(Scope _scope, Tagger _tagger)
             => (IsDeclaration
             ? SyntaxFactory.IsPatternExpression(
-                Expression.EmitNode(_scope, _tagger),
+                (ExpressionSyntax) Expression.EmitNode(_scope, _tagger),
                 SyntaxFactory.DeclarationPattern(
-                    Type.EmitNode(_scope, _tagger),
-                    Name!.EmitNode(_scope, _tagger)))
+                    (TypeSyntax) Type.EmitNode(_scope, _tagger),
+                    (VariableDesignationSyntax) Name!.EmitNode(_scope, _tagger)))
             : (ExpressionSyntax) SyntaxFactory.BinaryExpression(
                 SyntaxKind.IsExpression,
-                Expression.EmitNode(_scope, _tagger),
-                Type.EmitNode(_scope, _tagger)))
+                (ExpressionSyntax) Expression.EmitNode(_scope, _tagger),
+                (ExpressionSyntax) Type.EmitNode(_scope, _tagger)))
             .Own(_tagger, this);
         public override IEnumerable<Node> Children
             => new Node[] { Expression, Type }.Concat(IsDeclaration ? new Node[] { Name! } : Enumerable.Empty<Node>());

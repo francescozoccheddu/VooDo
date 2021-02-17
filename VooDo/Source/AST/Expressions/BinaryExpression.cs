@@ -1,4 +1,5 @@
-﻿using Microsoft.CodeAnalysis.CSharp;
+﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 using System;
@@ -54,7 +55,7 @@ namespace VooDo.AST.Expressions
             EKind.BitwiseXor => EPrecedence.BitwiseXor,
         };
 
-        public override BinaryExpression ReplaceNodes(Func<Node?, Node?> _map)
+        protected internal override Node ReplaceNodes(Func<Node?, Node?> _map)
         {
             Expression newLeft = (Expression) _map(Left).NonNull();
             Expression newRight = (Expression) _map(Right).NonNull();
@@ -72,7 +73,7 @@ namespace VooDo.AST.Expressions
             }
         }
 
-        internal override BinaryExpressionSyntax EmitNode(Scope _scope, Tagger _tagger)
+        internal override SyntaxNode EmitNode(Scope _scope, Tagger _tagger)
             => SyntaxFactory.BinaryExpression(
                 Kind switch
                 {
@@ -96,10 +97,10 @@ namespace VooDo.AST.Expressions
                     EKind.BitwiseOr => SyntaxKind.BitwiseOrExpression,
                     EKind.BitwiseXor => SyntaxKind.ExclusiveOrExpression,
                 },
-                Left.EmitNode(_scope, _tagger),
-                Right.EmitNode(_scope, _tagger))
+                (ExpressionSyntax) Left.EmitNode(_scope, _tagger),
+                (ExpressionSyntax) Right.EmitNode(_scope, _tagger))
             .Own(_tagger, this);
-        public override IEnumerable<Expression> Children => new Expression[] { Left, Right };
+        public override IEnumerable<Node> Children => new Expression[] { Left, Right };
         public override string ToString() => $"{LeftCode(Left)} {Kind.Token()} {RightCode(Right)}";
 
         #endregion

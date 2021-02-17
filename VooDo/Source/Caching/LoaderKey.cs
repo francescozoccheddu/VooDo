@@ -6,6 +6,7 @@ using VooDo.AST;
 using VooDo.AST.Names;
 using VooDo.Compiling;
 using VooDo.Hooks;
+using VooDo.Utils;
 
 namespace VooDo.Caching
 {
@@ -29,15 +30,7 @@ namespace VooDo.Caching
             m_references = Reference.Merge(_references).ToImmutableHashSet();
             m_returnType = _returnType;
             m_hookInitializerProvider = _hookInitializerProvider;
-            m_hashCode = 0;
-            foreach (Reference reference in m_references)
-            {
-                unchecked
-                {
-                    m_hashCode += reference.GetHashCode();
-                }
-            }
-            m_hashCode = HashCode.Combine(m_hashCode, m_source, m_returnType, m_hookInitializerProvider);
+            m_hashCode = Identity.CombineHash(Identity.CombineHashes(m_references), m_source, m_returnType, m_hookInitializerProvider);
         }
 
         public CompilationOptions CreateMatchingOptions() => CompilationOptions.Default with

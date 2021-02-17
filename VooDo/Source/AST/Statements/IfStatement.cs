@@ -1,4 +1,5 @@
-﻿using Microsoft.CodeAnalysis.CSharp;
+﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 using System;
@@ -23,7 +24,7 @@ namespace VooDo.AST.Statements
 
         #region Overrides
 
-        public override IfStatement ReplaceNodes(Func<Node?, Node?> _map)
+        protected internal override Node ReplaceNodes(Func<Node?, Node?> _map)
         {
             Expression newCondition = (Expression) _map(Condition).NonNull();
             Statement newThen = (Statement) _map(Then).NonNull();
@@ -43,17 +44,17 @@ namespace VooDo.AST.Statements
             }
         }
 
-        internal override IfStatementSyntax EmitNode(Scope _scope, Tagger _tagger)
+        internal override SyntaxNode EmitNode(Scope _scope, Tagger _tagger)
         {
-            ExpressionSyntax condition = Condition.EmitNode(_scope, _tagger);
-            StatementSyntax then = Then.EmitNode(_scope, _tagger);
+            ExpressionSyntax condition = (ExpressionSyntax) Condition.EmitNode(_scope, _tagger);
+            StatementSyntax then = (StatementSyntax) Then.EmitNode(_scope, _tagger);
             return (HasElse
-                ? SyntaxFactory.IfStatement(condition, then, SyntaxFactory.ElseClause(Else!.EmitNode(_scope, _tagger)))
+                ? SyntaxFactory.IfStatement(condition, then, SyntaxFactory.ElseClause((StatementSyntax) Else!.EmitNode(_scope, _tagger)))
                 : SyntaxFactory.IfStatement(condition, then))
                 .Own(_tagger, this);
         }
 
-        public override IEnumerable<BodyNode> Children => new BodyNode[] { Condition, Then }.Concat(HasElse ? new[] { Else! } : Enumerable.Empty<BodyNode>());
+        public override IEnumerable<Node> Children => new BodyNode[] { Condition, Then }.Concat(HasElse ? new[] { Else! } : Enumerable.Empty<BodyNode>());
         public override string ToString() => $"{GrammarConstants.ifKeyword} ({Condition})\n"
             + (Then is BlockStatement ? "" : "\t") + Then
             + (Else is null ? "" : $"\n{GrammarConstants.elseKeyword}\n" + (Else is BlockStatement ? "" : "\t") + Else);

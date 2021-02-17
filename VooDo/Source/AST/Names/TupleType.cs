@@ -1,4 +1,5 @@
-﻿using Microsoft.CodeAnalysis.CSharp;
+﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 using System;
@@ -52,7 +53,7 @@ namespace VooDo.AST.Names
             {
                 throw new ArgumentException("Ref type", nameof(_type));
             }
-            if (_type.IsAssignableTo(typeof(ITuple)) && s_tupleTypes.Contains(_type.GetGenericTypeDefinition()))
+            if (IsTuple(_type))
             {
                 return new TupleType(_type.GenericTypeArguments.Select(_t => new Element(ComplexType.FromType(_t, _ignoreUnbound))));
             }
@@ -62,7 +63,22 @@ namespace VooDo.AST.Names
             }
         }
 
+        internal static bool IsTuple(Type _type)
+        {
+            bool isTuple = true;
+#if NET5_0
+            isTuple = typeof(ITuple).IsAssignableFrom(_type);
+#else
+            isTuple = _type.IsGenericType;
+#endif
+            return isTuple && s_tupleTypes.Contains(_type.GetGenericTypeDefinition());
+        }
+
+#if NET5_0
         public static new TupleType FromType<TType>() where TType : ITuple
+#else
+        public static new TupleType FromType<TType>() 
+#endif
             => FromType(typeof(TType));
 
         #endregion
@@ -88,7 +104,7 @@ namespace VooDo.AST.Names
 
             public bool IsNamed => Name is not null;
 
-            public override Element ReplaceNodes(Func<Node?, Node?> _map)
+            protected internal override Node ReplaceNodes(Func<Node?, Node?> _map)
             {
                 ComplexType newType = (ComplexType) _map(Type).NonNull();
                 Identifier? newName = (Identifier?) _map(Name).NonNull();
@@ -105,9 +121,9 @@ namespace VooDo.AST.Names
                     };
                 }
             }
-            internal override TupleElementSyntax EmitNode(Scope _scope, Tagger _tagger)
+            internal override SyntaxNode EmitNode(Scope _scope, Tagger _tagger)
                 => SyntaxFactory.TupleElement(
-                    Type.EmitNode(_scope, _tagger),
+                    (TypeSyntax) Type.EmitNode(_scope, _tagger),
                     IsNamed
                     ? Name!.EmitToken(_tagger)
                     : SyntaxFactory.Token(SyntaxKind.None))
@@ -151,7 +167,7 @@ namespace VooDo.AST.Names
 
         #region Overrides
 
-        public override TupleType ReplaceNodes(Func<Node?, Node?> _map)
+        protected internal override Node ReplaceNodes(Func<Node?, Node?> _map)
         {
             ImmutableArray<Element> newElements = m_Elements.Map(_map).NonNull();
             TupleType newThis = (TupleType) base.ReplaceNodes(_map);
@@ -174,8 +190,8 @@ namespace VooDo.AST.Names
         IEnumerator IEnumerable.GetEnumerator() => ((IEnumerable) m_Elements).GetEnumerator();
         private protected override TypeSyntax EmitNonArrayNonNullableType(Scope _scope, Tagger _tagger)
             => SyntaxFactory.TupleType(this.Select(_e => _e.EmitNode(_scope, _tagger)).ToSeparatedList()).Own(_tagger, this);
-        public override IEnumerable<Element> Children => m_Elements;
-        public override string ToString() => $"({string.Join(',', m_Elements)})" + base.ToString();
+        public override IEnumerable<Node> Children => m_Elements;
+        public override string ToString() => $"({string.Join(",", m_Elements)})" + base.ToString();
 
         #endregion
 

@@ -1,4 +1,5 @@
-﻿using Microsoft.CodeAnalysis.CSharp;
+﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 using System;
@@ -76,9 +77,11 @@ namespace VooDo.AST.Names
 
         #region Overrides
 
+#if NET5_0
         public override UsingNamespaceDirective? Parent => (UsingNamespaceDirective?) base.Parent;
+#endif
 
-        public override Namespace ReplaceNodes(Func<Node?, Node?> _map)
+        protected internal override Node ReplaceNodes(Func<Node?, Node?> _map)
         {
             Identifier? newAlias = (Identifier?) _map(Alias);
             ImmutableArray<Identifier> newPath = Path.Map(_map).NonNull();
@@ -96,7 +99,7 @@ namespace VooDo.AST.Names
             }
         }
 
-        internal override NameSyntax EmitNode(Scope _scope, Tagger _tagger)
+        internal override SyntaxNode EmitNode(Scope _scope, Tagger _tagger)
         {
             IdentifierNameSyntax[] path = Path.Select(_i => SyntaxFactory.IdentifierName(_i.EmitToken(_tagger)).Own(_tagger, _i)).ToArray();
             NameSyntax type = path[0];
@@ -114,7 +117,7 @@ namespace VooDo.AST.Names
         }
 
         public override IEnumerable<Node> Children => (IsAliasQualified ? new Node[] { Alias! } : Enumerable.Empty<Node>()).Concat(Path);
-        public override string ToString() => (IsAliasQualified ? $"{Alias}::" : "") + string.Join('.', Path);
+        public override string ToString() => (IsAliasQualified ? $"{Alias}::" : "") + string.Join(".", Path);
 
         #endregion
 

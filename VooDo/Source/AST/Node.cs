@@ -51,7 +51,7 @@ namespace VooDo.AST
         protected virtual IEnumerable<Problem> GetSelfSyntaxProblems()
             => Enumerable.Empty<Problem>();
 
-        public abstract Node ReplaceNodes(Func<Node?, Node?> _map);
+        protected internal abstract Node ReplaceNodes(Func<Node?, Node?> _map);
 
         internal Node SetAsRootInternal(Compilation? _compilation)
         {
@@ -72,7 +72,6 @@ namespace VooDo.AST
     public abstract record BodyNodeOrIdentifier : Node
     {
 
-        public abstract override BodyNodeOrIdentifier ReplaceNodes(Func<Node?, Node?> _map);
         internal abstract Roslyn::SyntaxNodeOrToken EmitNodeOrToken(Scope _scope, Tagger _tagger);
 
     }
@@ -80,7 +79,6 @@ namespace VooDo.AST
     public abstract record BodyNode : BodyNodeOrIdentifier
     {
 
-        public abstract override BodyNode ReplaceNodes(Func<Node?, Node?> _map);
         internal sealed override Roslyn::SyntaxNodeOrToken EmitNodeOrToken(Scope _scope, Tagger _tagger) => EmitNode(_scope, _tagger);
         internal abstract Roslyn::SyntaxNode EmitNode(Scope _scope, Tagger _tagger);
 

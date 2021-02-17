@@ -142,7 +142,7 @@ namespace VooDo.Compiling.Emission
             Single, AllDescendants, UnownedDescendants
         }
 
-        private readonly Dictionary<Node, int> m_forward = new Dictionary<Node, int>(new ReferenceComparer<Node>());
+        private readonly Dictionary<Node, int> m_forward = new Dictionary<Node, int>(new Identity.ReferenceComparer<Node>());
         private readonly List<Node> m_reverse = new List<Node>();
 
         private int GetOwnerIndex(Node _owner)

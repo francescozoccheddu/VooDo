@@ -1,4 +1,5 @@
-﻿using Microsoft.CodeAnalysis.CSharp;
+﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 using System;
@@ -16,7 +17,7 @@ namespace VooDo.AST.Statements
 
         #region Overrides
 
-        public override ExpressionStatement ReplaceNodes(Func<Node?, Node?> _map)
+        protected internal override Node ReplaceNodes(Func<Node?, Node?> _map)
         {
             InvocationOrObjectCreationExpression newType = (InvocationOrObjectCreationExpression) _map(Expression).NonNull();
             if (ReferenceEquals(newType, Expression))
@@ -32,9 +33,9 @@ namespace VooDo.AST.Statements
             }
         }
 
-        internal override ExpressionStatementSyntax EmitNode(Scope _scope, Tagger _tagger)
-            => SyntaxFactory.ExpressionStatement(Expression.EmitNode(_scope, _tagger)).Own(_tagger, this);
-        public override IEnumerable<InvocationOrObjectCreationExpression> Children => new[] { Expression };
+        internal override SyntaxNode EmitNode(Scope _scope, Tagger _tagger)
+            => SyntaxFactory.ExpressionStatement((ExpressionSyntax) Expression.EmitNode(_scope, _tagger)).Own(_tagger, this);
+        public override IEnumerable<Node> Children => new Node[] { Expression };
         public override string ToString() => $"{Expression}{GrammarConstants.statementEndToken}";
 
         #endregion

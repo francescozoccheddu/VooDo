@@ -1,4 +1,5 @@
-﻿using Microsoft.CodeAnalysis.CSharp;
+﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 using System;
@@ -18,7 +19,7 @@ namespace VooDo.AST.Expressions
 
         protected override EPrecedence m_Precedence => EPrecedence.Cast;
 
-        public override CastExpression ReplaceNodes(Func<Node?, Node?> _map)
+        protected internal override Node ReplaceNodes(Func<Node?, Node?> _map)
         {
             ComplexType newType = (ComplexType) _map(Type).NonNull();
             Expression newExpression = (Expression) _map(Expression).NonNull();
@@ -36,12 +37,12 @@ namespace VooDo.AST.Expressions
             }
         }
 
-        internal override CastExpressionSyntax EmitNode(Scope _scope, Tagger _tagger)
+        internal override SyntaxNode EmitNode(Scope _scope, Tagger _tagger)
             => SyntaxFactory.CastExpression(
-                Type.EmitNode(_scope, _tagger),
-                Expression.EmitNode(_scope, _tagger))
+                (TypeSyntax) Type.EmitNode(_scope, _tagger),
+                (ExpressionSyntax) Expression.EmitNode(_scope, _tagger))
             .Own(_tagger, this);
-        public override IEnumerable<ComplexTypeOrExpression> Children => new ComplexTypeOrExpression[] { Expression, Type };
+        public override IEnumerable<Node> Children => new Node[] { Expression, Type };
         public override string ToString() => $"({Type}) {RightCode(Expression)}";
 
         #endregion

@@ -1,4 +1,5 @@
-﻿using Microsoft.CodeAnalysis.CSharp;
+﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 using System;
@@ -30,7 +31,7 @@ namespace VooDo.AST.Statements
 
         #region Overrides
 
-        public override AssignmentStatement ReplaceNodes(Func<Node?, Node?> _map)
+        protected internal override Node ReplaceNodes(Func<Node?, Node?> _map)
         {
             AssignableExpression newTarget = (AssignableExpression) _map(Target).NonNull();
             Expression newExpression = (Expression) _map(Source).NonNull();
@@ -48,7 +49,7 @@ namespace VooDo.AST.Statements
             }
         }
 
-        internal override StatementSyntax EmitNode(Scope _scope, Tagger _tagger)
+        internal override SyntaxNode EmitNode(Scope _scope, Tagger _tagger)
             => SyntaxFactory.ExpressionStatement(
                 SyntaxFactory.AssignmentExpression(
                     Kind switch
@@ -66,10 +67,10 @@ namespace VooDo.AST.Statements
                         EKind.BitwiseXor => SyntaxKind.ExclusiveOrAssignmentExpression,
                         EKind.Coalesce => SyntaxKind.CoalesceAssignmentExpression,
                     },
-                    Target.EmitNode(_scope, _tagger),
-                    Source.EmitNode(_scope, _tagger)))
+                    (ExpressionSyntax) Target.EmitNode(_scope, _tagger),
+                    (ExpressionSyntax) Source.EmitNode(_scope, _tagger)))
             .Own(_tagger, this);
-        public override IEnumerable<Expression> Children => new[] { Target, Source };
+        public override IEnumerable<Node> Children => new[] { Target, Source };
         public override string ToString() => $"{Target} {Kind.Token()} {Source}{GrammarConstants.statementEndToken}";
 
         #endregion

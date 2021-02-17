@@ -1,8 +1,8 @@
 ﻿
-using SimpleLRUCache;
 
 using VooDo.AST;
 using VooDo.Parsing;
+using VooDo.Utils;
 
 namespace VooDo.Caching
 {

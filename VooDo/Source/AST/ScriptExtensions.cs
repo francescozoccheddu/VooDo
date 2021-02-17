@@ -41,7 +41,7 @@ namespace VooDo.AST
             };
 
         public static Script AddUsingAliasNamespace(this Script _script, Identifier _alias, Namespace _namespace)
-            => AddUsingAliasNamespaces(_script, new[] { KeyValuePair.Create(_alias, _namespace) }.ToImmutableDictionary());
+            => AddUsingAliasNamespaces(_script, new[] { new KeyValuePair<Identifier, Namespace>(_alias, _namespace) }.ToImmutableDictionary());
 
         public static Script AddUsingAliasNamespaces(this Script _script, IDictionary<Identifier, Namespace> _namespaces)
             => _script with
