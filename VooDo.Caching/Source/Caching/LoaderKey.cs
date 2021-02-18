@@ -31,7 +31,7 @@ namespace VooDo.Caching
             ReturnType = _returnType;
             returnTypeCode = _returnType?.ToString();
             HookInitializerProvider = _hookInitializerProvider;
-            m_hashCode = Identity.CombineHash(Identity.CombineHashes(References), scriptCode, returnTypeCode, HookInitializerProvider);
+            m_hashCode = Identity.CombineHash(References.Count, scriptCode, returnTypeCode, HookInitializerProvider);
         }
 
         public CompilationOptions CreateMatchingOptions() => CompilationOptions.Default with

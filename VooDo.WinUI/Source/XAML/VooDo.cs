@@ -3,6 +3,7 @@ using Microsoft.UI.Xaml.Markup;
 
 using System;
 
+using VooDo.Runtime;
 using VooDo.WinUI.Core;
 
 namespace VooDo.WinUI.Xaml
@@ -12,9 +13,16 @@ namespace VooDo.WinUI.Xaml
     public sealed class VooDo : MarkupExtension
     {
 
+        public VooDo() { }
+        public VooDo(string _code)
+        {
+            Code = _code;
+        }
+
         public string? Code { get; set; }
 
         public Binding? Binding { get; private set; }
+        private object? m_lastValue;
 
         protected override object ProvideValue(IXamlServiceProvider _serviceProvider)
         {
@@ -29,10 +37,16 @@ namespace VooDo.WinUI.Xaml
                 }
                 XamlInfo xamlInfo = new XamlInfo(rootObjectProvider.RootObject, provideValueTarget.TargetObject, provideValueTarget.TargetProperty, uriContext.BaseUri, Code);
                 Binding = CoreBindingManager.BindingManager.AddBinding(xamlInfo);
+                if (Binding.Program is TypedProgram typedProgram)
+                {
+                    typedProgram.OnReturn += ProgramReturned;
+                }
+                Binding.Program.RequestRun();
             }
-            return null!;
+            return m_lastValue!;
         }
 
+        private void ProgramReturned(object? _value) => m_lastValue = _value;
     }
 
 }

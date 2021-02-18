@@ -14,11 +14,10 @@ namespace VooDo.Caching
         private HookInitializerProviderTypeNameSerializer() { }
 
         public IHookInitializerProvider Deserialize(BinaryReader _reader)
-            => (IHookInitializerProvider) Activator.CreateInstance(Type.GetType(_reader.ReadString(), true));
+            => (IHookInitializerProvider) Activator.CreateInstance(Type.GetType(_reader.ReadString(), true)!)!;
 
         public void Serialize(IHookInitializerProvider _value, BinaryWriter _writer)
-            => _writer.Write(_value.GetType().AssemblyQualifiedName);
-
+            => _writer.Write(_value.GetType().AssemblyQualifiedName!);
     }
 
 }

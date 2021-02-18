@@ -6,11 +6,7 @@
 
     <Grid>
 
-        <Button HorizontalAlignment="Center" VerticalAlignment="Center">
-            <Button.Content>
-                <voodo:VooDo>"ciao" + " mondo!"</voodo:VooDo>
-            </Button.Content>
-        </Button>
+        <Button HorizontalAlignment="Center" VerticalAlignment="Center" Content="{voodo:VooDo Code=3+2}" />
 
     </Grid>
 

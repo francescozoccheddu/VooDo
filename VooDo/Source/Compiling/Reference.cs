@@ -16,7 +16,7 @@ using VooDo.Utils;
 namespace VooDo.Compiling
 {
 
-    public sealed record Reference
+    public sealed record Reference : IEquatable<Reference?>
     {
 
         public static Reference RuntimeReference { get; }
@@ -45,13 +45,13 @@ namespace VooDo.Compiling
         }
 
         public static Reference FromStream(Stream _stream, params Identifier[] _aliases)
-            => FromStream(_stream, _aliases);
+            => FromStream(_stream, (IEnumerable<Identifier>) _aliases);
 
         public static Reference FromFile(string _path, params Identifier[] _aliases)
-            => FromFile(_path, _aliases);
+            => FromFile(_path, (IEnumerable<Identifier>) _aliases);
 
         public static Reference FromImage(IEnumerable<byte> _image, params Identifier[] _aliases)
-            => FromImage(_image, _aliases);
+            => FromImage(_image, (IEnumerable<Identifier>) _aliases);
 
         public static Reference FromAssembly(Assembly _assembly, params Identifier[] _aliases)
             => FromAssembly(_assembly, (IEnumerable<Identifier>) _aliases);
@@ -74,6 +74,7 @@ namespace VooDo.Compiling
             m_metadata = _metadata;
             string? path = m_metadata.FilePath ?? _assembly?.Location;
             FilePath = path is not null ? new Uri(path).AbsolutePath : null;
+            FilePath = Uri.UnescapeDataString(FilePath);
             Assembly = _assembly;
         }
 
@@ -94,6 +95,9 @@ namespace VooDo.Compiling
                 .GroupBy(_r => _r, MetadataEqualityComparer)
                 .Select(_r => _r.Key with { Aliases = _r.SelectMany(_v => _v.Aliases).ToImmutableHashSet() })
                 .ToImmutableArray();
+
+        public bool Equals(Reference? _other) => _other is not null && AreSameMetadata(this, _other) && Aliases.SetEquals(_other.Aliases);
+        public override int GetHashCode() => Identity.CombineHash(Identity.CombineHashes(Aliases), FilePath);
 
     }
 
