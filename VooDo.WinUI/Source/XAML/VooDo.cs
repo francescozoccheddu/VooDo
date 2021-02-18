@@ -14,17 +14,22 @@ namespace VooDo.WinUI.Xaml
 
         public string? Code { get; set; }
 
+        public Binding? Binding { get; private set; }
+
         protected override object ProvideValue(IXamlServiceProvider _serviceProvider)
         {
-            IProvideValueTarget provideValueTarget = (IProvideValueTarget) _serviceProvider.GetService(typeof(IProvideValueTarget));
-            IRootObjectProvider rootObjectProvider = (IRootObjectProvider) _serviceProvider.GetService(typeof(IRootObjectProvider));
-            IUriContext uriContext = (IUriContext) _serviceProvider.GetService(typeof(IUriContext));
-            if (Code is null)
+            if (Binding is null)
             {
-                throw new InvalidOperationException("Code is null");
+                IProvideValueTarget provideValueTarget = (IProvideValueTarget) _serviceProvider.GetService(typeof(IProvideValueTarget));
+                IRootObjectProvider rootObjectProvider = (IRootObjectProvider) _serviceProvider.GetService(typeof(IRootObjectProvider));
+                IUriContext uriContext = (IUriContext) _serviceProvider.GetService(typeof(IUriContext));
+                if (Code is null)
+                {
+                    throw new InvalidOperationException("Code is null");
+                }
+                XamlInfo xamlInfo = new XamlInfo(rootObjectProvider.RootObject, provideValueTarget.TargetObject, provideValueTarget.TargetProperty, uriContext.BaseUri, Code);
+                Binding = CoreBindingManager.BindingManager.AddBinding(xamlInfo);
             }
-            XamlInfo xamlInfo = new XamlInfo(rootObjectProvider.RootObject, provideValueTarget.TargetObject, provideValueTarget.TargetProperty, uriContext.BaseUri, Code);
-            Binding binding = CoreBindingManager.BindingManager.AddBinding(xamlInfo);
             return null!;
         }
 

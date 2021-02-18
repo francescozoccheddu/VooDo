@@ -63,7 +63,7 @@ complexTypeOrExpression_Greedy
 // Script
 
 script
-	: mUsings += usingDirective* mBody += statement* # fullScript | mExpr = expression # inlineScript
+	: mExpr = expression # inlineScript | mUsings += usingDirective* mBody += statement+ # fullScript
 ;
 
 // Statements
@@ -196,10 +196,10 @@ expression
 	| DEFAULT (OPEN_PARENS mType = complexType CLOSE_PARENS)																			# defaultExpression
 	| OPEN_PARENS mElements += tupleExpressionElement (COMMA mElements += tupleExpressionElement)+ CLOSE_PARENS							# tupleExpression
 	| mOp = (PLUS | MINUS | NOT | BNOT) mExpr = expression																				# unaryExpression
-	| NULL																																# nullLiteralExpression
-	| FALSE																																# falseLiteralExpression
-	| TRUE																																# trueLiteralExpression
-	| mLiteral = (INTEGER_LITERAL | CHAR_LITERAL | REAL_LITERAL | BIN_INTEGER_LITERAL | HEX_INTEGER_LITERAL)							# otherLiteralExpression
+	| NULL																																					# nullLiteralExpression
+	| FALSE																																					# falseLiteralExpression
+	| TRUE																																					# trueLiteralExpression
+	| mLiteral = (INTEGER_LITERAL | CHAR_LITERAL | REAL_LITERAL | BIN_INTEGER_LITERAL | HEX_INTEGER_LITERAL | STRING_LITERAL | VERBATIUM_STRING_LITERAL)	# otherLiteralExpression
 ;
 
 // Directives

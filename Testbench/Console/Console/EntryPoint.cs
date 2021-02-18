@@ -15,12 +15,7 @@ namespace VooDo.ConsoleTestbench
         public static void Run()
         {
             string code = @"
-global var x = 7;
-global {
-    var y = 5, z = 6;
-}
-bool q = glob (VooDo.ConsoleTestbench.Culo) null;
-int p = glob null init 8;
+""ciao"" + "" mondo!""
             ";
             Script script = Parser.Script(code);
             ImmutableArray<Reference> references = CompilationOptions.Default.References.Add(Reference.FromAssembly(typeof(Culo).Assembly));

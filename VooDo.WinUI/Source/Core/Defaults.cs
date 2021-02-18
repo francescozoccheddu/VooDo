@@ -36,7 +36,7 @@ namespace VooDo.WinUI.Core
                 References = references.ToImmutableArray();
             }
             HookInitializerProvider = new HookInitializerList(Enumerable.Empty<IHookInitializerProvider>());
-            TargetProvider = new SimpleTargetProvider();
+            TargetProvider = new TargetProviderList<SimpleTarget>(new[] { new DependencyPropertyTargetProvider() });
         }
 
     }

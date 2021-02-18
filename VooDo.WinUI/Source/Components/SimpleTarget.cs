@@ -4,18 +4,19 @@ using System.Collections.Immutable;
 using VooDo.AST;
 using VooDo.AST.Names;
 using VooDo.Runtime;
+using VooDo.Utils;
 using VooDo.WinUI.Interfaces;
 
 namespace VooDo.WinUI.Components
 {
 
-    public abstract class SimpleTarget : ITarget
+    public class SimpleTarget : ITarget
     {
 
-        public SimpleTarget(IReturnTarget? _returnTarget, ImmutableArray<IConstantValue> _constants)
+        public SimpleTarget(IReturnTarget? _returnTarget = null, ImmutableArray<IConstantValue> _constants = default)
         {
             m_returnTarget = _returnTarget;
-            m_constants = _constants;
+            m_constants = _constants.EmptyIfDefault();
         }
 
         event TargetDiscontinuedEventHandler? ITarget.OnTargetDiscontinued
@@ -76,11 +77,19 @@ namespace VooDo.WinUI.Components
     {
 
         public ConstantValue(Identifier _name, TValue _value)
+            : this(_name, _value, typeof(TValue))
+        {
+
+        }
+
+        public ConstantValue(Identifier _name, TValue _value, Type _type)
         {
             Name = _name;
             Value = _value;
+            Type = _type;
         }
 
+        public Type Type { get; }
         public Identifier Name { get; }
         public TValue Value { get; }
 
@@ -103,7 +112,9 @@ namespace VooDo.WinUI.Components
 
         protected abstract TValue m_Value { set; }
 
-        Type IReturnTarget.ReturnType => typeof(TValue);
+        protected virtual Type m_ReturnType => typeof(TValue);
+
+        Type IReturnTarget.ReturnType => m_ReturnType;
         void IReturnTarget.SetReturnValue(object? _value) => m_Value = (TValue) _value!;
 
     }
