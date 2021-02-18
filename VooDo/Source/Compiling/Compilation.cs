@@ -61,6 +61,12 @@ namespace VooDo.Compiling
 
         public Loader Load()
         {
+            Assembly assembly = Assembly.Load(EmitRawAssembly());
+            return Loader.FromAssembly(assembly, Options.Namespace, Options.ClassName);
+        }
+
+        public byte[] EmitRawAssembly()
+        {
             if (!Succeded)
             {
                 throw new InvalidOperationException("Compilation did not succeed");
@@ -71,8 +77,7 @@ namespace VooDo.Compiling
             {
                 throw result.Diagnostics.SelectNonNull(_d => RoslynProblem.FromDiagnostic(_d, null, Problem.EKind.Emission)).AsThrowable();
             }
-            Assembly assembly = Assembly.Load(stream.ToArray());
-            return Loader.FromAssembly(assembly, Options.Namespace, Options.ClassName);
+            return stream.ToArray();
         }
 
         public void SaveLibraryFile(string _file)

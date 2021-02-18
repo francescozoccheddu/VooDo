@@ -8,23 +8,32 @@ using VooDo.Caching;
 using VooDo.Compiling;
 using VooDo.Hooks;
 using VooDo.Runtime;
+using VooDo.WinUI.Interfaces;
 
-namespace VooDo.WinUI.Interfaces
+namespace VooDo.WinUI.Components
 {
 
-    public abstract class LoaderProvider : ILoaderProvider
+    public sealed class SimpleLoaderProvider : ILoaderProvider<SimpleTarget>
     {
 
-        protected abstract IHookInitializerProvider GetHookInitializerProvider(Target _target);
-        protected abstract ImmutableArray<Reference> GetReferences(Target _target);
-        protected virtual ILoaderCache? m_LoaderCache => null;
-        protected virtual Identifier? GetAssemblyAlias(QualifiedType _qualifiedType, ImmutableArray<Reference> _references)
+        public ImmutableArray<Reference> References { get; }
+        public IHookInitializerProvider HookInitializerProvider { get; }
+        public ILoaderCache LoaderCache { get; }
+
+        public SimpleLoaderProvider(ImmutableArray<Reference> _references, IHookInitializerProvider _hookInitializerProvider, ILoaderCache _loaderCache)
+        {
+            References = _references;
+            HookInitializerProvider = _hookInitializerProvider;
+            LoaderCache = _loaderCache;
+        }
+
+        private Identifier? GetAssemblyAlias(QualifiedType _qualifiedType)
         {
             Type? type = Type.GetType(_qualifiedType.ToString());
             if (type is not null)
             {
                 string path = new Uri(type.Assembly.Location).AbsolutePath;
-                return _references
+                return References
                     .FirstOrDefault(_r => _r.FilePath is not null && path == new Uri(_r.FilePath).AbsolutePath)?
                     .Aliases
                     .FirstOrDefault();
@@ -32,25 +41,22 @@ namespace VooDo.WinUI.Interfaces
             return null;
         }
 
-        public Loader GetLoader(Script _script, Target _target)
+        public Loader GetLoader(Script _script, SimpleTarget _target)
         {
-            ImmutableArray<Reference> references = GetReferences(_target);
             ComplexType? returnType = _target.ReturnType == typeof(void)
                 ? null
                 : GetTypeNode(_target.ReturnType, _target);
-            IHookInitializerProvider hookInitializerProvider = GetHookInitializerProvider(_target);
-            LoaderKey key = LoaderKey.Create(_script, references, returnType, hookInitializerProvider);
-            return m_LoaderCache?.GetOrCreateLoader(key)
+            LoaderKey key = LoaderKey.Create(_script, References, returnType, hookInitializerProvider);
+            return LoaderCache?.GetOrCreateLoader(key)
                 ?? Compilation.SucceedOrThrow(_script, key.CreateMatchingOptions()).Load();
         }
 
-        public ComplexType GetTypeNode(Type _type, Target _target)
+        public ComplexType GetTypeNode(Type _type, SimpleTarget _target)
         {
             ComplexType type = ComplexType.FromType(_type);
-            ImmutableArray<Reference> references = GetReferences(_target);
             return type.ReplaceNonNullDescendantNodes(_n =>
                 _n is QualifiedType qualifiedType
-                ? qualifiedType with { Alias = GetAssemblyAlias(qualifiedType, references) }
+                ? qualifiedType with { Alias = GetAssemblyAlias(qualifiedType) }
                 : _n)!;
         }
 

@@ -7,10 +7,10 @@ using System.Linq;
 
 namespace VooDo.Utils
 {
-    internal static class EnumerableExtensions
+    public static class EnumerableExtensions
     {
 
-        internal static ImmutableArray<TItem> EmptyIfDefault<TItem>(this ImmutableArray<TItem> _array)
+        public static ImmutableArray<TItem> EmptyIfDefault<TItem>(this ImmutableArray<TItem> _array)
             => _array.IsDefault ? ImmutableArray.Create<TItem>() : _array;
 
         internal static IEnumerable<TItem> EmptyIfNull<TItem>(this IEnumerable<TItem>? _enumerable)

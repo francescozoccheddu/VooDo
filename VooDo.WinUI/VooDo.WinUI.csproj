@@ -13,6 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\VooDo.Caching\VooDo.Caching.csproj" />
     <ProjectReference Include="..\VooDo\VooDo.csproj" />
   </ItemGroup>
 </Project>

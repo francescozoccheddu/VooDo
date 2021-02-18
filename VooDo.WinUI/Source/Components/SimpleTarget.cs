@@ -4,11 +4,12 @@ using System.Collections.Immutable;
 using VooDo.AST;
 using VooDo.AST.Names;
 using VooDo.Runtime;
+using VooDo.WinUI.Interfaces;
 
-namespace VooDo.WinUI.Interfaces
+namespace VooDo.WinUI.Components
 {
 
-    public abstract class SimpleTarget : Target
+    public abstract class SimpleTarget : ITarget
     {
 
         public SimpleTarget(IReturnTarget? _returnTarget, ImmutableArray<IConstantValue> _constants)

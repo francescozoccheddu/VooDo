@@ -115,7 +115,7 @@ namespace VooDo.AST
             {
                 ETraversal.BreadthFirst => VisitBreadthFirst(_node, _shouldVisitChildren).Skip(1),
                 ETraversal.PreDepthFirst => VisitDepthFirstPreorder(_node, _shouldVisitChildren).Skip(1),
-                ETraversal.PostDepthFirst => VisitDepthFirstPostorder(_node, _shouldVisitChildren).Where(_n => !ReferenceEquals(_n, _node)),
+                ETraversal.PostDepthFirst => VisitDepthFirstPostorder(_node, _shouldVisitChildren).SkipLast(1),
             };
 
         public static IEnumerable<(Node node, Node? parent)> DescendantNodesAndSelfWithParents(this Node _node, ETraversal _traversal = ETraversal.PostDepthFirst)

@@ -77,7 +77,7 @@ namespace VooDo.AST.Names
 #if NET5_0
         public static new TupleType FromType<TType>() where TType : ITuple
 #else
-        public static new TupleType FromType<TType>() 
+        public static new TupleType FromType<TType>()
 #endif
             => FromType(typeof(TType));
 

@@ -1,7 +1,4 @@
-﻿
-using VooDo.AST;
-
-namespace VooDo.Source.AST.HookInitialization
+﻿namespace VooDo.AST.HookInitialization
 {
 
     public abstract record HookInitializationNode : Node
