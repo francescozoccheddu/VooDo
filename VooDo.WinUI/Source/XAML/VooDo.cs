@@ -3,25 +3,29 @@ using Microsoft.UI.Xaml.Markup;
 
 using System;
 
+using VooDo.WinUI.Core;
+
 namespace VooDo.WinUI.Xaml
 {
 
+    [ContentProperty(Name = nameof(Code))]
     public sealed class VooDo : MarkupExtension
     {
 
-        public string? Text { get; set; }
+        public string? Code { get; set; }
 
         protected override object ProvideValue(IXamlServiceProvider _serviceProvider)
         {
             IProvideValueTarget provideValueTarget = (IProvideValueTarget) _serviceProvider.GetService(typeof(IProvideValueTarget));
-            if (provideValueTarget.TargetProperty is ProvideValueTargetProperty targetProperty)
+            IRootObjectProvider rootObjectProvider = (IRootObjectProvider) _serviceProvider.GetService(typeof(IRootObjectProvider));
+            IUriContext uriContext = (IUriContext) _serviceProvider.GetService(typeof(IUriContext));
+            if (Code is null)
             {
-                return 2;
+                throw new InvalidOperationException("Code is null");
             }
-            else
-            {
-                throw new NotSupportedException("Property not supported");
-            }
+            XamlInfo xamlInfo = new XamlInfo(rootObjectProvider.RootObject, provideValueTarget.TargetObject, provideValueTarget.TargetProperty, uriContext.BaseUri, Code);
+            Binding binding = CoreBindingManager.BindingManager.AddBinding(xamlInfo);
+            return null!;
         }
 
     }

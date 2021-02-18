@@ -18,12 +18,20 @@ namespace VooDo.WinUI.Components
             m_constants = _constants;
         }
 
+        event TargetDiscontinuedEventHandler? ITarget.OnTargetDiscontinued
+        {
+            add => OnTargetDiscontinued += value;
+            remove => OnTargetDiscontinued -= value;
+        }
+
+        internal event TargetDiscontinuedEventHandler? OnTargetDiscontinued;
+
         private readonly IReturnTarget? m_returnTarget;
         private readonly ImmutableArray<IConstantValue> m_constants;
 
         private Program? m_program;
 
-        protected internal sealed override void AttachProgram(Program _program)
+        internal void AttachProgram(Program _program)
         {
             m_program = _program;
             if (m_returnTarget is not null)
@@ -32,7 +40,7 @@ namespace VooDo.WinUI.Components
             }
         }
 
-        protected internal sealed override void DetachProgram()
+        internal void DetachProgram()
         {
             m_program = null;
             if (m_returnTarget is not null)
@@ -41,10 +49,16 @@ namespace VooDo.WinUI.Components
             }
         }
 
-        public sealed override Type ReturnType => m_returnTarget?.ReturnType ?? typeof(void);
-        protected internal sealed override Script ProcessScript(Script _script)
+        public virtual Type ReturnType => m_returnTarget?.ReturnType ?? typeof(void);
+
+        internal virtual Script ProcessScript(Script _script)
         {
             return _script; // TODO Add constants
+        }
+
+        protected void NotifyTargetDiscontinued()
+        {
+            OnTargetDiscontinued?.Invoke(this);
         }
 
     }

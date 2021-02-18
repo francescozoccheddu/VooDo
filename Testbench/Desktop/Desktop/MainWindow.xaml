@@ -8,7 +8,7 @@
 
         <Button HorizontalAlignment="Center" VerticalAlignment="Center">
             <Button.Content>
-                <voodo:VooDo Text="Ciao!" />
+                <voodo:VooDo>"ciao" + " mondo!"</voodo:VooDo>
             </Button.Content>
         </Button>
 

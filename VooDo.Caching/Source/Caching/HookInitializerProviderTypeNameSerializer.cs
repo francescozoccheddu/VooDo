@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 
 using VooDo.Hooks;
 
@@ -12,11 +13,11 @@ namespace VooDo.Caching
 
         private HookInitializerProviderTypeNameSerializer() { }
 
-        public IHookInitializerProvider Deserialize(string _serializedValue)
-            => (IHookInitializerProvider) Activator.CreateInstance(Type.GetType(_serializedValue, true));
+        public IHookInitializerProvider Deserialize(BinaryReader _reader)
+            => (IHookInitializerProvider) Activator.CreateInstance(Type.GetType(_reader.ReadString(), true));
 
-        public string Serialize(IHookInitializerProvider _value)
-            => _value.GetType().AssemblyQualifiedName;
+        public void Serialize(IHookInitializerProvider _value, BinaryWriter _writer)
+            => _writer.Write(_value.GetType().AssemblyQualifiedName);
 
     }
 

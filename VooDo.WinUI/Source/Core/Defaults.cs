@@ -17,11 +17,9 @@ namespace VooDo.WinUI.Core
     public static class Defaults
     {
 
-        private static readonly ImmutableArray<Reference> s_references;
-        private static readonly IHookInitializerProvider s_hookInitializerProvider;
-        private static readonly ILoaderProvider<ITarget> s_loaderProvider;
-        private static readonly ITargetProvider<ITarget> s_targetProvider;
-        private static readonly IBindingManager s_bindingManager;
+        public static ImmutableArray<Reference> References { get; }
+        public static IHookInitializerProvider HookInitializerProvider { get; }
+        public static ITargetProvider<SimpleTarget> TargetProvider { get; }
 
         static Defaults()
         {
@@ -35,17 +33,10 @@ namespace VooDo.WinUI.Core
                     .GetAssemblies()
                     .Where(_a => _a.GetReferencedAssemblies().Contains(assemblyName))
                     .Select(_a => Reference.FromAssembly(_a)));
-                s_references = references.ToImmutableArray();
+                References = references.ToImmutableArray();
             }
-            s_hookInitializerProvider = new HookInitializerList(Enumerable.Empty<IHookInitializerProvider>());
-            s_loaderProvider = new SimpleLoaderProvider();
-            s_targetProvider = new SimpleTargetProvider();
-            s_bindingManager = new BindingManager<ITarget>(s_targetProvider, s_loaderProvider);
-        }
-
-        internal static void Update()
-        {
-
+            HookInitializerProvider = new HookInitializerList(Enumerable.Empty<IHookInitializerProvider>());
+            TargetProvider = new SimpleTargetProvider();
         }
 
     }
