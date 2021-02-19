@@ -92,12 +92,8 @@ namespace VooDo.AST
                                 null,
                                 SFH.CreateVariableInvocation(
                                     type,
-                                    _definition.Prototype.Global.IsAnonymous
-                                    ? SF.LiteralExpression(
-                                        SyntaxKind.NullLiteralExpression)
-                                    : SF.LiteralExpression(
-                                        SyntaxKind.StringLiteralExpression,
-                                        SF.Literal(_definition.Prototype.Global.Name!)),
+                                    _definition.Prototype.Global.IsConstant,
+                                    _definition.Prototype.Global.Name,
                                     (_definition.Prototype.Global.HasInitializer
                                     ? (ExpressionSyntax) _definition.Prototype.Global.Initializer!.EmitNode(new Scope(), tagger)
                                     : SF.LiteralExpression(

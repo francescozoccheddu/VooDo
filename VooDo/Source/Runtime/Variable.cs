@@ -10,12 +10,14 @@ namespace VooDo.Runtime
     public abstract class Variable
     {
 
-        internal Variable(string _name, Type _type)
+        internal Variable(bool _isConstant, string _name, Type _type)
         {
+            IsConstant = _isConstant;
             Name = _name;
             Type = _type;
         }
 
+        public bool IsConstant { get; }
         public string Name { get; }
         public Type Type { get; }
         public object? Value { get => m_DynamicValue; set => m_DynamicValue = value; }
@@ -56,7 +58,7 @@ namespace VooDo.Runtime
 
         private Controller<TValue> m_controller;
 
-        internal Variable(string _name, TValue _value = default) : base(_name, typeof(TValue))
+        internal Variable(bool _isConstant, string _name, TValue _value = default) : base(_isConstant, _name, typeof(TValue))
         {
             m_oldValue = _value!;
             m_controller = new NoController(this, _value!);

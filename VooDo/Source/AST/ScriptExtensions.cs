@@ -26,8 +26,8 @@ namespace VooDo.AST
             => _script.DescendantNodes(_c => Tree.IsStatementAncestor(_c) || Tree.IsExpressionAncestor(_c), Tree.ETraversal.BreadthFirst)
                 .SelectMany(_c => _c switch
                 {
-                    GlobalExpression expr => new[] { new GlobalPrototype(new Global(ComplexTypeOrVar.Var, null, expr.Initializer), expr) },
-                    GlobalStatement stat => stat.SelectMany(_d => _d.Declarators.Select(_l => new GlobalPrototype(new Global(_d.Type, _l.Name, _l.Initializer), _l))),
+                    GlobalExpression expr => new[] { new GlobalPrototype(new Global(false, ComplexTypeOrVar.Var, null, expr.Initializer), expr) },
+                    GlobalStatement stat => stat.SelectMany(_d => _d.Declarators.Select(_l => new GlobalPrototype(new Global(stat.IsConstant, _d.Type, _l.Name, _l.Initializer), _l))),
                     _ => Enumerable.Empty<GlobalPrototype>()
                 }).ToImmutableArray();
 
@@ -49,10 +49,10 @@ namespace VooDo.AST
                 Usings = _script.Usings.AddRange(_namespaces.Select(_n => new UsingNamespaceDirective(_n.Key, _n.Value)))
             };
 
-        public static Script AddGlobals(this Script _script, params Global[] _globals)
-            => AddGlobals(_script, (IEnumerable<Global>) _globals);
+        public static Script AddGlobals(this Script _script, bool _constant, params Global[] _globals)
+            => AddGlobals(_script, _constant, (IEnumerable<Global>) _globals);
 
-        public static Script AddGlobals(this Script _script, IEnumerable<Global> _globals)
+        public static Script AddGlobals(this Script _script, bool _constant, IEnumerable<Global> _globals)
         {
             if (_globals.Select(_g => _g.Name).AnyNull())
             {
@@ -66,7 +66,7 @@ namespace VooDo.AST
                         _g.Initializer))));
             return _script with
             {
-                Statements = _script.Statements.Insert(0, new GlobalStatement(declarations.ToImmutableArray()))
+                Statements = _script.Statements.Insert(0, new GlobalStatement(_constant, declarations.ToImmutableArray()))
             };
         }
     }

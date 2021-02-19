@@ -77,8 +77,8 @@ declarator
 ;
 
 globalStatement
-	: GLOBAL OPEN_BRACE mDeclarations += declarationStatement* CLOSE_BRACE
-	| GLOBAL mDeclarations += declarationStatement
+	: mMod=(GLOBAL | CONST) OPEN_BRACE mDeclarations += declarationStatement* CLOSE_BRACE
+	| mMod=(GLOBAL | CONST) mDeclarations += declarationStatement
 ;
 
 statement
@@ -196,10 +196,19 @@ expression
 	| DEFAULT (OPEN_PARENS mType = complexType CLOSE_PARENS)																			# defaultExpression
 	| OPEN_PARENS mElements += tupleExpressionElement (COMMA mElements += tupleExpressionElement)+ CLOSE_PARENS							# tupleExpression
 	| mOp = (PLUS | MINUS | NOT | BNOT) mExpr = expression																				# unaryExpression
-	| NULL																																					# nullLiteralExpression
-	| FALSE																																					# falseLiteralExpression
-	| TRUE																																					# trueLiteralExpression
-	| mLiteral = (INTEGER_LITERAL | CHAR_LITERAL | REAL_LITERAL | BIN_INTEGER_LITERAL | HEX_INTEGER_LITERAL | STRING_LITERAL | VERBATIUM_STRING_LITERAL)	# otherLiteralExpression
+	| NULL																																# nullLiteralExpression
+	| FALSE																																# falseLiteralExpression
+	| TRUE																																# trueLiteralExpression
+	| mLiteral =
+	(
+		INTEGER_LITERAL
+		| CHAR_LITERAL
+		| REAL_LITERAL
+		| BIN_INTEGER_LITERAL
+		| HEX_INTEGER_LITERAL
+		| STRING_LITERAL
+		| VERBATIUM_STRING_LITERAL
+	) # otherLiteralExpression
 ;
 
 // Directives

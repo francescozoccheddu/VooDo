@@ -3,8 +3,8 @@
     public static class RuntimeHelpers
     {
 
-        public static Variable<TValue> CreateVariable<TValue>(string _name, TValue _value = default)
-            => new Variable<TValue>(_name, _value!);
+        public static Variable<TValue> CreateVariable<TValue>(bool _isConstant, string _name, TValue _value = default)
+            => new Variable<TValue>(_isConstant, _name, _value!);
 
         public static TValue SetControllerAndGetValue<TValue>(Variable<TValue> _variable, IControllerFactory<TValue> _controllerFactory)
         {

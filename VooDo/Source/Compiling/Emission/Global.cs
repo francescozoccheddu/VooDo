@@ -8,7 +8,7 @@ using VooDo.AST.Statements;
 namespace VooDo.Compiling.Emission
 {
 
-    public sealed record Global(ComplexTypeOrVar Type, Identifier? Name, Expression? Initializer = null)
+    public sealed record Global(bool IsConstant, ComplexTypeOrVar Type, Identifier? Name, Expression? Initializer = null)
     {
 
         public bool IsAnonymous => Name is null;

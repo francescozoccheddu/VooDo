@@ -63,6 +63,7 @@ namespace VooDo.AST
         };
 
         internal const string globalKeyword = "global";
+        internal const string constKeyword = "const";
         internal const string globKeyword = "glob";
         internal const string initKeyword = "init";
         internal const string statementEndToken = ";";

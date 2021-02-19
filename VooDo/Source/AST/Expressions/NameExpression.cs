@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 
 using VooDo.AST.Names;
+using VooDo.AST.Statements;
 using VooDo.Compiling.Emission;
 using VooDo.Problems;
 using VooDo.Runtime;
@@ -40,9 +41,21 @@ namespace VooDo.AST.Expressions
         internal override SyntaxNode EmitNode(Scope _scope, Tagger _tagger)
         {
             bool isGlobal = _scope.IsGlobal(Name);
-            if (!isGlobal && IsControllerOf)
+            bool isConstant = _scope.IsConstant(Name);
+            if (IsControllerOf)
             {
-                throw new ControllerOfNonGlobalProblem(this).AsThrowable();
+                if (!isGlobal)
+                {
+                    throw new ControllerOfNonGlobalProblem(this).AsThrowable();
+                }
+                if (isConstant)
+                {
+                    throw new ControllerOfConstantProblem(this).AsThrowable();
+                }
+            }
+            if (isConstant && Parent is AssignmentStatement assignment && assignment.Target == this)
+            {
+                throw new AssignmentOfConstantProblem(this).AsThrowable();
             }
             ExpressionSyntax result;
             IdentifierNameSyntax name = SyntaxFactory.IdentifierName(Name.EmitToken(_tagger));

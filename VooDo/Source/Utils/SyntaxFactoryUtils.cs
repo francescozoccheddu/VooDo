@@ -49,14 +49,21 @@ namespace VooDo.Utils
         internal static NameSyntax ToNameSyntax(this Namespace _namespace)
             => (NameSyntax) _namespace.EmitNode(new Scope(), new Tagger());
 
-        internal static InvocationExpressionSyntax CreateVariableInvocation(TypeSyntax? _type, LiteralExpressionSyntax _name, ExpressionSyntax _initialValue)
+        internal static InvocationExpressionSyntax CreateVariableInvocation(TypeSyntax? _type, bool _isConstant, string? _name, ExpressionSyntax _initialValue)
             => Invocation(
                 MemberAccess(
                     s_runtimeHelpersType,
                     GenericName(
                         nameof(RuntimeHelpers.CreateVariable),
                         _type!)),
-                    _name,
+                    SF.LiteralExpression(_isConstant
+                        ? SyntaxKind.TrueLiteralExpression
+                        : SyntaxKind.FalseLiteralExpression),
+                    _name is null
+                        ? SF.LiteralExpression(SyntaxKind.NullLiteralExpression)
+                        : SF.LiteralExpression(
+                            SyntaxKind.StringLiteralExpression,
+                            SF.Literal(_name)),
                     _initialValue);
 
         internal static InvocationExpressionSyntax SetControllerAndGetValueInvocation(ExpressionSyntax _variable, ExpressionSyntax _controller)

@@ -74,7 +74,7 @@ namespace VooDo.Compiling.Transformation
                 if (globalsMap.TryGetValue(declaration.GetTag()!, out int index))
                 {
                     InvocationExpressionSyntax invocation = (InvocationExpressionSyntax) declaration.Variables.Single().Initializer!.Value;
-                    ExpressionSyntax initialValue = invocation.ArgumentList.Arguments[1].Expression;
+                    ExpressionSyntax initialValue = invocation.ArgumentList.Arguments[2].Expression;
                     syntax[index] = new GlobalSyntax(declaration, initialValue, null);
                 }
             }

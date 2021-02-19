@@ -24,7 +24,13 @@ namespace VooDo.AST.Statements
             init => m_declarations = value.EmptyIfDefault();
         }
 
-        public GlobalStatement(ImmutableArray<DeclarationStatement> _declarations) => m_Declarations = _declarations;
+        public bool IsConstant { get; }
+
+        public GlobalStatement(bool _isConstant, ImmutableArray<DeclarationStatement> _declarations)
+        {
+            IsConstant = _isConstant;
+            m_Declarations = _declarations;
+        }
 
         #endregion
 
@@ -53,7 +59,7 @@ namespace VooDo.AST.Statements
         internal override IEnumerable<StatementSyntax> EmitNodes(Scope _scope, Tagger _tagger)
             => this.SelectMany(_s => _s.EmitNodes(_scope, _tagger));
         public override IEnumerable<Node> Children => m_Declarations;
-        public override string ToString() => GrammarConstants.globalKeyword + Count switch
+        public override string ToString() => (IsConstant ? GrammarConstants.constKeyword : GrammarConstants.globalKeyword) + Count switch
         {
             0 => " {}",
             1 => $" {this[0]}",

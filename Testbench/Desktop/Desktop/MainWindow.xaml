@@ -6,7 +6,10 @@
 
     <Grid>
 
-        <Button HorizontalAlignment="Center" VerticalAlignment="Center" Content="{voodo:VooDo Code=3+2}" />
+        <Button
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            Content="{voodo:VooDo Code=3+2}" />
 
     </Grid>
 

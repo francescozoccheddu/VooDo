@@ -73,8 +73,7 @@ namespace VooDo.Compiling
             Aliases = _aliases.EmptyIfNull().ToImmutableHashSet();
             m_metadata = _metadata;
             string? path = m_metadata.FilePath ?? _assembly?.Location;
-            FilePath = path is not null ? new Uri(path).AbsolutePath : null;
-            FilePath = Uri.UnescapeDataString(FilePath);
+            FilePath = path is not null ? Uri.UnescapeDataString(new Uri(path).AbsolutePath) : null;
             Assembly = _assembly;
         }
 

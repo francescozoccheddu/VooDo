@@ -29,9 +29,9 @@ namespace VooDo.AST.Statements
             internal override SyntaxNode EmitNode(Scope _scope, Tagger _tagger)
             {
                 ExpressionSyntax? initializer;
-                if (Parent is not null && Parent.Parent is GlobalStatement)
+                if (Parent is not null && Parent.Parent is GlobalStatement globalStatement)
                 {
-                    Scope.GlobalDefinition globalDefinition = _scope.AddGlobal(new GlobalPrototype(new Global(((DeclarationStatement) Parent).Type, Name, Initializer), this));
+                    Scope.GlobalDefinition globalDefinition = _scope.AddGlobal(new GlobalPrototype(new Global(globalStatement.IsConstant, ((DeclarationStatement) Parent).Type, Name, Initializer), this));
                     initializer = SyntaxFactoryUtils.ThisMemberAccess(globalDefinition.Identifier);
                 }
                 else

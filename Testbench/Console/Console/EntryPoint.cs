@@ -9,16 +9,21 @@ using VooDo.Runtime;
 
 namespace VooDo.ConsoleTestbench
 {
-    public interface Culo : IControllerFactory<bool> { }
+    public interface CIao : IControllerFactory<bool> { }
     internal static class EntryPoint
     {
         public static void Run()
         {
             string code = @"
-""ciao"" + "" mondo!""
+global var x = 7;
+const {
+    var y = 5, z = 6;
+}
+bool q = glob (VooDo.ConsoleTestbench.CIao) null;
+int p = glob null init 8;
             ";
             Script script = Parser.Script(code);
-            ImmutableArray<Reference> references = CompilationOptions.Default.References.Add(Reference.FromAssembly(typeof(Culo).Assembly));
+            ImmutableArray<Reference> references = CompilationOptions.Default.References.Add(Reference.FromAssembly(typeof(CIao).Assembly));
             Compilation compilation = Compilation.Create(script, CompilationOptions.Default with { References = references });
             if (compilation.Succeded)
             {

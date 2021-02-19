@@ -22,6 +22,10 @@ AS
 	: 'as'
 ;
 
+CONST
+	: 'const'
+;
+
 DEFAULT
 	: 'default'
 ;

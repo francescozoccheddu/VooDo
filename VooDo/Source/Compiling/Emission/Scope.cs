@@ -31,23 +31,31 @@ namespace VooDo.Compiling.Emission
 
         }
 
-        private readonly Dictionary<string, bool> m_names;
+        private enum EKind
+        {
+            Local, GlobalVariable, GlobalConst
+        }
+
+        private readonly Dictionary<string, EKind> m_names;
         private readonly List<GlobalDefinition> m_globals;
 
-        internal Scope() : this(new List<GlobalDefinition>(), new Dictionary<string, bool>())
+        internal Scope() : this(new List<GlobalDefinition>(), new Dictionary<string, EKind>())
         { }
 
-        private Scope(List<GlobalDefinition> _globals, Dictionary<string, bool> _names)
+        private Scope(List<GlobalDefinition> _globals, Dictionary<string, EKind> _names)
         {
             m_names = _names;
             m_globals = _globals;
         }
 
-        public bool IsNameTaken(Identifier _name)
-            => m_names.ContainsKey(_name);
+        public bool IsConstant(Identifier _name)
+            => m_names.GetValueOrDefault(_name, EKind.Local) == EKind.GlobalConst;
 
         public bool IsGlobal(Identifier _name)
-            => m_names.TryGetValue(_name, out bool isGlobal) && isGlobal;
+            => m_names.GetValueOrDefault(_name, EKind.Local) != EKind.Local;
+
+        public bool IsNameTaken(Identifier _name)
+            => m_names.ContainsKey(_name);
 
         public ImmutableArray<GlobalDefinition> GetGlobalDefinitions()
             => m_globals.ToImmutableArray();
@@ -61,7 +69,7 @@ namespace VooDo.Compiling.Emission
             {
                 throw new VariableRedefinitionProblem(_source, _name).AsThrowable();
             }
-            m_names.Add(_name, false);
+            m_names.Add(_name, EKind.Local);
         }
 
         public GlobalDefinition AddGlobal(GlobalPrototype _global)
@@ -72,14 +80,14 @@ namespace VooDo.Compiling.Emission
                 {
                     throw new VariableRedefinitionProblem(_global.Source, _global.Global.Name).AsThrowable();
                 }
-                m_names.Add(_global.Global.Name, true);
+                m_names.Add(_global.Global.Name, _global.Global.IsConstant ? EKind.GlobalConst : EKind.GlobalVariable);
             }
             GlobalDefinition definition = CreateGlobalDefinition(_global, m_globals.Count);
             m_globals.Add(definition);
             return definition;
         }
 
-        internal Scope CreateNested() => new Scope(m_globals, new Dictionary<string, bool>(m_names));
+        internal Scope CreateNested() => new Scope(m_globals, new Dictionary<string, EKind>(m_names));
 
     }
 

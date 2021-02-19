@@ -40,7 +40,7 @@ namespace VooDo.AST.Names
         #region Conversion
 
         public static implicit operator Identifier(string _identifier) => new Identifier(_identifier);
-        public static implicit operator string(Identifier _identifier) => _identifier.ToString();
+        public static implicit operator string?(Identifier? _identifier) => _identifier?.ToString();
 
         #endregion
 

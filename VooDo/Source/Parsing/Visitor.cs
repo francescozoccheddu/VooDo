@@ -198,7 +198,7 @@ namespace VooDo.Parsing
         public override Node VisitGlobalExpression([NotNull] VooDoParser.GlobalExpressionContext _c)
             => new GlobalExpression(Get<Expression>(_c.mController), TryGet<Expression>(_c.mInitializer));
         public override Node VisitGlobalStatement([NotNull] VooDoParser.GlobalStatementContext _c)
-            => new GlobalStatement(Get<DeclarationStatement>(_c._mDeclarations));
+            => new GlobalStatement(_c.mMod.Type == VooDoParser.CONST, Get<DeclarationStatement>(_c._mDeclarations));
         public override Node VisitIdentifier([NotNull] VooDoParser.IdentifierContext _c)
             => new Identifier(_c.GetText());
         public override Node VisitIdentifierOrDiscard([NotNull] VooDoParser.IdentifierOrDiscardContext _c)
