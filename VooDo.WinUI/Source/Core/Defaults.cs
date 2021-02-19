@@ -20,6 +20,8 @@ namespace VooDo.WinUI.Core
         public static ImmutableArray<Reference> References { get; }
         public static IHookInitializerProvider HookInitializerProvider { get; }
         public static ITargetProvider<SimpleTarget> TargetProvider { get; }
+        public static ImmutableArray<(string name, string? alias)> UsingNamespaceDirectives { get; }
+        public static ImmutableArray<Type> UsingStaticTypes { get; }
 
         static Defaults()
         {
@@ -37,6 +39,8 @@ namespace VooDo.WinUI.Core
             }
             HookInitializerProvider = new HookInitializerList(Enumerable.Empty<IHookInitializerProvider>());
             TargetProvider = new TargetProviderList<SimpleTarget>(new[] { new DependencyPropertyTargetProvider() });
+            UsingNamespaceDirectives = ImmutableArray.Create<(string, string?)>();
+            UsingStaticTypes = ImmutableArray.Create<Type>();
         }
 
     }

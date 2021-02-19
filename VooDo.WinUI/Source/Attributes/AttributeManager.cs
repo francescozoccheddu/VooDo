@@ -1,10 +1,13 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Reflection;
 
 using VooDo.Compiling;
 using VooDo.Hooks;
+using VooDo.Utils;
+using VooDo.WinUI.Core;
 using VooDo.WinUI.Interfaces;
 
 namespace VooDo.WinUI.Attributes
@@ -25,26 +28,29 @@ namespace VooDo.WinUI.Attributes
 
         public static void Update()
         {
-            s_initialized = true;
             ImmutableArray<Assembly> assemblies = GetAssemblies();
-            if (s_lastAssemblies.SequenceEqual(assemblies))
+            if (s_initialized && s_lastAssemblies.SequenceEqual(assemblies))
             {
                 return;
             }
+            s_initialized = true;
             s_lastAssemblies = assemblies;
             {
                 // Assembly attributes
                 ImmutableDictionary<Type, ImmutableArray<AssemblyTagAttribute>> assemblyMap = AssemblyTagAttribute.RetrieveAttributes(assemblies);
-                References = ReferenceAttribute.Resolve(assemblyMap[typeof(ReferenceAttribute)].Cast<ReferenceAttribute>());
+                s_references = ReferenceAttribute.Resolve(assemblyMap.GetValueOrDefault(typeof(ReferenceAttribute)).EmptyIfDefault().Cast<ReferenceAttribute>());
+                s_usingStaticTypes = UsingStaticAttribute.Resolve(assemblyMap.GetValueOrDefault(typeof(UsingStaticAttribute)).EmptyIfDefault().Cast<UsingStaticAttribute>());
+                s_usingNamespaceDirectives = UsingNamespaceAttribute.Resolve(assemblyMap.GetValueOrDefault(typeof(UsingNamespaceAttribute)).EmptyIfDefault().Cast<UsingNamespaceAttribute>());
             }
             {
                 // Type attributes
                 ImmutableDictionary<Type, ImmutableArray<TypeTagAttribute.Application>> typeMap = TypeTagAttribute.RetrieveAttributes(assemblies);
-                BindingManager = BindingManagerAttribute.Resolve(typeMap[typeof(BindingManagerAttribute)]);
-                TargetProvider = TargetProviderAttribute.Resolve<ITarget>(typeMap[typeof(TargetProviderAttribute)]);
-                LoaderProvider = LoaderProviderAttribute.Resolve<ITarget>(typeMap[typeof(LoaderProviderAttribute)]);
-                HookInitializerProvider = HookInitializerProviderAttribute.Resolve(typeMap[typeof(HookInitializerProviderAttribute)]);
+                s_bindingManager = BindingManagerAttribute.Resolve(typeMap.GetValueOrDefault(typeof(BindingManagerAttribute)).EmptyIfDefault());
+                s_targetProvider = TargetProviderAttribute.Resolve<ITarget>(typeMap.GetValueOrDefault(typeof(TargetProviderAttribute)).EmptyIfDefault());
+                s_loaderProvider = LoaderProviderAttribute.Resolve<ITarget>(typeMap.GetValueOrDefault(typeof(LoaderProviderAttribute)).EmptyIfDefault());
+                s_hookInitializerProvider = HookInitializerProviderAttribute.Resolve(typeMap.GetValueOrDefault(typeof(HookInitializerProviderAttribute)).EmptyIfDefault());
             }
+            LoaderOptions.Update();
         }
 
         private static void EnsureInitialized()
@@ -62,6 +68,8 @@ namespace VooDo.WinUI.Attributes
         private static ILoaderProvider<ITarget>? s_loaderProvider;
         private static IHookInitializerProvider? s_hookInitializerProvider;
         private static ImmutableArray<Reference> s_references = ImmutableArray.Create<Reference>();
+        private static ImmutableArray<Type> s_usingStaticTypes = ImmutableArray.Create<Type>();
+        private static ImmutableArray<(string name, string? alias)> s_usingNamespaceDirectives = ImmutableArray.Create<(string name, string? alias)>();
 
         public static IBindingManager? BindingManager
         {
@@ -70,7 +78,6 @@ namespace VooDo.WinUI.Attributes
                 EnsureInitialized();
                 return s_bindingManager;
             }
-            private set => s_bindingManager = value;
         }
         public static ITargetProvider<ITarget>? TargetProvider
         {
@@ -79,7 +86,6 @@ namespace VooDo.WinUI.Attributes
                 EnsureInitialized();
                 return s_targetProvider;
             }
-            private set => s_targetProvider = value;
         }
         public static ILoaderProvider<ITarget>? LoaderProvider
         {
@@ -88,7 +94,6 @@ namespace VooDo.WinUI.Attributes
                 EnsureInitialized();
                 return s_loaderProvider;
             }
-            private set => s_loaderProvider = value;
         }
         public static IHookInitializerProvider? HookInitializerProvider
         {
@@ -97,7 +102,6 @@ namespace VooDo.WinUI.Attributes
                 EnsureInitialized();
                 return s_hookInitializerProvider;
             }
-            private set => s_hookInitializerProvider = value;
         }
         public static ImmutableArray<Reference> References
         {
@@ -106,7 +110,22 @@ namespace VooDo.WinUI.Attributes
                 EnsureInitialized();
                 return s_references;
             }
-            private set => s_references = value;
+        }
+        public static ImmutableArray<Type> UsingStaticTypes
+        {
+            get
+            {
+                EnsureInitialized();
+                return s_usingStaticTypes;
+            }
+        }
+        public static ImmutableArray<(string name, string? alias)> UsingNamespaceDirectives
+        {
+            get
+            {
+                EnsureInitialized();
+                return s_usingNamespaceDirectives;
+            }
         }
 
     }

@@ -1,13 +1,12 @@
 ﻿using System;
-using System.Collections.Immutable;
 using System.Linq;
 
 using VooDo.AST;
 using VooDo.AST.Names;
 using VooDo.Caching;
 using VooDo.Compiling;
-using VooDo.Hooks;
 using VooDo.Runtime;
+using VooDo.WinUI.Core;
 using VooDo.WinUI.Interfaces;
 
 namespace VooDo.WinUI.Components
@@ -16,24 +15,20 @@ namespace VooDo.WinUI.Components
     public sealed class SimpleLoaderProvider : ILoaderProvider<SimpleTarget>
     {
 
-        public ImmutableArray<Reference> References { get; }
-        public IHookInitializerProvider HookInitializerProvider { get; }
         public ILoaderCache LoaderCache { get; }
 
-        public SimpleLoaderProvider(ImmutableArray<Reference> _references, IHookInitializerProvider _hookInitializerProvider, ILoaderCache _loaderCache)
+        public SimpleLoaderProvider(ILoaderCache _loaderCache)
         {
-            References = _references;
-            HookInitializerProvider = _hookInitializerProvider;
             LoaderCache = _loaderCache;
         }
 
-        private Identifier? GetAssemblyAlias(QualifiedType _qualifiedType)
+        private static Identifier? GetAssemblyAlias(QualifiedType _qualifiedType)
         {
             Type? type = Type.GetType(_qualifiedType.ToString());
             if (type is not null)
             {
                 string path = new Uri(type.Assembly.Location).AbsolutePath;
-                return References
+                return LoaderOptions.References
                     .FirstOrDefault(_r => _r.FilePath is not null && path == new Uri(_r.FilePath).AbsolutePath)?
                     .Aliases
                     .FirstOrDefault();
@@ -41,12 +36,18 @@ namespace VooDo.WinUI.Components
             return null;
         }
 
+        private static Script ProcessScript(Script _script)
+        {
+            return _script;
+        }
+
         public Loader GetLoader(Script _script, SimpleTarget _target)
         {
+            _script = ProcessScript(_script);
             ComplexType? returnType = _target.ReturnType == typeof(void)
                 ? null
                 : GetTypeNode(_target.ReturnType, _target);
-            LoaderKey key = LoaderKey.Create(_script, References, returnType, HookInitializerProvider);
+            LoaderKey key = LoaderKey.Create(_script, LoaderOptions.References, returnType, LoaderOptions.HookInitializerProvider);
             return LoaderCache?.GetOrCreateLoader(key)
                 ?? Compilation.SucceedOrThrow(_script, key.CreateMatchingOptions()).Load();
         }

@@ -39,8 +39,8 @@ namespace VooDo.AST.Names
 
         #region Conversion
 
-        public static implicit operator Identifier(string _identifier) => new Identifier(_identifier);
-        public static implicit operator string?(Identifier? _identifier) => _identifier?.ToString();
+        public static implicit operator Identifier(string _identifier) => _identifier is null ? null! : new Identifier(_identifier);
+        public static implicit operator string(Identifier _identifier) => _identifier?.ToString()!;
 
         #endregion
 
@@ -92,10 +92,10 @@ namespace VooDo.AST.Names
             .ToImmutableDictionary(_t => _t.ValueText);
 
         internal SyntaxToken? EmitPredefinedTypeKeywordToken(Tagger _tagger)
-            => s_predefinedTypesTokens.TryGetValue(this, out SyntaxToken token)
+            => s_predefinedTypesTokens.TryGetValue(ToString(), out SyntaxToken token)
             ? token.Own(_tagger, this) : null;
         internal override SyntaxNodeOrToken EmitNodeOrToken(Scope _scope, Tagger _tagger) => EmitToken(_tagger);
-        internal SyntaxToken EmitToken(Tagger _tagger) => SyntaxFactory.Identifier(this).Own(_tagger, this);
+        internal SyntaxToken EmitToken(Tagger _tagger) => SyntaxFactory.Identifier(ToString()).Own(_tagger, this);
         public override string ToString() => m_identifier;
 
         #endregion
