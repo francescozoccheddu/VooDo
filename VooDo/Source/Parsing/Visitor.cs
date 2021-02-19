@@ -51,7 +51,21 @@ namespace VooDo.Parsing
             => TryGet<TNode>(_rule)!;
 
         private TNode? TryGet<TNode>(ParserRuleContext _rule) where TNode : Node
-            => _rule is null ? null : (TNode?) Visit(_rule);
+        {
+            if (_rule is null)
+            {
+                return null;
+            }
+            Node node = Visit(_rule);
+            if (node is TNode tnode)
+            {
+                return tnode;
+            }
+            else
+            {
+                throw new SyntaxError(node, $"Expected {typeof(TNode).Name} but found {node.GetType().Name}").AsThrowable();
+            }
+        }
 
         public override Node Visit(IParseTree _tree)
         {
@@ -109,8 +123,6 @@ namespace VooDo.Parsing
             };
             return new AssignableArgument(null, kind, Get<AssignableExpression>(_c.mValue));
         }
-        public override Node VisitAssignableExpression([NotNull] VooDoParser.AssignableExpressionContext _c)
-            => Variant<AssignableExpression>(_c);
         public override Node VisitAssignmentStatement([NotNull] VooDoParser.AssignmentStatementContext _c)
         {
             AssignmentStatement.EKind kind = _c.mOp.Type switch
@@ -165,8 +177,6 @@ namespace VooDo.Parsing
             => Variant<ComplexType>(_c);
         public override Node VisitComplexTypeBase([NotNull] VooDoParser.ComplexTypeBaseContext _c)
             => Variant<ComplexType>(_c);
-        public override Node VisitComplexTypeOrExpression([NotNull] VooDoParser.ComplexTypeOrExpressionContext _c)
-            => Variant<ComplexTypeOrExpression>(_c);
         public override Node VisitComplexTypeOrVar([NotNull] VooDoParser.ComplexTypeOrVarContext _c)
             => _c.mType is null ? ComplexTypeOrVar.Var : ComplexTypeOrVar.FromComplexType(Get<ComplexType>(_c.mType));
         public override Node VisitConditionalExpression([NotNull] VooDoParser.ConditionalExpressionContext _c)
@@ -180,17 +190,7 @@ namespace VooDo.Parsing
         public override Node VisitElementAccessExpression([NotNull] VooDoParser.ElementAccessExpressionContext _c)
             => new ElementAccessExpression(Get<Expression>(_c.mSource), Get<Expression>(_c._mArgs));
         public override Node VisitExpressionStatement([NotNull] VooDoParser.ExpressionStatementContext _c)
-        {
-            Expression expression = Get<Expression>(_c.mExpr);
-            if (expression is InvocationOrObjectCreationExpression validExpression)
-            {
-                return new ExpressionStatement(validExpression);
-            }
-            else
-            {
-                throw new SyntaxError(expression, "ExpressionStatement expression must be an InvocationExpression or an ObjectCreationExpression").AsThrowable();
-            }
-        }
+            => new ExpressionStatement(Get<InvocationOrObjectCreationExpression>(_c.mExpr));
         public override Node VisitFalseLiteralExpression([NotNull] VooDoParser.FalseLiteralExpressionContext _c)
             => LiteralExpression.False;
         public override Node VisitFullScript([NotNull] VooDoParser.FullScriptContext _c)
@@ -215,22 +215,14 @@ namespace VooDo.Parsing
             => new IsExpression(Get<Expression>(_c.mSource), Get<ComplexType>(_c.mType), TryGet<IdentifierOrDiscard>(_c.mName));
         public override Node VisitMemberAccessExpression([NotNull] VooDoParser.MemberAccessExpressionContext _c)
             => new MemberAccessExpression(Get<ComplexTypeOrExpression>(_c.mSource), Get<Identifier>(_c.mMember));
-        public override Node VisitMethod([NotNull] VooDoParser.MethodContext _c)
-            => new InvocationExpression.Method(Get<NameOrMemberAccessExpression>(_c.mSource), Get<ComplexType>(_c._mTypeArgs));
-        public override Node VisitMethodInvocationExpression([NotNull] VooDoParser.MethodInvocationExpressionContext _c)
-            => new InvocationExpression(Get<InvocationExpression.Method>(_c.mSource), Get<Argument>(_c._mArgs));
         public override Node VisitNameExpression([NotNull] VooDoParser.NameExpressionContext _c)
             => new NameExpression(_c.mControllerOf is not null, Get<Identifier>(_c.mName));
-        public override Node VisitNameOrMemberAccessExpression([NotNull] VooDoParser.NameOrMemberAccessExpressionContext _c)
-            => Variant<NameOrMemberAccessExpression>(_c);
         public override Node VisitNamespace([NotNull] VooDoParser.NamespaceContext _c)
             => new Namespace(TryGet<Identifier>(_c.mAlias), Get<Identifier>(_c._mPath));
         public override Node VisitNullLiteralExpression([NotNull] VooDoParser.NullLiteralExpressionContext _c)
             => LiteralExpression.Null;
         public override Node VisitObjectCreationExpression([NotNull] VooDoParser.ObjectCreationExpressionContext _c)
             => new ObjectCreationExpression(TryGet<ComplexType>(_c.mType), Get<Argument>(_c._mArgs));
-        public override Node VisitOtherExpression([NotNull] VooDoParser.OtherExpressionContext _c)
-            => Variant<Expression>(_c);
         public override Node VisitOtherLiteralExpression([NotNull] VooDoParser.OtherLiteralExpressionContext _c)
             => new LiteralExpression(((LiteralExpressionSyntax) SyntaxFactory.ParseExpression(_c.GetText())).Token.Value);
         public override Node VisitOtherStatement([NotNull] VooDoParser.OtherStatementContext _c)
@@ -249,8 +241,23 @@ namespace VooDo.Parsing
             => new ComplexType.RankSpecifier(_c._mCommas.Count + 1);
         public override Node VisitReturnStatement([NotNull] VooDoParser.ReturnStatementContext _c)
             => new ReturnStatement(Get<Expression>(_c.mExpr));
-        public override Node VisitSimpleInvocationExpression([NotNull] VooDoParser.SimpleInvocationExpressionContext _c)
-            => new InvocationExpression(new InvocationExpression.SimpleCallable(Get<Expression>(_c.mSource)) with { Origin = GetOrigin(_c.mSource) }, Get<Argument>(_c._mArgs));
+        public override Node VisitInvocationExpression([NotNull] VooDoParser.InvocationExpressionContext _c)
+        {
+            InvocationExpression.Callable callable;
+            if (_c.mAngular is not null)
+            {
+                ImmutableArray<ComplexType> typeArgs = Get<ComplexType>(_c._mTypeArgs);
+                NameOrMemberAccessExpression expression = Get<NameOrMemberAccessExpression>(_c.mSource);
+                callable = new InvocationExpression.Method(expression, typeArgs);
+            }
+            else
+            {
+                callable = new InvocationExpression.SimpleCallable(Get<Expression>(_c.mSource));
+            }
+            {
+                return new InvocationExpression(callable with { Origin = GetOrigin(_c.mSource) }, Get<Argument>(_c._mArgs));
+            }
+        }
         public override Node VisitSimpleType([NotNull] VooDoParser.SimpleTypeContext _c)
             => new SimpleType(Get<Identifier>(_c.mName), Get<ComplexType>(_c._mTypeArgs));
         public override Node VisitTrueLiteralExpression([NotNull] VooDoParser.TrueLiteralExpressionContext _c)

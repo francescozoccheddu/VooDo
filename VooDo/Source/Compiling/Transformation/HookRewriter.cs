@@ -16,6 +16,7 @@ using System.Linq;
 using System.Threading;
 
 using VooDo.Hooks;
+using VooDo.Problems;
 using VooDo.Runtime;
 using VooDo.Utils;
 
@@ -54,52 +55,74 @@ namespace VooDo.Compiling.Transformation
             private readonly IHookInitializerProvider m_hookInitializerProvider;
             private readonly List<IHookInitializer> m_hookInitializers = new List<IHookInitializer>();
 
+            private ExpressionSyntax? TryReplaceExpression(ExpressionSyntax _expression)
+            {
+                IOperation sourceOperation = m_semantics.GetOperation(_expression)!;
+                if (sourceOperation.Kind is not OperationKind.ArrayElementReference
+                    and not OperationKind.FieldReference
+                    and not OperationKind.PropertyReference
+                    and not OperationKind.LocalReference)
+                {
+                    return null;
+                }
+                if (m_semantics.GetTypeInfo(_expression).Type!.IsValueType)
+                {
+                    return null;
+                }
+                ISymbol? symbol = m_semantics.GetSymbolInfo((ExpressionSyntax) _expression.Parent!).Symbol;
+                if (symbol is null ||
+                    (symbol is IFieldSymbol field && (field.IsReadOnly || field.IsConst)))
+                {
+                    return null;
+                }
+                PointsToAbstractValue result = m_pointsToAnalysis[sourceOperation.Kind, _expression];
+                Entry? entry = m_map.GetValueOrDefault(symbol);
+                if (entry is not null && result.Locations.IsSubsetOf(entry.Locations))
+                {
+                    return null;
+                }
+                IHookInitializer? initializer = entry?.Initializer ?? m_hookInitializerProvider.Provide(symbol);
+                if (initializer is null)
+                {
+                    return null;
+                }
+                m_hookInitializers.Add(initializer);
+                if (entry is null)
+                {
+                    m_map[symbol] = entry = new Entry(initializer);
+                }
+                if (result.Locations.Count == 1)
+                {
+                    entry.Locations.Add(result.Locations.First());
+                }
+                return SyntaxFactoryUtils.SubscribeHookInvocation((ExpressionSyntax) Visit(_expression), m_hookInitializers.Count);
+            }
+
             public override SyntaxNode? VisitElementAccessExpression(ElementAccessExpressionSyntax _node)
             {
+                IOperation operation = m_semantics.GetOperation(_node)!;
+                if (operation.Kind is OperationKind.ArrayElementReference or OperationKind.PropertyReference)
+                {
+                    ExpressionSyntax? expression = TryReplaceExpression(_node.Expression);
+                    if (expression is not null)
+                    {
+                        return _node.WithExpression(expression);
+                    }
+                }
                 return base.VisitElementAccessExpression(_node);
             }
 
             public override SyntaxNode? VisitMemberAccessExpression(MemberAccessExpressionSyntax _node)
             {
                 IOperation operation = m_semantics.GetOperation(_node)!;
-                if (operation.Kind is not OperationKind.FieldReference
-                    and not OperationKind.PropertyReference)
+                if (operation.Kind is OperationKind.FieldReference or OperationKind.PropertyReference)
                 {
-                    goto skip;
+                    ExpressionSyntax? expression = TryReplaceExpression(_node.Expression);
+                    if (expression is not null)
+                    {
+                        return _node.WithExpression(expression);
+                    }
                 }
-                IOperation sourceOperation = m_semantics.GetOperation(_node.Expression)!;
-                if (sourceOperation.Kind is not OperationKind.ArrayElementReference
-                    and not OperationKind.FieldReference
-                    and not OperationKind.PropertyReference
-                    and not OperationKind.LocalReference)
-                {
-                    goto skip;
-                }
-                if (m_semantics.GetTypeInfo(_node.Expression).Type!.IsValueType)
-                {
-                    goto skip;
-                }
-                ISymbol? symbol = m_semantics.GetSymbolInfo(_node).Symbol;
-                if (symbol is null ||
-                    (symbol is IFieldSymbol field && (field.IsReadOnly || field.IsConst)))
-                {
-                    goto skip;
-                }
-                PointsToAbstractValue result = m_pointsToAnalysis[sourceOperation];
-                Entry? entry = m_map.GetValueOrDefault(symbol);
-                if (entry is not null && result.Locations.All(_l => entry.Locations.Contains(_l)))
-                {
-                    goto skip;
-                }
-                IHookInitializer? initializer = entry?.Initializer ?? m_hookInitializerProvider.Provide(symbol);
-                if (initializer is null)
-                {
-                    goto skip;
-                }
-                InvocationExpressionSyntax expression = SyntaxFactoryUtils.SubscribeHookInvocation((ExpressionSyntax) Visit(_node.Expression), m_hookInitializers.Count);
-                m_hookInitializers.Add(initializer);
-                return _node.WithExpression(expression);
-                skip:
                 return base.VisitMemberAccessExpression(_node);
             }
 
@@ -119,7 +142,12 @@ namespace VooDo.Compiling.Transformation
                 _compilation,
                 InterproceduralAnalysisKind.None,
                 CancellationToken.None);
-            return PointsToAnalysis.TryGetOrComputeResult(controlFlowGraph, methodSymbol, options, typeProvider, interproceduralAnalysis, null)!;
+            PointsToAnalysisResult? result = PointsToAnalysis.TryGetOrComputeResult(controlFlowGraph, methodSymbol, options, typeProvider, interproceduralAnalysis, null)!;
+            if (result is null)
+            {
+                throw new NoSemanticsProblem().AsThrowable();
+            }
+            return result;
         }
 
         internal static CompilationUnitSyntax Rewrite(Session _session)

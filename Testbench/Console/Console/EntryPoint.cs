@@ -38,9 +38,12 @@ namespace VooDo.ConsoleTestbench
     {
         public static void Run()
         {
+
             string code = @"
 var x = new VooDo.ConsoleTestbench.MyClass1();
 var y = x.myField.myField;
+x = new VooDo.ConsoleTestbench.MyClass1();
+var z = x.myField.myField;
             ";
             Script script = Parser.Script(code);
             ImmutableArray<Reference> references = CompilationOptions.Default.References.Add(Reference.FromAssembly(typeof(MyClass1).Assembly));
