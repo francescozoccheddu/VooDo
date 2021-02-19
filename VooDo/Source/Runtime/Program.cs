@@ -76,6 +76,7 @@ namespace VooDo.Runtime
 
         protected internal abstract void Run();
         protected internal abstract Variable[] m_Variables { get; }
+        protected internal abstract IHook[] m_Hooks { get; }
 
         public virtual Type ReturnType => typeof(void);
 

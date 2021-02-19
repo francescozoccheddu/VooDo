@@ -9,12 +9,13 @@ using Microsoft.CodeAnalysis.FlowAnalysis.DataFlow;
 using Microsoft.CodeAnalysis.FlowAnalysis.DataFlow.PointsToAnalysis;
 using Microsoft.CodeAnalysis.Operations;
 
-using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Threading;
 
+using VooDo.AST.Names;
+using VooDo.Compiling.Emission;
 using VooDo.Hooks;
 using VooDo.Problems;
 using VooDo.Runtime;
@@ -55,6 +56,8 @@ namespace VooDo.Compiling.Transformation
             private readonly IHookInitializerProvider m_hookInitializerProvider;
             private readonly List<IHookInitializer> m_hookInitializers = new List<IHookInitializer>();
 
+            internal ImmutableArray<IHookInitializer> Initializers => m_hookInitializers.ToImmutableArray();
+
             private ExpressionSyntax? TryReplaceExpression(ExpressionSyntax _expression)
             {
                 IOperation sourceOperation = m_semantics.GetOperation(_expression)!;
@@ -86,6 +89,7 @@ namespace VooDo.Compiling.Transformation
                 {
                     return null;
                 }
+                int index = m_hookInitializers.Count;
                 m_hookInitializers.Add(initializer);
                 if (entry is null)
                 {
@@ -95,13 +99,13 @@ namespace VooDo.Compiling.Transformation
                 {
                     entry.Locations.Add(result.Locations.First());
                 }
-                return SyntaxFactoryUtils.SubscribeHookInvocation((ExpressionSyntax) Visit(_expression), m_hookInitializers.Count);
+                return SyntaxFactoryUtils.SubscribeHookInvocation((ExpressionSyntax) Visit(_expression), index);
             }
 
             public override SyntaxNode? VisitElementAccessExpression(ElementAccessExpressionSyntax _node)
             {
                 IOperation operation = m_semantics.GetOperation(_node)!;
-                if (operation.Kind is OperationKind.ArrayElementReference or OperationKind.PropertyReference)
+                if (operation.Kind is OperationKind.PropertyReference)
                 {
                     ExpressionSyntax? expression = TryReplaceExpression(_node.Expression);
                     if (expression is not null)
@@ -150,6 +154,25 @@ namespace VooDo.Compiling.Transformation
             return result;
         }
 
+        private static PropertyDeclarationSyntax CreatePropertySyntax(ImmutableArray<IHookInitializer> _initializers, Tagger _tagger)
+        {
+            ArrayTypeSyntax hookType = SyntaxFactory.ArrayType(
+                (QualifiedType.FromType<IHook>() with { Alias = Session.runtimeReferenceAlias }).ToTypeSyntax(),
+                SyntaxFactoryUtils.SingleArrayRank());
+            return SyntaxFactoryUtils.ArrowProperty(
+                hookType,
+                nameof(Program.m_Hooks),
+                SyntaxFactory.ArrayCreationExpression(
+                    hookType,
+                    SyntaxFactory.InitializerExpression(
+                        SyntaxKind.ArrayInitializerExpression,
+                        _initializers.Select(_i => (ExpressionSyntax) _i.CreateInitializer().EmitNode(new Scope(), _tagger)).ToSeparatedList())))
+                .WithModifiers(
+                    SyntaxFactoryUtils.Tokens(
+                        SyntaxKind.ProtectedKeyword,
+                        SyntaxKind.OverrideKeyword));
+        }
+
         internal static CompilationUnitSyntax Rewrite(Session _session)
         {
             SemanticModel semantics = _session.Semantics!;
@@ -163,7 +186,10 @@ namespace VooDo.Compiling.Transformation
             PointsToAnalysisResult pointsToAnalysis = CreatePointsToAnalysis(method, semantics, _session.CSharpCompilation!);
             BodyRewriter rewriter = new BodyRewriter(semantics, pointsToAnalysis, _session.Compilation.Options.HookInitializerProvider);
             BlockSyntax body = (BlockSyntax) rewriter.Visit(method.Body!);
-            throw new NotImplementedException();
+            PropertyDeclarationSyntax property = CreatePropertySyntax(rewriter.Initializers, _session.Tagger);
+            ClassDeclarationSyntax newClass = classDeclaration.ReplaceNode(method.Body!, body);
+            newClass = newClass.AddMembers(property);
+            return root.ReplaceNode(classDeclaration, newClass);
         }
 
     }

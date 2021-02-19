@@ -16,7 +16,7 @@ namespace VooDo.ConsoleTestbench
     public sealed class MyClass1
     {
 
-        public MyClass2 myField = new MyClass2();
+        public MyClass2 this[int _x] => new MyClass2();
 
     }
 
@@ -30,7 +30,7 @@ namespace VooDo.ConsoleTestbench
 
     public sealed class Hooker : IHookInitializerProvider, IHookInitializer
     {
-        Expression IHookInitializer.CreateInitializer() => null!;
+        Expression IHookInitializer.CreateInitializer() => LiteralExpression.Null;
         IHookInitializer? IHookInitializerProvider.Provide(roslyn::ISymbol _symbol) => this;
     }
 
@@ -41,9 +41,8 @@ namespace VooDo.ConsoleTestbench
 
             string code = @"
 var x = new VooDo.ConsoleTestbench.MyClass1();
-var y = x.myField.myField;
-x = new VooDo.ConsoleTestbench.MyClass1();
-var z = x.myField.myField;
+var y = x[0].myField;
+var z = x[1].myField;
             ";
             Script script = Parser.Script(code);
             ImmutableArray<Reference> references = CompilationOptions.Default.References.Add(Reference.FromAssembly(typeof(MyClass1).Assembly));
