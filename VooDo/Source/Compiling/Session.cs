@@ -102,6 +102,16 @@ namespace VooDo.Compiling
             }
             {
                 // Hooks
+                CompilationUnitSyntax newSyntax = HookRewriter.Rewrite(this);
+                if (newSyntax != Syntax)
+                {
+                    SyntaxTree newTree = CSharpSyntaxTree.Create(newSyntax, parseOptions);
+                    CSharpCompilation = CSharpCompilation.ReplaceSyntaxTree(tree, newTree);
+                    tree = newTree;
+                    tree.GetDiagnostics().SelectNonNull(_d => RoslynProblem.FromDiagnostic(_d, Tagger, Problem.EKind.Syntactic)).ThrowErrors();
+                    Semantics = CSharpCompilation.GetSemanticModel(tree);
+                    Syntax = (CompilationUnitSyntax) tree.GetRoot();
+                }
             }
             CSharpCompilation.GetDiagnostics().SelectNonNull(_d => RoslynProblem.FromDiagnostic(_d, Tagger, Problem.EKind.Semantic)).ThrowErrors();
             Succeeded = true;

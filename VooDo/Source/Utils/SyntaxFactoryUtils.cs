@@ -74,6 +74,12 @@ namespace VooDo.Utils
                 _variable,
                 _controller);
 
+        internal static InvocationExpressionSyntax SubscribeHookInvocation(ExpressionSyntax _source, int _hookIndex)
+            => Invocation(
+                ThisMemberAccess(nameof(Program.SubscribeHook)),
+                _source,
+                SF.LiteralExpression(SyntaxKind.NumericLiteralExpression, SF.Literal(_hookIndex)));
+
         internal static TypeSyntax VariableType(TypeSyntax? _type = null)
         {
             if (_type is null)

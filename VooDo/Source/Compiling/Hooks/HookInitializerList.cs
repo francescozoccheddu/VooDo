@@ -1,4 +1,6 @@
 ﻿
+using Microsoft.CodeAnalysis;
+
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -32,6 +34,9 @@ namespace VooDo.Hooks
         public static bool operator ==(HookInitializerList? _left, HookInitializerList? _right) => _left is not null && _left.Equals(_right);
         public static bool operator !=(HookInitializerList? _left, HookInitializerList? _right) => !(_left == _right);
         public override int GetHashCode() => Identity.CombineHashes(m_hookInitializers);
+        public IHookInitializer? Provide(ISymbol _symbol)
+            => m_hookInitializers.Select(_h => _h.Provide(_symbol)).FirstOrDefault(_h => _h is not null);
+
     }
 
 }

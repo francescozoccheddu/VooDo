@@ -23,7 +23,7 @@ namespace VooDo.Compiling
             ClassName = "GeneratedProgram";
             ReturnType = null;
             AssemblyName = null;
-            HookInitializerProvider = null!; // TODO implement
+            HookInitializerProvider = new HookInitializerList(Enumerable.Empty<IHookInitializerProvider>());
         }
 
         public string? AssemblyName { get; init; }

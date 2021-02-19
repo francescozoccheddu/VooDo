@@ -3,28 +3,52 @@ using System;
 using System.Collections.Immutable;
 
 using VooDo.AST;
+using VooDo.AST.Expressions;
 using VooDo.Compiling;
+using VooDo.Hooks;
 using VooDo.Parsing;
-using VooDo.Runtime;
+
+using roslyn = Microsoft.CodeAnalysis;
 
 namespace VooDo.ConsoleTestbench
 {
-    public interface CIao : IControllerFactory<bool> { }
+
+    public sealed class MyClass1
+    {
+
+        public MyClass2 myField = new MyClass2();
+
+    }
+
+
+    public sealed class MyClass2
+    {
+
+        public int myField;
+
+    }
+
+    public sealed class Hooker : IHookInitializerProvider, IHookInitializer
+    {
+        Expression IHookInitializer.CreateInitializer() => null!;
+        IHookInitializer? IHookInitializerProvider.Provide(roslyn::ISymbol _symbol) => this;
+    }
+
     internal static class EntryPoint
     {
         public static void Run()
         {
             string code = @"
-global var x = 7;
-const {
-    var y = 5, z = 6;
-}
-bool q = glob (VooDo.ConsoleTestbench.CIao) null;
-int p = glob null init 8;
+var x = new VooDo.ConsoleTestbench.MyClass1();
+var y = x.myField.myField;
             ";
             Script script = Parser.Script(code);
-            ImmutableArray<Reference> references = CompilationOptions.Default.References.Add(Reference.FromAssembly(typeof(CIao).Assembly));
-            Compilation compilation = Compilation.Create(script, CompilationOptions.Default with { References = references });
+            ImmutableArray<Reference> references = CompilationOptions.Default.References.Add(Reference.FromAssembly(typeof(MyClass1).Assembly));
+            Compilation compilation = Compilation.Create(script, CompilationOptions.Default with
+            {
+                HookInitializerProvider = new Hooker(),
+                References = references
+            });
             if (compilation.Succeded)
             {
                 Console.WriteLine(compilation.GetCSharpSourceCode());

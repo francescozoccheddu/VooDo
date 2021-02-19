@@ -123,6 +123,11 @@ namespace VooDo.Runtime
         public bool IsLocked => m_locks > 0;
         public bool IsRunRequested => m_runRequested;
 
+        protected internal TValue SubscribeHook<TValue>(TValue _object, int _hookIndex)
+        {
+            return _object;
+        }
+
         private void ProcessRunRequest()
         {
             if (IsRunRequested && !IsLocked)
