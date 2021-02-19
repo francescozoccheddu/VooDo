@@ -21,8 +21,6 @@ namespace VooDo.Runtime
 
         public TValue Value { get => m_Value; set => SetValue(value); }
 
-        public abstract IControllerFactory<TValue> Factory { get; }
-
         protected TValue m_Value
         {
             get => m_value;

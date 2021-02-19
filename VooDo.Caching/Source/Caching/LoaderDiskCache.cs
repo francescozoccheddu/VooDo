@@ -1,7 +1,7 @@
 ﻿
+using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Reflection;
 
 using VooDo.AST;
@@ -32,6 +32,7 @@ namespace VooDo.Caching
 
         private readonly Dictionary<LoaderKey, Value> m_cache = new Dictionary<LoaderKey, Value>(64);
         private readonly IScriptCache m_scriptCache = new ScriptMemoryCache();
+        private const int c_maxCount = 512;
 
         public ISerializer<Reference> ReferenceSerializer { get; }
         public ISerializer<IHookInitializerProvider> HookInitializerProviderSerializer { get; }
@@ -116,7 +117,7 @@ namespace VooDo.Caching
         public void Load()
         {
             using BinaryReader reader = new BinaryReader(File.Open(FilePath, FileMode.Open));
-            int count = reader.ReadInt32();
+            int count = Math.Min(reader.ReadInt32(), c_maxCount);
             while (count-- > 0)
             {
                 string scriptCode = reader.ReadString();
@@ -152,7 +153,6 @@ namespace VooDo.Caching
 
         public Loader GetOrCreateLoader(LoaderKey _key)
         {
-            LoaderKey[] keys = m_cache.Keys.ToArray();
             if (m_cache.TryGetValue(_key, out Value cached))
             {
                 return cached.Loader;

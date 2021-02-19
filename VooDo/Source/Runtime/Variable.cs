@@ -46,8 +46,6 @@ namespace VooDo.Runtime
             internal NoController(Variable<TValue> _variable) : base(_variable) { }
             internal NoController(Variable<TValue> _variable, TValue _value) : base(_variable, _value) { }
 
-            public override IControllerFactory<TValue> Factory => throw new NotImplementedException();
-
             protected override void SetValue(TValue _value) => m_Value = _value;
 
             public override Controller<TValue> Create(Variable<TValue> _variable) => throw new NotSupportedException();
@@ -77,7 +75,10 @@ namespace VooDo.Runtime
                 {
                     throw new Exception("Controller is not bound to this variable");
                 }
-                m_controller?.Destroy();
+                if (!ReferenceEquals(m_controller, controller))
+                {
+                    m_controller?.Destroy();
+                }
                 m_controller = controller;
             }
         }

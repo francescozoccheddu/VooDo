@@ -250,7 +250,7 @@ namespace VooDo.Parsing
         public override Node VisitReturnStatement([NotNull] VooDoParser.ReturnStatementContext _c)
             => new ReturnStatement(Get<Expression>(_c.mExpr));
         public override Node VisitSimpleInvocationExpression([NotNull] VooDoParser.SimpleInvocationExpressionContext _c)
-            => new InvocationExpression(Get<InvocationExpression.SimpleCallable>(_c.mSource), Get<Argument>(_c._mArgs));
+            => new InvocationExpression(new InvocationExpression.SimpleCallable(Get<Expression>(_c.mSource)) with { Origin = GetOrigin(_c.mSource) }, Get<Argument>(_c._mArgs));
         public override Node VisitSimpleType([NotNull] VooDoParser.SimpleTypeContext _c)
             => new SimpleType(Get<Identifier>(_c.mName), Get<ComplexType>(_c._mTypeArgs));
         public override Node VisitTrueLiteralExpression([NotNull] VooDoParser.TrueLiteralExpressionContext _c)

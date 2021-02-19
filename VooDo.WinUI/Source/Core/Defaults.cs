@@ -8,6 +8,7 @@ using System.Reflection;
 
 using VooDo.Compiling;
 using VooDo.Hooks;
+using VooDo.WinUI.Animators;
 using VooDo.WinUI.Components;
 using VooDo.WinUI.Interfaces;
 
@@ -28,6 +29,7 @@ namespace VooDo.WinUI.Core
             {
                 List<Reference> references = new();
                 references.Add(Reference.RuntimeReference);
+                references.Add(Reference.FromAssembly(Assembly.GetExecutingAssembly()));
                 references.Add(Reference.FromAssembly(typeof(DependencyObject).Assembly));
                 references.AddRange(Reference.GetSystemReferences());
                 AssemblyName assemblyName = Assembly.GetExecutingAssembly().GetName();
@@ -40,7 +42,7 @@ namespace VooDo.WinUI.Core
             HookInitializerProvider = new HookInitializerList(Enumerable.Empty<IHookInitializerProvider>());
             TargetProvider = new TargetProviderList<SimpleTarget>(new[] { new DependencyPropertyTargetProvider() });
             UsingNamespaceDirectives = ImmutableArray.Create<(string, string?)>();
-            UsingStaticTypes = ImmutableArray.Create<Type>();
+            UsingStaticTypes = new[] { typeof(AnimatorFactory) }.ToImmutableArray();
         }
 
     }

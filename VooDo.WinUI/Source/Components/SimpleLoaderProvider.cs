@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 using VooDo.AST;
+using VooDo.AST.Directives;
 using VooDo.AST.Names;
 using VooDo.Caching;
 using VooDo.Compiling;
@@ -38,6 +40,14 @@ namespace VooDo.WinUI.Components
 
         private static Script ProcessScript(Script _script)
         {
+            IEnumerable<UsingDirective> usings = LoaderOptions.UsingNamespaceDirectives
+                .Select(_u => (UsingDirective) new UsingNamespaceDirective(_u.name, _u.alias!))
+                .Concat(LoaderOptions.UsingStaticTypes
+                    .Select(_t => new UsingStaticDirective((QualifiedType) GetTypeNode(_t))));
+            _script = _script with
+            {
+                Usings = _script.Usings.AddRange(usings)
+            };
             return _script;
         }
 
@@ -52,7 +62,7 @@ namespace VooDo.WinUI.Components
                 ?? Compilation.SucceedOrThrow(_script, key.CreateMatchingOptions()).Load();
         }
 
-        public ComplexType GetTypeNode(Type _type, SimpleTarget _target)
+        private static ComplexType GetTypeNode(Type _type)
         {
             ComplexType type = ComplexType.FromType(_type);
             return type.ReplaceNonNullDescendantNodes(_n =>
@@ -60,6 +70,9 @@ namespace VooDo.WinUI.Components
                 ? qualifiedType with { Alias = GetAssemblyAlias(qualifiedType) }
                 : _n)!;
         }
+
+        public ComplexType GetTypeNode(Type _type, SimpleTarget _target)
+            => GetTypeNode(_type);
 
     }
 

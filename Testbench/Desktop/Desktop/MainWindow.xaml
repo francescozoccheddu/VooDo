@@ -9,7 +9,7 @@
         <Button
             HorizontalAlignment="Center"
             VerticalAlignment="Center"
-            Content="{voodo:VooDo Code=3+2}" />
+            Content="{voodo:VooDo Code=glob Smooth(1000) }" />
 
     </Grid>
 

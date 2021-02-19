@@ -14,6 +14,7 @@ namespace VooDo.WinUI.Xaml
     {
 
         public VooDo() { }
+
         public VooDo(string _code)
         {
             Code = _code;
