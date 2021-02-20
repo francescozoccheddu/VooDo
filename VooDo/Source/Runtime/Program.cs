@@ -111,12 +111,14 @@ namespace VooDo.Runtime
             => GetVariables<TValue>(_name).SingleOrDefault();
 
         private bool m_running;
-        private bool m_runRequested;
         private int m_locks;
 
         protected internal abstract void Run();
+
+#pragma warning disable CA1819 // Properties should not return arrays
         protected internal virtual Variable[] m_Variables => Array.Empty<Variable>();
         protected internal virtual IHook[] m_Hooks => Array.Empty<IHook>();
+#pragma warning restore CA1819 // Properties should not return arrays
 
         public virtual Type ReturnType => typeof(void);
 
@@ -170,7 +172,7 @@ namespace VooDo.Runtime
         }
 
         public bool IsLocked => m_locks > 0;
-        public bool IsRunRequested => m_runRequested;
+        public bool IsRunRequested { get; private set; }
 
         protected internal TValue? SubscribeHook<TValue>(TValue? _object, int _hookIndex) where TValue : class
         {
@@ -197,11 +199,11 @@ namespace VooDo.Runtime
 
         public void RequestRun()
         {
-            m_runRequested = true;
+            IsRunRequested = true;
             ProcessRunRequest();
         }
 
-        public void CancelRunRequest() => m_runRequested = false;
+        public void CancelRunRequest() => IsRunRequested = false;
 
         void IHookListener.NotifyChange() => RequestRun();
 

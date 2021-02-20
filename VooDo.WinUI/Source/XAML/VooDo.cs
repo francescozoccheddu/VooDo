@@ -42,8 +42,7 @@ namespace VooDo.WinUI.Xaml
                 {
                     throw new InvalidOperationException("Failed to retrieve XAML service");
                 }
-                ProvideValueTargetProperty? property = provideValueTarget.TargetProperty as ProvideValueTargetProperty;
-                if (property is null)
+                if (provideValueTarget.TargetProperty is not ProvideValueTargetProperty property)
                 {
                     throw new InvalidOperationException("Failed to retrieve XAML target property");
                 }

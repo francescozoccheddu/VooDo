@@ -1,7 +1,7 @@
 ﻿
 using System;
 using System.Collections.Immutable;
-using System.ComponentModel;
+using System.Reflection;
 
 using VooDo.AST;
 using VooDo.Compiling;
@@ -10,21 +10,7 @@ using VooDo.Parsing;
 namespace VooDo.ConsoleTestbench
 {
 
-    public sealed class MyClass1
-    {
 
-        public MyClass2 this[int _x] => new MyClass2();
-
-    }
-
-
-    public sealed class MyClass2 : INotifyPropertyChanged
-    {
-
-        public int myField;
-
-        public event PropertyChangedEventHandler? PropertyChanged;
-    }
 
     internal static class EntryPoint
     {
@@ -32,12 +18,9 @@ namespace VooDo.ConsoleTestbench
         {
 
             string code = @"
-var x = new VooDo.ConsoleTestbench.MyClass1();
-var y = x[0].myField;
-var z = x[1].myField;
             ";
             Script script = Parser.Script(code);
-            ImmutableArray<Reference> references = Options.Default.References.Add(Reference.FromAssembly(typeof(MyClass1).Assembly));
+            ImmutableArray<Reference> references = Options.Default.References.Add(Reference.FromAssembly(Assembly.GetExecutingAssembly()));
             Compilation compilation = Compilation.Create(script, Options.Default with
             {
                 References = references

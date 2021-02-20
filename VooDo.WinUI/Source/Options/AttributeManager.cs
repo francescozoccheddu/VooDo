@@ -48,7 +48,9 @@ namespace VooDo.WinUI.Options
             // Type attributes
             ImmutableDictionary<Type, ImmutableArray<TypeTagAttribute.Application>> typeMap = TypeTagAttribute.RetrieveAttributes(assemblies);
             ITargetProvider? targetProvider = TargetProviderAttribute.Resolve(typeMap.GetValueOrDefault(typeof(TargetProviderAttribute)).EmptyIfDefault());
+            targetProvider ??= BindingManagerOptions.Empty.TargetProvider;
             IHookInitializer? hookInitializer = HookInitializerAttribute.Resolve(typeMap.GetValueOrDefault(typeof(HookInitializerAttribute)).EmptyIfDefault());
+            hookInitializer ??= BindingManagerOptions.Empty.HookInitializer;
             s_cached = new BindingManagerOptions(references, usingNamespaces, usingStaticTypes, constants, hookInitializer, targetProvider);
             return s_cached;
         }

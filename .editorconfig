@@ -21,3 +21,9 @@ dotnet_diagnostic.IDE0058.severity = none
 
 # CA1034: Nested types should not be visible
 dotnet_diagnostic.CA1034.severity = none
+
+# CA1012: Abstract types should not have constructors
+dotnet_diagnostic.CA1012.severity = none
+
+# CS3021: Type or member does not need a CLSCompliant attribute because the assembly does not have a CLSCompliant attribute
+dotnet_diagnostic.CS3021.severity = none

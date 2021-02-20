@@ -93,11 +93,11 @@ namespace VooDo.AST
                                 SFH.CreateVariableInvocation(
                                     type,
                                     _definition.Prototype.Global.IsConstant,
-                                    _definition.Prototype.Global.Name,
-                                    (_definition.Prototype.Global.HasInitializer
+                                    _definition.Prototype.Global.Name!,
+                                    _definition.Prototype.Global.HasInitializer
                                     ? (ExpressionSyntax) _definition.Prototype.Global.Initializer!.EmitNode(new Scope(), tagger)
                                     : SF.LiteralExpression(
-                                        SyntaxKind.DefaultLiteralExpression)))
+                                        SyntaxKind.DefaultLiteralExpression))
                                 .ToEqualsValueClause())
                             .ToSeparatedList())
                     .Own(tagger, _definition.Prototype.Source);

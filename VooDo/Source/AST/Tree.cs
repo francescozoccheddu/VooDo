@@ -128,6 +128,7 @@ namespace VooDo.AST
                 ETraversal.PostDepthFirst => DescendantNodesWithParents(_node, _shouldVisitChildren, _traversal),
             };
 
+#pragma warning disable CA1815 // Override equals and operator equals on value types
         public readonly struct ReplaceInfo
         {
             internal ReplaceInfo(Node? _parent, Node? _original, Node? _replaced)
@@ -140,7 +141,9 @@ namespace VooDo.AST
             public Node? Parent { get; }
             public Node? Original { get; }
             public Node? Replaced { get; }
+
         }
+#pragma warning restore CA1815 // Override equals and operator equals on value types
 
         private static Node? ReplaceNodeRecursive(Node? _node, Node? _parent, Func<ReplaceInfo, Node?> _map, Predicate<Node> _shouldVisitChildren)
         {
