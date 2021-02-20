@@ -12,3 +12,9 @@ dotnet_diagnostic.CS8509.severity = none
 
 # IDE0045: Convert to conditional expression
 dotnet_style_prefer_conditional_expression_over_assignment = false:suggestion
+
+# IDE0058: Expression value is never used
+csharp_style_unused_value_expression_statement_preference = discard_variable:none
+
+# IDE0058: Expression value is never used
+dotnet_diagnostic.IDE0058.severity = none

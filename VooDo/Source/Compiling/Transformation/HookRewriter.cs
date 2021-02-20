@@ -186,6 +186,11 @@ namespace VooDo.Compiling.Transformation
             PointsToAnalysisResult pointsToAnalysis = CreatePointsToAnalysis(method, semantics, _session.CSharpCompilation!);
             BodyRewriter rewriter = new BodyRewriter(semantics, pointsToAnalysis, _session.Compilation.Options.HookInitializerProvider);
             BlockSyntax body = (BlockSyntax) rewriter.Visit(method.Body!);
+            ImmutableArray<IHookInitializer> initializers = rewriter.Initializers;
+            if (initializers.IsEmpty)
+            {
+                return root;
+            }
             PropertyDeclarationSyntax property = CreatePropertySyntax(rewriter.Initializers, _session.Tagger);
             ClassDeclarationSyntax newClass = classDeclaration.ReplaceNode(method.Body!, body);
             newClass = newClass.AddMembers(property);

@@ -31,7 +31,7 @@ namespace VooDo.ConsoleTestbench
     public sealed class Hooker : IHookInitializerProvider, IHookInitializer
     {
         Expression IHookInitializer.CreateInitializer() => LiteralExpression.Null;
-        IHookInitializer? IHookInitializerProvider.Provide(roslyn::ISymbol _symbol) => this;
+        IHookInitializer? IHookInitializerProvider.Provide(roslyn::ISymbol _symbol) => null;
     }
 
     internal static class EntryPoint

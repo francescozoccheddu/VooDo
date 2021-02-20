@@ -184,6 +184,10 @@ namespace VooDo.Compiling.Transformation
             NamespaceDeclarationSyntax namespaceDeclaration = root.Members.OfType<NamespaceDeclarationSyntax>().Single();
             ClassDeclarationSyntax classDeclaration = namespaceDeclaration.Members.OfType<ClassDeclarationSyntax>().Single();
             ImmutableArray<GlobalDefinition> globals = _session.Globals.Where(_g => _g.Prototype.Global.Type.IsVar).ToImmutableArray();
+            if (globals.IsEmpty)
+            {
+                return root;
+            }
             ImmutableArray<GlobalSyntax> syntax = GetSyntax(classDeclaration, globals, _session.Tagger);
             ImmutableArray<ITypeSymbol> types = InferSingleType(syntax, globals.Select(_g => _g.Prototype), _session.Semantics!);
             return ReplaceAll(root, syntax.Select(_s => _s.Declaration).ToImmutableArray(), types);

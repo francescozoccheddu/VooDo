@@ -51,8 +51,44 @@ namespace VooDo.Runtime
                 .Where(_v => _v.Name is not null)
                 .GroupBy(_v => _v.Name)
                 .ToImmutableDictionary(_g => _g.Key, _g => _g.ToImmutableArray());
+            m_hookHolders = m_Hooks.Select(_h => new HookHolder(_h)).ToImmutableArray();
         }
 
+        private sealed class HookHolder
+        {
+
+
+            private bool m_subscribedInThisRun;
+            private readonly IHook m_hook;
+            private object? m_lastSubscribedObject;
+
+            internal HookHolder(IHook _hook) => m_hook = _hook;
+
+            internal void OnRunStart()
+                => m_subscribedInThisRun = false;
+
+            internal void Subscribe(object _object)
+            {
+                m_subscribedInThisRun = true;
+                if (!ReferenceEquals(_object, m_lastSubscribedObject))
+                {
+                    m_lastSubscribedObject = _object;
+                    m_hook.Subscribe(_object);
+                }
+            }
+
+            internal void OnRunEnd()
+            {
+                if (!m_subscribedInThisRun)
+                {
+                    m_lastSubscribedObject = null;
+                    m_hook.Unsubscribe();
+                }
+            }
+
+        }
+
+        private readonly ImmutableArray<HookHolder> m_hookHolders;
         private readonly ImmutableDictionary<string, ImmutableArray<Variable>> m_variableMap;
         public ImmutableArray<Variable> Variables { get; }
 
@@ -75,8 +111,8 @@ namespace VooDo.Runtime
         private int m_locks;
 
         protected internal abstract void Run();
-        protected internal abstract Variable[] m_Variables { get; }
-        protected internal abstract IHook[] m_Hooks { get; }
+        protected internal virtual Variable[] m_Variables => Array.Empty<Variable>();
+        protected internal virtual IHook[] m_Hooks => Array.Empty<IHook>();
 
         public virtual Type ReturnType => typeof(void);
 
@@ -89,7 +125,15 @@ namespace VooDo.Runtime
             using (Lock())
             {
                 m_running = true;
+                foreach (HookHolder holder in m_hookHolders)
+                {
+                    holder.OnRunStart();
+                }
                 Run();
+                foreach (HookHolder holder in m_hookHolders)
+                {
+                    holder.OnRunEnd();
+                }
                 CancelRunRequest();
                 m_running = false;
             }
@@ -124,8 +168,12 @@ namespace VooDo.Runtime
         public bool IsLocked => m_locks > 0;
         public bool IsRunRequested => m_runRequested;
 
-        protected internal TValue SubscribeHook<TValue>(TValue _object, int _hookIndex)
+        protected internal TValue? SubscribeHook<TValue>(TValue? _object, int _hookIndex) where TValue : class
         {
+            if (_object is not null)
+            {
+                m_hookHolders[_hookIndex].Subscribe(_object);
+            }
             return _object;
         }
 
