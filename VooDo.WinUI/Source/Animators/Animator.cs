@@ -1,15 +1,12 @@
 ﻿
-using Microsoft.UI.Xaml.Media;
-
 using System.Collections.Generic;
-using System.Diagnostics;
 
 using VooDo.Runtime;
 
 namespace VooDo.WinUI.Animators
 {
 
-    public abstract class Animator<TValue> : Controller<TValue>
+    public abstract class Animator<TValue> : Controller<TValue>, IAnimator
     {
 
         protected Animator(Variable<TValue> _variable) : this(_variable, default!) { }
@@ -21,7 +18,6 @@ namespace VooDo.WinUI.Animators
         }
 
         private bool m_running;
-        private readonly Stopwatch m_stopwatch = new Stopwatch();
 
         private void SetRunning(bool _running)
         {
@@ -30,42 +26,38 @@ namespace VooDo.WinUI.Animators
                 m_running = _running;
                 if (m_running)
                 {
-                    CompositionTarget.Rendering += CompositionTarget_Rendering;
-                    m_stopwatch.Restart();
+                    AnimatorManager.RegisterAnimator(this);
                 }
                 else
                 {
-                    CompositionTarget.Rendering -= CompositionTarget_Rendering;
-                    m_stopwatch.Stop();
+                    AnimatorManager.UnregisterAnimator(this);
                 }
             }
-        }
-
-        private void CompositionTarget_Rendering(object? _sender, object _e) => Update();
-
-        private void Update()
-        {
-            TValue value = m_Value;
-            bool updated = Update(ref value, m_stopwatch.Elapsed.TotalSeconds);
-            m_Value = value;
-            if (updated)
-            {
-                m_stopwatch.Restart();
-            }
-            SetRunning(updated);
         }
 
         protected abstract bool Update(ref TValue _value, double _deltaTime);
 
         protected TValue m_Target { get; private set; }
 
-        protected override void SetValue(TValue _value)
+        protected sealed override void SetValue(TValue _value)
         {
             if (!EqualityComparer<TValue>.Default.Equals(_value, m_Target))
             {
                 m_Target = _value;
                 SetRunning(true);
             }
+        }
+
+        protected sealed override void Destroying() => SetRunning(false);
+
+        Program IAnimator.Program => Variable.Program;
+
+        void IAnimator.Update(double _deltaTime)
+        {
+            TValue value = m_Value;
+            bool updated = Update(ref value, _deltaTime);
+            m_Value = value;
+            SetRunning(updated);
         }
 
     }

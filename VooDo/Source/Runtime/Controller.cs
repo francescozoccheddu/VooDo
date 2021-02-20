@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace VooDo.Runtime
 {
@@ -8,15 +9,16 @@ namespace VooDo.Runtime
 
         private TValue m_value;
 
-        internal Variable<TValue>? Variable { get; private set; }
+        public Variable<TValue> Variable { get; }
+        public bool Destroyed { get; private set; }
 
         protected Controller(Variable<TValue> _variable) : this(_variable, _variable.Value)
         { }
 
         protected Controller(Variable<TValue> _variable, TValue _value)
         {
-            Variable = _variable;
             m_value = _value;
+            Variable = _variable;
         }
 
         public TValue Value { get => m_Value; set => SetValue(value); }
@@ -40,8 +42,15 @@ namespace VooDo.Runtime
 
         internal void Destroy()
         {
-            Destroying();
-            Variable = null;
+            if (!Destroyed)
+            {
+                Destroyed = true;
+                Destroying();
+            }
+            else
+            {
+                throw new InvalidOperationException("Already destroyed");
+            }
         }
 
         public abstract Controller<TValue> Create(Variable<TValue> _variable);
