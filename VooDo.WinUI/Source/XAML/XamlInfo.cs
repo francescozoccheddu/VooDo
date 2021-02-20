@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Microsoft.UI.Xaml.Markup;
+
+using System;
 
 namespace VooDo.WinUI.Xaml
 {
@@ -6,20 +8,20 @@ namespace VooDo.WinUI.Xaml
     public sealed class XamlInfo
     {
 
-        public XamlInfo(object? _rootObject, object? _targetObject, object? _targetProperty, Uri _sourcePath, string _scriptSource)
+        public XamlInfo(string _script, ProvideValueTargetProperty _property, object? _object, object? _root, Uri _path)
         {
-            RootObject = _rootObject;
-            TargetObject = _targetObject;
-            TargetProperty = _targetProperty;
-            SourcePath = _sourcePath;
-            ScriptSource = _scriptSource;
+            Script = _script;
+            Property = _property;
+            Object = _object;
+            Root = _root;
+            Path = _path;
         }
 
-        public object? RootObject { get; }
-        public object? TargetObject { get; }
-        public object? TargetProperty { get; }
-        public Uri SourcePath { get; }
-        public string ScriptSource { get; }
+        public string Script { get; }
+        public ProvideValueTargetProperty Property { get; }
+        public object? Object { get; }
+        public object? Root { get; }
+        public Uri Path { get; }
 
     }
 

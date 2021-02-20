@@ -6,7 +6,7 @@ using System.Reflection;
 using VooDo.AST.Names;
 using VooDo.Compiling;
 
-namespace VooDo.WinUI.Attributes
+namespace VooDo.WinUI.Options
 {
 
     public sealed class ReferenceAttribute : AssemblyTagAttribute

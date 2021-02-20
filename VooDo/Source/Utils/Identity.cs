@@ -5,18 +5,18 @@ using System.Runtime.CompilerServices;
 namespace VooDo.Utils
 {
 
-    internal static class Identity
+    public static class Identity
     {
 
-        internal sealed class ReferenceComparer<T> : IEqualityComparer<T>
+        public sealed class ReferenceComparer<T> : IEqualityComparer<T>
         {
             public bool Equals(T? _x, T? _y) => ReferenceEquals(_x, _y);
             public int GetHashCode(T? _obj) => RuntimeHelpers.GetHashCode(_obj);
         }
 
-        internal static int CombineHash(params object?[] _objs) => CombineHashes(_objs);
+        public static int CombineHash(params object?[] _objs) => CombineHashes(_objs);
 
-        internal static int CombineHashes(IEnumerable _objs)
+        public static int CombineHashes(IEnumerable _objs)
         {
             int hashCode = 579313498;
             foreach (object obj in _objs)

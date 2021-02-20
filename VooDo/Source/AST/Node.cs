@@ -55,7 +55,7 @@ namespace VooDo.AST
 
         internal Node SetAsRootInternal(Compilation? _compilation)
         {
-            Node root = this.ReplaceNonNullDescendantNodes(_n => _n with
+            Node root = this.ReplaceNonNullDescendantNodesAndSelf(_n => _n with
             {
                 Compilation = _compilation
             })!;

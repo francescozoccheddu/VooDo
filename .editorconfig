@@ -18,3 +18,6 @@ csharp_style_unused_value_expression_statement_preference = discard_variable:non
 
 # IDE0058: Expression value is never used
 dotnet_diagnostic.IDE0058.severity = none
+
+# CA1034: Nested types should not be visible
+dotnet_diagnostic.CA1034.severity = none

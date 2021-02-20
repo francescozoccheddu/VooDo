@@ -25,7 +25,7 @@ namespace VooDo.Compiling
         private sealed class MetadataEqualityComparerImpl : IEqualityComparer<Reference>
         {
             public bool Equals(Reference? _x, Reference? _y) => _x is not null && _y is not null && AreSameMetadata(_x, _y);
-            public int GetHashCode(Reference _obj) => _obj.DisplayName?.GetHashCode() ?? 0;
+            public int GetHashCode(Reference _obj) => Identity.CombineHash(_obj.FilePath);
         }
 
         public static IEqualityComparer<Reference> MetadataEqualityComparer { get; } = new MetadataEqualityComparerImpl();
@@ -41,7 +41,7 @@ namespace VooDo.Compiling
                 typeof(object).Assembly.Location,
                 typeof(int).Assembly.Location,
             };
-            return names.Select(_n => FromFile(Path.Combine(directory, _n))).ToImmutableArray();
+            return Merge(names.Select(_n => FromFile(Path.Combine(directory, _n))).ToImmutableArray());
         }
 
         public static Reference FromStream(Stream _stream, params Identifier[] _aliases)
@@ -72,8 +72,8 @@ namespace VooDo.Compiling
         {
             Aliases = _aliases.EmptyIfNull().ToImmutableHashSet();
             m_metadata = _metadata;
-            string? path = m_metadata.FilePath ?? _assembly?.Location;
-            FilePath = path is not null ? Uri.UnescapeDataString(new Uri(path).AbsolutePath) : null;
+            FilePath = m_metadata.FilePath ?? _assembly?.Location;
+            FilePath = FilePath is not null ? NormalizeFilePath.Normalize(FilePath) : null;
             Assembly = _assembly;
         }
 
@@ -81,7 +81,6 @@ namespace VooDo.Compiling
 
         public ImmutableHashSet<Identifier> Aliases { get; init; }
         public string? FilePath { get; }
-        public string? DisplayName => m_metadata.Display;
         public Assembly? Assembly { get; }
 
         internal MetadataReference GetMetadataReference() => m_metadata.WithAliases(Aliases.Select(_a => _a.ToString()));

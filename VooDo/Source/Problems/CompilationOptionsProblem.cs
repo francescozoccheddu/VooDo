@@ -7,9 +7,9 @@ namespace VooDo.Problems
     public class CompilationOptionsProblem : Problem
     {
 
-        public CompilationOptions Options { get; }
+        public Options Options { get; }
 
-        internal CompilationOptionsProblem(string _description, CompilationOptions _options)
+        internal CompilationOptionsProblem(string _description, Options _options)
             : base(EKind.Semantic, ESeverity.Error, _description)
         {
             Options = _options;
@@ -22,7 +22,7 @@ namespace VooDo.Problems
 
         public string Property { get; }
 
-        internal CompilationOptionsPropertyProblem(string _description, CompilationOptions _options, string _property)
+        internal CompilationOptionsPropertyProblem(string _description, Options _options, string _property)
             : base(_description, _options)
         {
             Property = _property;

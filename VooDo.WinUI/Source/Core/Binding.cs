@@ -1,14 +1,14 @@
 ﻿using VooDo.Runtime;
-using VooDo.WinUI.Interfaces;
+using VooDo.WinUI.Components;
 using VooDo.WinUI.Xaml;
 
-namespace VooDo.WinUI
+namespace VooDo.WinUI.Core
 {
 
     public sealed class Binding
     {
 
-        internal Binding(XamlInfo _xamlInfo, ITarget _target, Program _program)
+        internal Binding(XamlInfo _xamlInfo, Target _target, Program _program)
         {
             XamlInfo = _xamlInfo;
             Target = _target;
@@ -16,7 +16,7 @@ namespace VooDo.WinUI
         }
 
         public XamlInfo XamlInfo { get; }
-        public ITarget Target { get; }
+        public Target Target { get; }
         public Program Program { get; }
 
     }

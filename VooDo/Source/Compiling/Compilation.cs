@@ -22,7 +22,7 @@ namespace VooDo.Compiling
     {
 
         public Script Script { get; }
-        public CompilationOptions Options { get; }
+        public Options Options { get; }
         public bool Succeded { get; }
         public ImmutableArray<Problem> Problems { get; }
         public ImmutableArray<GlobalPrototype> Globals { get; }
@@ -30,10 +30,10 @@ namespace VooDo.Compiling
         private readonly CSharpCompilation? m_cSharpCompilation;
         private readonly string? m_cSharpCode;
 
-        public static Compilation Create(Script _script, CompilationOptions _options)
+        public static Compilation Create(Script _script, Options _options)
             => new Compilation(_script, _options);
 
-        public static Compilation SucceedOrThrow(Script _script, CompilationOptions _options)
+        public static Compilation SucceedOrThrow(Script _script, Options _options)
         {
             Compilation compilation = Create(_script, _options);
             if (!compilation.Succeded)
@@ -43,7 +43,7 @@ namespace VooDo.Compiling
             return compilation;
         }
 
-        private Compilation(Script _script, CompilationOptions _options)
+        private Compilation(Script _script, Options _options)
         {
             Script = _script.SetAsRoot(this);
             Options = _options;

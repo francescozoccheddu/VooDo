@@ -61,7 +61,7 @@ namespace VooDo.Utils
             }
         }
 
-        private void PropertyChanged(object _sender, PropertyChangedEventArgs _e)
+        private void PropertyChanged(object? _sender, PropertyChangedEventArgs _e)
         {
             if (_e.PropertyName == m_name)
             {

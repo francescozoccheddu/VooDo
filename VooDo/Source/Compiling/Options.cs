@@ -11,12 +11,12 @@ using VooDo.Utils;
 namespace VooDo.Compiling
 {
 
-    public sealed record CompilationOptions
+    public sealed record Options
     {
 
-        public static CompilationOptions Default { get; } = new CompilationOptions();
+        public static Options Default { get; } = new Options();
 
-        private CompilationOptions()
+        private Options()
         {
             References = Reference.GetSystemReferences().Add(Reference.RuntimeReference);
             Namespace = "VooDo.Generated";

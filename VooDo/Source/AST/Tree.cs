@@ -152,28 +152,28 @@ namespace VooDo.AST
             return _map(new ReplaceInfo(_parent, _node, replaced));
         }
 
-        public static TNode? ReplaceNonNullDescendantNodes<TNode>(this TNode _node, Func<Node, Node?> _map) where TNode : Node
-            => ReplaceNonNullDescendantNodes(_node, _map, _ => true);
+        public static TNode? ReplaceNonNullDescendantNodesAndSelf<TNode>(this TNode _node, Func<Node, Node?> _map) where TNode : Node
+            => ReplaceNonNullDescendantNodesAndSelf(_node, _map, _ => true);
 
-        public static TNode? ReplaceNonNullDescendantNodes<TNode>(this TNode _node, Func<Node, Node?> _map, Predicate<Node> _shouldVisitChildren) where TNode : Node
-            => ReplaceDescendantNodes(_node, _i => _i.Replaced is null ? null : _map(_i.Replaced), _shouldVisitChildren);
+        public static TNode? ReplaceNonNullDescendantNodesAndSelf<TNode>(this TNode _node, Func<Node, Node?> _map, Predicate<Node> _shouldVisitChildren) where TNode : Node
+            => ReplaceDescendantNodesAndSelf(_node, _i => _i.Replaced is null ? null : _map(_i.Replaced), _shouldVisitChildren);
 
-        public static TNode? ReplaceNonNullDescendantNodes<TNode>(this TNode _node, Func<ReplaceInfo, Node?> _map) where TNode : Node
-            => ReplaceNonNullDescendantNodes(_node, _map, _ => true);
+        public static TNode? ReplaceNonNullDescendantNodesAndSelf<TNode>(this TNode _node, Func<ReplaceInfo, Node?> _map) where TNode : Node
+            => ReplaceNonNullDescendantNodesAndSelf(_node, _map, _ => true);
 
-        public static TNode? ReplaceNonNullDescendantNodes<TNode>(this TNode _node, Func<ReplaceInfo, Node?> _map, Predicate<Node> _shouldVisitChildren) where TNode : Node
-            => ReplaceDescendantNodes(_node, _i => _i.Replaced is null ? null : _map(_i), _shouldVisitChildren);
+        public static TNode? ReplaceNonNullDescendantNodesAndSelf<TNode>(this TNode _node, Func<ReplaceInfo, Node?> _map, Predicate<Node> _shouldVisitChildren) where TNode : Node
+            => ReplaceDescendantNodesAndSelf(_node, _i => _i.Replaced is null ? null : _map(_i), _shouldVisitChildren);
 
-        public static TNode? ReplaceDescendantNodes<TNode>(this TNode _node, Func<Node?, Node?> _map) where TNode : Node
-            => ReplaceDescendantNodes(_node, _map, _ => true);
+        public static TNode? ReplaceDescendantNodesAndSelf<TNode>(this TNode _node, Func<Node?, Node?> _map) where TNode : Node
+            => ReplaceDescendantNodesAndSelf(_node, _map, _ => true);
 
-        public static TNode? ReplaceDescendantNodes<TNode>(this TNode _node, Func<Node?, Node?> _map, Predicate<Node> _shouldVisitChildren) where TNode : Node
-            => ReplaceDescendantNodes(_node, _i => _map(_i.Replaced), _shouldVisitChildren);
+        public static TNode? ReplaceDescendantNodesAndSelf<TNode>(this TNode _node, Func<Node?, Node?> _map, Predicate<Node> _shouldVisitChildren) where TNode : Node
+            => ReplaceDescendantNodesAndSelf(_node, _i => _map(_i.Replaced), _shouldVisitChildren);
 
-        public static TNode? ReplaceDescendantNodes<TNode>(this TNode _node, Func<ReplaceInfo, Node?> _map) where TNode : Node
-            => ReplaceDescendantNodes(_node, _map, _ => true);
+        public static TNode? ReplaceDescendantNodesAndSelf<TNode>(this TNode _node, Func<ReplaceInfo, Node?> _map) where TNode : Node
+            => ReplaceDescendantNodesAndSelf(_node, _map, _ => true);
 
-        public static TNode? ReplaceDescendantNodes<TNode>(this TNode _node, Func<ReplaceInfo, Node?> _map, Predicate<Node> _shouldVisitChildren) where TNode : Node
+        public static TNode? ReplaceDescendantNodesAndSelf<TNode>(this TNode _node, Func<ReplaceInfo, Node?> _map, Predicate<Node> _shouldVisitChildren) where TNode : Node
             => (TNode?) ReplaceNodeRecursive(_node, null, _map, _shouldVisitChildren);
 
         public static TNode SetAsRoot<TNode>(this TNode _node) where TNode : Node

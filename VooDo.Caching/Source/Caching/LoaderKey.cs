@@ -17,7 +17,7 @@ namespace VooDo.Caching
         public static LoaderKey Create(Compilation _compilation)
             => Create(_compilation.Script, _compilation.Options);
 
-        public static LoaderKey Create(Script _script, CompilationOptions _options)
+        public static LoaderKey Create(Script _script, Options _options)
             => Create(_script, _options);
 
         public static LoaderKey Create(Script _script, IEnumerable<Reference> _references, ComplexType? _returnType, IHookInitializer _hookInitializer)
@@ -34,7 +34,7 @@ namespace VooDo.Caching
             m_hashCode = Identity.CombineHash(References.Count, scriptCode, returnTypeCode, HookInitializer);
         }
 
-        public CompilationOptions CreateMatchingOptions() => CompilationOptions.Default with
+        public Options CreateMatchingOptions() => Options.Default with
         {
             HookInitializer = HookInitializer,
             References = References.ToImmutableArray(),

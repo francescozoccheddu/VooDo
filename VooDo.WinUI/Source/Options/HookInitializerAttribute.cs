@@ -4,7 +4,7 @@ using System.Linq;
 
 using VooDo.Hooks;
 
-namespace VooDo.WinUI.Attributes
+namespace VooDo.WinUI.Options
 {
 
     public sealed class HookInitializerAttribute : CombinableTypeTagAttribute

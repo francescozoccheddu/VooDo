@@ -31,42 +31,58 @@ namespace VooDo.AST
                     _ => Enumerable.Empty<GlobalPrototype>()
                 }).ToImmutableArray();
 
+        public static Script AddUsingStaticTypes(this Script _script, params QualifiedType[] _types)
+            => AddUsingStaticTypes(_script, (IEnumerable<QualifiedType>) _types);
+
+        public static Script AddUsingStaticTypes(this Script _script, IEnumerable<QualifiedType> _types)
+            => _script with
+            {
+                Usings = _script.Usings.AddRange(_types.Select(_t => new UsingStaticDirective(_t)))
+            };
+
         public static Script AddUsingNamespaces(this Script _script, params Namespace[] _namespaces)
             => AddUsingNamespaces(_script, (IEnumerable<Namespace>) _namespaces);
 
         public static Script AddUsingNamespaces(this Script _script, IEnumerable<Namespace> _namespaces)
-            => _script with
-            {
-                Usings = _script.Usings.AddRange(_namespaces.Select(_n => new UsingNamespaceDirective(_n)))
-            };
+            => AddUsingDirectives(_script, _namespaces.Select(_n => new UsingNamespaceDirective(_n)));
 
         public static Script AddUsingAliasNamespace(this Script _script, Identifier _alias, Namespace _namespace)
             => AddUsingAliasNamespaces(_script, new[] { new KeyValuePair<Identifier, Namespace>(_alias, _namespace) }.ToImmutableDictionary());
 
         public static Script AddUsingAliasNamespaces(this Script _script, IDictionary<Identifier, Namespace> _namespaces)
+            => AddUsingDirectives(_script, _namespaces.Select(_n => new UsingNamespaceDirective(_n.Key, _n.Value)));
+
+        public static Script AddUsingDirectives(this Script _script, params UsingDirective[] _directives)
+            => AddUsingDirectives(_script, (IEnumerable<UsingDirective>) _directives);
+
+        public static Script AddUsingDirectives(this Script _script, IEnumerable<UsingDirective> _directives)
             => _script with
             {
-                Usings = _script.Usings.AddRange(_namespaces.Select(_n => new UsingNamespaceDirective(_n.Key, _n.Value)))
+                Usings = _script.Usings.AddRange(_directives)
             };
 
-        public static Script AddGlobals(this Script _script, bool _constant, params Global[] _globals)
-            => AddGlobals(_script, _constant, (IEnumerable<Global>) _globals);
+        public static Script AddGlobals(this Script _script, params Global[] _globals)
+            => AddGlobals(_script, (IEnumerable<Global>) _globals);
 
-        public static Script AddGlobals(this Script _script, bool _constant, IEnumerable<Global> _globals)
+        public static Script AddGlobals(this Script _script, IEnumerable<Global> _globals)
         {
             if (_globals.Select(_g => _g.Name).AnyNull())
             {
                 throw new ArgumentException("Global name cannot be null", nameof(_globals));
             }
-            IEnumerable<DeclarationStatement> declarations = _globals.Select(_g => new DeclarationStatement(
-                _g.Type,
-                ImmutableArray.Create(
-                    new DeclarationStatement.Declarator(
-                        _g.Name!,
-                        _g.Initializer))));
+            IEnumerable<GlobalStatement> statements = _globals.Select(_g =>
+                new GlobalStatement(
+                    _g.IsConstant,
+                    ImmutableArray.Create(
+                    new DeclarationStatement(
+                        _g.Type,
+                        ImmutableArray.Create(
+                            new DeclarationStatement.Declarator(
+                                _g.Name!,
+                                _g.Initializer))))));
             return _script with
             {
-                Statements = _script.Statements.Insert(0, new GlobalStatement(_constant, declarations.ToImmutableArray()))
+                Statements = _script.Statements.InsertRange(0, statements)
             };
         }
     }

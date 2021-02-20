@@ -37,8 +37,8 @@ var y = x[0].myField;
 var z = x[1].myField;
             ";
             Script script = Parser.Script(code);
-            ImmutableArray<Reference> references = CompilationOptions.Default.References.Add(Reference.FromAssembly(typeof(MyClass1).Assembly));
-            Compilation compilation = Compilation.Create(script, CompilationOptions.Default with
+            ImmutableArray<Reference> references = Options.Default.References.Add(Reference.FromAssembly(typeof(MyClass1).Assembly));
+            Compilation compilation = Compilation.Create(script, Options.Default with
             {
                 References = references
             });

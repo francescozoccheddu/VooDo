@@ -18,6 +18,9 @@ namespace VooDo.Hooks
 
         private ImmutableArray<IHookInitializer> m_hookInitializers;
 
+        public HookInitializerList(params IHookInitializer[] _collection)
+            : this((IEnumerable<IHookInitializer>) _collection) { }
+
         public HookInitializerList(IEnumerable<IHookInitializer> _collection)
         {
             m_hookInitializers = _collection.ToImmutableArray();
