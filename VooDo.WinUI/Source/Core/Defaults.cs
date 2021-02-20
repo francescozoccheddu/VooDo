@@ -19,7 +19,7 @@ namespace VooDo.WinUI.Core
     {
 
         public static ImmutableArray<Reference> References { get; }
-        public static IHookInitializerProvider HookInitializerProvider { get; }
+        public static IHookInitializer HookInitializer { get; }
         public static ITargetProvider<SimpleTarget> TargetProvider { get; }
         public static ImmutableArray<(string name, string? alias)> UsingNamespaceDirectives { get; }
         public static ImmutableArray<Type> UsingStaticTypes { get; }
@@ -39,7 +39,7 @@ namespace VooDo.WinUI.Core
                     .Select(_a => Reference.FromAssembly(_a)));
                 References = references.ToImmutableArray();
             }
-            HookInitializerProvider = new HookInitializerList(Enumerable.Empty<IHookInitializerProvider>());
+            HookInitializer = new HookInitializerList(Enumerable.Empty<IHookInitializer>());
             TargetProvider = new TargetProviderList<SimpleTarget>(new[] { new DependencyPropertyTargetProvider() });
             UsingNamespaceDirectives = ImmutableArray.Create<(string, string?)>();
             UsingStaticTypes = new[] { typeof(AnimatorFactory) }.ToImmutableArray();

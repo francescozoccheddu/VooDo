@@ -1,14 +1,11 @@
 ﻿
 using System;
 using System.Collections.Immutable;
+using System.ComponentModel;
 
 using VooDo.AST;
-using VooDo.AST.Expressions;
 using VooDo.Compiling;
-using VooDo.Hooks;
 using VooDo.Parsing;
-
-using roslyn = Microsoft.CodeAnalysis;
 
 namespace VooDo.ConsoleTestbench
 {
@@ -21,17 +18,12 @@ namespace VooDo.ConsoleTestbench
     }
 
 
-    public sealed class MyClass2
+    public sealed class MyClass2 : INotifyPropertyChanged
     {
 
         public int myField;
 
-    }
-
-    public sealed class Hooker : IHookInitializerProvider, IHookInitializer
-    {
-        Expression IHookInitializer.CreateInitializer() => LiteralExpression.Null;
-        IHookInitializer? IHookInitializerProvider.Provide(roslyn::ISymbol _symbol) => null;
+        public event PropertyChangedEventHandler? PropertyChanged;
     }
 
     internal static class EntryPoint
@@ -48,7 +40,6 @@ var z = x[1].myField;
             ImmutableArray<Reference> references = CompilationOptions.Default.References.Add(Reference.FromAssembly(typeof(MyClass1).Assembly));
             Compilation compilation = Compilation.Create(script, CompilationOptions.Default with
             {
-                HookInitializerProvider = new Hooker(),
                 References = references
             });
             if (compilation.Succeded)

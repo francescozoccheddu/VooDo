@@ -8,7 +8,7 @@
 
         void Unsubscribe();
 
-        IHookListener Listener { set; }
+        IHookListener? Listener { set; }
 
     }
 

@@ -6,17 +6,17 @@ using VooDo.Hooks;
 namespace VooDo.Caching
 {
 
-    public sealed class HookInitializerProviderTypeNameSerializer : ISerializer<IHookInitializerProvider>
+    public sealed class HookInitializerTypeNameSerializer : ISerializer<IHookInitializer>
     {
 
-        public static HookInitializerProviderTypeNameSerializer Instance { get; } = new HookInitializerProviderTypeNameSerializer();
+        public static HookInitializerTypeNameSerializer Instance { get; } = new HookInitializerTypeNameSerializer();
 
-        private HookInitializerProviderTypeNameSerializer() { }
+        private HookInitializerTypeNameSerializer() { }
 
-        public IHookInitializerProvider Deserialize(BinaryReader _reader)
-            => (IHookInitializerProvider) Activator.CreateInstance(Type.GetType(_reader.ReadString(), true)!)!;
+        public IHookInitializer Deserialize(BinaryReader _reader)
+            => (IHookInitializer) Activator.CreateInstance(Type.GetType(_reader.ReadString(), true)!)!;
 
-        public void Serialize(IHookInitializerProvider _value, BinaryWriter _writer)
+        public void Serialize(IHookInitializer _value, BinaryWriter _writer)
             => _writer.Write(_value.GetType().AssemblyQualifiedName!);
     }
 

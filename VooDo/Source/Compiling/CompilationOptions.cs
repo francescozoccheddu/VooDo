@@ -23,7 +23,7 @@ namespace VooDo.Compiling
             ClassName = "GeneratedProgram";
             ReturnType = null;
             AssemblyName = null;
-            HookInitializerProvider = new HookInitializerList(Enumerable.Empty<IHookInitializerProvider>());
+            HookInitializer = NotifyPropertyChangedHookInitializer.Instance;
         }
 
         public string? AssemblyName { get; init; }
@@ -32,7 +32,7 @@ namespace VooDo.Compiling
 
         public Identifier ClassName { get; init; }
 
-        public IHookInitializerProvider HookInitializerProvider { get; init; }
+        public IHookInitializer HookInitializer { get; init; }
 
         public ComplexType? ReturnType { get; init; }
 

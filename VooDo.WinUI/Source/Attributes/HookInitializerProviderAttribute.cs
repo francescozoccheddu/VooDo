@@ -7,20 +7,20 @@ using VooDo.Hooks;
 namespace VooDo.WinUI.Attributes
 {
 
-    public sealed class HookInitializerProviderAttribute : CombinableTypeTagAttribute
+    public sealed class HookInitializerAttribute : CombinableTypeTagAttribute
     {
 
-        internal static IHookInitializerProvider? Resolve(IEnumerable<Application> _applications)
+        internal static IHookInitializer? Resolve(IEnumerable<Application> _applications)
         {
             if (Resolve(_applications, out ImmutableArray<Application> resolvedApplications, out EKind kind))
             {
                 if (kind == EKind.Combinable)
                 {
-                    return new HookInitializerList(resolvedApplications.Select(_a => Instantiate<IHookInitializerProvider>(_a.GetType())));
+                    return new HookInitializerList(resolvedApplications.Select(_a => Instantiate<IHookInitializer>(_a.GetType())));
                 }
                 else
                 {
-                    return Instantiate<IHookInitializerProvider>(resolvedApplications.Single().GetType());
+                    return Instantiate<IHookInitializer>(resolvedApplications.Single().GetType());
                 }
             }
             else

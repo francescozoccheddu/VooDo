@@ -35,7 +35,7 @@ namespace VooDo.Caching
         private const int c_maxCount = 512;
 
         public ISerializer<Reference> ReferenceSerializer { get; }
-        public ISerializer<IHookInitializerProvider> HookInitializerProviderSerializer { get; }
+        public ISerializer<IHookInitializer> HookInitializerSerializer { get; }
 
         public static void Delete(string _filePath)
             => File.Delete(_filePath);
@@ -43,13 +43,13 @@ namespace VooDo.Caching
         public string FilePath { get; }
 
         public LoaderDiskCache(string _filePath)
-            : this(_filePath, FileReferenceSerializer.Instance, HookInitializerProviderTypeNameSerializer.Instance) { }
+            : this(_filePath, FileReferenceSerializer.Instance, HookInitializerTypeNameSerializer.Instance) { }
 
-        public LoaderDiskCache(string _filePath, ISerializer<Reference> _referenceSerializer, ISerializer<IHookInitializerProvider> _hookInitializerProviderSerializer)
+        public LoaderDiskCache(string _filePath, ISerializer<Reference> _referenceSerializer, ISerializer<IHookInitializer> _hookInitializerSerializer)
         {
             FilePath = _filePath;
             ReferenceSerializer = _referenceSerializer;
-            HookInitializerProviderSerializer = _hookInitializerProviderSerializer;
+            HookInitializerSerializer = _hookInitializerSerializer;
             if (File.Exists(_filePath))
             {
                 Load();
@@ -60,38 +60,38 @@ namespace VooDo.Caching
             }
         }
 
-        private IHookInitializerProvider DeserializeHookInitializerProvider(BinaryReader _reader)
+        private IHookInitializer DeserializeHookInitializer(BinaryReader _reader)
         {
             int count = _reader.ReadInt32();
             if (count == -1)
             {
-                return HookInitializerProviderSerializer.Deserialize(_reader);
+                return HookInitializerSerializer.Deserialize(_reader);
             }
             else
             {
-                IHookInitializerProvider[] children = new IHookInitializerProvider[count];
+                IHookInitializer[] children = new IHookInitializer[count];
                 for (int i = 0; i < count; i++)
                 {
-                    children[i] = DeserializeHookInitializerProvider(_reader);
+                    children[i] = DeserializeHookInitializer(_reader);
                 }
                 return new HookInitializerList(children);
             }
         }
 
-        private void SerializeHookInitializerProvider(IHookInitializerProvider _provider, BinaryWriter _writer)
+        private void SerializeHookInitializer(IHookInitializer _provider, BinaryWriter _writer)
         {
             if (_provider is HookInitializerList list)
             {
                 _writer.Write(list.Count);
-                foreach (IHookInitializerProvider child in list)
+                foreach (IHookInitializer child in list)
                 {
-                    SerializeHookInitializerProvider(child, _writer);
+                    SerializeHookInitializer(child, _writer);
                 }
             }
             else
             {
                 _writer.Write(-1);
-                HookInitializerProviderSerializer.Serialize(_provider, _writer);
+                HookInitializerSerializer.Serialize(_provider, _writer);
             }
         }
 
@@ -103,7 +103,7 @@ namespace VooDo.Caching
             {
                 writer.Write(key.scriptCode);
                 writer.Write(key.returnTypeCode ?? "void");
-                SerializeHookInitializerProvider(key.HookInitializerProvider, writer);
+                SerializeHookInitializer(key.HookInitializer, writer);
                 writer.Write(key.References.Count);
                 foreach (Reference reference in key.References)
                 {
@@ -122,7 +122,7 @@ namespace VooDo.Caching
             {
                 string scriptCode = reader.ReadString();
                 string returnTypeCode = reader.ReadString();
-                IHookInitializerProvider hookInitializerProvider = DeserializeHookInitializerProvider(reader);
+                IHookInitializer hookInitializer = DeserializeHookInitializer(reader);
                 Reference[] references = new Reference[reader.ReadInt32()];
                 for (int r = 0; r < references.Length; r++)
                 {
@@ -131,7 +131,7 @@ namespace VooDo.Caching
                 byte[] assembly = reader.ReadBytes(reader.ReadInt32());
                 Script script = m_scriptCache.GetOrParseScript(scriptCode);
                 ComplexType? returnType = returnTypeCode == "void" ? null : ComplexType.Parse(returnTypeCode);
-                LoaderKey key = LoaderKey.Create(script, references, returnType, hookInitializerProvider);
+                LoaderKey key = LoaderKey.Create(script, references, returnType, hookInitializer);
                 if (!m_cache.ContainsKey(key))
                 {
                     m_cache[key] = new Value(Loader.FromAssembly(Assembly.Load(assembly)), assembly);

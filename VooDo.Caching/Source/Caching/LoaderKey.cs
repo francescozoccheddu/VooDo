@@ -20,23 +20,23 @@ namespace VooDo.Caching
         public static LoaderKey Create(Script _script, CompilationOptions _options)
             => Create(_script, _options);
 
-        public static LoaderKey Create(Script _script, IEnumerable<Reference> _references, ComplexType? _returnType, IHookInitializerProvider _hookInitializerProvider)
-            => new LoaderKey(_script, _references, _returnType, _hookInitializerProvider);
+        public static LoaderKey Create(Script _script, IEnumerable<Reference> _references, ComplexType? _returnType, IHookInitializer _hookInitializer)
+            => new LoaderKey(_script, _references, _returnType, _hookInitializer);
 
-        private LoaderKey(Script _script, IEnumerable<Reference> _references, ComplexType? _returnType, IHookInitializerProvider _hookInitializerProvider)
+        private LoaderKey(Script _script, IEnumerable<Reference> _references, ComplexType? _returnType, IHookInitializer _hookInitializer)
         {
             Script = _script;
             scriptCode = _script.ToString();
             References = Reference.Merge(_references).ToImmutableHashSet();
             ReturnType = _returnType;
             returnTypeCode = _returnType?.ToString();
-            HookInitializerProvider = _hookInitializerProvider;
-            m_hashCode = Identity.CombineHash(References.Count, scriptCode, returnTypeCode, HookInitializerProvider);
+            HookInitializer = _hookInitializer;
+            m_hashCode = Identity.CombineHash(References.Count, scriptCode, returnTypeCode, HookInitializer);
         }
 
         public CompilationOptions CreateMatchingOptions() => CompilationOptions.Default with
         {
-            HookInitializerProvider = HookInitializerProvider,
+            HookInitializer = HookInitializer,
             References = References.ToImmutableArray(),
             ReturnType = ReturnType
         };
@@ -48,7 +48,7 @@ namespace VooDo.Caching
         public Script Script { get; }
         public ImmutableHashSet<Reference> References { get; }
         public ComplexType? ReturnType { get; }
-        public IHookInitializerProvider HookInitializerProvider { get; }
+        public IHookInitializer HookInitializer { get; }
 
         public override bool Equals(object? _obj) => _obj is LoaderKey key && Equals(key);
         public bool Equals(LoaderKey _other) =>
@@ -56,7 +56,7 @@ namespace VooDo.Caching
             && scriptCode == _other.scriptCode
             && returnTypeCode == _other.returnTypeCode
             && References.SetEquals(_other.References)
-            && HookInitializerProvider.Equals(_other.HookInitializerProvider);
+            && HookInitializer.Equals(_other.HookInitializer);
         public override int GetHashCode() => m_hashCode;
 
         public static bool operator ==(LoaderKey? _left, LoaderKey? _right) => _left.Equals(_right);

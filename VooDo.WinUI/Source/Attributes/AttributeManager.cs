@@ -48,7 +48,7 @@ namespace VooDo.WinUI.Attributes
                 s_bindingManager = BindingManagerAttribute.Resolve(typeMap.GetValueOrDefault(typeof(BindingManagerAttribute)).EmptyIfDefault());
                 s_targetProvider = TargetProviderAttribute.Resolve<ITarget>(typeMap.GetValueOrDefault(typeof(TargetProviderAttribute)).EmptyIfDefault());
                 s_loaderProvider = LoaderProviderAttribute.Resolve<ITarget>(typeMap.GetValueOrDefault(typeof(LoaderProviderAttribute)).EmptyIfDefault());
-                s_hookInitializerProvider = HookInitializerProviderAttribute.Resolve(typeMap.GetValueOrDefault(typeof(HookInitializerProviderAttribute)).EmptyIfDefault());
+                s_hookInitializer = HookInitializerAttribute.Resolve(typeMap.GetValueOrDefault(typeof(HookInitializerAttribute)).EmptyIfDefault());
             }
             LoaderOptions.Update();
         }
@@ -66,7 +66,7 @@ namespace VooDo.WinUI.Attributes
         private static IBindingManager? s_bindingManager;
         private static ITargetProvider<ITarget>? s_targetProvider;
         private static ILoaderProvider<ITarget>? s_loaderProvider;
-        private static IHookInitializerProvider? s_hookInitializerProvider;
+        private static IHookInitializer? s_hookInitializer;
         private static ImmutableArray<Reference> s_references = ImmutableArray.Create<Reference>();
         private static ImmutableArray<Type> s_usingStaticTypes = ImmutableArray.Create<Type>();
         private static ImmutableArray<(string name, string? alias)> s_usingNamespaceDirectives = ImmutableArray.Create<(string name, string? alias)>();
@@ -95,12 +95,12 @@ namespace VooDo.WinUI.Attributes
                 return s_loaderProvider;
             }
         }
-        public static IHookInitializerProvider? HookInitializerProvider
+        public static IHookInitializer? HookInitializer
         {
             get
             {
                 EnsureInitialized();
-                return s_hookInitializerProvider;
+                return s_hookInitializer;
             }
         }
         public static ImmutableArray<Reference> References

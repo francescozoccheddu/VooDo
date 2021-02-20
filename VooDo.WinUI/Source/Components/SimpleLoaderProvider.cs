@@ -57,7 +57,7 @@ namespace VooDo.WinUI.Components
             ComplexType? returnType = _target.ReturnType == typeof(void)
                 ? null
                 : GetTypeNode(_target.ReturnType, _target);
-            LoaderKey key = LoaderKey.Create(_script, LoaderOptions.References, returnType, LoaderOptions.HookInitializerProvider);
+            LoaderKey key = LoaderKey.Create(_script, LoaderOptions.References, returnType, LoaderOptions.HookInitializer);
             return LoaderCache?.GetOrCreateLoader(key)
                 ?? Compilation.SucceedOrThrow(_script, key.CreateMatchingOptions()).Load();
         }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 
 namespace VooDo.Runtime
 {
@@ -7,7 +8,7 @@ namespace VooDo.Runtime
 
     public delegate void VariableChangedEventHandler<TValue>(Variable<TValue> _variable, TValue _oldValue);
 
-    public abstract class Variable
+    public abstract class Variable : INotifyPropertyChanged
     {
 
         internal Variable(bool _isConstant, string _name, Type _type)
@@ -27,13 +28,18 @@ namespace VooDo.Runtime
         public Variable<TValue> OfType<TValue>() => (Variable<TValue>) this;
 
         public event VariableChangedEventHandler? OnChange;
+        public event PropertyChangedEventHandler? PropertyChanged;
 
         internal abstract void NotifyChanged();
 
         protected abstract object? m_DynamicValue { get; set; }
         protected abstract object? m_DynamicControllerFactory { get; set; }
 
-        protected void NotifyChanged(object? _oldValue) => OnChange?.Invoke(this, _oldValue);
+        protected void NotifyChanged(object? _oldValue)
+        {
+            OnChange?.Invoke(this, _oldValue);
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Value)));
+        }
 
     }
 
