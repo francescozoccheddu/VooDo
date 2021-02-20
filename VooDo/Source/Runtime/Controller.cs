@@ -36,7 +36,13 @@ namespace VooDo.Runtime
 
         protected abstract void SetValue(TValue _value);
 
-        internal void Destroy() => Variable = null;
+        protected virtual void Destroying() { }
+
+        internal void Destroy()
+        {
+            Destroying();
+            Variable = null;
+        }
 
         public abstract Controller<TValue> Create(Variable<TValue> _variable);
 
