@@ -40,7 +40,7 @@ namespace VooDo.WinUI.Options
                 .Where(_a => _a.GetReferencedAssemblies().Contains(assemblyName))
                 .Select(_a => Reference.FromAssembly(_a)));
             IHookInitializer hookInitializer = NotifyPropertyChangedHookInitializer.Instance;
-            ImmutableArray<UsingNamespace> usingNamespaces = ImmutableArray.Create<UsingNamespace>();
+            ImmutableArray<UsingNamespace> usingNamespaces = ImmutableArray.Create(new UsingNamespace("System"));
             ImmutableArray<UnresolvedType> usingStaticTypes = new UnresolvedType[] { typeof(AnimatorFactory) }.ToImmutableArray();
             ImmutableArray<Constant> constants = ImmutableArray.Create<Constant>();
             Default = new BindingOptions(references.ToImmutableArray(), usingNamespaces, usingStaticTypes, constants, hookInitializer);
@@ -68,7 +68,7 @@ namespace VooDo.WinUI.Options
 
         public static BindingOptions Combine(BindingOptions _a, BindingOptions _b)
         {
-            ImmutableArray<Reference> references = _a.References.AddRange(_b.References);
+            ImmutableArray<Reference> references = Reference.Merge(_a.References.AddRange(_b.References));
             ImmutableArray<UsingNamespace> usingNamespaces = _a.UsingNamespaces.AddRange(_b.UsingNamespaces);
             ImmutableArray<UnresolvedType> usingStaticTypes = _a.UsingStaticTypes.AddRange(_b.UsingStaticTypes);
             ImmutableArray<Constant> constants = _a.Constants.AddRange(_b.Constants);

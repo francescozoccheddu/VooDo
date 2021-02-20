@@ -45,6 +45,10 @@ namespace VooDo.WinUI.Core
             ComplexType? returnType = target.ReturnValue?.Type.Resolve(options.References);
             LoaderKey loaderKey = LoaderKey.Create(script, options.References, returnType, options.HookInitializer);
             Program program = s_loaderCache.GetOrCreateLoader(loaderKey).Create();
+            foreach (Constant constant in options.Constants)
+            {
+                program.GetVariable(constant.Name)!.Value = constant.Value;
+            }
             Binding binding = new Binding(_xamlInfo, target, program);
             target.Bind(binding);
             if (target.ReturnValue is not null)

@@ -36,6 +36,10 @@ namespace VooDo.Utils
                     {
                         return _type with { Alias = alias };
                     }
+                    else if (!_type.IsSimple || !_type.Path[0].Name.IsPredefinedType)
+                    {
+                        return _type with { Alias = "global" };
+                    }
                 }
             }
             return _type;

@@ -39,7 +39,6 @@ namespace VooDo.Compiling
                 "mscorlib.dll",
                 "System.dll",
                 typeof(object).Assembly.Location,
-                typeof(int).Assembly.Location,
             };
             return Merge(names.Select(_n => FromFile(Path.Combine(directory, _n))).ToImmutableArray());
         }

@@ -35,6 +35,7 @@ namespace VooDo.AST.Names
         public static Identifier Double { get; } = "double";
         public static Identifier Object { get; } = "object";
 
+
         #endregion
 
         #region Conversion
@@ -64,6 +65,8 @@ namespace VooDo.AST.Names
                 throw new SyntaxError(this, "Non letter or undescore starting letter").AsThrowable();
             }
         }
+
+        public bool IsPredefinedType => s_predefinedTypesTokens.ContainsKey(m_identifier);
 
         #endregion
 

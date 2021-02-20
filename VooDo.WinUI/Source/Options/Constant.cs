@@ -7,6 +7,12 @@ namespace VooDo.WinUI.Options
     public sealed record Constant
     {
 
+        public Constant(Identifier _name, object _value)
+            : this(_value.GetType(), _name, _value)
+        {
+
+        }
+
         public Constant(UnresolvedType _type, Identifier _name, object? _value)
         {
             Type = _type;

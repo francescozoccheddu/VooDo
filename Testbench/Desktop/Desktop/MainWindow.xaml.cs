@@ -2,7 +2,7 @@
 
 namespace VooDo.DesktopTestbench
 {
-    internal sealed partial class MainWindow : Window
+    public sealed partial class MainWindow : Window
     {
 
         public MainWindow()
