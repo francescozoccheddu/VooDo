@@ -51,6 +51,10 @@ namespace VooDo.Runtime
                 .Where(_v => _v.Name is not null)
                 .GroupBy(_v => _v.Name)
                 .ToImmutableDictionary(_g => _g.Key, _g => _g.ToImmutableArray());
+            foreach (Variable variable in Variables)
+            {
+                variable.Program = this;
+            }
             m_hookHolders = m_Hooks.Select(_h => new HookHolder(_h)).ToImmutableArray();
         }
 

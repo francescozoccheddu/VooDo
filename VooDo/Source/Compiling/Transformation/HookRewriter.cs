@@ -105,8 +105,8 @@ namespace VooDo.Compiling.Transformation
 
             public override SyntaxNode? VisitElementAccessExpression(ElementAccessExpressionSyntax _node)
             {
-                IOperation operation = m_semantics.GetOperation(_node)!;
-                if (operation.Kind is OperationKind.PropertyReference)
+                IOperation? operation = m_semantics.GetOperation(_node);
+                if (operation is not null && operation.Kind is OperationKind.PropertyReference)
                 {
                     ExpressionSyntax? expression = TryReplaceExpression(_node.Expression);
                     if (expression is not null)
@@ -119,8 +119,8 @@ namespace VooDo.Compiling.Transformation
 
             public override SyntaxNode? VisitMemberAccessExpression(MemberAccessExpressionSyntax _node)
             {
-                IOperation operation = m_semantics.GetOperation(_node)!;
-                if (operation.Kind is OperationKind.FieldReference or OperationKind.PropertyReference)
+                IOperation? operation = m_semantics.GetOperation(_node);
+                if (operation is not null && operation.Kind is OperationKind.FieldReference or OperationKind.PropertyReference)
                 {
                     ExpressionSyntax? expression = TryReplaceExpression(_node.Expression);
                     if (expression is not null)

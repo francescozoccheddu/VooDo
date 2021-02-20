@@ -1,6 +1,4 @@
 ﻿
-using System.IO;
-
 using VooDo.Caching;
 using VooDo.WinUI.Components;
 using VooDo.WinUI.Interfaces;
@@ -19,7 +17,8 @@ namespace VooDo.WinUI.Core
             {
                 if (s_bindingManager is null)
                 {
-                    LoaderDiskCache cache = new LoaderDiskCache(Path.Combine(Path.GetTempPath(), "ciao"));
+                    //LoaderDiskCache cache = new LoaderDiskCache(Path.Combine(Path.GetTempPath(), "ciao"));
+                    LoaderMemoryCache cache = new LoaderMemoryCache();
                     SimpleLoaderProvider? loaderProvider = new SimpleLoaderProvider(cache);
                     s_bindingManager = new BindingManager<SimpleTarget>(Defaults.TargetProvider, loaderProvider);
                 }

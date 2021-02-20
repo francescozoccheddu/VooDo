@@ -9,10 +9,10 @@ namespace VooDo.WinUI.Interfaces
     public interface ITarget
     {
 
-        internal void AttachProgram(Program _program) { }
-        internal void DetachProgram() { }
+        void AttachProgram(Program _program);
+        void DetachProgram();
 
-        internal event TargetDiscontinuedEventHandler? OnTargetDiscontinued;
+        event TargetDiscontinuedEventHandler? OnTargetDiscontinued;
 
     }
 

@@ -32,7 +32,7 @@ namespace VooDo.WinUI.Components
 
         private Program? m_program;
 
-        internal void AttachProgram(Program _program)
+        void ITarget.AttachProgram(Program _program)
         {
             m_program = _program;
             if (m_returnTarget is not null)
@@ -41,7 +41,7 @@ namespace VooDo.WinUI.Components
             }
         }
 
-        internal void DetachProgram()
+        void ITarget.DetachProgram()
         {
             m_program = null;
             if (m_returnTarget is not null)

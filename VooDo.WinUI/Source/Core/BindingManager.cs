@@ -45,6 +45,7 @@ namespace VooDo.WinUI
             }
             Script script = ScriptCache.GetOrParseScript(_xamlInfo.ScriptSource);
             Program program = LoaderProvider.GetLoader(script, target).Create();
+            target.AttachProgram(program);
             Binding binding = new Binding(_xamlInfo, target, program);
             m_bindings.Add(binding);
             return binding;

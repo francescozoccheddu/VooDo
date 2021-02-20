@@ -1,5 +1,4 @@
 ﻿using System;
-using System.ComponentModel;
 
 namespace VooDo.Runtime
 {
@@ -8,7 +7,7 @@ namespace VooDo.Runtime
 
     public delegate void VariableChangedEventHandler<TValue>(Variable<TValue> _variable, TValue _oldValue);
 
-    public abstract class Variable : INotifyPropertyChanged
+    public abstract class Variable
     {
 
         internal Variable(bool _isConstant, string _name, Type _type)
@@ -24,11 +23,11 @@ namespace VooDo.Runtime
         public object? Value { get => m_DynamicValue; set => m_DynamicValue = value; }
         public object? ControllerFactory { get => m_DynamicControllerFactory; set => m_DynamicControllerFactory = value; }
         public abstract bool HasController { get; }
+        public Program Program { get; internal set; } = null!;
 
         public Variable<TValue> OfType<TValue>() => (Variable<TValue>) this;
 
         public event VariableChangedEventHandler? OnChange;
-        public event PropertyChangedEventHandler? PropertyChanged;
 
         internal abstract void NotifyChanged();
 
@@ -37,8 +36,8 @@ namespace VooDo.Runtime
 
         protected void NotifyChanged(object? _oldValue)
         {
+            Program.RequestRun();
             OnChange?.Invoke(this, _oldValue);
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Value)));
         }
 
     }
@@ -68,6 +67,7 @@ namespace VooDo.Runtime
             m_controller = new NoController(this, _value!);
         }
 
+
         public new TValue Value { get => m_controller.Value; set => m_controller.Value = value; }
 
         public Controller<TValue>? Controller => m_controller is NoController ? null : m_controller;
@@ -96,9 +96,9 @@ namespace VooDo.Runtime
         internal override void NotifyChanged()
         {
             TValue oldValue = m_oldValue;
-            NotifyChanged(m_oldValue);
-            OnChange?.Invoke(this, m_oldValue);
             m_oldValue = Value;
+            NotifyChanged(oldValue);
+            OnChange?.Invoke(this, oldValue);
         }
 
         protected override object? m_DynamicValue { get => Value; set => Value = (TValue) value!; }

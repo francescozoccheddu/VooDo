@@ -47,7 +47,10 @@ namespace VooDo.WinUI.Xaml
             return m_lastValue!;
         }
 
-        private void ProgramReturned(object? _value) => m_lastValue = _value;
+        private void ProgramReturned(object? _value)
+        {
+            m_lastValue = _value;
+        }
     }
 
 }
