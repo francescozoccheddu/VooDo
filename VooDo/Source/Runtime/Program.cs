@@ -46,16 +46,25 @@ namespace VooDo.Runtime
 
         protected Program()
         {
-            Variables = m_Variables.ToImmutableArray();
-            m_variableMap = Variables
-                .Where(_v => _v.Name is not null)
-                .GroupBy(_v => _v.Name)
-                .ToImmutableDictionary(_g => _g.Key, _g => _g.ToImmutableArray());
-            foreach (Variable variable in Variables)
             {
-                variable.Program = this;
+                Variables = m_Variables.ToImmutableArray();
+                m_variableMap = Variables
+                    .Where(_v => _v.Name is not null)
+                    .GroupBy(_v => _v.Name)
+                    .ToImmutableDictionary(_g => _g.Key, _g => _g.ToImmutableArray());
+                foreach (Variable variable in Variables)
+                {
+                    variable.Program = this;
+                }
             }
-            m_hookHolders = m_Hooks.Select(_h => new HookHolder(_h)).ToImmutableArray();
+            {
+                IHook[]? hooks = m_Hooks;
+                foreach (IHook hook in hooks)
+                {
+                    hook.Listener = this;
+                }
+                m_hookHolders = hooks.Select(_h => new HookHolder(_h)).ToImmutableArray();
+            }
         }
 
         private sealed class HookHolder

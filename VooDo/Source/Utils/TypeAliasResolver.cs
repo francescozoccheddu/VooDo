@@ -13,8 +13,12 @@ namespace VooDo.Utils
     public static class TypeAliasResolver
     {
 
+
+        public static ComplexType Resolve(Type _type, ImmutableArray<Reference> _references)
+            => Resolve(ComplexType.FromType(_type), _references);
+
         public static ComplexType Resolve(ComplexType _type, ImmutableArray<Reference> _references)
-            => _type.ReplaceNonNullDescendantNodesAndSelf(_n => _n is QualifiedType type
+            => _type.SetAsRoot().ReplaceNonNullDescendantNodesAndSelf(_n => _n is QualifiedType type
                     ? ResolveSingleNode(type, _references)
                     : _n)!;
 

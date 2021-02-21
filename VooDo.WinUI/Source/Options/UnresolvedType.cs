@@ -29,10 +29,9 @@ namespace VooDo.WinUI.Options
         }
 
         internal ComplexType Resolve(ImmutableArray<Reference> _references)
-        {
-            ComplexType type = m_resolved ?? ComplexType.FromType(m_unresolved!, true);
-            return TypeAliasResolver.Resolve(type, _references);
-        }
+            => m_resolved is null
+                ? TypeAliasResolver.Resolve(m_unresolved!, _references)
+                : TypeAliasResolver.Resolve(m_resolved, _references);
 
     }
 

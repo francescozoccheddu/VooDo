@@ -7,27 +7,31 @@
     <Grid>
 
         <Grid.RowDefinitions>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="*"/>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
         <Slider
-            Grid.Row="0"
             x:Name="m_Slider"
-            x:FieldModifier="public"
+            Grid.Row="0"
+            MinWidth="200"
             HorizontalAlignment="Center"
             VerticalAlignment="Center"
-            MinWidth="200"
-            Minimum="10"
-            Maximum="20"/>
+            x:FieldModifier="public"
+            Maximum="20"
+            Minimum="10" />
 
         <TextBlock
             Grid.Row="1"
             HorizontalAlignment="Center"
             VerticalAlignment="Center"
-            Text="Lorem Ipsum"
-            FontSize="{voodo:VooDo Code=glob Smooth(root.m_Slider.Value)}"
-            />
+            Text="Lorem Ipsum">
+            <TextBlock.FontSize>
+                <voodo:VooDo>
+                    return root.m_Slider.Value;
+                </voodo:VooDo>
+            </TextBlock.FontSize>
+        </TextBlock>
 
     </Grid>
 

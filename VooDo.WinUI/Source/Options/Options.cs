@@ -39,7 +39,7 @@ namespace VooDo.WinUI.Options
                 .GetAssemblies()
                 .Where(_a => _a.GetReferencedAssemblies().Contains(assemblyName))
                 .Select(_a => Reference.FromAssembly(_a)));
-            IHookInitializer hookInitializer = NotifyPropertyChangedHookInitializer.Instance;
+            IHookInitializer hookInitializer = new HookInitializerList(NotifyPropertyChangedHookInitializer.Instance, DependencyPropertyHookInitializer.Instance);
             ImmutableArray<UsingNamespace> usingNamespaces = ImmutableArray.Create(new UsingNamespace("System"));
             ImmutableArray<UnresolvedType> usingStaticTypes = new UnresolvedType[] { typeof(AnimatorFactory) }.ToImmutableArray();
             ImmutableArray<Constant> constants = ImmutableArray.Create<Constant>();

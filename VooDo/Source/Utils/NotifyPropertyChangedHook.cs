@@ -19,7 +19,7 @@ namespace VooDo.Utils
 
         private NotifyPropertyChangedHookInitializer() { }
 
-        public Expression? GetInitializer(ISymbol _symbol)
+        public Expression? GetInitializer(ISymbol _symbol, ImmutableArray<Reference> _references)
         {
             INamedTypeSymbol? type = _symbol.ContainingType;
             string? interfaceName = typeof(INotifyPropertyChanged).FullName;

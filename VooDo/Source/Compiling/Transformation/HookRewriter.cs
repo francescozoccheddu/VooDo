@@ -43,14 +43,16 @@ namespace VooDo.Compiling.Transformation
                 internal Expression Initializer { get; }
             }
 
-            internal BodyRewriter(SemanticModel _semantics, PointsToAnalysisResult _pointsToAnalysis, IHookInitializer _hookInitializer)
+            internal BodyRewriter(SemanticModel _semantics, PointsToAnalysisResult _pointsToAnalysis, IHookInitializer _hookInitializer, ImmutableArray<Reference> _references)
             {
                 m_semantics = _semantics;
                 m_pointsToAnalysis = _pointsToAnalysis;
                 m_map = new Dictionary<ISymbol, Entry>(SymbolEqualityComparer.Default);
                 m_hookInitializer = _hookInitializer;
+                m_references = _references;
             }
 
+            private readonly ImmutableArray<Reference> m_references;
             private readonly SemanticModel m_semantics;
             private readonly PointsToAnalysisResult m_pointsToAnalysis;
             private readonly Dictionary<ISymbol, Entry> m_map;
@@ -85,7 +87,7 @@ namespace VooDo.Compiling.Transformation
                 {
                     return null;
                 }
-                Expression? initializer = entry?.Initializer ?? m_hookInitializer.GetInitializer(symbol);
+                Expression? initializer = entry?.Initializer ?? m_hookInitializer.GetInitializer(symbol, m_references);
                 if (initializer is null)
                 {
                     return null;
@@ -185,7 +187,7 @@ namespace VooDo.Compiling.Transformation
                 .Where(_m => _m.Identifier.ValueText is nameof(Program.Run) or nameof(TypedProgram<object>.TypedRun) && _m.Modifiers.Any(_d => _d.IsKind(SyntaxKind.OverrideKeyword)))
                 .Single();
             PointsToAnalysisResult pointsToAnalysis = CreatePointsToAnalysis(method, semantics, _session.CSharpCompilation!);
-            BodyRewriter rewriter = new BodyRewriter(semantics, pointsToAnalysis, _session.Compilation.Options.HookInitializer);
+            BodyRewriter rewriter = new BodyRewriter(semantics, pointsToAnalysis, _session.Compilation.Options.HookInitializer, _session.Compilation.Options.References);
             BlockSyntax body = (BlockSyntax) rewriter.Visit(method.Body!);
             ImmutableArray<Expression> initializers = rewriter.Initializers;
             if (initializers.IsEmpty)

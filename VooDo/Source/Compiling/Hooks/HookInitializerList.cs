@@ -8,6 +8,7 @@ using System.Collections.Immutable;
 using System.Linq;
 
 using VooDo.AST.Expressions;
+using VooDo.Compiling;
 using VooDo.Utils;
 
 namespace VooDo.Hooks
@@ -38,8 +39,8 @@ namespace VooDo.Hooks
         public static bool operator ==(HookInitializerList? _left, HookInitializerList? _right) => _left is not null && _left.Equals(_right);
         public static bool operator !=(HookInitializerList? _left, HookInitializerList? _right) => !(_left == _right);
         public override int GetHashCode() => Identity.CombineHashes(m_hookInitializers);
-        public Expression? GetInitializer(ISymbol _symbol)
-            => m_hookInitializers.Select(_h => _h.GetInitializer(_symbol)).FirstOrDefault(_h => _h is not null);
+        public Expression? GetInitializer(ISymbol _symbol, ImmutableArray<Reference> _references)
+            => m_hookInitializers.Select(_h => _h.GetInitializer(_symbol, _references)).FirstOrDefault(_h => _h is not null);
 
     }
 

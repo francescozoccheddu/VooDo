@@ -45,16 +45,20 @@ namespace VooDo.WinUI.Core
             ComplexType? returnType = target.ReturnValue?.Type.Resolve(options.References);
             LoaderKey loaderKey = LoaderKey.Create(script, options.References, returnType, options.HookInitializer);
             Program program = s_loaderCache.GetOrCreateLoader(loaderKey).Create();
-            foreach (Constant constant in options.Constants)
+            using (program.Lock())
             {
-                program.GetVariable(constant.Name)!.Value = constant.Value;
+                foreach (Constant constant in options.Constants)
+                {
+                    program.GetVariable(constant.Name)!.Value = constant.Value;
+                }
+                program.CancelRunRequest();
             }
-            Binding binding = new Binding(_xamlInfo, target, program);
-            target.Bind(binding);
             if (target.ReturnValue is not null)
             {
                 ((TypedProgram) program).OnReturn += target.ReturnValue.Setter.SetReturnValue;
             }
+            Binding binding = new Binding(_xamlInfo, target, program);
+            target.Bind(binding);
             s_bindings.Add(binding);
             return binding;
         }
