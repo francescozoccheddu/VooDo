@@ -24,13 +24,20 @@
         <TextBlock
             Grid.Row="1"
             HorizontalAlignment="Center"
-            VerticalAlignment="Center"
-            Text="Lorem Ipsum">
-            <TextBlock.FontSize>
+            VerticalAlignment="Center">
+            <TextBlock.Text>
                 <voodo:VooDo>
-                    return root.m_Slider.Value;
+                    if (root.m_Slider.Value &lt; 12)
+                    return &quot;Very Small&quot;;
+                    if (root.m_Slider.Value &lt; 14)
+                    return &quot;Small&quot;;
+                    if (root.m_Slider.Value &lt; 16)
+                    return &quot;Medium&quot;;
+                    if (root.m_Slider.Value &lt; 18)
+                    return &quot;Large&quot;;
+                    return &quot;Very large&quot;;
                 </voodo:VooDo>
-            </TextBlock.FontSize>
+            </TextBlock.Text>
         </TextBlock>
 
     </Grid>

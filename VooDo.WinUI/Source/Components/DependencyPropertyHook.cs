@@ -90,6 +90,7 @@ namespace VooDo.WinUI.Components
             }
         }
 
+        public IHook Clone() => new DependencyPropertyHook(m_name);
     }
 
 }

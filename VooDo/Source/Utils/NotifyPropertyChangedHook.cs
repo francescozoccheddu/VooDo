@@ -78,6 +78,7 @@ namespace VooDo.Utils
             }
         }
 
+        public IHook Clone() => new NotifyPropertyChangedHook(m_name);
     }
 
 }

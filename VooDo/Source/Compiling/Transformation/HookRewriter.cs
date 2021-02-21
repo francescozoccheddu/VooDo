@@ -15,7 +15,6 @@ using System.Linq;
 using System.Threading;
 
 using VooDo.AST.Expressions;
-using VooDo.AST.Names;
 using VooDo.Compiling.Emission;
 using VooDo.Hooks;
 using VooDo.Problems;
@@ -33,14 +32,17 @@ namespace VooDo.Compiling.Transformation
 
             private sealed class Entry
             {
-                internal Entry(Expression _initializer)
+                internal Entry(int _index, Expression _initializer)
                 {
                     Locations = new HashSet<AbstractLocation>();
                     Initializer = _initializer;
+                    Index = _index;
                 }
 
+                internal int Index { get; }
                 internal HashSet<AbstractLocation> Locations { get; }
                 internal Expression Initializer { get; }
+                internal int Count { get; set; }
             }
 
             internal BodyRewriter(SemanticModel _semantics, PointsToAnalysisResult _pointsToAnalysis, IHookInitializer _hookInitializer, ImmutableArray<Reference> _references)
@@ -57,9 +59,9 @@ namespace VooDo.Compiling.Transformation
             private readonly PointsToAnalysisResult m_pointsToAnalysis;
             private readonly Dictionary<ISymbol, Entry> m_map;
             private readonly IHookInitializer m_hookInitializer;
-            private readonly List<Expression> m_expressions = new List<Expression>();
 
-            internal ImmutableArray<Expression> Initializers => m_expressions.ToImmutableArray();
+            internal ImmutableArray<(Expression initializer, int count)> Initializers
+                => m_map.Values.Select(_e => (_e.Initializer, _e.Count)).ToImmutableArray();
 
             private ExpressionSyntax? TryReplaceExpression(ExpressionSyntax _expression)
             {
@@ -92,17 +94,16 @@ namespace VooDo.Compiling.Transformation
                 {
                     return null;
                 }
-                int index = m_expressions.Count;
-                m_expressions.Add(initializer);
                 if (entry is null)
                 {
-                    m_map[symbol] = entry = new Entry(initializer);
+                    m_map[symbol] = entry = new Entry(m_map.Count, initializer);
                 }
+                int hookIndex = entry.Count++;
                 if (result.Locations.Count == 1)
                 {
                     entry.Locations.Add(result.Locations.First());
                 }
-                return SyntaxFactoryUtils.SubscribeHookInvocation((ExpressionSyntax) Visit(_expression), index);
+                return SyntaxFactoryUtils.SubscribeHookInvocation((ExpressionSyntax) Visit(_expression), entry.Index, hookIndex);
             }
 
             public override SyntaxNode? VisitElementAccessExpression(ElementAccessExpressionSyntax _node)
@@ -157,11 +158,13 @@ namespace VooDo.Compiling.Transformation
             return result;
         }
 
-        private static PropertyDeclarationSyntax CreatePropertySyntax(ImmutableArray<Expression> _initializers, Tagger _tagger)
+        private static PropertyDeclarationSyntax CreatePropertySyntax(ImmutableArray<(Expression initializer, int count)> _initializers, Tagger _tagger)
         {
-            ArrayTypeSyntax hookType = SyntaxFactory.ArrayType(
-                (QualifiedType.FromType<IHook>() with { Alias = Session.runtimeReferenceAlias }).ToTypeSyntax(),
-                SyntaxFactoryUtils.SingleArrayRank());
+            ArrayTypeSyntax hookType =
+                SyntaxFactoryUtils.SingleArray(
+                    SyntaxFactoryUtils.TupleType(
+                        SyntaxFactory.ParseTypeName($"{Session.runtimeReferenceAlias}::{typeof(IHook).FullName}"),
+                        SyntaxFactoryUtils.PredefinedType(SyntaxKind.IntKeyword)));
             return SyntaxFactoryUtils.ArrowProperty(
                 hookType,
                 nameof(Program.m_Hooks),
@@ -169,7 +172,12 @@ namespace VooDo.Compiling.Transformation
                     hookType,
                     SyntaxFactory.InitializerExpression(
                         SyntaxKind.ArrayInitializerExpression,
-                        _initializers.Select(_i => (ExpressionSyntax) _i.EmitNode(new Scope(), _tagger)).ToSeparatedList())))
+                        _initializers.Select(_i =>
+                            SyntaxFactory.TupleExpression(
+                                SyntaxFactoryUtils.Arguments(
+                                    (ExpressionSyntax) _i.initializer.EmitNode(new Scope(), _tagger),
+                                    SyntaxFactoryUtils.Literal(_i.count)).Arguments))
+                        .ToSeparatedList<ExpressionSyntax>())))
                 .WithModifiers(
                     SyntaxFactoryUtils.Tokens(
                         SyntaxKind.ProtectedKeyword,
@@ -189,7 +197,7 @@ namespace VooDo.Compiling.Transformation
             PointsToAnalysisResult pointsToAnalysis = CreatePointsToAnalysis(method, semantics, _session.CSharpCompilation!);
             BodyRewriter rewriter = new BodyRewriter(semantics, pointsToAnalysis, _session.Compilation.Options.HookInitializer, _session.Compilation.Options.References);
             BlockSyntax body = (BlockSyntax) rewriter.Visit(method.Body!);
-            ImmutableArray<Expression> initializers = rewriter.Initializers;
+            ImmutableArray<(Expression, int)> initializers = rewriter.Initializers;
             if (initializers.IsEmpty)
             {
                 return root;

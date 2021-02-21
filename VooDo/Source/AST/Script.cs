@@ -16,7 +16,7 @@ using VooDo.Utils;
 using static VooDo.Compiling.Emission.Scope;
 
 using SF = Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
-using SFH = VooDo.Utils.SyntaxFactoryUtils;
+using SFU = VooDo.Utils.SyntaxFactoryUtils;
 
 namespace VooDo.AST
 {
@@ -60,19 +60,19 @@ namespace VooDo.AST
             Scope scope = new Scope();
             Tagger tagger = _session.Tagger;
             TypeSyntax? returnType = (TypeSyntax?) (_session.Compilation.Options.ReturnType?.EmitNode(scope, tagger));
-            TypeSyntax variableType = SFH.VariableType();
+            TypeSyntax variableType = SFU.VariableType();
             IEnumerable<ExternAliasDirectiveSyntax> aliases =
                 _session.Compilation.Options.References
                 .SelectMany(_r => _r.Aliases)
                 .Select(_r => SF.ExternAliasDirective(_r).Own(tagger, _r));
             IEnumerable<UsingDirectiveSyntax> usings = Usings.Select(_u => (UsingDirectiveSyntax) _u.EmitNode(scope, tagger));
             MethodDeclarationSyntax? runMethod = SF.MethodDeclaration(
-                                returnType ?? SFH.Void(),
+                                returnType ?? SFU.Void(),
                                 SF.Identifier(returnType is null
                                     ? nameof(Program.Run)
                                     : nameof(TypedProgram<object>.TypedRun)))
                             .WithModifiers(
-                                SFH.Tokens(
+                                SFU.Tokens(
                                     SyntaxKind.ProtectedKeyword,
                                     SyntaxKind.OverrideKeyword))
                             .WithBody(
@@ -86,11 +86,11 @@ namespace VooDo.AST
                     ? null
                     : (TypeSyntax) _definition.Prototype.Global.Type.EmitNode(scope, tagger);
                 return SF.VariableDeclaration(
-                            SFH.VariableType(type).Own(tagger, _definition.Prototype.Global.Type),
+                            SFU.VariableType(type).Own(tagger, _definition.Prototype.Global.Type),
                             SF.VariableDeclarator(
                                 _definition.Identifier,
                                 null,
-                                SFH.CreateVariableInvocation(
+                                SFU.CreateVariableInvocation(
                                     type,
                                     _definition.Prototype.Global.IsConstant,
                                     _definition.Prototype.Global.Name!,
@@ -102,42 +102,39 @@ namespace VooDo.AST
                             .ToSeparatedList())
                     .Own(tagger, _definition.Prototype.Source);
             }
-            PropertyDeclarationSyntax variablesProperty = SFH.ArrowProperty(
-                SF.ArrayType(
-                    SFH.VariableType(),
-                    SFH.SingleArrayRank()),
+            PropertyDeclarationSyntax variablesProperty = SFU.ArrowProperty(
+                SFU.SingleArray(
+                    SFU.VariableType()),
                 nameof(Program.m_Variables),
                 SF.ArrayCreationExpression(
-                    SF.ArrayType(variableType)
-                    .WithRankSpecifiers(
-                        SFH.SingleArrayRank()))
-                    .WithInitializer(
-                        SF.InitializerExpression(
-                            SyntaxKind.ArrayInitializerExpression,
-                            globals.Select(_g => SFH.ThisMemberAccess(_g.Identifier))
-                        .ToSeparatedList<ExpressionSyntax>())))
+                    SFU.SingleArray(variableType))
+                .WithInitializer(
+                    SF.InitializerExpression(
+                        SyntaxKind.ArrayInitializerExpression,
+                        globals.Select(_g => SFU.ThisMemberAccess(_g.Identifier))
+                    .ToSeparatedList<ExpressionSyntax>())))
                 .WithModifiers(
-                    SFH.Tokens(
+                    SFU.Tokens(
                         SyntaxKind.ProtectedKeyword,
                         SyntaxKind.OverrideKeyword));
             IEnumerable<FieldDeclarationSyntax> globalDeclarations =
                 globals.Select(_g =>
                     SF.FieldDeclaration(
                         SF.List<AttributeListSyntax>(),
-                        SFH.Tokens(
+                        SFU.Tokens(
                             SyntaxKind.PrivateKeyword,
                             SyntaxKind.ReadOnlyKeyword),
                         EmitGlobalDeclaration(_g)));
             ClassDeclarationSyntax? classDeclaration =
                 SF.ClassDeclaration(_session.Compilation.Options.ClassName)
                     .WithModifiers(
-                        SFH.Tokens(
+                        SFU.Tokens(
                             SyntaxKind.PublicKeyword,
                             SyntaxKind.SealedKeyword))
                     .WithBaseList(
                         SF.BaseList(
                             SF.SimpleBaseType(
-                                SFH.ProgramType(returnType))
+                                SFU.ProgramType(returnType))
                             .ToSeparatedList<BaseTypeSyntax>()))
                     .WithMembers(globalDeclarations
                         .Cast<MemberDeclarationSyntax>()

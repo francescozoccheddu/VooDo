@@ -5,6 +5,7 @@ using System.Collections.Immutable;
 using System.Linq;
 
 using VooDo.Hooks;
+using VooDo.Utils;
 
 namespace VooDo.Runtime
 {
@@ -44,64 +45,71 @@ namespace VooDo.Runtime
     public abstract class Program : IHookListener
     {
 
+
         protected Program()
         {
+            Variables = m_Variables.ToImmutableArray();
+            m_variableMap = Variables
+                .Where(_v => _v.Name is not null)
+                .GroupBy(_v => _v.Name)
+                .ToImmutableDictionary(_g => _g.Key, _g => _g.ToImmutableArray());
+            foreach (Variable variable in Variables)
             {
-                Variables = m_Variables.ToImmutableArray();
-                m_variableMap = Variables
-                    .Where(_v => _v.Name is not null)
-                    .GroupBy(_v => _v.Name)
-                    .ToImmutableDictionary(_g => _g.Key, _g => _g.ToImmutableArray());
-                foreach (Variable variable in Variables)
-                {
-                    variable.Program = this;
-                }
+                variable.Program = this;
             }
-            {
-                IHook[]? hooks = m_Hooks;
-                foreach (IHook hook in hooks)
-                {
-                    hook.Listener = this;
-                }
-                m_hookHolders = hooks.Select(_h => new HookHolder(_h)).ToImmutableArray();
-            }
+            m_hookSets = m_Hooks.Select(_h => new HookSet(this, _h.hook, _h.count)).ToImmutableArray();
         }
 
-        private sealed class HookHolder
+        private sealed class HookSet
         {
 
+            private static readonly IEqualityComparer<object?> s_targetComparer = new Identity.ReferenceComparer<object?>();
 
-            private bool m_subscribedInThisRun;
-            private readonly IHook m_hook;
-            private object? m_lastSubscribedObject;
+            private readonly HashSet<object?> m_activeTargets;
+            private readonly bool[] m_subscribedInThisRun;
+            private readonly IHook[] m_hooks;
 
-            internal HookHolder(IHook _hook) => m_hook = _hook;
-
-            internal void OnRunStart()
-                => m_subscribedInThisRun = false;
-
-            internal void Subscribe(object _object)
+            internal HookSet(IHookListener _listener, IHook _hook, int _count)
             {
-                m_subscribedInThisRun = true;
-                if (!ReferenceEquals(_object, m_lastSubscribedObject))
+                m_activeTargets = new HashSet<object?>(s_targetComparer);
+                m_subscribedInThisRun = new bool[_count];
+                m_hooks = new IHook[_count];
+                m_hooks[0] = _hook;
+                m_hooks[0].Listener = _listener;
+                for (int i = 1; i < _count; i++)
                 {
-                    m_lastSubscribedObject = _object;
-                    m_hook.Subscribe(_object);
+                    m_hooks[i] = _hook.Clone();
+                    m_hooks[i].Listener = _listener;
                 }
             }
 
-            internal void OnRunEnd()
+            public void OnRunEnd()
             {
-                if (!m_subscribedInThisRun)
+                for (int i = 0; i < m_subscribedInThisRun.Length; i++)
                 {
-                    m_lastSubscribedObject = null;
-                    m_hook.Unsubscribe();
+                    if (!m_subscribedInThisRun[i])
+                    {
+                        m_hooks[i].Unsubscribe();
+                    }
+                    m_subscribedInThisRun[i] = false;
+                }
+                m_activeTargets.Clear();
+            }
+
+            public void OnSubscribe(object? _target, int _hookIndex)
+            {
+                if (_target is not null && !m_activeTargets.Contains(_target))
+                {
+                    m_subscribedInThisRun[_hookIndex] = true;
+                    m_activeTargets.Add(_target);
+                    m_hooks[_hookIndex].Unsubscribe();
+                    m_hooks[_hookIndex].Subscribe(_target);
                 }
             }
 
         }
 
-        private readonly ImmutableArray<HookHolder> m_hookHolders;
+        private readonly ImmutableArray<HookSet> m_hookSets;
         private readonly ImmutableDictionary<string, ImmutableArray<Variable>> m_variableMap;
         public ImmutableArray<Variable> Variables { get; }
 
@@ -126,7 +134,7 @@ namespace VooDo.Runtime
 
 #pragma warning disable CA1819 // Properties should not return arrays
         protected internal virtual Variable[] m_Variables => Array.Empty<Variable>();
-        protected internal virtual IHook[] m_Hooks => Array.Empty<IHook>();
+        protected internal virtual (IHook hook, int count)[] m_Hooks => Array.Empty<(IHook, int)>();
 #pragma warning restore CA1819 // Properties should not return arrays
 
         public virtual Type ReturnType => typeof(void);
@@ -140,14 +148,10 @@ namespace VooDo.Runtime
             using (Lock())
             {
                 m_running = true;
-                foreach (HookHolder holder in m_hookHolders)
-                {
-                    holder.OnRunStart();
-                }
                 Run();
-                foreach (HookHolder holder in m_hookHolders)
+                foreach (HookSet hookSet in m_hookSets)
                 {
-                    holder.OnRunEnd();
+                    hookSet.OnRunEnd();
                 }
                 CancelRunRequest();
                 m_running = false;
@@ -183,12 +187,9 @@ namespace VooDo.Runtime
         public bool IsLocked => m_locks > 0;
         public bool IsRunRequested { get; private set; }
 
-        protected internal TValue? SubscribeHook<TValue>(TValue? _object, int _hookIndex) where TValue : class
+        protected internal TValue? SubscribeHook<TValue>(TValue? _object, int _setIndex, int _hookIndex) where TValue : class
         {
-            if (_object is not null)
-            {
-                m_hookHolders[_hookIndex].Subscribe(_object);
-            }
+            m_hookSets[_setIndex].OnSubscribe(_object, _hookIndex);
             return _object;
         }
 

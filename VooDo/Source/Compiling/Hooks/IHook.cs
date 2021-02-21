@@ -10,6 +10,8 @@
 
         IHookListener? Listener { set; }
 
+        IHook Clone();
+
     }
 
 }

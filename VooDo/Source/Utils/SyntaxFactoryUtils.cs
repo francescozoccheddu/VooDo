@@ -11,6 +11,7 @@ using VooDo.Compiling.Emission;
 using VooDo.Runtime;
 
 using SF = Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
+using SK = Microsoft.CodeAnalysis.CSharp.SyntaxKind;
 
 namespace VooDo.Utils
 {
@@ -43,6 +44,9 @@ namespace VooDo.Utils
             Alias = CompilationConstants.runtimeReferenceAlias
         }).ToTypeSyntax();
 
+        internal static PredefinedTypeSyntax PredefinedType(SyntaxKind _kind)
+            => SF.PredefinedType(SF.Token(_kind));
+
         internal static TypeSyntax ToTypeSyntax(this ComplexType _type)
             => (TypeSyntax) _type.EmitNode(new Scope(), new Tagger());
 
@@ -56,14 +60,8 @@ namespace VooDo.Utils
                     GenericName(
                         nameof(RuntimeHelpers.CreateVariable),
                         _type!)),
-                    SF.LiteralExpression(_isConstant
-                        ? SyntaxKind.TrueLiteralExpression
-                        : SyntaxKind.FalseLiteralExpression),
-                    _name is null
-                        ? SF.LiteralExpression(SyntaxKind.NullLiteralExpression)
-                        : SF.LiteralExpression(
-                            SyntaxKind.StringLiteralExpression,
-                            SF.Literal(_name)),
+                    Literal(_isConstant),
+                    Literal(_name),
                     _initialValue);
 
         internal static InvocationExpressionSyntax SetControllerAndGetValueInvocation(ExpressionSyntax _variable, ExpressionSyntax _controller)
@@ -74,11 +72,12 @@ namespace VooDo.Utils
                 _variable,
                 _controller);
 
-        internal static InvocationExpressionSyntax SubscribeHookInvocation(ExpressionSyntax _source, int _hookIndex)
+        internal static InvocationExpressionSyntax SubscribeHookInvocation(ExpressionSyntax _source, int _setIndex, int _hookIndex)
             => Invocation(
                 ThisMemberAccess(nameof(Program.SubscribeHook)),
                 _source,
-                SF.LiteralExpression(SyntaxKind.NumericLiteralExpression, SF.Literal(_hookIndex)));
+                Literal(_setIndex),
+                Literal(_hookIndex));
 
         internal static TypeSyntax VariableType(TypeSyntax? _type = null)
         {
@@ -101,7 +100,7 @@ namespace VooDo.Utils
             => MemberAccess(_source, SF.IdentifierName(_member));
 
         internal static MemberAccessExpressionSyntax MemberAccess(ExpressionSyntax _source, SimpleNameSyntax _member)
-            => SF.MemberAccessExpression(SyntaxKind.SimpleMemberAccessExpression, _source, _member);
+            => SF.MemberAccessExpression(SK.SimpleMemberAccessExpression, _source, _member);
 
         internal static MemberAccessExpressionSyntax MemberAccess(ExpressionSyntax _source, string _member)
             => MemberAccess(_source, SF.Identifier(_member));
@@ -114,6 +113,9 @@ namespace VooDo.Utils
 
         internal static MemberAccessExpressionSyntax ThisMemberAccess(string _name)
             => ThisMemberAccess(SF.IdentifierName(_name));
+
+        internal static ArgumentListSyntax Arguments(params ExpressionSyntax[] _arguments)
+            => Arguments(_arguments.Select(_a => SF.Argument(_a)));
 
         internal static ArgumentListSyntax Arguments(IEnumerable<ArgumentSyntax> _arguments)
             => SF.ArgumentList(_arguments.ToSeparatedList());
@@ -156,7 +158,7 @@ namespace VooDo.Utils
             }
         }
 
-        internal static SyntaxTokenList Tokens(params SyntaxKind[] _kinds)
+        internal static SyntaxTokenList Tokens(params SK[] _kinds)
             => SF.TokenList(_kinds.Select(_k => SF.Token(_k)));
 
         internal static ArrayRankSpecifierSyntax ArrayRank(int _rank)
@@ -173,13 +175,34 @@ namespace VooDo.Utils
             .Concat(ArrayRanks(_additionalRanks))
             .ToSyntaxList();
 
+        internal static LiteralExpressionSyntax NullLiteral { get; } = SF.LiteralExpression(SK.NullLiteralExpression);
+
+        internal static LiteralExpressionSyntax Literal(string? _literal)
+            => _literal is null
+                ? NullLiteral
+                : SF.LiteralExpression(SK.StringLiteralExpression, SF.Literal(_literal));
+
+        internal static LiteralExpressionSyntax Literal(int _literal)
+            => SF.LiteralExpression(SK.NumericLiteralExpression, SF.Literal(_literal));
+
+        internal static LiteralExpressionSyntax Literal(bool _literal)
+            => SF.LiteralExpression(_literal ? SK.TrueLiteralExpression : SK.FalseLiteralExpression);
+
         internal static InvocationExpressionSyntax Invocation(ExpressionSyntax _source, params ExpressionSyntax[] _arguments)
-            => Invocation(_source, _arguments.Select(_a => SF.Argument(_a)));
+            => SF.InvocationExpression(
+                _source,
+                Arguments(_arguments));
 
         internal static InvocationExpressionSyntax Invocation(ExpressionSyntax _source, IEnumerable<ArgumentSyntax> _arguments)
             => SF.InvocationExpression(
                 _source,
                 Arguments(_arguments));
+
+        internal static TupleTypeSyntax TupleType(params TypeSyntax[] _types)
+            => SF.TupleType(_types.Select(_t => SF.TupleElement(_t)).ToSeparatedList());
+
+        internal static ArrayTypeSyntax SingleArray(TypeSyntax _syntax)
+            => SF.ArrayType(_syntax, SingleArrayRank());
 
         internal static SyntaxList<ArrayRankSpecifierSyntax> SingleArrayRank()
             => ArrayRanks(new[] { 1 });
@@ -197,10 +220,10 @@ namespace VooDo.Utils
             => SF.EqualsValueClause(_expression);
 
         internal static PredefinedTypeSyntax Void()
-            => SF.PredefinedType(SF.Token(SyntaxKind.VoidKeyword));
+            => SF.PredefinedType(SF.Token(SK.VoidKeyword));
 
         internal static PredefinedTypeSyntax Object()
-            => SF.PredefinedType(SF.Token(SyntaxKind.ObjectKeyword));
+            => SF.PredefinedType(SF.Token(SK.ObjectKeyword));
 
         internal static NameSyntax? QualifiedName(IEnumerable<NameSyntax> _names)
         {
@@ -217,7 +240,7 @@ namespace VooDo.Utils
         internal static PropertyDeclarationSyntax ArrowProperty(TypeSyntax _type, string _name, ExpressionSyntax _expression)
             => SF.PropertyDeclaration(_type, _name)
                 .WithExpressionBody(SF.ArrowExpressionClause(_expression))
-                .WithSemicolonToken(SF.Token(SyntaxKind.SemicolonToken));
+                .WithSemicolonToken(SF.Token(SK.SemicolonToken));
 
     }
 
