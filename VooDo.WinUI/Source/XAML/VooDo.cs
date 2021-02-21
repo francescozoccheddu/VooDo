@@ -2,13 +2,10 @@
 using Microsoft.UI.Xaml.Markup;
 
 using System;
-using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Reflection;
 
 using VooDo.Runtime;
-using VooDo.Utils;
 using VooDo.WinUI.Core;
 
 namespace VooDo.WinUI.Xaml
@@ -17,6 +14,7 @@ namespace VooDo.WinUI.Xaml
     [ContentProperty(Name = nameof(Code))]
     public sealed class VooDo : MarkupExtension
     {
+
 
         public VooDo() { }
 
@@ -31,18 +29,6 @@ namespace VooDo.WinUI.Xaml
         public Binding? Binding { get; private set; }
         private object? m_lastValue;
 
-        private static readonly Dictionary<string, string> s_codeCache = new Dictionary<string, string>();
-
-        private static string GetCode(string _path)
-        {
-            _path = NormalizeFilePath.Normalize(_path);
-            if (!s_codeCache.TryGetValue(_path, out string? code))
-            {
-                s_codeCache[_path] = code = File.ReadAllText(_path);
-            }
-            return code;
-        }
-
         protected override object? ProvideValue(IXamlServiceProvider _serviceProvider)
         {
             if (Code is null && Path is null)
@@ -55,7 +41,7 @@ namespace VooDo.WinUI.Xaml
             }
             if (Binding is null)
             {
-                string code = Code ?? GetCode(Path!);
+                string code = Code ?? CodeLoader.GetCode(Path!);
                 IProvideValueTarget? provideValueTarget = (IProvideValueTarget?) _serviceProvider.GetService(typeof(IProvideValueTarget));
                 IRootObjectProvider? rootObjectProvider = (IRootObjectProvider?) _serviceProvider.GetService(typeof(IRootObjectProvider));
                 IUriContext? uriContext = (IUriContext?) _serviceProvider.GetService(typeof(IUriContext));
@@ -67,7 +53,7 @@ namespace VooDo.WinUI.Xaml
                 {
                     throw new InvalidOperationException("Failed to retrieve XAML target property");
                 }
-                XamlInfo xamlInfo = new XamlInfo(code, property, provideValueTarget.TargetObject, rootObjectProvider.RootObject, uriContext.BaseUri);
+                XamlInfo xamlInfo = XamlInfo.FromMarkupExtension(code, property, provideValueTarget.TargetObject, rootObjectProvider.RootObject, uriContext.BaseUri);
                 Binding = BindingManager.AddBinding(xamlInfo);
                 if (Binding.Program is TypedProgram typedProgram)
                 {

@@ -1,5 +1,6 @@
 ﻿
 using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Markup;
 
 using System;
 using System.Collections.Generic;
@@ -41,36 +42,42 @@ namespace VooDo.WinUI.Components
                     assemblies.Add(type.Assembly);
                 }
             }
-            if (_xamlInfo.Root is not null)
+            object? root = _xamlInfo.Root ?? (_xamlInfo.Object as UIElement)?.XamlRoot?.Content;
+            if (root is not null)
             {
-                Type? type = FirstPublicAncestor(_xamlInfo.Root.GetType());
+                Type? type = FirstPublicAncestor(root.GetType());
                 if (type is not null)
                 {
-                    constants.Add(new Constant(type, "root", _xamlInfo.Root));
+                    constants.Add(new Constant(type, "root", root));
                     assemblies.Add(type.Assembly);
                 }
             }
-            if (_xamlInfo.Object is DependencyObject owner)
+            Target.ReturnValueInfo? returnValueInfo = null;
+            if (_xamlInfo.SourceKind == XamlInfo.ESourceKind.MarkupExtension)
             {
+                if (_xamlInfo.Object is not DependencyObject owner)
+                {
+                    return null;
+                }
+                ProvideValueTargetProperty property = _xamlInfo.Property!;
                 DependencyProperty? dependencyProperty = (DependencyProperty?) owner
                     .GetType()
                     .GetProperty(
-                        $"{_xamlInfo.Property.Name}Property",
+                        $"{property.Name}Property",
                         BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy)?
                     .GetValue(null);
                 if (dependencyProperty is not null)
                 {
-                    assemblies.Add(_xamlInfo.Property.Type.Assembly);
+                    assemblies.Add(property.Type.Assembly);
                     DependencyPropertySetter setter = new DependencyPropertySetter(dependencyProperty, owner);
-                    Target.ReturnValueInfo returnValueInfo = new Target.ReturnValueInfo(_xamlInfo.Property.Type, setter);
-                    return new Target(returnValueInfo, BindingOptions.Empty with
-                    {
-                        Constants = constants.ToImmutableArray(),
-                        References = assemblies.Select(_a => Reference.FromAssembly(_a)).ToImmutableArray()
-                    });
+                    returnValueInfo = new Target.ReturnValueInfo(property.Type, setter);
                 }
             }
-            return null;
+            return new Target(returnValueInfo, BindingOptions.Empty with
+            {
+                Constants = constants.ToImmutableArray(),
+                References = assemblies.Select(_a => Reference.FromAssembly(_a)).ToImmutableArray()
+            });
         }
 
 

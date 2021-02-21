@@ -4,6 +4,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:voodo="using:VooDo.WinUI.Xaml">
 
+
     <Grid>
 
         <Grid.RowDefinitions>
@@ -11,6 +12,7 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
+        
         <Slider
             x:Name="m_Slider"
             Grid.Row="0"
@@ -25,21 +27,12 @@
             Grid.Row="1"
             HorizontalAlignment="Center"
             VerticalAlignment="Center">
-            <TextBlock.Text>
-                <voodo:VooDo>
-                    if (root.m_Slider.Value &lt; 12)
-                    return &quot;Very Small&quot;;
-                    if (root.m_Slider.Value &lt; 14)
-                    return &quot;Small&quot;;
-                    if (root.m_Slider.Value &lt; 16)
-                    return &quot;Medium&quot;;
-                    if (root.m_Slider.Value &lt; 18)
-                    return &quot;Large&quot;;
-                    return &quot;Very large&quot;;
-                </voodo:VooDo>
-            </TextBlock.Text>
-        </TextBlock>
 
+            <voodo:Standalone.Code>
+                this.Text = (glob Smooth(1000)).ToString();
+            </voodo:Standalone.Code>
+            
+        </TextBlock>
     </Grid>
 
 </Window>
