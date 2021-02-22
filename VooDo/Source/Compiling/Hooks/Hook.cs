@@ -20,7 +20,7 @@ namespace VooDo.Hooks
         void IHook.Subscribe(object _object)
         {
             TObject newObject = (TObject) _object;
-            if (!ReferenceEquals(newObject, _object))
+            if (!ReferenceEquals(newObject, m_object))
             {
                 if (m_object is not null)
                 {
