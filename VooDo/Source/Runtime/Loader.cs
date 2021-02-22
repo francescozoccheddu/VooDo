@@ -37,7 +37,7 @@ namespace VooDo.Runtime
             m_type = _type;
             ReturnType = m_type
                 .GetMethods(BindingFlags.Instance | BindingFlags.NonPublic)
-                .Single(_m => _m.IsVirtual
+                .Single(_m => _m.IsVirtual && !_m.IsFinal
                     && _m.Name is nameof(Program.Run) or nameof(TypedProgram<object>.TypedRun)
                     && _m.GetBaseDefinition().DeclaringType is Type declaring
                     && (declaring == typeof(Program) || declaring.IsSubclassOf(typeof(Program))))

@@ -28,9 +28,11 @@
             HorizontalAlignment="Center"
             VerticalAlignment="Center">
 
-            <voodo:Standalone.Code>
-                this.Text = (glob Smooth(1000)).ToString();
-            </voodo:Standalone.Code>
+            <TextBlock.Text>
+                <voodo:VooDo>
+                    (glob Smooth(root.m_Slider.Value)).ToString()
+                </voodo:VooDo>
+            </TextBlock.Text>
             
         </TextBlock>
     </Grid>

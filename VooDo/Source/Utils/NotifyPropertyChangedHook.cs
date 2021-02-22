@@ -38,47 +38,29 @@ namespace VooDo.Utils
 
     }
 
-    public sealed class NotifyPropertyChangedHook : IHook
+    public sealed class NotifyPropertyChangedHook : Hook<INotifyPropertyChanged, INotifyPropertyChanged>
     {
 
         private readonly string m_name;
-        private INotifyPropertyChanged? m_object;
-
-        public NotifyPropertyChangedHook(string _name)
-        {
-            m_name = _name;
-        }
-
-        public IHookListener? Listener { get; set; }
-
-        public void Subscribe(object _object)
-        {
-            if (!ReferenceEquals(_object, m_object))
-            {
-                Unsubscribe();
-                m_object = (INotifyPropertyChanged) _object;
-                m_object.PropertyChanged += PropertyChanged;
-            }
-        }
+        public NotifyPropertyChangedHook(string _name) => m_name = _name;
 
         private void PropertyChanged(object? _sender, PropertyChangedEventArgs _e)
         {
             if (_e.PropertyName == m_name)
             {
-                Listener?.NotifyChange();
+                NotifyChange();
             }
         }
 
-        public void Unsubscribe()
+        public override IHook Clone() => new NotifyPropertyChangedHook(m_name);
+        protected override INotifyPropertyChanged Subscribe(INotifyPropertyChanged _object)
         {
-            if (m_object is not null)
-            {
-                m_object.PropertyChanged -= PropertyChanged;
-                m_object = null;
-            }
+            _object.PropertyChanged += PropertyChanged;
+            return _object;
         }
 
-        public IHook Clone() => new NotifyPropertyChangedHook(m_name);
+        protected override void Unsubscribe(INotifyPropertyChanged _object) => _object.PropertyChanged -= PropertyChanged;
+
     }
 
 }

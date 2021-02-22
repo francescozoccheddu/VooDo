@@ -39,58 +39,37 @@ namespace VooDo.WinUI.Components
 
     }
 
-    public sealed class DependencyPropertyHook : IHook
+    public sealed class DependencyPropertyHook : Hook<DependencyObject, (DependencyObject obj, long token), object?>
     {
 
         private readonly string m_name;
-        private DependencyObject? m_object;
         private DependencyProperty? m_property;
-        private long m_token;
 
         public DependencyPropertyHook(string _name)
         {
             m_name = _name;
         }
 
-        private DependencyProperty GetDependencyProperty()
+        public override IHook Clone() => new DependencyPropertyHook(m_name);
+
+        protected override (DependencyObject obj, long token) Subscribe(DependencyObject _object)
         {
             if (m_property is null)
             {
-                m_property = (DependencyProperty) m_object!
+                m_property = (DependencyProperty) _object
                     .GetType()
                     .GetProperty($"{m_name}Property", BindingFlags.Public | BindingFlags.FlattenHierarchy | BindingFlags.Static)!
                     .GetValue(null)!;
             }
-            return m_property;
+            return (_object, _object.RegisterPropertyChangedCallback(m_property, PropertyChanged));
         }
 
-        public IHookListener? Listener { get; set; }
-
-        public void Subscribe(object _object)
-        {
-            if (!ReferenceEquals(_object, m_object))
-            {
-                Unsubscribe();
-                m_object = (DependencyObject) _object;
-                m_token = m_object.RegisterPropertyChangedCallback(GetDependencyProperty(), PropertyChanged);
-            }
-        }
+        protected override void Unsubscribe((DependencyObject obj, long token) _token)
+            => _token.obj.UnregisterPropertyChangedCallback(m_property, _token.token);
 
         private void PropertyChanged(DependencyObject? _sender, DependencyProperty _property)
-        {
-            Listener?.NotifyChange();
-        }
+            => NotifyChange(_sender!.GetValue(_property));
 
-        public void Unsubscribe()
-        {
-            if (m_object is not null)
-            {
-                m_object.UnregisterPropertyChangedCallback(GetDependencyProperty(), m_token);
-                m_object = null;
-            }
-        }
-
-        public IHook Clone() => new DependencyPropertyHook(m_name);
     }
 
 }
