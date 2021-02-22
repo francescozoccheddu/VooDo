@@ -5,7 +5,6 @@ using System;
 using System.Linq;
 using System.Reflection;
 
-using VooDo.Runtime;
 using VooDo.WinUI.Core;
 
 namespace VooDo.WinUI.Xaml
@@ -14,7 +13,6 @@ namespace VooDo.WinUI.Xaml
     [ContentProperty(Name = nameof(Code))]
     public sealed class VooDo : MarkupExtension
     {
-
 
         public VooDo() { }
 
@@ -27,7 +25,6 @@ namespace VooDo.WinUI.Xaml
         public string? Path { get; set; }
 
         public Binding? Binding { get; private set; }
-        private object? m_lastValue;
 
         protected override object? ProvideValue(IXamlServiceProvider _serviceProvider)
         {
@@ -39,48 +36,36 @@ namespace VooDo.WinUI.Xaml
             {
                 throw new InvalidOperationException("Cannot specify both Code and Path");
             }
+            IProvideValueTarget? provideValueTarget = (IProvideValueTarget?) _serviceProvider.GetService(typeof(IProvideValueTarget));
+            IRootObjectProvider? rootObjectProvider = (IRootObjectProvider?) _serviceProvider.GetService(typeof(IRootObjectProvider));
+            IUriContext? uriContext = (IUriContext?) _serviceProvider.GetService(typeof(IUriContext));
+            if (provideValueTarget is null || rootObjectProvider is null || uriContext is null)
+            {
+                throw new InvalidOperationException("Failed to retrieve XAML target service");
+            }
+            if (provideValueTarget.TargetProperty is not ProvideValueTargetProperty property)
+            {
+                throw new InvalidOperationException("Failed to retrieve XAML target property");
+            }
             if (Binding is null)
             {
                 string code = Code ?? CodeLoader.GetCode(Path!);
-                IProvideValueTarget? provideValueTarget = (IProvideValueTarget?) _serviceProvider.GetService(typeof(IProvideValueTarget));
-                IRootObjectProvider? rootObjectProvider = (IRootObjectProvider?) _serviceProvider.GetService(typeof(IRootObjectProvider));
-                IUriContext? uriContext = (IUriContext?) _serviceProvider.GetService(typeof(IUriContext));
-                if (provideValueTarget is null || rootObjectProvider is null || uriContext is null)
-                {
-                    throw new InvalidOperationException("Failed to retrieve XAML service");
-                }
-                if (provideValueTarget.TargetProperty is not ProvideValueTargetProperty property)
-                {
-                    throw new InvalidOperationException("Failed to retrieve XAML target property");
-                }
                 XamlInfo xamlInfo = XamlInfo.FromMarkupExtension(code, property, provideValueTarget.TargetObject, rootObjectProvider.RootObject, uriContext.BaseUri);
-                Binding = BindingManager.AddBinding(xamlInfo);
-                if (Binding.Program is TypedProgram typedProgram)
-                {
-                    typedProgram.OnReturn += ProgramReturned;
-                    Binding.Program.RequestRun();
-                }
-                else
-                {
-                    MemberInfo[] members = property.DeclaringType.GetMember(
-                        property.Name,
-                        MemberTypes.Field | MemberTypes.Property,
-                        BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance);
-                    return members.Single() switch
-                    {
-                        PropertyInfo m => m.GetValue(provideValueTarget.TargetObject),
-                        FieldInfo m => m.GetValue(provideValueTarget.TargetObject),
-                        _ => throw new InvalidOperationException("Failed to retrieve original property value")
-                    };
-                }
+                Binding = BindingManager.CreateBinding(xamlInfo);
+                BindingManager.AddBinding(Binding);
             }
-            return m_lastValue;
+            MemberInfo[] members = property.DeclaringType.GetMember(
+                property.Name,
+                MemberTypes.Field | MemberTypes.Property,
+                BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance);
+            return members.Single() switch
+            {
+                PropertyInfo m => m.GetValue(provideValueTarget.TargetObject),
+                FieldInfo m => m.GetValue(provideValueTarget.TargetObject),
+                _ => throw new InvalidOperationException("Failed to retrieve original property value")
+            };
         }
 
-        private void ProgramReturned(object? _value)
-        {
-            m_lastValue = _value;
-        }
     }
 
 }

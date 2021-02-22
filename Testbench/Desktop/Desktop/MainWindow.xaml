@@ -13,18 +13,35 @@
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
 
-            <ScrollViewer 
-                x:Name="m_Scroll"
-                x:FieldModifier="public"
-                Grid.Row="1" 
-                VerticalScrollMode="Enabled" 
-                Padding="10,0,10,0"
-                VerticalScrollBarVisibility="Visible">
+            <Grid
+                Grid.Row="0"
+                Height="{voodo:VooDo Code='glob Smooth(root.m_Scroll.VerticalOffset &lt;= 20 ? 50 : 0)'}"
+                Padding="10"
+                Background="Gray">
 
-                <TextBlock 
-                    TextWrapping="WrapWholeWords" 
-                    FontSize="18" 
-                    Padding="0,10,0,10">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <TextBlock VerticalAlignment="Center">
+                    Header
+                </TextBlock>
+
+            </Grid>
+
+            <ScrollViewer
+                x:Name="m_Scroll"
+                Grid.Row="1"
+                Padding="10,0,10,0"
+                x:FieldModifier="public"
+                VerticalScrollBarVisibility="Visible"
+                VerticalScrollMode="Enabled">
+
+                <TextBlock
+                    Padding="0,10,0,10"
+                    FontSize="18"
+                    TextWrapping="WrapWholeWords">
                     Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Viverra suspendisse potenti nullam ac tortor vitae purus faucibus ornare. Porttitor massa id neque aliquam vestibulum. Justo laoreet sit amet cursus sit amet dictum. Tincidunt tortor aliquam nulla facilisi cras fermentum odio. A scelerisque purus semper eget. Velit scelerisque in dictum non consectetur a erat. Ac tincidunt vitae semper quis lectus. Sagittis vitae et leo duis ut. Ut porttitor leo a diam sollicitudin tempor. Tristique senectus et netus et malesuada fames ac turpis egestas. Diam maecenas ultricies mi eget mauris pharetra et ultrices. Neque aliquam vestibulum morbi blandit cursus risus at ultrices. Quis ipsum suspendisse ultrices gravida dictum fusce ut placerat orci.
                     Pellentesque massa placerat duis ultricies lacus. Libero nunc consequat interdum varius. Sit amet purus gravida quis blandit turpis. Nunc aliquet bibendum enim facilisis gravida neque convallis. Tortor vitae purus faucibus ornare suspendisse sed. Lectus quam id leo in vitae turpis massa sed. Risus at ultrices mi tempus. Aliquam nulla facilisi cras fermentum odio eu feugiat. Et malesuada fames ac turpis egestas integer. Venenatis urna cursus eget nunc. Amet mauris commodo quis imperdiet. Etiam dignissim diam quis enim lobortis. Nibh tortor id aliquet lectus proin nibh nisl. Accumsan in nisl nisi scelerisque eu ultrices vitae. Ipsum a arcu cursus vitae congue. Nisl tincidunt eget nullam non nisi. Purus ut faucibus pulvinar elementum integer enim neque volutpat ac. Interdum consectetur libero id faucibus. Fringilla urna porttitor rhoncus dolor purus non. Proin fermentum leo vel orci porta non pulvinar.
                     Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Viverra suspendisse potenti nullam ac tortor vitae purus faucibus ornare. Porttitor massa id neque aliquam vestibulum. Justo laoreet sit amet cursus sit amet dictum. Tincidunt tortor aliquam nulla facilisi cras fermentum odio. A scelerisque purus semper eget. Velit scelerisque in dictum non consectetur a erat. Ac tincidunt vitae semper quis lectus. Sagittis vitae et leo duis ut. Ut porttitor leo a diam sollicitudin tempor. Tristique senectus et netus et malesuada fames ac turpis egestas. Diam maecenas ultricies mi eget mauris pharetra et ultrices. Neque aliquam vestibulum morbi blandit cursus risus at ultrices. Quis ipsum suspendisse ultrices gravida dictum fusce ut placerat orci.
@@ -38,44 +55,42 @@
 
             </ScrollViewer>
 
-            <Grid 
-                Grid.Row="0"
-                Height="{voodo:VooDo Code=glob Smooth(root.m_Scroll.VerticalOffset > 0 ? 50 : 0)}"
-                Background="Gray"
-                Padding="10"
-                >
-
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
-
-                <TextBlock 
-                    VerticalAlignment="Center">
-                    Header
-                </TextBlock>
-
-            </Grid>
 
         </Grid>
 
         <Border
+            x:Name="m_Border"
+            Margin="0,0,30,20"
+            Padding="10"
             HorizontalAlignment="Right"
             VerticalAlignment="Bottom"
-            Margin="0,0,30,20"
-            Background="Black"
-            Padding="10"
-            >
-            <Border.Translation>
+            Background="Black">
+
+            <Border.Opacity>
                 <voodo:VooDo>
-                    new System.Numerics.Vector3(0, (float) glob Smooth(root.m_Scroll.VerticalOffset > 0 ? this.ActualHeight + 20 : 0), 0)
+                    glob Smooth(root.m_Scroll.VerticalOffset > 20 ? 1 : 0)
                 </voodo:VooDo>
-            </Border.Translation>
-            
-            <Button
-                >
+            </Border.Opacity>
+
+            <Button>
                 Go up!
             </Button>
+
+        </Border>
+
+        <Border
+            Margin="20,0,0,20"
+            Padding="10"
+            Background="Black"
+            HorizontalAlignment="Left"
+            VerticalAlignment="Bottom"
+            >
+
+            <TextBlock
+                Text="{x:Bind m_Scroll.VerticalOffset, Mode=OneWay}"
+                >
+                
+            </TextBlock>
             
         </Border>
 

@@ -79,11 +79,12 @@ namespace VooDo.WinUI.Components
                 assemblies.Add(property.Type.Assembly);
                 returnValueInfo = new Target.ReturnValueInfo(property.Type, setter);
             }
-            return new Target(returnValueInfo, BindingOptions.Empty with
+            Target target = new Target(_xamlInfo.Object as FrameworkElement, returnValueInfo, BindingOptions.Empty with
             {
                 Constants = constants.ToImmutableArray(),
                 References = assemblies.Select(_a => Reference.FromAssembly(_a)).ToImmutableArray()
             });
+            return target;
         }
 
 
@@ -116,6 +117,7 @@ namespace VooDo.WinUI.Components
             }
 
             public void SetReturnValue(object? _value) => m_property.SetValue(m_instance, _value);
+
         }
 
     }

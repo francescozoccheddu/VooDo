@@ -9,6 +9,7 @@ using VooDo.AST.Names;
 using VooDo.Caching;
 using VooDo.Compiling.Emission;
 using VooDo.Runtime;
+using VooDo.Utils;
 using VooDo.WinUI.Options;
 using VooDo.WinUI.Xaml;
 
@@ -18,11 +19,11 @@ namespace VooDo.WinUI.Core
     public static class BindingManager
     {
 
-        private static readonly List<Binding> s_bindings = new();
+        private static readonly HashSet<Binding> s_bindings = new(new Identity.ReferenceComparer<Binding>());
         private static readonly IScriptCache s_scriptCache = new ScriptMemoryCache();
         private static readonly ILoaderCache s_loaderCache = new LoaderMemoryCache();
 
-        public static IReadOnlyList<Binding> Bindings { get; } = s_bindings.AsReadOnly();
+        public static IReadOnlySet<Binding> Bindings { get; } = s_bindings;
 
         private static Script ProcessScript(Script _script, BindingOptions _options)
         {
@@ -32,7 +33,15 @@ namespace VooDo.WinUI.Core
             return _script;
         }
 
-        public static Binding AddBinding(XamlInfo _xamlInfo)
+        public static void AddBinding(Binding _binding)
+        {
+            if (s_bindings.Add(_binding))
+            {
+                _binding.OnAdd();
+            }
+        }
+
+        public static Binding CreateBinding(XamlInfo _xamlInfo)
         {
             Target? target = BindingManagerOptions.DefaultAndUserDefined.TargetProvider.GetTarget(_xamlInfo);
             if (target is null)
@@ -57,34 +66,15 @@ namespace VooDo.WinUI.Core
             {
                 ((TypedProgram) program).OnReturn += target.ReturnValue.Setter.SetReturnValue;
             }
-            Binding binding = new Binding(_xamlInfo, target, program);
-            target.Bind(binding);
-            s_bindings.Add(binding);
-            return binding;
+            return new Binding(_xamlInfo, target, program);
         }
 
-        private static void DestroyBinding(Binding _binding)
-        {
-            using (_binding.Program.Lock())
-            {
-                foreach (Variable variable in _binding.Program.Variables)
-                {
-                    variable.ControllerFactory = null;
-                }
-                _binding.Program.CancelRunRequest();
-            }
-            if (_binding.Target.ReturnValue is not null)
-            {
-                ((TypedProgram) _binding.Program).OnReturn -= _binding.Target.ReturnValue.Setter.SetReturnValue;
-            }
-            _binding.Target.Unbind();
-        }
 
         public static void RemoveBinding(Binding _binding)
         {
             if (s_bindings.Remove(_binding))
             {
-                DestroyBinding(_binding);
+                _binding.OnRemove();
             }
         }
 
@@ -92,7 +82,7 @@ namespace VooDo.WinUI.Core
         {
             foreach (Binding binding in s_bindings)
             {
-                DestroyBinding(binding);
+                binding.OnRemove();
             }
             s_bindings.Clear();
         }

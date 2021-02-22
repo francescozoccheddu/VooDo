@@ -20,8 +20,10 @@ namespace VooDo.WinUI.Xaml
 
         public static void SetPath(DependencyObject _obj, string? _value)
         {
-            SetBinding(_value is null ? null : CodeLoader.GetCode(_value), _obj);
+            string? code = _value is null ? null : CodeLoader.GetCode(_value);
             _obj.SetValue(PathProperty, _value);
+            _obj.SetValue(CodeProperty, code);
+            UpdateBinding(_obj);
         }
 
         public static string? GetCode(DependencyObject _obj)
@@ -31,23 +33,27 @@ namespace VooDo.WinUI.Xaml
 
         public static void SetCode(DependencyObject _obj, string? _value)
         {
-            SetBinding(_value, _obj);
+            _obj.SetValue(PathProperty, null);
+            _obj.SetValue(CodeProperty, _value);
+            UpdateBinding(_obj);
         }
 
-        private static void SetBinding(string? _code, DependencyObject _object)
+        private static void UpdateBinding(DependencyObject _obj)
         {
-            Binding? binding = GetBinding(_object);
+            Binding? binding = GetBinding(_obj);
+            string? code = GetCode(_obj);
             if (binding is not null)
             {
+                binding.AutoAddOnLoad = false;
                 BindingManager.RemoveBinding(binding);
+                binding = null;
             }
-            _object.SetValue(CodeProperty, _code);
-            if (_code is not null)
+            if (code is not null)
             {
-                _object.SetValue(BindingProperty, binding);
-                binding = BindingManager.AddBinding(XamlInfo.FromAttachedProperty(_code, _object));
-                binding.Program.RequestRun();
+                binding = BindingManager.CreateBinding(XamlInfo.FromAttachedProperty(code, _obj));
+                BindingManager.AddBinding(binding);
             }
+            _obj.SetValue(BindingProperty, binding);
         }
 
 #pragma warning disable IDE1006 // Naming Styles

@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Microsoft.UI.Xaml;
+
+using System;
 
 using VooDo.WinUI.Options;
 
@@ -29,36 +31,29 @@ namespace VooDo.WinUI.Core
 
         }
 
-        public Target(ReturnValueInfo? _returnValue = null)
-            : this(_returnValue, BindingOptions.Empty) { }
+        public Target(FrameworkElement? _owner, ReturnValueInfo? _returnValue = null)
+            : this(_owner, _returnValue, BindingOptions.Empty) { }
 
-        public Target(ReturnValueInfo? _returnValue, BindingOptions _additionalOptions)
+        public Target(FrameworkElement? _owner, ReturnValueInfo? _returnValue, BindingOptions _additionalOptions)
         {
             ReturnValue = _returnValue;
             AdditionalOptions = _additionalOptions;
+            Owner = _owner;
         }
 
-        private Binding? m_binding;
-        private bool m_invalidated;
-
+        public FrameworkElement? Owner { get; }
         public BindingOptions AdditionalOptions { get; }
         public ReturnValueInfo? ReturnValue { get; }
 
-        public Binding? Binding
-            => m_invalidated ? null : m_binding;
+        public Binding? Binding { get; private set; }
 
         internal void Bind(Binding _binding)
         {
-            if (m_binding is not null)
+            if (Binding is not null)
             {
                 throw new InvalidOperationException("Target is already bound");
             }
-            m_binding = _binding;
-        }
-
-        internal void Unbind()
-        {
-            m_invalidated = true;
+            Binding = _binding;
         }
 
     }
