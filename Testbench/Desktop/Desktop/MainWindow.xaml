@@ -4,37 +4,81 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:voodo="using:VooDo.WinUI.Xaml">
 
-
     <Grid>
 
-        <Grid.RowDefinitions>
-            <RowDefinition Height="*" />
-            <RowDefinition Height="*" />
-        </Grid.RowDefinitions>
+        <Grid>
 
-        
-        <Slider
-            x:Name="m_Slider"
-            Grid.Row="0"
-            MinWidth="200"
-            HorizontalAlignment="Center"
-            VerticalAlignment="Center"
-            x:FieldModifier="public"
-            Maximum="20"
-            Minimum="10" />
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
 
-        <TextBlock
-            Grid.Row="1"
-            HorizontalAlignment="Center"
-            VerticalAlignment="Center">
+            <ScrollViewer 
+                x:Name="m_Scroll"
+                x:FieldModifier="public"
+                Grid.Row="1" 
+                VerticalScrollMode="Enabled" 
+                Padding="10,0,10,0"
+                VerticalScrollBarVisibility="Visible">
 
-            <TextBlock.Text>
+                <TextBlock 
+                    TextWrapping="WrapWholeWords" 
+                    FontSize="18" 
+                    Padding="0,10,0,10">
+                    Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Viverra suspendisse potenti nullam ac tortor vitae purus faucibus ornare. Porttitor massa id neque aliquam vestibulum. Justo laoreet sit amet cursus sit amet dictum. Tincidunt tortor aliquam nulla facilisi cras fermentum odio. A scelerisque purus semper eget. Velit scelerisque in dictum non consectetur a erat. Ac tincidunt vitae semper quis lectus. Sagittis vitae et leo duis ut. Ut porttitor leo a diam sollicitudin tempor. Tristique senectus et netus et malesuada fames ac turpis egestas. Diam maecenas ultricies mi eget mauris pharetra et ultrices. Neque aliquam vestibulum morbi blandit cursus risus at ultrices. Quis ipsum suspendisse ultrices gravida dictum fusce ut placerat orci.
+                    Pellentesque massa placerat duis ultricies lacus. Libero nunc consequat interdum varius. Sit amet purus gravida quis blandit turpis. Nunc aliquet bibendum enim facilisis gravida neque convallis. Tortor vitae purus faucibus ornare suspendisse sed. Lectus quam id leo in vitae turpis massa sed. Risus at ultrices mi tempus. Aliquam nulla facilisi cras fermentum odio eu feugiat. Et malesuada fames ac turpis egestas integer. Venenatis urna cursus eget nunc. Amet mauris commodo quis imperdiet. Etiam dignissim diam quis enim lobortis. Nibh tortor id aliquet lectus proin nibh nisl. Accumsan in nisl nisi scelerisque eu ultrices vitae. Ipsum a arcu cursus vitae congue. Nisl tincidunt eget nullam non nisi. Purus ut faucibus pulvinar elementum integer enim neque volutpat ac. Interdum consectetur libero id faucibus. Fringilla urna porttitor rhoncus dolor purus non. Proin fermentum leo vel orci porta non pulvinar.
+                    Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Viverra suspendisse potenti nullam ac tortor vitae purus faucibus ornare. Porttitor massa id neque aliquam vestibulum. Justo laoreet sit amet cursus sit amet dictum. Tincidunt tortor aliquam nulla facilisi cras fermentum odio. A scelerisque purus semper eget. Velit scelerisque in dictum non consectetur a erat. Ac tincidunt vitae semper quis lectus. Sagittis vitae et leo duis ut. Ut porttitor leo a diam sollicitudin tempor. Tristique senectus et netus et malesuada fames ac turpis egestas. Diam maecenas ultricies mi eget mauris pharetra et ultrices. Neque aliquam vestibulum morbi blandit cursus risus at ultrices. Quis ipsum suspendisse ultrices gravida dictum fusce ut placerat orci.
+                    Porttitor eget dolor morbi non arcu risus quis varius. Pulvinar etiam non quam lacus suspendisse. Non enim praesent elementum facilisis leo vel fringilla est ullamcorper. Nec nam aliquam sem et tortor consequat id porta nibh. Tincidunt vitae semper quis lectus nulla at. Sit amet consectetur adipiscing elit pellentesque. Et netus et malesuada fames ac turpis egestas sed. Ornare arcu odio ut sem nulla pharetra diam sit. In fermentum posuere urna nec tincidunt praesent semper feugiat. Vel pretium lectus quam id leo in. Enim sit amet venenatis urna cursus. Senectus et netus et malesuada fames ac. Tortor id aliquet lectus proin nibh nisl condimentum id. Ipsum suspendisse ultrices gravida dictum. Enim praesent elementum facilisis leo vel fringilla.
+                    Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Viverra suspendisse potenti nullam ac tortor vitae purus faucibus ornare. Porttitor massa id neque aliquam vestibulum. Justo laoreet sit amet cursus sit amet dictum. Tincidunt tortor aliquam nulla facilisi cras fermentum odio. A scelerisque purus semper eget. Velit scelerisque in dictum non consectetur a erat. Ac tincidunt vitae semper quis lectus. Sagittis vitae et leo duis ut. Ut porttitor leo a diam sollicitudin tempor. Tristique senectus et netus et malesuada fames ac turpis egestas. Diam maecenas ultricies mi eget mauris pharetra et ultrices. Neque aliquam vestibulum morbi blandit cursus risus at ultrices. Quis ipsum suspendisse ultrices gravida dictum fusce ut placerat orci.
+                    Fames ac turpis egestas sed tempus urna et. Amet dictum sit amet justo. Consequat nisl vel pretium lectus quam id. Auctor elit sed vulputate mi sit amet mauris commodo. Morbi tristique senectus et netus et malesuada. Laoreet id donec ultrices tincidunt arcu non. Est pellentesque elit ullamcorper dignissim cras tincidunt. Leo vel orci porta non. Aliquam sem fringilla ut morbi tincidunt augue. Diam in arcu cursus euismod quis viverra nibh. Elementum eu facilisis sed odio morbi. Tortor posuere ac ut consequat semper. Egestas congue quisque egestas diam in arcu cursus. Dignissim enim sit amet venenatis. Consectetur a erat nam at lectus urna duis.
+                    Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Viverra suspendisse potenti nullam ac tortor vitae purus faucibus ornare. Porttitor massa id neque aliquam vestibulum. Justo laoreet sit amet cursus sit amet dictum. Tincidunt tortor aliquam nulla facilisi cras fermentum odio. A scelerisque purus semper eget. Velit scelerisque in dictum non consectetur a erat. Ac tincidunt vitae semper quis lectus. Sagittis vitae et leo duis ut. Ut porttitor leo a diam sollicitudin tempor. Tristique senectus et netus et malesuada fames ac turpis egestas. Diam maecenas ultricies mi eget mauris pharetra et ultrices. Neque aliquam vestibulum morbi blandit cursus risus at ultrices. Quis ipsum suspendisse ultrices gravida dictum fusce ut placerat orci.
+                    Lacus vestibulum sed arcu non odio. Eu augue ut lectus arcu bibendum at varius vel. Tristique senectus et netus et. Pulvinar pellentesque habitant morbi tristique senectus. Fringilla est ullamcorper eget nulla facilisi. Cursus turpis massa tincidunt dui ut ornare lectus sit. Feugiat nibh sed pulvinar proin gravida hendrerit lectus a. Id diam vel quam elementum pulvinar. Dolor purus non enim praesent elementum facilisis leo vel fringilla. Molestie at elementum eu facilisis sed odio morbi quis. Donec massa sapien faucibus et molestie ac feugiat sed lectus. Purus non enim praesent elementum facilisis leo vel fringilla est. Dolor sit amet consectetur adipiscing elit ut aliquam purus sit. Ultricies integer quis auctor elit sed vulputate mi sit amet. Mus mauris vitae ultricies leo integer malesuada.
+                    Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Viverra suspendisse potenti nullam ac tortor vitae purus faucibus ornare. Porttitor massa id neque aliquam vestibulum. Justo laoreet sit amet cursus sit amet dictum. Tincidunt tortor aliquam nulla facilisi cras fermentum odio. A scelerisque purus semper eget. Velit scelerisque in dictum non consectetur a erat. Ac tincidunt vitae semper quis lectus. Sagittis vitae et leo duis ut. Ut porttitor leo a diam sollicitudin tempor. Tristique senectus et netus et malesuada fames ac turpis egestas. Diam maecenas ultricies mi eget mauris pharetra et ultrices. Neque aliquam vestibulum morbi blandit cursus risus at ultrices. Quis ipsum suspendisse ultrices gravida dictum fusce ut placerat orci.
+                </TextBlock>
+
+            </ScrollViewer>
+
+            <Grid 
+                Grid.Row="0"
+                Height="{voodo:VooDo Code=glob Smooth(root.m_Scroll.VerticalOffset > 0 ? 50 : 0)}"
+                Background="Gray"
+                Padding="10"
+                >
+
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock 
+                    VerticalAlignment="Center">
+                    Header
+                </TextBlock>
+
+            </Grid>
+
+        </Grid>
+
+        <Border
+            HorizontalAlignment="Right"
+            VerticalAlignment="Bottom"
+            Margin="0,0,30,20"
+            Background="Black"
+            Padding="10"
+            >
+            <Border.Translation>
                 <voodo:VooDo>
-                    (glob Smooth(root.m_Slider.Value)).ToString()
+                    new System.Numerics.Vector3(0, (float) glob Smooth(root.m_Scroll.VerticalOffset > 0 ? this.ActualHeight + 20 : 0), 0)
                 </voodo:VooDo>
-            </TextBlock.Text>
+            </Border.Translation>
             
-        </TextBlock>
+            <Button
+                >
+                Go up!
+            </Button>
+            
+        </Border>
+
     </Grid>
 
 </Window>

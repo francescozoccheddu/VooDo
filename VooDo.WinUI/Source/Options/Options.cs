@@ -93,7 +93,7 @@ namespace VooDo.WinUI.Options
         static BindingManagerOptions()
         {
             Empty = new BindingManagerOptions(BindingOptions.Empty, new TargetProviderList());
-            ITargetProvider targetProvider = new TargetProviderList(new DependencyPropertyTargetProvider());
+            ITargetProvider targetProvider = new TargetProviderList(new DefaultTargetProvider());
             Default = new BindingManagerOptions(BindingOptions.Default, targetProvider);
         }
 

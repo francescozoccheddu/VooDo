@@ -74,7 +74,7 @@ namespace VooDo.Hooks
 
         protected void NotifyChange(TValue _value)
         {
-            if (!m_initialized || m_comparer.Equals(_value, m_value))
+            if (!m_initialized || !m_comparer.Equals(_value, m_value))
             {
                 m_initialized = true;
                 m_value = _value;

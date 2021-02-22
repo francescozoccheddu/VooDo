@@ -27,7 +27,7 @@ namespace VooDo.WinUI.Xaml
             Object = _object;
         }
 
-        private XamlInfo(string _script, ProvideValueTargetProperty _property, object? _object, object? _root, Uri _path)
+        private XamlInfo(string _script, ProvideValueTargetProperty _property, object _object, object? _root, Uri _path)
         {
             SourceKind = ESourceKind.MarkupExtension;
             Script = _script;

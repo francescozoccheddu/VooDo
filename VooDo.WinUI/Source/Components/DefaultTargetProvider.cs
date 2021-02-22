@@ -16,7 +16,7 @@ using VooDo.WinUI.Xaml;
 namespace VooDo.WinUI.Components
 {
 
-    public sealed class DependencyPropertyTargetProvider : ITargetProvider
+    public sealed class DefaultTargetProvider : ITargetProvider
     {
 
         private static Type? FirstPublicAncestor(Type _type)
@@ -55,23 +55,29 @@ namespace VooDo.WinUI.Components
             Target.ReturnValueInfo? returnValueInfo = null;
             if (_xamlInfo.SourceKind == XamlInfo.ESourceKind.MarkupExtension)
             {
-                if (_xamlInfo.Object is not DependencyObject owner)
-                {
-                    return null;
-                }
                 ProvideValueTargetProperty property = _xamlInfo.Property!;
-                DependencyProperty? dependencyProperty = (DependencyProperty?) owner
-                    .GetType()
+                Target.IReturnValueSetter setter;
+                DependencyProperty? dependencyProperty = (DependencyProperty?) (_xamlInfo.Object as DependencyObject)
+                    ?.GetType()
                     .GetProperty(
                         $"{property.Name}Property",
                         BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy)?
                     .GetValue(null);
                 if (dependencyProperty is not null)
                 {
-                    assemblies.Add(property.Type.Assembly);
-                    DependencyPropertySetter setter = new DependencyPropertySetter(dependencyProperty, owner);
-                    returnValueInfo = new Target.ReturnValueInfo(property.Type, setter);
+                    setter = new DependencyPropertySetter(dependencyProperty, (DependencyObject) _xamlInfo.Object!);
                 }
+                else
+                {
+                    PropertyInfo propertyInfo = _xamlInfo.Object!
+                        .GetType()
+                        .GetProperty(
+                            _xamlInfo.Property!.Name,
+                            BindingFlags.Instance | BindingFlags.Public)!;
+                    setter = new ReflectionPropertySetter(propertyInfo, _xamlInfo.Object!);
+                }
+                assemblies.Add(property.Type.Assembly);
+                returnValueInfo = new Target.ReturnValueInfo(property.Type, setter);
             }
             return new Target(returnValueInfo, BindingOptions.Empty with
             {
@@ -95,6 +101,21 @@ namespace VooDo.WinUI.Components
 
             public void SetReturnValue(object? _value) => m_object.SetValue(m_property, _value);
 
+        }
+
+        private sealed class ReflectionPropertySetter : Target.IReturnValueSetter
+        {
+
+            private readonly PropertyInfo m_property;
+            private readonly object m_instance;
+
+            public ReflectionPropertySetter(PropertyInfo _property, object _instance)
+            {
+                m_property = _property;
+                m_instance = _instance;
+            }
+
+            public void SetReturnValue(object? _value) => m_property.SetValue(m_instance, _value);
         }
 
     }

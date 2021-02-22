@@ -102,6 +102,7 @@ namespace VooDo.Compiling
             }
             {
                 // Hooks
+                CSharpCompilation.GetDiagnostics().SelectNonNull(_d => RoslynProblem.FromDiagnostic(_d, Tagger, Problem.EKind.Semantic)).ThrowErrors();
                 CompilationUnitSyntax newSyntax = HookRewriter.Rewrite(this);
                 if (newSyntax != Syntax)
                 {

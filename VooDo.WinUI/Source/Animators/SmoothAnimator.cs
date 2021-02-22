@@ -52,7 +52,7 @@ namespace VooDo.WinUI.Animators
 
         protected override bool Update(ref double _value, double _deltaTime)
         {
-            double alpha = Math.Min(_deltaTime, 1);
+            double alpha = Math.Min(_deltaTime * 10, 1);
             _value = (_value * (1 - alpha)) + (m_Target * alpha);
             if (Math.Abs(_value - m_Target) < 0.0001)
             {
