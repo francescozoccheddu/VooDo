@@ -1,14 +1,11 @@
 ﻿
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 
-using VooDo.Compiling.Emission;
 using VooDo.Parsing;
 using VooDo.Problems;
 using VooDo.Utils;
@@ -19,8 +16,7 @@ namespace VooDo.AST.Names
     public abstract record ComplexType : ComplexTypeOrExpression
     {
 
-        #region Creation
-
+        
         protected static Type Unwrap(Type _type, out bool _nullable, out ImmutableArray<RankSpecifier> _ranks)
         {
             List<RankSpecifier> ranks = new List<RankSpecifier>();
@@ -60,20 +56,16 @@ namespace VooDo.AST.Names
         public static ComplexType FromType<TType>()
             => FromType(typeof(TType), false);
 
-        #endregion
-
-        #region Conversion
-
+        
+        
         public static implicit operator ComplexType(string _type) => Parse(_type);
         public static implicit operator ComplexType(Type _type) => FromType(_type);
         public static implicit operator ComplexType(Identifier _name) => new QualifiedType(new SimpleType(_name));
         public static implicit operator ComplexType(SimpleType _simpleType) => new QualifiedType(_simpleType);
         public static implicit operator string(ComplexType _complexType) => _complexType.ToString();
 
-        #endregion
-
-        #region Nested types
-
+        
+        
         public sealed record RankSpecifier : BodyNode
         {
 
@@ -100,18 +92,13 @@ namespace VooDo.AST.Names
 
             protected internal override Node ReplaceNodes(Func<Node?, Node?> _map) => this;
 
-            internal override SyntaxNode EmitNode(Scope _scope, Tagger _tagger)
-                => SyntaxFactoryUtils.ArrayRank(m_rank).Own(_tagger, this);
-
             public override string ToString()
                 => $"[{new string(',', m_rank - 1)}]";
 
         }
 
-        #endregion
-
-        #region Members
-
+        
+        
         public ComplexType(bool _isNullable = false, ImmutableArray<RankSpecifier> _ranks = default)
         {
             IsNullable = _isNullable;
@@ -129,10 +116,8 @@ namespace VooDo.AST.Names
         }
         public bool IsArray => Ranks.Any();
 
-        #endregion
-
-        #region Overrides
-
+        
+        
         protected internal override Node ReplaceNodes(Func<Node?, Node?> _map)
         {
             ImmutableArray<RankSpecifier> newRanks = Ranks.Map(_map).NonNull();
@@ -149,27 +134,10 @@ namespace VooDo.AST.Names
             }
         }
 
-        internal sealed override SyntaxNode EmitNode(Scope _scope, Tagger _tagger)
-        {
-            TypeSyntax? type = EmitNonArrayNonNullableType(_scope, _tagger);
-            if (IsNullable)
-            {
-                type = SyntaxFactory.NullableType(type);
-            }
-            if (IsArray)
-            {
-                type = SyntaxFactory.ArrayType(type, Ranks.Select(_r => _r.EmitNode(_scope, _tagger)).ToSyntaxList());
-            }
-            return type.Own(_tagger, this);
-        }
-
-        private protected abstract TypeSyntax EmitNonArrayNonNullableType(Scope _scope, Tagger _tagger);
-
         public override string ToString()
             => $"{(IsNullable ? "?" : "")}{string.Concat(Ranks)}";
 
-        #endregion
-
+        
     }
 
 }

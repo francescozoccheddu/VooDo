@@ -1,14 +1,9 @@
 ﻿
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-
 using System;
 using System.Collections.Generic;
 
 using VooDo.AST.Names;
 using VooDo.AST.Statements;
-using VooDo.Compiling.Emission;
 using VooDo.Utils;
 
 namespace VooDo.AST.Directives
@@ -17,20 +12,15 @@ namespace VooDo.AST.Directives
     public sealed record UsingNamespaceDirective(Identifier? Alias, Namespace Namespace) : UsingDirective
     {
 
-        #region Delegating constructors
-
+        
         public UsingNamespaceDirective(Namespace _namespace) : this(null, _namespace) { }
 
-        #endregion
-
-        #region Members
-
+        
+        
         public bool HasAlias => Alias is not null;
 
-        #endregion
-
-        #region Overrides
-
+        
+        
         protected internal override Node ReplaceNodes(Func<Node?, Node?> _map)
         {
             Identifier? newAlias = (Identifier?) _map(Alias);
@@ -49,22 +39,6 @@ namespace VooDo.AST.Directives
             }
         }
 
-        internal override SyntaxNode EmitNode(Scope _scope, Tagger _tagger)
-        {
-            NameSyntax name = (NameSyntax) Namespace.EmitNode(_scope, _tagger);
-            UsingDirectiveSyntax result;
-            if (HasAlias)
-            {
-                SyntaxToken alias = Alias!.EmitToken(_tagger);
-                NameEqualsSyntax aliasName = SyntaxFactory.NameEquals(SyntaxFactory.IdentifierName(alias)).Own(_tagger, Alias);
-                result = SyntaxFactory.UsingDirective(aliasName, name);
-            }
-            else
-            {
-                result = SyntaxFactory.UsingDirective(name);
-            }
-            return result.Own(_tagger, this);
-        }
 
         public override IEnumerable<Node> Children => HasAlias ? new Node[] { Alias!, Namespace } : new Node[] { Namespace };
 
@@ -73,8 +47,7 @@ namespace VooDo.AST.Directives
             + Namespace
             + GrammarConstants.statementEndToken;
 
-        #endregion
-
+        
     }
 
 }

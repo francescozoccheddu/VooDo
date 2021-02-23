@@ -10,6 +10,11 @@ namespace VooDo.Utils
     public static class EnumerableExtensions
     {
 
+        internal static IEnumerable<TValue> Singleton<TValue>(TValue _value)
+        {
+            yield return _value;
+        }
+
         public static ImmutableArray<TItem> EmptyIfDefault<TItem>(this ImmutableArray<TItem> _array)
             => _array.IsDefault ? ImmutableArray.Create<TItem>() : _array;
 

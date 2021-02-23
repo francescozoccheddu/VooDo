@@ -1,15 +1,10 @@
-﻿using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-
+﻿
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Linq;
 
 using VooDo.AST.Names;
-using VooDo.Compiling.Emission;
 using VooDo.Problems;
 using VooDo.Utils;
 
@@ -19,16 +14,13 @@ namespace VooDo.AST.Expressions
     public abstract record TupleExpressionBase<TElement> : AssignableExpression, IReadOnlyList<TElement> where TElement : TupleExpressionBase<TElement>.ElementBase
     {
 
-        #region Nested types
 
         public abstract record ElementBase : BodyNode
         {
 
         }
 
-        #endregion
 
-        #region Members
 
         private ImmutableArray<TElement> m_elements;
         private ImmutableArray<TElement> m_Elements
@@ -49,9 +41,7 @@ namespace VooDo.AST.Expressions
             m_Elements = _elements;
         }
 
-        #endregion
 
-        #region Overrides
 
         protected internal sealed override Node ReplaceNodes(Func<Node?, Node?> _map)
         {
@@ -75,13 +65,10 @@ namespace VooDo.AST.Expressions
         IEnumerator IEnumerable.GetEnumerator() => ((IEnumerable) m_Elements).GetEnumerator();
 
         protected sealed override EPrecedence m_Precedence => EPrecedence.Primary;
-        internal sealed override SyntaxNode EmitNode(Scope _scope, Tagger _tagger)
-            => SyntaxFactory.TupleExpression(this.Select(_e => _e.EmitNode(_scope, _tagger)).ToSeparatedList())
-            .Own(_tagger, this);
+
         public override IEnumerable<Node> Children => m_Elements;
         public override string ToString() => $"({string.Join(", ", m_Elements)})";
 
-        #endregion
 
     }
 
@@ -113,12 +100,6 @@ namespace VooDo.AST.Expressions
                 }
             }
 
-            internal override SyntaxNode EmitNode(Scope _scope, Tagger _tagger)
-                => SyntaxFactory.Argument((ExpressionSyntax) Expression.EmitNode(_scope, _tagger))
-                .WithNameColon(IsNamed
-                    ? SyntaxFactory.NameColon(SyntaxFactory.IdentifierName(Name!.EmitToken(_tagger)).Own(_tagger, Name))
-                    : null)
-                .Own(_tagger, this);
             public override IEnumerable<Node> Children => IsNamed ? new Node[] { Name!, Expression } : new Node[] { Expression };
             public override string ToString() => IsNamed ? $"{Name}: {Expression}" : $"{Expression}";
 
@@ -152,18 +133,6 @@ namespace VooDo.AST.Expressions
                 }
             }
 
-            internal override SyntaxNode EmitNode(Scope _scope, Tagger _tagger)
-            {
-                if (!Name.IsDiscard)
-                {
-                    _scope.AddLocal(this, Name.Identifier!);
-                }
-                return SyntaxFactory.Argument(
-                            SyntaxFactory.DeclarationExpression(
-                                (TypeSyntax) Type.EmitNode(_scope, _tagger),
-                                (VariableDesignationSyntax) Name.EmitNode(_scope, _tagger).Own(_tagger, Name)))
-                            .Own(_tagger, this);
-            }
 
             public override IEnumerable<Node> Children => new Node[] { Type, Name };
             public override string ToString() => $"{Type} {Name}";

@@ -1,12 +1,8 @@
-﻿using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-
+﻿
 using System;
 using System.Collections.Generic;
 
 using VooDo.AST.Names;
-using VooDo.Compiling.Emission;
 using VooDo.Utils;
 
 namespace VooDo.AST.Expressions
@@ -40,24 +36,6 @@ namespace VooDo.AST.Expressions
             }
         }
 
-
-        private protected abstract ExpressionSyntax EmitArgumentExpression(Scope _scope, Tagger _tagger);
-
-        internal sealed override SyntaxNode EmitNode(Scope _scope, Tagger _tagger)
-            => SyntaxFactory.Argument(EmitArgumentExpression(_scope, _tagger))
-                .WithRefKindKeyword(SyntaxFactory.Token(Kind switch
-                {
-                    EKind.Value => SyntaxKind.None,
-                    EKind.Ref => SyntaxKind.RefKeyword,
-                    EKind.Out => SyntaxKind.OutKeyword,
-                    EKind.In => SyntaxKind.InKeyword
-                }))
-                .WithNameColon(Parameter is null
-                    ? null
-                    : SyntaxFactory.NameColon(
-                        SyntaxFactory.IdentifierName(Parameter.EmitToken(_tagger))))
-                .Own(_tagger, this);
-
     }
 
     public sealed record ValueArgument(Identifier? Parameter, Expression Expression) : Argument(Parameter)
@@ -80,8 +58,7 @@ namespace VooDo.AST.Expressions
             }
         }
 
-        private protected override ExpressionSyntax EmitArgumentExpression(Scope _scope, Tagger _tagger)
-            => (ExpressionSyntax) Expression.EmitNode(_scope, _tagger).Own(_tagger, this);
+
         public override IEnumerable<Node> Children => new[] { Expression };
         public override string ToString() => $"{Kind.Token()} {Expression}".TrimStart();
     }
@@ -104,8 +81,7 @@ namespace VooDo.AST.Expressions
                 };
             }
         }
-        private protected override ExpressionSyntax EmitArgumentExpression(Scope _scope, Tagger _tagger)
-            => (ExpressionSyntax) Expression.EmitNode(_scope, _tagger).Own(_tagger, this);
+
         public override IEnumerable<Node> Children => new[] { Expression };
         public override string ToString() => $"{Kind.Token()} {Expression}".TrimStart();
     }
@@ -130,11 +106,7 @@ namespace VooDo.AST.Expressions
                 };
             }
         }
-        private protected override ExpressionSyntax EmitArgumentExpression(Scope _scope, Tagger _tagger)
-            => SyntaxFactory.DeclarationExpression(
-                    (TypeSyntax) Type.EmitNode(_scope, _tagger),
-                    (VariableDesignationSyntax) Name.EmitNode(_scope, _tagger))
-            .Own(_tagger, this);
+
         public override IEnumerable<Node> Children => new Node[] { Type, Name };
         public override string ToString() => $"{Kind.Token()} {Type} {Name}".TrimStart();
     }

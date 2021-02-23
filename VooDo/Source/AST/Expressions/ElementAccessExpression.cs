@@ -1,13 +1,9 @@
-﻿using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-
+﻿
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 
-using VooDo.Compiling.Emission;
 using VooDo.Problems;
 using VooDo.Utils;
 
@@ -17,8 +13,7 @@ namespace VooDo.AST.Expressions
     public sealed record ElementAccessExpression : AssignableExpression
     {
 
-        #region Members
-
+        
         public ElementAccessExpression(Expression _source, ImmutableArray<Expression> _arguments)
         {
             Source = _source;
@@ -41,10 +36,8 @@ namespace VooDo.AST.Expressions
             }
         }
 
-        #endregion
-
-        #region Overrides
-
+        
+        
         protected override EPrecedence m_Precedence => EPrecedence.Primary;
 
         protected internal override Node ReplaceNodes(Func<Node?, Node?> _map)
@@ -65,17 +58,11 @@ namespace VooDo.AST.Expressions
             }
         }
 
-        internal override SyntaxNode EmitNode(Scope _scope, Tagger _tagger)
-            => SyntaxFactory.ElementAccessExpression(
-                (ExpressionSyntax) Source.EmitNode(_scope, _tagger),
-                SyntaxFactoryUtils.BracketedArguments(
-                        Arguments.Select(_a => SyntaxFactory.Argument((ExpressionSyntax) _a.EmitNode(_scope, _tagger)).Own(_tagger, _a))))
-            .Own(_tagger, this);
+
         public override IEnumerable<Node> Children => new Node[] { Source }.Concat(Arguments);
         public override string ToString() => $"{Source}[{string.Join(",", Arguments)}]";
 
-        #endregion
-
+        
     }
 
 }

@@ -175,7 +175,7 @@ namespace VooDo.Compiling.Transformation
                         _initializers.Select(_i =>
                             SyntaxFactory.TupleExpression(
                                 SyntaxFactoryUtils.Arguments(
-                                    (ExpressionSyntax) _i.initializer.EmitNode(new Scope(), _tagger),
+                                    Emitter.Emit(_i.initializer, _tagger),
                                     SyntaxFactoryUtils.Literal(_i.count)).Arguments))
                         .ToSeparatedList<ExpressionSyntax>())))
                 .WithModifiers(

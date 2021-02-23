@@ -1,24 +1,18 @@
-﻿using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-
+﻿
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Linq;
 
-using VooDo.Compiling.Emission;
 using VooDo.Utils;
 
 namespace VooDo.AST.Statements
 {
 
-    public sealed record BlockStatement : SingleStatement, IReadOnlyList<Statement>
+    public sealed record BlockStatement : Statement, IReadOnlyList<Statement>
     {
 
-        #region Members
-
+        
         private ImmutableArray<Statement> m_statements;
         private ImmutableArray<Statement> m_Statements
         {
@@ -28,10 +22,8 @@ namespace VooDo.AST.Statements
 
         public BlockStatement(ImmutableArray<Statement> _statements) => m_Statements = _statements;
 
-        #endregion
-
-        #region Overrides
-
+        
+        
         protected internal override Node ReplaceNodes(Func<Node?, Node?> _map)
         {
             ImmutableArray<Statement> newStatements = m_statements.Map(_map).NonNull();
@@ -52,20 +44,14 @@ namespace VooDo.AST.Statements
         public int Count => ((IReadOnlyCollection<Statement>) m_Statements).Count;
         public IEnumerator<Statement> GetEnumerator() => ((IEnumerable<Statement>) m_Statements).GetEnumerator();
         IEnumerator IEnumerable.GetEnumerator() => ((IEnumerable) m_Statements).GetEnumerator();
-        internal override SyntaxNode EmitNode(Scope _scope, Tagger _tagger)
-        {
-            Scope nestedScope = _scope.CreateNested();
-            IEnumerable<StatementSyntax> statements = this.SelectMany(_s => _s.EmitNodes(nestedScope, _tagger));
-            return SyntaxFactory.Block(statements.ToSyntaxList()).Own(_tagger, this);
-        }
+
 
         public override IEnumerable<Node> Children => m_Statements;
         public override string ToString() => Count == 0
             ? "{}"
             : $"{{{("\n" + string.Join("\n", m_Statements)).Replace("\n", "\n\t")}\n}}";
 
-        #endregion
-
+        
     }
 
 }

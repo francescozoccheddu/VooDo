@@ -1,7 +1,4 @@
-﻿using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-
+﻿
 using System;
 
 using VooDo.Compiling.Emission;
@@ -14,7 +11,6 @@ namespace VooDo.AST.Expressions
     public sealed record LiteralExpression : Expression
     {
 
-        #region Creation
 
         public static LiteralExpression Null { get; } = new LiteralExpression((object?) null);
         public static LiteralExpression True { get; } = new LiteralExpression(true);
@@ -62,9 +58,7 @@ namespace VooDo.AST.Expressions
         public static LiteralExpression Create(double _value)
             => new LiteralExpression(_value);
 
-        #endregion
 
-        #region Members
 
         public LiteralExpression(object? _value = null)
         {
@@ -99,46 +93,11 @@ namespace VooDo.AST.Expressions
             }
         }
 
-        #endregion
-
-        #region Overrides
-
         protected override EPrecedence m_Precedence => EPrecedence.Primary;
 
         protected internal override Node ReplaceNodes(Func<Node?, Node?> _map) => this;
 
-        private LiteralExpressionSyntax EmitNode()
-        {
-            SyntaxKind kind = m_value switch
-            {
-                true => SyntaxKind.TrueLiteralExpression,
-                false => SyntaxKind.FalseLiteralExpression,
-                null => SyntaxKind.NullLiteralExpression,
-                char => SyntaxKind.CharacterLiteralExpression,
-                string => SyntaxKind.StringLiteralExpression,
-                _ => SyntaxKind.NumericLiteralExpression
-            };
-#pragma warning disable CS8509 // The switch expression does not handle all possible values of its input type (it is not exhaustive).
-            return m_value is bool or null
-                ? SyntaxFactory.LiteralExpression(kind)
-                : SyntaxFactory.LiteralExpression(kind, m_value switch
-                {
-                    char v => SyntaxFactory.Literal(v),
-                    decimal v => SyntaxFactory.Literal(v),
-                    string v => SyntaxFactory.Literal(v),
-                    uint v => SyntaxFactory.Literal(v),
-                    double v => SyntaxFactory.Literal(v),
-                    float v => SyntaxFactory.Literal(v),
-                    ulong v => SyntaxFactory.Literal(v),
-                    long v => SyntaxFactory.Literal(v),
-                    int v => SyntaxFactory.Literal(v)
-                });
-#pragma warning restore CS8509 // The switch expression does not handle all possible values of its input type (it is not exhaustive).
-        }
-        internal override SyntaxNode EmitNode(Scope _scope, Tagger _tagger) => EmitNode().Own(_tagger, this);
-        public override string ToString() => EmitNode().ToFullString();
-
-        #endregion
+        public override string ToString() => Emitter.Emit(this, new Tagger()).ToFullString();
 
     }
 }

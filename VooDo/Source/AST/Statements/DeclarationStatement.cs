@@ -1,7 +1,4 @@
-﻿using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-
+﻿
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -9,39 +6,20 @@ using System.Linq;
 
 using VooDo.AST.Expressions;
 using VooDo.AST.Names;
-using VooDo.Compiling.Emission;
 using VooDo.Problems;
 using VooDo.Utils;
 
 namespace VooDo.AST.Statements
 {
 
-    public record DeclarationStatement : MultipleStatements
+    public record DeclarationStatement : Statement
     {
 
-        #region Nested types
-
+        
         public sealed record Declarator(Identifier Name, Expression? Initializer = null) : BodyNode
         {
 
             public bool HasInitializer => Initializer is not null;
-
-            internal override SyntaxNode EmitNode(Scope _scope, Tagger _tagger)
-            {
-                ExpressionSyntax? initializer;
-                if (Parent is not null && Parent.Parent is GlobalStatement globalStatement)
-                {
-                    Scope.GlobalDefinition globalDefinition = _scope.AddGlobal(new GlobalPrototype(new Global(globalStatement.IsConstant, ((DeclarationStatement) Parent).Type, Name, Initializer), this));
-                    initializer = SyntaxFactoryUtils.ThisMemberAccess(globalDefinition.Identifier);
-                }
-                else
-                {
-                    _scope.AddLocal(this, Name);
-                    initializer = (ExpressionSyntax?) (Initializer?.EmitNode(_scope, _tagger));
-                }
-                EqualsValueClauseSyntax? initializerClause = initializer?.ToEqualsValueClause();
-                return SyntaxFactory.VariableDeclarator(Name.EmitToken(_tagger), null, initializerClause).Own(_tagger, this);
-            }
 
             protected internal override Node ReplaceNodes(Func<Node?, Node?> _map)
             {
@@ -67,10 +45,8 @@ namespace VooDo.AST.Statements
 
         }
 
-        #endregion
-
-        #region Members
-
+        
+        
         public DeclarationStatement(ComplexTypeOrVar _type, ImmutableArray<Declarator> _declarators)
         {
             Type = _type;
@@ -94,10 +70,8 @@ namespace VooDo.AST.Statements
 
         }
 
-        #endregion
-
-        #region Overrides
-
+        
+        
         protected override IEnumerable<Problem> GetSelfSyntaxProblems()
         {
             if (Type.IsVar)
@@ -134,24 +108,10 @@ namespace VooDo.AST.Statements
             }
         }
 
-        internal override IEnumerable<StatementSyntax> EmitNodes(Scope _scope, Tagger _tagger)
-        {
-            TypeSyntax type = (TypeSyntax) Type.EmitNode(_scope, _tagger);
-            if (Parent is GlobalStatement && !Type.IsVar)
-            {
-                type = SyntaxFactoryUtils.VariableType(type);
-            }
-            return Declarators.Select(_d =>
-                SyntaxFactory.LocalDeclarationStatement(
-                        SyntaxFactory.VariableDeclaration(type, _d.EmitNode(_scope, _tagger).ToSeparatedList()))
-                       .Own(_tagger, this));
-        }
-
         public override IEnumerable<Node> Children => new BodyNode[] { Type }.Concat(Declarators);
         public override string ToString() => $"{Type} {string.Join(", ", Declarators)}{GrammarConstants.statementEndToken}";
 
-        #endregion
-
+        
     }
 
 }

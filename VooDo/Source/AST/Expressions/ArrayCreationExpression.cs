@@ -1,14 +1,10 @@
-﻿using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-
+﻿
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 
 using VooDo.AST.Names;
-using VooDo.Compiling.Emission;
 using VooDo.Problems;
 using VooDo.Utils;
 
@@ -18,8 +14,7 @@ namespace VooDo.AST.Expressions
     public sealed record ArrayCreationExpression : Expression
     {
 
-        #region Members
-
+        
         public ArrayCreationExpression(ComplexType _type, ImmutableArray<Expression> _sizes)
         {
             m_type = Type = _type;
@@ -54,10 +49,8 @@ namespace VooDo.AST.Expressions
         }
         public int Rank => Sizes.Length;
 
-        #endregion
-
-        #region Override
-
+        
+        
         protected override IEnumerable<Problem> GetSelfSyntaxProblems()
         {
             if (Type.Ranks[0].Rank != Sizes.Length)
@@ -86,20 +79,11 @@ namespace VooDo.AST.Expressions
             }
         }
 
-        internal override SyntaxNode EmitNode(Scope _scope, Tagger _tagger)
-        {
-            ArrayTypeSyntax type = (ArrayTypeSyntax) Type.EmitNode(_scope, _tagger);
-            SyntaxList<ArrayRankSpecifierSyntax> rankSpecifiers = type.RankSpecifiers;
-            ArrayRankSpecifierSyntax rank = rankSpecifiers[0].WithSizes(Sizes.Select(_s => _s.EmitNode(_scope, _tagger)).ToSeparatedList());
-            rankSpecifiers = new[] { rank }.Concat(rankSpecifiers.Skip(1)).ToSyntaxList();
-            type = type.WithRankSpecifiers(rankSpecifiers);
-            return SyntaxFactory.ArrayCreationExpression(type).Own(_tagger, this);
-        }
+
         public override IEnumerable<Node> Children => new ComplexTypeOrExpression[] { Type }.Concat(Sizes);
         public override string ToString() => $"{GrammarConstants.newKeyword} {Type with { Ranks = default }}[{string.Join(", ", Sizes)}]";
 
-        #endregion
-
+        
     }
 
 }

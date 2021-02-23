@@ -1,14 +1,9 @@
 ﻿
-
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 
-using VooDo.Compiling.Emission;
 using VooDo.Parsing;
 using VooDo.Problems;
 using VooDo.Utils;
@@ -19,8 +14,7 @@ namespace VooDo.AST.Names
     public sealed record QualifiedType : ComplexType
     {
 
-        #region Creation
-
+        
         public static new QualifiedType Parse(string _type)
             => Parser.QualifiedType(_type);
 
@@ -75,20 +69,16 @@ namespace VooDo.AST.Names
         public static new QualifiedType FromType<TType>()
             => FromType(typeof(TType), false);
 
-        #endregion
-
-        #region Conversion
-
+        
+        
         public static implicit operator QualifiedType(string _type) => Parse(_type);
         public static implicit operator QualifiedType(Type _type) => FromType(_type);
         public static implicit operator QualifiedType(Identifier _name) => new QualifiedType(new SimpleType(_name));
         public static implicit operator QualifiedType(SimpleType _simpleType) => new QualifiedType(_simpleType);
         public static implicit operator string(QualifiedType _complexType) => _complexType.ToString();
 
-        #endregion
-
-        #region Delegating constructors
-
+        
+        
         public QualifiedType(params SimpleType[] _path) : this(null, (IEnumerable<SimpleType>) _path) { }
         public QualifiedType(Namespace? _namespace, params SimpleType[] _path) : this(_namespace, (IEnumerable<SimpleType>) _path) { }
         public QualifiedType(Identifier? _alias, params SimpleType[] _path) : this(_alias, (IEnumerable<SimpleType>) _path) { }
@@ -102,10 +92,8 @@ namespace VooDo.AST.Names
         { }
         public QualifiedType(Identifier? _alias, IEnumerable<SimpleType> _path) : this(_alias, _path.ToImmutableArray()) { }
 
-        #endregion
-
-        #region Members
-
+        
+        
         public QualifiedType(Identifier? _alias, ImmutableArray<SimpleType> _path)
         {
             Alias = _alias;
@@ -133,10 +121,8 @@ namespace VooDo.AST.Names
         public bool IsNamespaceQualified => Path.Length > 1;
         public SimpleType SimpleType => Path[0];
 
-        #endregion
-
-        #region Overrides
-
+        
+        
         protected internal override Node ReplaceNodes(Func<Node?, Node?> _map)
         {
             Identifier? newAlias = (Identifier?) _map(Alias);
@@ -156,32 +142,13 @@ namespace VooDo.AST.Names
             }
         }
 
-        private protected override TypeSyntax EmitNonArrayNonNullableType(Scope _scope, Tagger _tagger)
-        {
-            if (IsSimple)
-            {
-                return (TypeSyntax) Path[0].EmitNode(_scope, _tagger);
-            }
-            NameSyntax type = (NameSyntax) Path[0].EmitNode(_scope, _tagger);
-            if (IsAliasQualified)
-            {
-                type = SyntaxFactory.AliasQualifiedName(
-                    SyntaxFactory.IdentifierName(Alias!.EmitToken(_tagger)).Own(_tagger, Alias!),
-                    (SimpleNameSyntax) type);
-            }
-            foreach (SimpleType name in Path.Skip(1))
-            {
-                type = SyntaxFactory.QualifiedName(type, (SimpleNameSyntax) name.EmitNode(_scope, _tagger));
-            }
-            return type.Own(_tagger, this);
-        }
+
 
         public override IEnumerable<Node> Children =>
             (IsAliasQualified ? new Node[] { Alias! } : Enumerable.Empty<Node>())
             .Concat(Path);
         public override string ToString() => (IsAliasQualified ? $"{Alias}::" : "") + string.Join(".", Path) + base.ToString();
 
-        #endregion
-
+        
     }
 }

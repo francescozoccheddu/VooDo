@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Microsoft.CodeAnalysis.CSharp;
+
+using System;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Reflection;
@@ -13,6 +15,26 @@ namespace VooDo.Utils
     public static class TypeAliasResolver
     {
 
+        private static readonly ImmutableHashSet<string> s_predefinedTypeNames =
+            new SyntaxKind[] {
+                SyntaxKind.BoolKeyword,
+                SyntaxKind.CharKeyword,
+                SyntaxKind.StringKeyword,
+                SyntaxKind.ByteKeyword,
+                SyntaxKind.SByteKeyword,
+                SyntaxKind.ShortKeyword,
+                SyntaxKind.UShortKeyword,
+                SyntaxKind.IntKeyword,
+                SyntaxKind.UIntKeyword,
+                SyntaxKind.LongKeyword,
+                SyntaxKind.ULongKeyword,
+                SyntaxKind.DecimalKeyword,
+                SyntaxKind.FloatKeyword,
+                SyntaxKind.DoubleKeyword,
+                SyntaxKind.ObjectKeyword
+            }
+            .Select(_k => SyntaxFactory.Token(_k).ValueText)
+            .ToImmutableHashSet();
 
         public static ComplexType Resolve(Type _type, ImmutableArray<Reference> _references)
             => Resolve(ComplexType.FromType(_type), _references);
@@ -40,7 +62,7 @@ namespace VooDo.Utils
                     {
                         return _type with { Alias = alias };
                     }
-                    else if (!_type.IsSimple || !_type.Path[0].Name.IsPredefinedType)
+                    else if (!_type.IsSimple || !s_predefinedTypeNames.Contains(_type.Path[0].Name))
                     {
                         return _type with { Alias = "global" };
                     }

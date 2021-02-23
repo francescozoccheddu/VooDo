@@ -1,13 +1,10 @@
 ﻿
 
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 
 using System;
-using System.Collections.Immutable;
 using System.Linq;
 
-using VooDo.Compiling.Emission;
 using VooDo.Problems;
 using VooDo.Utils;
 
@@ -17,8 +14,7 @@ namespace VooDo.AST.Names
     public sealed record Identifier : BodyNodeOrIdentifier
     {
 
-        #region Creation
-
+        
         public static Identifier Bool { get; } = "bool";
         public static Identifier Char { get; } = "char";
         public static Identifier String { get; } = "string";
@@ -36,17 +32,13 @@ namespace VooDo.AST.Names
         public static Identifier Object { get; } = "object";
 
 
-        #endregion
-
-        #region Conversion
-
+        
+        
         public static implicit operator Identifier(string _identifier) => _identifier is null ? null! : new Identifier(_identifier);
         public static implicit operator string(Identifier _identifier) => _identifier?.ToString()!;
 
-        #endregion
-
-        #region Members
-
+        
+        
         private readonly string m_identifier;
 
         public Identifier(string _identifier)
@@ -66,43 +58,13 @@ namespace VooDo.AST.Names
             }
         }
 
-        public bool IsPredefinedType => s_predefinedTypesTokens.ContainsKey(m_identifier);
-
-        #endregion
-
-        #region Overrides
-
+        
+        
         protected internal override Node ReplaceNodes(Func<Node?, Node?> _map) => this;
 
-        private static readonly ImmutableDictionary<string, SyntaxToken> s_predefinedTypesTokens =
-            new SyntaxKind[] {
-                SyntaxKind.BoolKeyword,
-                SyntaxKind.CharKeyword,
-                SyntaxKind.StringKeyword,
-                SyntaxKind.ByteKeyword,
-                SyntaxKind.SByteKeyword,
-                SyntaxKind.ShortKeyword,
-                SyntaxKind.UShortKeyword,
-                SyntaxKind.IntKeyword,
-                SyntaxKind.UIntKeyword,
-                SyntaxKind.LongKeyword,
-                SyntaxKind.ULongKeyword,
-                SyntaxKind.DecimalKeyword,
-                SyntaxKind.FloatKeyword,
-                SyntaxKind.DoubleKeyword,
-                SyntaxKind.ObjectKeyword
-            }.Select(_k => SyntaxFactory.Token(_k))
-            .ToImmutableDictionary(_t => _t.ValueText);
-
-        internal SyntaxToken? EmitPredefinedTypeKeywordToken(Tagger _tagger)
-            => s_predefinedTypesTokens.TryGetValue(ToString(), out SyntaxToken token)
-            ? token.Own(_tagger, this) : null;
-        internal override SyntaxNodeOrToken EmitNodeOrToken(Scope _scope, Tagger _tagger) => EmitToken(_tagger);
-        internal SyntaxToken EmitToken(Tagger _tagger) => SyntaxFactory.Identifier(ToString()).Own(_tagger, this);
         public override string ToString() => m_identifier;
 
-        #endregion
-
+        
     }
 
 }

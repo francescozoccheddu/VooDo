@@ -1,13 +1,9 @@
-﻿using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-
+﻿
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 
-using VooDo.Compiling.Emission;
 using VooDo.Utils;
 
 namespace VooDo.AST.Names
@@ -16,8 +12,7 @@ namespace VooDo.AST.Names
     public sealed record SimpleType : BodyNode
     {
 
-        #region Creation
-
+        
         private static readonly Dictionary<Type, string> s_typenames =
                 new Dictionary<Type, string>()
             {
@@ -88,26 +83,20 @@ namespace VooDo.AST.Names
             }
         }
 
-        #endregion
-
-        #region Conversion
-
+        
+        
         public static implicit operator SimpleType(string _type) => Parse(_type);
         public static implicit operator SimpleType(Identifier _name) => new SimpleType(_name);
         public static implicit operator SimpleType(Type _type) => FromType(_type);
         public static implicit operator string(SimpleType _simpleType) => _simpleType.ToString();
 
-        #endregion
-
-        #region Delegating constructors
-
+        
+        
         public SimpleType(Identifier _name, params ComplexType[] _typeArguments) : this(_name, _typeArguments.ToImmutableArray()) { }
         public SimpleType(Identifier _name, IEnumerable<ComplexType>? _typeArguments) : this(_name, _typeArguments.EmptyIfNull().ToImmutableArray()) { }
 
-        #endregion
-
-        #region Members
-
+        
+        
         public SimpleType(Identifier _name, ImmutableArray<ComplexType> _typeArguments = default)
         {
             Name = _name;
@@ -124,10 +113,8 @@ namespace VooDo.AST.Names
         }
         public bool IsGeneric => !TypeArguments.IsEmpty;
 
-        #endregion
-
-        #region Overrides
-
+        
+        
 
         protected internal override Node ReplaceNodes(Func<Node?, Node?> _map)
         {
@@ -147,29 +134,10 @@ namespace VooDo.AST.Names
             }
         }
 
-        internal override SyntaxNode EmitNode(Scope _scope, Tagger _tagger)
-        {
-            if (Parent is not null && ((QualifiedType) Parent).IsSimple && !IsGeneric)
-            {
-                SyntaxToken? keyword = Name.EmitPredefinedTypeKeywordToken(_tagger);
-                if (keyword is not null)
-                {
-                    return SyntaxFactory.PredefinedType(keyword.Value).Own(_tagger, this);
-                }
-            }
-            return (IsGeneric
-            ? (SimpleNameSyntax) SyntaxFactoryUtils.GenericName(
-                Name.EmitToken(_tagger),
-                TypeArguments.Select(_a => (TypeSyntax) _a.EmitNode(_scope, _tagger)))
-            : SyntaxFactory.IdentifierName(Name.EmitToken(_tagger)))
-            .Own(_tagger, this);
-        }
-
         public override IEnumerable<Node> Children => new Node[] { Name }.Concat(TypeArguments);
         public override string ToString() => IsGeneric ? $"{Name}<{string.Join(", ", TypeArguments)}>" : $"{Name}";
 
-        #endregion
-
+        
     }
 
 }

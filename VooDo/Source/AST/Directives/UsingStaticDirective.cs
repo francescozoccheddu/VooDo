@@ -1,13 +1,8 @@
 ﻿
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-
 using System;
 using System.Collections.Generic;
 
 using VooDo.AST.Names;
-using VooDo.Compiling.Emission;
 using VooDo.Problems;
 using VooDo.Utils;
 
@@ -17,8 +12,7 @@ namespace VooDo.AST.Directives
     public sealed record UsingStaticDirective : UsingDirective
     {
 
-        #region Members
-
+        
         public UsingStaticDirective(QualifiedType _type)
         {
             m_type = Type = _type;
@@ -38,10 +32,8 @@ namespace VooDo.AST.Directives
             }
         }
 
-        #endregion
-
-        #region Overrides
-
+        
+        
         protected internal override Node ReplaceNodes(Func<Node?, Node?> _map)
         {
             QualifiedType newType = (QualifiedType) _map(Type).NonNull();
@@ -58,18 +50,10 @@ namespace VooDo.AST.Directives
             }
         }
 
-        internal override SyntaxNode EmitNode(Scope _scope, Tagger _tagger)
-            => SyntaxFactory.UsingDirective(
-                    SyntaxFactory.Token(SyntaxKind.StaticKeyword),
-                    null,
-                    (NameSyntax) Type.EmitNode(_scope, _tagger))
-                .Own(_tagger, this);
-
         public override IEnumerable<Node> Children => new QualifiedType[] { Type };
         public override string ToString() => $"{GrammarConstants.usingKeyword} {GrammarConstants.staticKeyword} {Type}{GrammarConstants.statementEndToken}";
 
-        #endregion
-
+        
     }
 
 }

@@ -1,12 +1,8 @@
-﻿using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-
+﻿
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
-using VooDo.AST.Names;
-using VooDo.Compiling.Emission;
 using VooDo.Problems;
 using VooDo.Utils;
 
@@ -16,8 +12,7 @@ namespace VooDo.AST.Expressions
     public sealed record GlobalExpression : Expression
     {
 
-        #region Members
-
+        
         public GlobalExpression(Expression _controller, Expression? _initializer = null)
         {
             Controller = _controller;
@@ -46,10 +41,8 @@ namespace VooDo.AST.Expressions
 
         public bool HasInitializer => Initializer is not null;
 
-        #endregion
-
-        #region Overrides
-
+        
+        
         protected override EPrecedence m_Precedence => EPrecedence.Global;
 
         protected internal override Node ReplaceNodes(Func<Node?, Node?> _map)
@@ -70,19 +63,11 @@ namespace VooDo.AST.Expressions
             }
         }
 
-        internal override SyntaxNode EmitNode(Scope _scope, Tagger _tagger)
-        {
-            Scope.GlobalDefinition globalDefinition = _scope.AddGlobal(new GlobalPrototype(new Global(false, ComplexTypeOrVar.Var, null, Initializer), this));
-            return SyntaxFactoryUtils.SetControllerAndGetValueInvocation(
-                    SyntaxFactoryUtils.ThisMemberAccess(globalDefinition.Identifier),
-                    (ExpressionSyntax) Controller.EmitNode(_scope, _tagger).Own(_tagger, Controller))
-                .Own(_tagger, this);
-        }
+
         public override IEnumerable<Node> Children => HasInitializer ? new Expression[] { Controller, Initializer! } : new Expression[] { Controller };
         public override string ToString() => $"{GrammarConstants.globKeyword} {Controller}" + (HasInitializer ? $" {GrammarConstants.initKeyword} {Initializer}" : "");
 
-        #endregion
-
+        
     }
 
 }

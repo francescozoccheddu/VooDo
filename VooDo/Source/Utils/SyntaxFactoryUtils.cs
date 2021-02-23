@@ -48,10 +48,10 @@ namespace VooDo.Utils
             => SF.PredefinedType(SF.Token(_kind));
 
         internal static TypeSyntax ToTypeSyntax(this ComplexType _type)
-            => (TypeSyntax) _type.EmitNode(new Scope(), new Tagger());
+            => Emitter.Emit(_type, new Tagger());
 
         internal static NameSyntax ToNameSyntax(this Namespace _namespace)
-            => (NameSyntax) _namespace.EmitNode(new Scope(), new Tagger());
+            => Emitter.Emit(_namespace, new Tagger());
 
         internal static InvocationExpressionSyntax CreateVariableInvocation(TypeSyntax? _type, bool _isConstant, string? _name, ExpressionSyntax _initialValue)
             => Invocation(

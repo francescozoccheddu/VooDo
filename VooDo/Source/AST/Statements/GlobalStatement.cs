@@ -1,22 +1,18 @@
-﻿using Microsoft.CodeAnalysis.CSharp.Syntax;
-
+﻿
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Linq;
 
-using VooDo.Compiling.Emission;
 using VooDo.Utils;
 
 namespace VooDo.AST.Statements
 {
 
-    public sealed record GlobalStatement : MultipleStatements, IReadOnlyList<DeclarationStatement>
+    public sealed record GlobalStatement : Statement, IReadOnlyList<DeclarationStatement>
     {
 
-        #region Members
-
+        
         private ImmutableArray<DeclarationStatement> m_declarations;
         private ImmutableArray<DeclarationStatement> m_Declarations
         {
@@ -32,10 +28,8 @@ namespace VooDo.AST.Statements
             m_Declarations = _declarations;
         }
 
-        #endregion
-
-        #region Overrides
-
+        
+        
         protected internal override Node ReplaceNodes(Func<Node?, Node?> _map)
         {
             ImmutableArray<DeclarationStatement> newDeclarations = m_Declarations.Map(_map).NonNull();
@@ -56,8 +50,7 @@ namespace VooDo.AST.Statements
         public int Count => ((IReadOnlyCollection<Statement>) m_Declarations).Count;
         public IEnumerator<DeclarationStatement> GetEnumerator() => ((IEnumerable<DeclarationStatement>) m_Declarations).GetEnumerator();
         IEnumerator IEnumerable.GetEnumerator() => ((IEnumerable) m_Declarations).GetEnumerator();
-        internal override IEnumerable<StatementSyntax> EmitNodes(Scope _scope, Tagger _tagger)
-            => this.SelectMany(_s => _s.EmitNodes(_scope, _tagger));
+
         public override IEnumerable<Node> Children => m_Declarations;
         public override string ToString() => (IsConstant ? GrammarConstants.constKeyword : GrammarConstants.globalKeyword) + Count switch
         {
@@ -66,8 +59,7 @@ namespace VooDo.AST.Statements
             _ => $"{{{("\n" + string.Join("\n", this)).Replace("\n", "\n\t")}\n}}"
         };
 
-        #endregion
-
+        
     }
 
 }

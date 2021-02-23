@@ -77,7 +77,7 @@ namespace VooDo.Compiling
                 .WithMetadataImportOptions(MetadataImportOptions.Public);
             {
                 // Emission
-                (Syntax, Globals) = Compilation.Script.EmitNode(this);
+                (Syntax, Globals) = Emitter.Emit(Compilation.Script, this);
                 tree = CSharpSyntaxTree.Create(Syntax, parseOptions);
                 tree.GetDiagnostics().SelectNonNull(_d => RoslynProblem.FromDiagnostic(_d, Tagger, Problem.EKind.Syntactic)).ThrowErrors();
                 Syntax = (CompilationUnitSyntax) tree.GetRoot();

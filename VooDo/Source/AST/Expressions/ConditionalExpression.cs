@@ -1,11 +1,7 @@
-﻿using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-
+﻿
 using System;
 using System.Collections.Generic;
 
-using VooDo.Compiling.Emission;
 using VooDo.Utils;
 
 namespace VooDo.AST.Expressions
@@ -14,8 +10,7 @@ namespace VooDo.AST.Expressions
     public sealed record ConditionalExpression(Expression Condition, Expression True, Expression False) : Expression
     {
 
-        #region Overrides
-
+        
         protected override EPrecedence m_Precedence => EPrecedence.Conditional;
 
         protected internal override Node ReplaceNodes(Func<Node?, Node?> _map)
@@ -38,17 +33,10 @@ namespace VooDo.AST.Expressions
             }
         }
 
-        internal override SyntaxNode EmitNode(Scope _scope, Tagger _tagger)
-            => SyntaxFactory.ConditionalExpression(
-                (ExpressionSyntax) Condition.EmitNode(_scope, _tagger),
-                (ExpressionSyntax) True.EmitNode(_scope, _tagger),
-                (ExpressionSyntax) False.EmitNode(_scope, _tagger))
-            .Own(_tagger, this);
         public override IEnumerable<Node> Children => new Expression[] { Condition, True, False };
         public override string ToString() => $"{LeftCode(Condition)} ? {True} : {RightCode(False)}";
 
-        #endregion
-
+        
     }
 
 }

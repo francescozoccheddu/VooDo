@@ -3,10 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 
 using VooDo.Compiling;
-using VooDo.Compiling.Emission;
 using VooDo.Problems;
-
-using Roslyn = Microsoft.CodeAnalysis;
 
 namespace VooDo.AST
 {
@@ -72,15 +69,11 @@ namespace VooDo.AST
     public abstract record BodyNodeOrIdentifier : Node
     {
 
-        internal abstract Roslyn::SyntaxNodeOrToken EmitNodeOrToken(Scope _scope, Tagger _tagger);
 
     }
 
     public abstract record BodyNode : BodyNodeOrIdentifier
     {
-
-        internal sealed override Roslyn::SyntaxNodeOrToken EmitNodeOrToken(Scope _scope, Tagger _tagger) => EmitNode(_scope, _tagger);
-        internal abstract Roslyn::SyntaxNode EmitNode(Scope _scope, Tagger _tagger);
 
     }
 

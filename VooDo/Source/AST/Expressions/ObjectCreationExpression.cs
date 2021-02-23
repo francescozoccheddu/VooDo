@@ -1,14 +1,10 @@
-﻿using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-
+﻿
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 
 using VooDo.AST.Names;
-using VooDo.Compiling.Emission;
 using VooDo.Utils;
 
 namespace VooDo.AST.Expressions
@@ -17,8 +13,7 @@ namespace VooDo.AST.Expressions
     public sealed record ObjectCreationExpression : InvocationOrObjectCreationExpression
     {
 
-        #region Delegating constructors
-
+        
         public ObjectCreationExpression(ImmutableArray<Argument> _arguments) : this(null, _arguments) { }
         public ObjectCreationExpression(ComplexType? _type = null, ImmutableArray<Argument> _arguments = default)
         {
@@ -26,10 +21,8 @@ namespace VooDo.AST.Expressions
             Arguments = _arguments;
         }
 
-        #endregion
-
-        #region Members
-
+        
+        
         public ComplexType? Type { get; init; }
         private ImmutableArray<Argument> m_arguments;
         public ImmutableArray<Argument> Arguments
@@ -39,10 +32,8 @@ namespace VooDo.AST.Expressions
         }
         public bool IsTypeImplicit => Type is null;
 
-        #endregion
-
-        #region Override
-
+        
+        
         protected override EPrecedence m_Precedence => EPrecedence.Primary;
 
         protected internal override Node ReplaceNodes(Func<Node?, Node?> _map)
@@ -63,20 +54,12 @@ namespace VooDo.AST.Expressions
             }
         }
 
-        internal override SyntaxNode EmitNode(Scope _scope, Tagger _tagger)
-        {
-            ArgumentListSyntax argumentList = SyntaxFactoryUtils.Arguments(Arguments.Select(_a => (ArgumentSyntax) _a.EmitNode(_scope, _tagger)));
-            return (IsTypeImplicit
-                ? (ExpressionSyntax) SyntaxFactory.ImplicitObjectCreationExpression(argumentList, null)
-                : SyntaxFactory.ObjectCreationExpression((TypeSyntax) Type!.EmitNode(_scope, _tagger), argumentList, null))
-                .Own(_tagger, this);
-        }
+
 
         public override IEnumerable<Node> Children => IsTypeImplicit ? Arguments : new BodyNode[] { Type! }.Concat(Arguments);
         public override string ToString() => $"{GrammarConstants.newKeyword} " + (IsTypeImplicit ? $"{Type} " : "") + $"({string.Join(", ", Arguments)})";
 
-        #endregion
-
+        
     }
 
 }

@@ -1,14 +1,10 @@
-﻿using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-
+﻿
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 
-using VooDo.Compiling.Emission;
 using VooDo.Parsing;
 using VooDo.Problems;
 using VooDo.Utils;
@@ -19,8 +15,7 @@ namespace VooDo.AST.Names
     public sealed record TupleType : ComplexType, IReadOnlyList<TupleType.Element>
     {
 
-        #region Creation
-
+        
         private static readonly ImmutableHashSet<Type> s_tupleTypes = new Type[] {
             typeof(ValueTuple<>), typeof(ValueTuple<,>),
             typeof(ValueTuple<,,>), typeof(ValueTuple<,,,>),
@@ -68,18 +63,14 @@ namespace VooDo.AST.Names
         public static new TupleType FromType<TType>()
             => FromType(typeof(TType));
 
-        #endregion
-
-        #region Conversion
-
+        
+        
         public static implicit operator TupleType(string _type) => Parse(_type);
         public static implicit operator TupleType(Type _type) => FromType(_type);
         public static implicit operator string(TupleType _tupleType) => _tupleType.ToString();
 
-        #endregion
-
-        #region Nested types
-
+        
+        
         public sealed record Element(ComplexType Type, Identifier? Name = null) : BodyNode
         {
 
@@ -108,30 +99,20 @@ namespace VooDo.AST.Names
                     };
                 }
             }
-            internal override SyntaxNode EmitNode(Scope _scope, Tagger _tagger)
-                => SyntaxFactory.TupleElement(
-                    (TypeSyntax) Type.EmitNode(_scope, _tagger),
-                    IsNamed
-                    ? Name!.EmitToken(_tagger)
-                    : SyntaxFactory.Token(SyntaxKind.None))
-                .Own(_tagger, this);
+
             public override IEnumerable<Node> Children => IsNamed ? new Node[] { Type, Name! } : new Node[] { Type };
             public override string ToString() => IsNamed ? $"{Type} {Name}" : $"{Type}";
 
         }
 
-        #endregion
-
-        #region Delegating constructors
-
+        
+        
         public TupleType(params Element[] _elements) : this(_elements.ToImmutableArray()) { }
         public TupleType(IEnumerable<ComplexType> _types) : this(_types.Select(_t => new Element(_t)).ToImmutableArray()) { }
         public TupleType(IEnumerable<Element> _elements) : this(_elements.ToImmutableArray()) { }
 
-        #endregion
-
-        #region Members
-
+        
+        
         private ImmutableArray<Element> m_elements;
         private ImmutableArray<Element> m_Elements
         {
@@ -150,10 +131,8 @@ namespace VooDo.AST.Names
             m_Elements = _elements;
         }
 
-        #endregion
-
-        #region Overrides
-
+        
+        
         protected internal override Node ReplaceNodes(Func<Node?, Node?> _map)
         {
             ImmutableArray<Element> newElements = m_Elements.Map(_map).NonNull();
@@ -175,13 +154,11 @@ namespace VooDo.AST.Names
         public Element this[int _index] => ((IReadOnlyList<Element>) m_Elements)[_index];
         public IEnumerator<Element> GetEnumerator() => ((IEnumerable<Element>) m_Elements).GetEnumerator();
         IEnumerator IEnumerable.GetEnumerator() => ((IEnumerable) m_Elements).GetEnumerator();
-        private protected override TypeSyntax EmitNonArrayNonNullableType(Scope _scope, Tagger _tagger)
-            => SyntaxFactory.TupleType(this.Select(_e => _e.EmitNode(_scope, _tagger)).ToSeparatedList()).Own(_tagger, this);
+
         public override IEnumerable<Node> Children => m_Elements;
         public override string ToString() => $"({string.Join(",", m_Elements)})" + base.ToString();
 
-        #endregion
-
+        
     }
 
 }
