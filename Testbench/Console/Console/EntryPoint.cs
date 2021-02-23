@@ -18,6 +18,9 @@ namespace VooDo.ConsoleTestbench
         {
 
             string code = @"
+global var x = 4;
+int y = 5;
+x += 2;
             ";
             Script script = Parser.Script(code);
             ImmutableArray<Reference> references = Options.Default.References.Add(Reference.FromAssembly(Assembly.GetExecutingAssembly()));

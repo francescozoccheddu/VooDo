@@ -7,7 +7,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
-using System.Runtime.CompilerServices;
 
 using VooDo.Compiling.Emission;
 using VooDo.Parsing;
@@ -64,21 +63,9 @@ namespace VooDo.AST.Names
         }
 
         internal static bool IsTuple(Type _type)
-        {
-            bool isTuple = true;
-#if NET5_0
-            isTuple = typeof(ITuple).IsAssignableFrom(_type);
-#else
-            isTuple = _type.IsGenericType;
-#endif
-            return isTuple && s_tupleTypes.Contains(_type.GetGenericTypeDefinition());
-        }
+            => _type.IsGenericType && s_tupleTypes.Contains(_type.GetGenericTypeDefinition());
 
-#if NET5_0
-        public static new TupleType FromType<TType>() where TType : ITuple
-#else
         public static new TupleType FromType<TType>()
-#endif
             => FromType(typeof(TType));
 
         #endregion

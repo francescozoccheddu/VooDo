@@ -49,10 +49,10 @@ namespace VooDo.Compiling.Emission
         }
 
         public bool IsConstant(Identifier _name)
-            => m_names.GetValueOrDefault(_name, EKind.Local) == EKind.GlobalConst;
+            => m_names.TryGetValue(_name, out EKind kind) && kind == EKind.GlobalConst;
 
         public bool IsGlobal(Identifier _name)
-            => m_names.GetValueOrDefault(_name, EKind.Local) != EKind.Local;
+            => m_names.TryGetValue(_name, out EKind kind) && kind != EKind.Local;
 
         public bool IsNameTaken(Identifier _name)
             => m_names.ContainsKey(_name);

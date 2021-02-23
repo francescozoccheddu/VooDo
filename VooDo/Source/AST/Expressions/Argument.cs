@@ -24,10 +24,6 @@ namespace VooDo.AST.Expressions
 
         protected abstract Argument ReplaceArgumentNodes(Func<Node?, Node?> _map);
 
-#if NET5_0
-        public override InvocationOrObjectCreationExpression? Parent => (InvocationOrObjectCreationExpression?) base.Parent;
-#endif
-
         protected internal sealed override Node ReplaceNodes(Func<Node?, Node?> _map)
         {
             Identifier? newParameter = (Identifier?) _map(Parameter);

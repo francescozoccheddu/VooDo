@@ -128,9 +128,6 @@ namespace VooDo.AST.Names
 
         #region Overrides
 
-#if NET5_0
-        public override QualifiedType? Parent => (QualifiedType?) base.Parent;
-#endif
 
         protected internal override Node ReplaceNodes(Func<Node?, Node?> _map)
         {

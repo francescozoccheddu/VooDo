@@ -61,10 +61,6 @@ namespace VooDo.AST.Statements
                 }
             }
 
-#if NET5_0
-            public override DeclarationStatement? Parent => (DeclarationStatement?) base.Parent;
-#endif
-
             public override IEnumerable<Node> Children
                 => HasInitializer ? new Node[] { Name, Initializer! } : new Node[] { Name };
             public override string ToString() => HasInitializer ? $"{Name} {AssignmentStatement.EKind.Simple.Token()} {Initializer}" : $"{Name}";

@@ -84,7 +84,7 @@ namespace VooDo.Compiling.Transformation
                     return null;
                 }
                 PointsToAbstractValue result = m_pointsToAnalysis[sourceOperation.Kind, _expression];
-                Entry? entry = m_map.GetValueOrDefault(symbol);
+                Entry? entry = m_map.TryGetValue(symbol, out Entry value) ? value : null;
                 if (entry is not null && result.Locations.IsSubsetOf(entry.Locations))
                 {
                     return null;

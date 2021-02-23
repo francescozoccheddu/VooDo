@@ -22,9 +22,6 @@ namespace VooDo.AST.Expressions
         public abstract record Callable : BodyNode
         {
 
-#if NET5_0
-            public sealed override InvocationExpression? Parent => (InvocationExpression?) base.Parent;
-#endif
 
         }
 

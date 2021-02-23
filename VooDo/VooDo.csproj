@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0;net5.0</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0</TargetFrameworks>
     <LangVersion>9.0</LangVersion>
     <Nullable>enable</Nullable>
     <RootNamespace>VooDo</RootNamespace>
@@ -9,9 +9,12 @@
   <ItemGroup>
     <PackageReference Include="Antlr4.Runtime.Standard" Version="4.9.1" />
     <PackageReference Include="Antlr4BuildTasks" Version="8.13.0" />
+    <PackageReference Include="IsExternalInit" Version="1.0.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="3.8.0" />
     <PackageReference Include="Microsoft.CodeAnalysis.Features" Version="3.8.0" />
-    <PackageReference Include="Theraot.Core" Version="3.2.4" />
   </ItemGroup>
 
 

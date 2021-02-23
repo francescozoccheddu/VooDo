@@ -7,7 +7,6 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 
-using VooDo.AST.Directives;
 using VooDo.Compiling.Emission;
 using VooDo.Parsing;
 using VooDo.Problems;
@@ -77,9 +76,6 @@ namespace VooDo.AST.Names
 
         #region Overrides
 
-#if NET5_0
-        public override UsingNamespaceDirective? Parent => (UsingNamespaceDirective?) base.Parent;
-#endif
 
         protected internal override Node ReplaceNodes(Func<Node?, Node?> _map)
         {
