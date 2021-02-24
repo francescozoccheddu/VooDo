@@ -52,6 +52,7 @@ namespace VooDo.Generator
                 if (c is (>= '0' and <= '9') or (>= 'A' and <= 'Z') or (>= 'a' and <= 'z') or '_')
                 {
                     builder.Append(initial ? char.ToUpper(c) : c);
+                    initial = false;
                 }
                 else
                 {

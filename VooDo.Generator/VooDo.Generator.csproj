@@ -15,9 +15,9 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.CodeAnalysis.AnalyzerUtilities" Version="3.3.0" PrivateAssets="all" GeneratePathProperty="true" />
-    <PackageReference Include="VooDo" Version="0.0.7" PrivateAssets="all" GeneratePathProperty="true" />
-    <PackageReference Include="VooDo.Runtime" Version="0.0.1" GeneratePathProperty="true" PrivateAssets="all"/>
     <PackageReference Include="Antlr4.Runtime.Standard" Version="4.9.1" PrivateAssets="all" GeneratePathProperty="true" />
+    <ProjectReference Include="..\VooDo\VooDo.csproj" PrivateAssets="all" />
+    <ProjectReference Include="..\VooDo.Runtime\VooDo.Runtime.csproj" PrivateAssets="all" />
   </ItemGroup>
 
   <PropertyGroup>
@@ -26,8 +26,8 @@
 
   <Target Name="GetDependencyTargetPaths">
     <ItemGroup>
-      <TargetPathWithTargetPlatformMoniker Include="$(PKGVooDo)\lib\netstandard2.0\VooDo.dll" IncludeRuntimeDependency="false" />
-      <TargetPathWithTargetPlatformMoniker Include="$(PKGVooDo_Runtime)\lib\netstandard2.0\VooDo.Runtime.dll" IncludeRuntimeDependency="false" />
+      <TargetPathWithTargetPlatformMoniker Include="$(SolutionDir)VooDo\$(OutputPath)VooDo.dll" IncludeRuntimeDependency="false" />
+      <TargetPathWithTargetPlatformMoniker Include="$(SolutionDir)VooDo.Runtime\$(OutputPath)VooDo.Runtime.dll" IncludeRuntimeDependency="false" />
       <TargetPathWithTargetPlatformMoniker Include="$(PKGAntlr4_Runtime_Standard)\lib\netstandard2.0\Antlr4.Runtime.Standard.dll" IncludeRuntimeDependency="false" />
       <TargetPathWithTargetPlatformMoniker Include="$(PKGMicrosoft_CodeAnalysis_AnalyzerUtilities)\lib\netstandard2.0\Microsoft.CodeAnalysis.AnalyzerUtilities.dll" IncludeRuntimeDependency="false" />
     </ItemGroup>
@@ -40,6 +40,5 @@
       </ReferencePath>
     </ItemGroup>
   </Target>
-
 
 </Project>

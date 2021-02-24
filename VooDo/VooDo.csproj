@@ -12,14 +12,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Antlr4.Runtime.Standard" Version="4.9.1"  PrivateAssets="compile"/>
+    <PackageReference Include="Antlr4.Runtime.Standard" Version="4.9.1" PrivateAssets="compile" />
     <PackageReference Include="Antlr4BuildTasks" Version="8.13.0" PrivateAssets="all" />
     <PackageReference Include="IsExternalInit" Version="1.0.0" PrivateAssets="all">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="3.8.0" PrivateAssets="compile" />
     <PackageReference Include="Microsoft.CodeAnalysis.Features" Version="3.8.0" PrivateAssets="compile" />
-    <PackageReference Include="VooDo.Runtime" Version="0.0.1" />
   </ItemGroup>
 
   <ItemGroup>
@@ -41,6 +40,10 @@
 
   <ItemGroup>
     <None Include="..\.editorconfig" Link=".editorconfig" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\VooDo.Runtime\VooDo.Runtime.csproj" />
   </ItemGroup>
 
 </Project>
