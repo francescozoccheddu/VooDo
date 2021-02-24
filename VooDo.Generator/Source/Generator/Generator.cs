@@ -114,7 +114,7 @@ namespace VooDo.Generator
             ImmutableArray<UsingDirective> usingDirectives = ImmutableArray.Create<UsingDirective>();
             ImmutableArray<VC::Reference> references = _context.Compilation.References
                 .OfType<PortableExecutableReference>()
-                .Where(_r => _r.FilePath is not null)
+                .Where(_r => _r.FilePath is not null && !Path.GetFileName(_r.FilePath).Equals("VooDo.Runtime.dll", StringComparison.OrdinalIgnoreCase))
                 .Select(_r => VC::Reference.FromFile(_r.FilePath!, _r.Properties.Aliases.Select(_a => new Identifier(_a))))
                 .Concat(new[] { VC::Reference.RuntimeReference })
                 .ToImmutableArray();
