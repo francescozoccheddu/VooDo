@@ -16,7 +16,7 @@ namespace VooDo.AST.Statements
     {
 
         
-        public sealed record Declarator(Identifier Name, Expression? Initializer = null) : BodyNode
+        public sealed record Declarator(Identifier Name, Expression? Initializer = null) : Node
         {
 
             public bool HasInitializer => Initializer is not null;
@@ -108,7 +108,7 @@ namespace VooDo.AST.Statements
             }
         }
 
-        public override IEnumerable<Node> Children => new BodyNode[] { Type }.Concat(Declarators);
+        public override IEnumerable<Node> Children => new Node[] { Type }.Concat(Declarators);
         public override string ToString() => $"{Type} {string.Join(", ", Declarators)}{GrammarConstants.statementEndToken}";
 
         

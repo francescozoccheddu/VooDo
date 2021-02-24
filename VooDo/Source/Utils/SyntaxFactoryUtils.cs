@@ -74,7 +74,7 @@ namespace VooDo.Utils
 
         internal static InvocationExpressionSyntax SubscribeHookInvocation(ExpressionSyntax _source, int _setIndex, int _hookIndex)
             => Invocation(
-                ThisMemberAccess(nameof(Program.SubscribeHook)),
+                ThisMemberAccess(RuntimeHelpers.subscribeHookMethodName),
                 _source,
                 Literal(_setIndex),
                 Literal(_hookIndex));

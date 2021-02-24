@@ -8,7 +8,7 @@ using VooDo.Parsing;
 namespace VooDo.AST.Names
 {
 
-    public sealed record ComplexTypeOrVar : BodyNode
+    public sealed record ComplexTypeOrVar : Node
     {
 
         

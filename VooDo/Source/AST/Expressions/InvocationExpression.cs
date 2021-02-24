@@ -14,7 +14,7 @@ namespace VooDo.AST.Expressions
     {
 
         
-        public abstract record Callable : BodyNode
+        public abstract record Callable : Node
         {
 
 
@@ -123,7 +123,7 @@ namespace VooDo.AST.Expressions
         }
 
 
-        public override IEnumerable<Node> Children => new BodyNode[] { Source }.Concat(Arguments);
+        public override IEnumerable<Node> Children => new Node[] { Source }.Concat(Arguments);
         public override string ToString() => $"{Source}({string.Join(", ", Arguments)})";
 
         

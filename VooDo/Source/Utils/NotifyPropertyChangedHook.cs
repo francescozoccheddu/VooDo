@@ -8,6 +8,7 @@ using VooDo.AST.Expressions;
 using VooDo.AST.Names;
 using VooDo.Compiling;
 using VooDo.Hooks;
+using VooDo.Runtime;
 
 namespace VooDo.Utils
 {

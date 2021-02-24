@@ -167,7 +167,7 @@ namespace VooDo.Compiling.Transformation
                         SyntaxFactoryUtils.PredefinedType(SyntaxKind.IntKeyword)));
             return SyntaxFactoryUtils.ArrowProperty(
                 hookType,
-                nameof(Program.m_Hooks),
+                RuntimeHelpers.hooksPropertyName,
                 SyntaxFactory.ArrayCreationExpression(
                     hookType,
                     SyntaxFactory.InitializerExpression(
@@ -192,7 +192,7 @@ namespace VooDo.Compiling.Transformation
             ClassDeclarationSyntax classDeclaration = namespaceDeclaration.Members.OfType<ClassDeclarationSyntax>().Single();
             MethodDeclarationSyntax method = classDeclaration.Members
                 .OfType<MethodDeclarationSyntax>()
-                .Where(_m => _m.Identifier.ValueText is nameof(Program.Run) or nameof(TypedProgram<object>.TypedRun) && _m.Modifiers.Any(_d => _d.IsKind(SyntaxKind.OverrideKeyword)))
+                .Where(_m => _m.Identifier.ValueText is RuntimeHelpers.runMethodName or RuntimeHelpers.typedRunMethodName && _m.Modifiers.Any(_d => _d.IsKind(SyntaxKind.OverrideKeyword)))
                 .Single();
             PointsToAnalysisResult pointsToAnalysis = CreatePointsToAnalysis(method, semantics, _session.CSharpCompilation!);
             BodyRewriter rewriter = new BodyRewriter(semantics, pointsToAnalysis, _session.Compilation.Options.HookInitializer, _session.Compilation.Options.References);

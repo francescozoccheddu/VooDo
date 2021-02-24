@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 
+using VooDo.Runtime;
+
 namespace VooDo.Hooks
 {
 

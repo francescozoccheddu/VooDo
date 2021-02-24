@@ -1,7 +1,7 @@
 ﻿namespace VooDo.AST
 {
 
-    public abstract record ComplexTypeOrExpression : BodyNode
+    public abstract record ComplexTypeOrExpression : Node
     {
 
     }

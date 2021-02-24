@@ -66,15 +66,4 @@ namespace VooDo.AST
 
     }
 
-    public abstract record BodyNodeOrIdentifier : Node
-    {
-
-
-    }
-
-    public abstract record BodyNode : BodyNodeOrIdentifier
-    {
-
-    }
-
 }

@@ -12,5 +12,11 @@
             return _variable.Value;
         }
 
+        public const string typedRunMethodName = nameof(TypedProgram<object>.TypedRun);
+        public const string runMethodName = nameof(Program.Run);
+        public const string hooksPropertyName = nameof(Program.m_Hooks);
+        public const string variablesPropertyName = nameof(Program.m_Variables);
+        public const string subscribeHookMethodName = nameof(Program.SubscribeHook);
+
     }
 }

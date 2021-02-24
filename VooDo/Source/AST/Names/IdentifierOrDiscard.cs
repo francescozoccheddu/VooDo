@@ -6,7 +6,7 @@ using System.Linq;
 namespace VooDo.AST.Names
 {
 
-    public sealed record IdentifierOrDiscard : BodyNode
+    public sealed record IdentifierOrDiscard : Node
     {
 
         

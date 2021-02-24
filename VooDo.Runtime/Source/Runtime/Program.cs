@@ -1,10 +1,8 @@
 ﻿
 using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Linq;
 
-using VooDo.Hooks;
 using VooDo.Utils;
 
 namespace VooDo.Runtime
@@ -48,22 +46,22 @@ namespace VooDo.Runtime
 
         protected Program()
         {
-            Variables = m_Variables.ToImmutableArray();
+            Variables = m_Variables.ToList().AsReadOnly();
             m_variableMap = Variables
                 .Where(_v => _v.Name is not null)
                 .GroupBy(_v => _v.Name)
-                .ToImmutableDictionary(_g => _g.Key, _g => _g.ToImmutableArray());
+                .ToDictionary(_g => _g.Key, _g => _g.ToArray());
             foreach (Variable variable in Variables)
             {
                 variable.Program = this;
             }
-            m_hookSets = m_Hooks.Select(_h => new HookSet(this, _h.hook, _h.count)).ToImmutableArray();
+            m_hookSets = m_Hooks.Select(_h => new HookSet(this, _h.hook, _h.count)).ToArray();
         }
 
         private sealed class HookSet
         {
 
-            private static readonly IEqualityComparer<object?> s_targetComparer = new Identity.ReferenceComparer<object?>();
+            private static readonly IEqualityComparer<object?> s_targetComparer = new ReferenceComparer<object?>();
 
             private readonly HashSet<object?> m_activeTargets;
             private readonly bool[] m_subscribedInThisRun;
@@ -109,12 +107,12 @@ namespace VooDo.Runtime
 
         }
 
-        private readonly ImmutableArray<HookSet> m_hookSets;
-        private readonly ImmutableDictionary<string, ImmutableArray<Variable>> m_variableMap;
-        public ImmutableArray<Variable> Variables { get; }
+        private readonly HookSet[] m_hookSets;
+        private readonly Dictionary<string, Variable[]> m_variableMap;
+        public IReadOnlyList<Variable> Variables { get; }
 
         public IEnumerable<Variable> GetVariables(string _name)
-            => m_variableMap.TryGetValue(_name, out ImmutableArray<Variable> variables) ? variables : Enumerable.Empty<Variable>();
+            => m_variableMap.TryGetValue(_name, out Variable[] variables) ? variables : Enumerable.Empty<Variable>();
 
         public IEnumerable<Variable<TValue>> GetVariables<TValue>(string _name)
             => GetVariables(_name)

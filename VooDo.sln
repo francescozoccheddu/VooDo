@@ -22,7 +22,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VooDo.WinUI", "VooDo.WinUI\VooDo.WinUI.csproj", "{8D408940-2BC7-432D-9487-F264CCB7BC99}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VooDo.Caching", "VooDo.Caching\VooDo.Caching.csproj", "{145D8A10-48C3-41AF-82AF-D4CE957B8C1B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VooDo.Caching", "VooDo.Caching\VooDo.Caching.csproj", "{145D8A10-48C3-41AF-82AF-D4CE957B8C1B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VooDo.Runtime", "VooDo.Runtime\VooDo.Runtime.csproj", "{0A302884-2BCD-4C56-B0CE-992DC15767F7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -152,6 +154,22 @@ Global
 		{145D8A10-48C3-41AF-82AF-D4CE957B8C1B}.Release|x64.Build.0 = Release|Any CPU
 		{145D8A10-48C3-41AF-82AF-D4CE957B8C1B}.Release|x86.ActiveCfg = Release|Any CPU
 		{145D8A10-48C3-41AF-82AF-D4CE957B8C1B}.Release|x86.Build.0 = Release|Any CPU
+		{0A302884-2BCD-4C56-B0CE-992DC15767F7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0A302884-2BCD-4C56-B0CE-992DC15767F7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0A302884-2BCD-4C56-B0CE-992DC15767F7}.Debug|arm64.ActiveCfg = Debug|Any CPU
+		{0A302884-2BCD-4C56-B0CE-992DC15767F7}.Debug|arm64.Build.0 = Debug|Any CPU
+		{0A302884-2BCD-4C56-B0CE-992DC15767F7}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{0A302884-2BCD-4C56-B0CE-992DC15767F7}.Debug|x64.Build.0 = Debug|Any CPU
+		{0A302884-2BCD-4C56-B0CE-992DC15767F7}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{0A302884-2BCD-4C56-B0CE-992DC15767F7}.Debug|x86.Build.0 = Debug|Any CPU
+		{0A302884-2BCD-4C56-B0CE-992DC15767F7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0A302884-2BCD-4C56-B0CE-992DC15767F7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0A302884-2BCD-4C56-B0CE-992DC15767F7}.Release|arm64.ActiveCfg = Release|Any CPU
+		{0A302884-2BCD-4C56-B0CE-992DC15767F7}.Release|arm64.Build.0 = Release|Any CPU
+		{0A302884-2BCD-4C56-B0CE-992DC15767F7}.Release|x64.ActiveCfg = Release|Any CPU
+		{0A302884-2BCD-4C56-B0CE-992DC15767F7}.Release|x64.Build.0 = Release|Any CPU
+		{0A302884-2BCD-4C56-B0CE-992DC15767F7}.Release|x86.ActiveCfg = Release|Any CPU
+		{0A302884-2BCD-4C56-B0CE-992DC15767F7}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

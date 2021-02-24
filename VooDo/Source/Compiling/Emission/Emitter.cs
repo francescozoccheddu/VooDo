@@ -587,8 +587,8 @@ namespace VooDo.Compiling.Emission
             MethodDeclarationSyntax? runMethod = SF.MethodDeclaration(
                                 returnType ?? SU.Void(),
                                 SF.Identifier(returnType is null
-                                    ? nameof(Program.Run)
-                                    : nameof(TypedProgram<object>.TypedRun)))
+                                    ? RuntimeHelpers.runMethodName
+                                    : RuntimeHelpers.typedRunMethodName))
                             .WithModifiers(
                                 SU.Tokens(
                                     SK.ProtectedKeyword,
@@ -627,7 +627,7 @@ namespace VooDo.Compiling.Emission
             PropertyDeclarationSyntax variablesProperty = SU.ArrowProperty(
                 SU.SingleArray(
                     SU.VariableType()),
-                nameof(Program.m_Variables),
+                RuntimeHelpers.variablesPropertyName,
                 SF.ArrayCreationExpression(
                     SU.SingleArray(variableType))
                 .WithInitializer(

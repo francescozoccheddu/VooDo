@@ -11,7 +11,7 @@ using VooDo.Utils;
 namespace VooDo.AST.Names
 {
 
-    public sealed record Namespace : BodyNode
+    public sealed record Namespace : Node
     {
 
         

@@ -8,7 +8,7 @@ using VooDo.Utils;
 namespace VooDo.AST.Expressions
 {
 
-    public abstract record Argument(Identifier? Parameter) : BodyNode
+    public abstract record Argument(Identifier? Parameter) : Node
     {
 
         public enum EKind

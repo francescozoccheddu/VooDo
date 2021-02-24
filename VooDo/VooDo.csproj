@@ -38,5 +38,9 @@
   <ItemGroup>
     <None Include="..\.editorconfig" Link=".editorconfig" />
   </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\VooDo.Runtime\VooDo.Runtime.csproj" />
+  </ItemGroup>
   
 </Project>

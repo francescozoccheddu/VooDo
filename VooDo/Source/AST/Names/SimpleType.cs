@@ -9,7 +9,7 @@ using VooDo.Utils;
 namespace VooDo.AST.Names
 {
 
-    public sealed record SimpleType : BodyNode
+    public sealed record SimpleType : Node
     {
 
         

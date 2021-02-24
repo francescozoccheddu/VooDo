@@ -1,7 +1,7 @@
 ﻿namespace VooDo.AST.Directives
 {
 
-    public abstract record UsingDirective : BodyNode
+    public abstract record UsingDirective : Node
     {
 
 

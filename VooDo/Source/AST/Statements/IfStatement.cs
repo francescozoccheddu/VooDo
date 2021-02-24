@@ -39,7 +39,7 @@ namespace VooDo.AST.Statements
 
 
 
-        public override IEnumerable<Node> Children => new BodyNode[] { Condition, Then }.Concat(HasElse ? new[] { Else! } : Enumerable.Empty<BodyNode>());
+        public override IEnumerable<Node> Children => new Node[] { Condition, Then }.Concat(HasElse ? new[] { Else! } : Enumerable.Empty<Node>());
         public override string ToString() => $"{GrammarConstants.ifKeyword} ({Condition})\n"
             + (Then is BlockStatement ? "" : "\t") + Then
             + (Else is null ? "" : $"\n{GrammarConstants.elseKeyword}\n" + (Else is BlockStatement ? "" : "\t") + Else);

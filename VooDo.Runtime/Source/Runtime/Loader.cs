@@ -2,8 +2,6 @@
 using System.Linq;
 using System.Reflection;
 
-using VooDo.AST.Names;
-
 namespace VooDo.Runtime
 {
 
@@ -15,9 +13,6 @@ namespace VooDo.Runtime
 
         public static Loader FromAssembly(Assembly _assembly)
             => new Loader(_assembly.GetTypes().Single(_t => _t.IsSubclassOf(typeof(Program))));
-
-        public static Loader FromAssembly(Assembly _assembly, Namespace _namespace, Identifier _className)
-            => new Loader(_assembly.GetType($"{_namespace}.{_className}", true)!);
 
         private readonly Type m_type;
 

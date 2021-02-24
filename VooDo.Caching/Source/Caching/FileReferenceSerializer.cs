@@ -28,12 +28,11 @@ namespace VooDo.Caching
 
         public void Serialize(Reference _value, BinaryWriter _writer)
         {
-            string? path = _value.FilePath ?? _value.Assembly?.Location;
-            if (path is null)
+            if (_value.FilePath is null)
             {
                 throw new SerializationException("Cannot serialize a Reference generated from memory");
             }
-            _writer.Write(path);
+            _writer.Write(_value.FilePath);
             _writer.Write(_value.Aliases.Count);
             foreach (Identifier alias in _value.Aliases)
             {

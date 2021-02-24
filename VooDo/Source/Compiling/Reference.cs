@@ -11,6 +11,7 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 
 using VooDo.AST.Names;
+using VooDo.Runtime;
 using VooDo.Utils;
 
 namespace VooDo.Compiling
@@ -20,7 +21,7 @@ namespace VooDo.Compiling
     {
 
         public static Reference RuntimeReference { get; }
-            = FromAssembly(Assembly.GetExecutingAssembly(), CompilationConstants.runtimeReferenceAlias);
+            = FromAssembly(typeof(Program).Assembly, CompilationConstants.runtimeReferenceAlias);
 
         private sealed class MetadataEqualityComparerImpl : IEqualityComparer<Reference>
         {
@@ -56,23 +57,22 @@ namespace VooDo.Compiling
             => FromAssembly(_assembly, (IEnumerable<Identifier>) _aliases);
 
         public static Reference FromStream(Stream _stream, IEnumerable<Identifier>? _aliases = null)
-            => new Reference(MetadataReference.CreateFromStream(_stream), null, _aliases);
+            => new Reference(MetadataReference.CreateFromStream(_stream), _stream is FileStream file ? file.Name : null, null, _aliases);
 
         public static Reference FromFile(string _path, IEnumerable<Identifier>? _aliases = null)
-            => new Reference(MetadataReference.CreateFromFile(_path), null, _aliases);
+            => new Reference(MetadataReference.CreateFromFile(_path), _path, null, _aliases);
 
         public static Reference FromImage(IEnumerable<byte> _bytes, IEnumerable<Identifier>? _aliases = null)
-            => new Reference(MetadataReference.CreateFromImage(_bytes), null, _aliases);
+            => new Reference(MetadataReference.CreateFromImage(_bytes), null, null, _aliases);
 
         public static Reference FromAssembly(Assembly _assembly, IEnumerable<Identifier>? _aliases = null)
-            => new Reference(MetadataReference.CreateFromFile(_assembly.Location), _assembly, _aliases);
+            => new Reference(MetadataReference.CreateFromFile(_assembly.Location), _assembly.Location, _assembly, _aliases);
 
-        private Reference(PortableExecutableReference _metadata, Assembly? _assembly, IEnumerable<Identifier>? _aliases = null)
+        private Reference(PortableExecutableReference _metadata, string? _path, Assembly? _assembly, IEnumerable<Identifier>? _aliases)
         {
             Aliases = _aliases.EmptyIfNull().ToImmutableHashSet();
             m_metadata = _metadata;
-            FilePath = m_metadata.FilePath ?? _assembly?.Location;
-            FilePath = FilePath is not null ? NormalizeFilePath.Normalize(FilePath) : null;
+            FilePath = _path is null ? null : NormalizeFilePath.Normalize(_path);
             Assembly = _assembly;
         }
 

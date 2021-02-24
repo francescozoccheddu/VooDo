@@ -62,7 +62,7 @@ namespace VooDo.Compiling
         public Loader Load()
         {
             Assembly assembly = Assembly.Load(EmitRawAssembly());
-            return Loader.FromAssembly(assembly, Options.Namespace, Options.ClassName);
+            return Loader.FromAssembly(assembly);
         }
 
         public byte[] EmitRawAssembly()

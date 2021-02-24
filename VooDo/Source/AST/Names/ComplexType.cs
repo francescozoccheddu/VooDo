@@ -66,7 +66,7 @@ namespace VooDo.AST.Names
 
         
         
-        public sealed record RankSpecifier : BodyNode
+        public sealed record RankSpecifier : Node
         {
 
             public static implicit operator RankSpecifier(int _rank) => new(_rank);

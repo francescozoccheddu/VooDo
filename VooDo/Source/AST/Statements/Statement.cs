@@ -1,7 +1,7 @@
 ﻿namespace VooDo.AST.Statements
 {
 
-    public abstract record Statement : BodyNode
+    public abstract record Statement : Node
     {
 
     }

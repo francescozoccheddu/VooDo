@@ -71,7 +71,7 @@ namespace VooDo.AST.Names
 
         
         
-        public sealed record Element(ComplexType Type, Identifier? Name = null) : BodyNode
+        public sealed record Element(ComplexType Type, Identifier? Name = null) : Node
         {
 
             public static implicit operator Element(string _type) => Parse(_type);

@@ -1,4 +1,4 @@
-﻿namespace VooDo.Hooks
+﻿namespace VooDo.Runtime
 {
 
     public interface IHookListener

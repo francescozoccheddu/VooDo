@@ -15,7 +15,7 @@ namespace VooDo.AST.Expressions
     {
 
 
-        public abstract record ElementBase : BodyNode
+        public abstract record ElementBase : Node
         {
 
         }
