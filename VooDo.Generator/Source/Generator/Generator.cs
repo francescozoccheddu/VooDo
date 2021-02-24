@@ -126,10 +126,11 @@ namespace VooDo.Generator
 
         public void Initialize(GeneratorInitializationContext _context)
         {
-            /*if (!Debugger.IsAttached)
+            return;
+            if (!System.Diagnostics.Debugger.IsAttached)
             {
-                Debugger.Launch();
-            }*/
+                System.Diagnostics.Debugger.Launch();
+            }
         }
 
     }

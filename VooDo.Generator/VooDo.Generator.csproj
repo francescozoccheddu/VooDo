@@ -10,13 +10,13 @@
     <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="3.3.2" PrivateAssets="all">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="3.8.0" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="3.8.0" PrivateAssets="all" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.CodeAnalysis.AnalyzerUtilities" Version="3.3.0" PrivateAssets="all" GeneratePathProperty="true"/>
+    <PackageReference Include="Microsoft.CodeAnalysis.AnalyzerUtilities" Version="3.3.0" PrivateAssets="all" GeneratePathProperty="true" />
     <PackageReference Include="VooDo" Version="0.0.7" PrivateAssets="all" GeneratePathProperty="true" />
-    <PackageReference Include="VooDo.Runtime" Version="0.0.1" PrivateAssets="all" GeneratePathProperty="true" />
+    <PackageReference Include="VooDo.Runtime" Version="0.0.1" GeneratePathProperty="true" PrivateAssets="all"/>
     <PackageReference Include="Antlr4.Runtime.Standard" Version="4.9.1" PrivateAssets="all" GeneratePathProperty="true" />
   </ItemGroup>
 
@@ -32,5 +32,14 @@
       <TargetPathWithTargetPlatformMoniker Include="$(PKGMicrosoft_CodeAnalysis_AnalyzerUtilities)\lib\netstandard2.0\Microsoft.CodeAnalysis.AnalyzerUtilities.dll" IncludeRuntimeDependency="false" />
     </ItemGroup>
   </Target>
+
+  <Target Name="AddCustomAliases" BeforeTargets="FindReferenceAssembliesForReferences;ResolveReferences">
+    <ItemGroup>
+      <ReferencePath Condition="'%(FileName)' == 'VooDo.Runtime' AND '%(ReferencePath.NuGetPackageId)' == 'VooDo.Runtime'">
+        <Aliases>VooDoRuntime</Aliases>
+      </ReferencePath>
+    </ItemGroup>
+  </Target>
+
 
 </Project>
