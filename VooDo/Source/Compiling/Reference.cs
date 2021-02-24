@@ -20,8 +20,10 @@ namespace VooDo.Compiling
     public sealed record Reference : IEquatable<Reference?>
     {
 
+        internal const string runtimeReferenceAlias = "VooDoRuntime";
+
         public static Reference RuntimeReference { get; }
-            = FromAssembly(typeof(Program).Assembly, CompilationConstants.runtimeReferenceAlias);
+            = FromAssembly(typeof(Program).Assembly, runtimeReferenceAlias);
 
         private sealed class MetadataEqualityComparerImpl : IEqualityComparer<Reference>
         {

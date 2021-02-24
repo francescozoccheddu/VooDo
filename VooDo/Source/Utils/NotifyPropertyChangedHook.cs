@@ -31,7 +31,7 @@ namespace VooDo.Utils
             if (type.AllInterfaces.Select(_i => _i.ToDisplayString()).Contains(interfaceName))
             {
                 return new ObjectCreationExpression(
-                    QualifiedType.FromType<NotifyPropertyChangedHook>() with { Alias = Session.runtimeReferenceAlias },
+                    QualifiedType.FromType<NotifyPropertyChangedHook>() with { Alias = Reference.runtimeReferenceAlias },
                     ImmutableArray.Create<Argument>(new ValueArgument(null, new LiteralExpression(_symbol.Name))));
             }
             return null;

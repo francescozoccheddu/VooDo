@@ -163,7 +163,7 @@ namespace VooDo.Compiling.Transformation
             ArrayTypeSyntax hookType =
                 SyntaxFactoryUtils.SingleArray(
                     SyntaxFactoryUtils.TupleType(
-                        SyntaxFactory.ParseTypeName($"{Session.runtimeReferenceAlias}::{typeof(IHook).FullName}"),
+                        SyntaxFactory.ParseTypeName($"{Reference.runtimeReferenceAlias}::{typeof(IHook).FullName}"),
                         SyntaxFactoryUtils.PredefinedType(SyntaxKind.IntKeyword)));
             return SyntaxFactoryUtils.ArrowProperty(
                 hookType,

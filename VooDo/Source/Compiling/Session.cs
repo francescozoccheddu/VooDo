@@ -19,9 +19,6 @@ namespace VooDo.Compiling
     internal sealed class Session
     {
 
-        internal const string runtimeReferenceAlias = "VooDoRuntime";
-        internal const string generatedClassName = "GeneratedProgram";
-        internal const string globalFieldPrefix = "field_";
 
         private readonly List<Problem> m_problems = new List<Problem>();
 

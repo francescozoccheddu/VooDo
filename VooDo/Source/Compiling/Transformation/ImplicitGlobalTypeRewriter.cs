@@ -39,7 +39,7 @@ namespace VooDo.Compiling.Transformation
         private static INamedTypeSymbol GetControllerFactorySymbol(SemanticModel _semantics)
         {
             CSharpCompilation compilation = (CSharpCompilation) _semantics.Compilation;
-            MetadataReference runtime = compilation.References.First(_r => _r.Properties.Aliases.Contains(CompilationConstants.runtimeReferenceAlias));
+            MetadataReference runtime = compilation.References.First(_r => _r.Properties.Aliases.Contains(Reference.runtimeReferenceAlias));
             IAssemblySymbol runtimeSymbol = (IAssemblySymbol) compilation.GetAssemblyOrModuleSymbol(runtime)!;
             INamedTypeSymbol? controllerFactorySymbol = runtimeSymbol.GetTypeByMetadataName(typeof(IControllerFactory<>).FullName!);
             if (controllerFactorySymbol is null)

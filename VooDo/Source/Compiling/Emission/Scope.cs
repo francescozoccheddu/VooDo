@@ -61,7 +61,7 @@ namespace VooDo.Compiling.Emission
             => m_globals.ToImmutableArray();
 
         private static GlobalDefinition CreateGlobalDefinition(GlobalPrototype _global, int _index)
-            => new GlobalDefinition(_global, CompilationConstants.globalFieldPrefix + _index);
+            => new GlobalDefinition(_global, $"global_{_index}");
 
         public void AddLocal(Node _source, Identifier _name)
         {
