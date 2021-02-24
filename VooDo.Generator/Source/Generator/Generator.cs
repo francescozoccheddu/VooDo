@@ -128,7 +128,7 @@ namespace VooDo.Generator
         {
             /*if (!Debugger.IsAttached)
             {
-                //Debugger.Launch();
+                Debugger.Launch();
             }*/
         }
 
