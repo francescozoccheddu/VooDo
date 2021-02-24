@@ -46,7 +46,7 @@ namespace VooDo.Runtime
 
         protected Program()
         {
-            Variables = m_Variables.ToList().AsReadOnly();
+            Variables = GeneratedVariables.ToList().AsReadOnly();
             m_variableMap = Variables
                 .Where(_v => _v.Name is not null)
                 .GroupBy(_v => _v.Name)
@@ -55,7 +55,7 @@ namespace VooDo.Runtime
             {
                 variable.Program = this;
             }
-            m_hookSets = m_Hooks.Select(_h => new HookSet(this, _h.hook, _h.count)).ToArray();
+            m_hookSets = GeneratedHooks.Select(_h => new HookSet(this, _h.hook, _h.count)).ToArray();
         }
 
         private sealed class HookSet
@@ -131,8 +131,8 @@ namespace VooDo.Runtime
         protected internal abstract void Run();
 
 #pragma warning disable CA1819 // Properties should not return arrays
-        protected internal virtual Variable[] m_Variables => Array.Empty<Variable>();
-        protected internal virtual (IHook hook, int count)[] m_Hooks => Array.Empty<(IHook, int)>();
+        protected internal virtual Variable[] GeneratedVariables => Array.Empty<Variable>();
+        protected internal virtual (IHook hook, int count)[] GeneratedHooks => Array.Empty<(IHook, int)>();
 #pragma warning restore CA1819 // Properties should not return arrays
 
         public virtual Type ReturnType => typeof(void);

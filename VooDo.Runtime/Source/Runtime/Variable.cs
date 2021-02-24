@@ -20,19 +20,19 @@ namespace VooDo.Runtime
         public bool IsConstant { get; }
         public string Name { get; }
         public Type Type { get; }
-        public object? Value { get => m_DynamicValue; set => m_DynamicValue = value; }
-        public object? ControllerFactory { get => m_DynamicControllerFactory; set => m_DynamicControllerFactory = value; }
+        public object? Value { get => DynamicValue; set => DynamicValue = value; }
+        public object? ControllerFactory { get => DynamicControllerFactory; set => DynamicControllerFactory = value; }
         public abstract bool HasController { get; }
         public Program Program { get; internal set; } = null!;
 
-        public Variable<TValue> OfType<TValue>() => (Variable<TValue>) this;
+        public Variable<TValue> OfType<TValue>() => (Variable<TValue>)this;
 
         public event VariableChangedEventHandler? OnChange;
 
         internal abstract void NotifyChanged();
 
-        protected abstract object? m_DynamicValue { get; set; }
-        protected abstract object? m_DynamicControllerFactory { get; set; }
+        protected abstract object? DynamicValue { get; set; }
+        protected abstract object? DynamicControllerFactory { get; set; }
 
         protected void NotifyChanged(object? _oldValue)
         {
@@ -61,7 +61,7 @@ namespace VooDo.Runtime
 
         private Controller<TValue> m_controller;
 
-        internal Variable(bool _isConstant, string _name, TValue _value = default) : base(_isConstant, _name, typeof(TValue))
+        internal Variable(bool _isConstant, string _name, TValue _value = default!) : base(_isConstant, _name, typeof(TValue))
         {
             m_oldValue = _value!;
             m_controller = new NoController(this, _value!);
@@ -101,8 +101,8 @@ namespace VooDo.Runtime
             OnChange?.Invoke(this, oldValue);
         }
 
-        protected override object? m_DynamicValue { get => Value; set => Value = (TValue) value!; }
-        protected override object? m_DynamicControllerFactory { get => ControllerFactory; set => ControllerFactory = (IControllerFactory<TValue>?) value; }
+        protected override object? DynamicValue { get => Value; set => Value = (TValue)value!; }
+        protected override object? DynamicControllerFactory { get => ControllerFactory; set => ControllerFactory = (IControllerFactory<TValue>?)value; }
 
     }
 
