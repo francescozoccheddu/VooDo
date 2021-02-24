@@ -27,3 +27,6 @@ dotnet_diagnostic.CA1012.severity = none
 
 # CS3021: Type or member does not need a CLSCompliant attribute because the assembly does not have a CLSCompliant attribute
 dotnet_diagnostic.CS3021.severity = none
+
+# RS2008: Enable analyzer release tracking
+dotnet_diagnostic.RS2008.severity = none
