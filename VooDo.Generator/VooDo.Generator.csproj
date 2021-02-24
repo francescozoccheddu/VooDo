@@ -14,7 +14,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\VooDo\VooDo.csproj" PrivateAssets="all" GeneratePathProperty="true"/>
+    <PackageReference Include="VooDo" Version="0.0.6" GeneratePathProperty="true"/>
+    <PackageReference Include="VooDo.Runtime" Version="0.0.1" GeneratePathProperty="true"/>
+    <PackageReference Include="Antlr4.Runtime.Standard" Version="4.9.1" GeneratePathProperty="true"/>
   </ItemGroup>
 
   <PropertyGroup>
@@ -23,7 +25,9 @@
 
   <Target Name="GetDependencyTargetPaths">
     <ItemGroup>
-      <TargetPathWithTargetPlatformMoniker Include="VooDo.dll" IncludeRuntimeDependency="false" />
+      <TargetPathWithTargetPlatformMoniker Include="$(PKGVooDo)\lib\netstandard2.0\VooDo.dll" IncludeRuntimeDependency="true" />
+      <TargetPathWithTargetPlatformMoniker Include="$(PKGVooDo_Runtime)\lib\netstandard2.0\VooDo.Runtime.dll" IncludeRuntimeDependency="true" />
+      <TargetPathWithTargetPlatformMoniker Include="$(PKGAntlr4_Runtime_Standard)\lib\netstandard2.0\Antlr4.Runtime.Standard.dll" IncludeRuntimeDependency="true" />
     </ItemGroup>
   </Target>
 

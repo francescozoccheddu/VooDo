@@ -4,7 +4,7 @@ using VooDo.AST;
 namespace VooDo.Problems
 {
 
-    public class SyntaxError : SourceProblem
+    public class SyntaxError : Problem
     {
         internal SyntaxError(Node _source, string _description) : base(EKind.Syntactic, ESeverity.Error, _description, _source) { }
     }

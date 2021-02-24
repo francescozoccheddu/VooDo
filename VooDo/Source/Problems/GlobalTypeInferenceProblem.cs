@@ -7,7 +7,7 @@ using VooDo.Compiling.Emission;
 namespace VooDo.Problems
 {
 
-    public sealed class GlobalTypeInferenceProblem : SourceProblem
+    public sealed class GlobalTypeInferenceProblem : Problem
     {
 
         private static string GetMessage(bool _hasCandidates, string? _name) => _hasCandidates switch

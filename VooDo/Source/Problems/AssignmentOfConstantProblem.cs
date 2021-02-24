@@ -4,7 +4,7 @@ using VooDo.AST;
 namespace VooDo.Problems
 {
 
-    public class AssignmentOfConstantProblem : SourceProblem
+    public class AssignmentOfConstantProblem : Problem
     {
 
         internal AssignmentOfConstantProblem(Node _source)

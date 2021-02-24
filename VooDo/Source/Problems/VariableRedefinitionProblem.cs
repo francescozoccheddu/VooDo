@@ -5,7 +5,7 @@ using VooDo.AST.Names;
 namespace VooDo.Problems
 {
 
-    public class VariableRedefinitionProblem : SourceProblem
+    public class VariableRedefinitionProblem : Problem
     {
 
         public Identifier Name { get; }

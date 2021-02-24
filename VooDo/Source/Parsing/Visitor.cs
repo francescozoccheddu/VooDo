@@ -85,12 +85,9 @@ namespace VooDo.Parsing
             }
             catch (VooDoException exception)
             {
-                foreach (SourceProblem problem in exception.Problems.OfType<SourceProblem>())
+                foreach (Problem problem in exception.Problems)
                 {
-                    if (problem.Source is null || problem.Source.Origin == Origin.Unknown)
-                    {
-                        problem.AttachOrigin(origin);
-                    }
+                    problem.AttachOrigin(origin);
                 }
                 throw;
             }
@@ -224,7 +221,7 @@ namespace VooDo.Parsing
         public override Node VisitObjectCreationExpression([NotNull] VooDoParser.ObjectCreationExpressionContext _c)
             => new ObjectCreationExpression(TryGet<ComplexType>(_c.mType), Get<Argument>(_c._mArgs));
         public override Node VisitOtherLiteralExpression([NotNull] VooDoParser.OtherLiteralExpressionContext _c)
-            => new LiteralExpression(((LiteralExpressionSyntax) SyntaxFactory.ParseExpression(_c.GetText())).Token.Value);
+            => new LiteralExpression(((LiteralExpressionSyntax)SyntaxFactory.ParseExpression(_c.GetText())).Token.Value);
         public override Node VisitOtherStatement([NotNull] VooDoParser.OtherStatementContext _c)
             => Variant<Statement>(_c);
         public override Node VisitOutDeclarationArgumentWithDiscard([NotNull] VooDoParser.OutDeclarationArgumentWithDiscardContext _c)

@@ -9,6 +9,8 @@ using VooDo.AST.Expressions;
 using VooDo.AST.Names;
 using VooDo.AST.Statements;
 using VooDo.Parsing.Generated;
+using VooDo.Problems;
+using VooDo.Utils;
 
 namespace VooDo.Parsing
 {
@@ -19,30 +21,71 @@ namespace VooDo.Parsing
         private sealed class ErrorListener : IAntlrErrorListener<int>, IAntlrErrorListener<IToken>
         {
 
-            public static ErrorListener Instance { get; } = new ErrorListener();
+            private readonly string m_source;
 
-            private ErrorListener() { }
+            internal ErrorListener(string _source)
+            {
+                m_source = _source;
+            }
+
+            private void Throw(string _message, IRecognizer _recognizer, RuleContext? _rule, IToken? _token)
+            {
+                int? startingChar = (_recognizer as VooDoLexer)?.TokenStartCharIndex;
+                _rule ??= (_recognizer as VooDoParser)?.RuleContext;
+                _token ??= (_recognizer as VooDoLexer)?.Token;
+                _token ??= (_recognizer as VooDoParser)?.CurrentToken;
+                Throw(_message, startingChar, _rule, _token);
+            }
+
+            private void Throw(string _message, int? _startingChar, RuleContext? _rule, IToken? _token)
+            {
+                int start, end;
+                if (_token is not null)
+                {
+                    start = _token.StartIndex;
+                    end = _token.StopIndex;
+                }
+                else if (_rule is ParserRuleContext rule)
+                {
+                    start = rule.Start.StartIndex;
+                    end = (rule.Stop ?? rule.Start).StopIndex;
+                }
+                else if (_startingChar is not null)
+                {
+                    start = _startingChar.Value;
+                    end = start + 1;
+                }
+                else
+                {
+                    start = end = 0;
+                }
+                CodeOrigin? origin = new CodeOrigin(start, end - start, m_source);
+                throw new ParsingError(_message, origin).AsThrowable();
+            }
 
             public void SyntaxError(TextWriter _output, IRecognizer _recognizer, int _offendingSymbol, int _line, int _charPositionInLine, string _msg, RecognitionException _e)
-                => throw new NotImplementedException();
+                => Throw(_msg, _recognizer, _e.Context, null);
+
 
             public void SyntaxError(TextWriter _output, IRecognizer _recognizer, IToken _offendingSymbol, int _line, int _charPositionInLine, string _msg, RecognitionException _e)
-                => throw new NotImplementedException();
+                => Throw(_msg, _recognizer, _e.Context, _offendingSymbol);
+
         }
 
         private static VooDoParser MakeParser(string _script)
         {
-            VooDoLexer lexer = new VooDoLexer(new AntlrInputStream(_script));
+            ErrorListener listener = new ErrorListener(_script);
+            VooDoLexer lexer = new(new AntlrInputStream(_script));
             lexer.RemoveErrorListeners();
-            lexer.AddErrorListener(ErrorListener.Instance);
-            VooDoParser parser = new VooDoParser(new CommonTokenStream(lexer));
+            lexer.AddErrorListener(listener);
+            VooDoParser parser = new(new CommonTokenStream(lexer));
             parser.RemoveErrorListeners();
-            parser.AddErrorListener(ErrorListener.Instance);
+            parser.AddErrorListener(listener);
             return parser;
         }
 
         private static TNode Parse<TNode>(string _source, Func<VooDoParser, ParserRuleContext> _ruleProvider) where TNode : Node
-            => (TNode) new Visitor(_source).Visit(_ruleProvider(MakeParser(_source)));
+            => (TNode)new Visitor(_source).Visit(_ruleProvider(MakeParser(_source)));
 
         // Script
         public static Script Script(string _source) => Parse<Script>(_source, _p => _p.script_Greedy());

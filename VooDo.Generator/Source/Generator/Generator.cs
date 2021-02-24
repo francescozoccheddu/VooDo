@@ -81,7 +81,7 @@ namespace VooDo.Generator
                 bool failed = false;
                 foreach (ReturnStatement returnStatement in script.DescendantNodesAndSelf().OfType<ReturnStatement>())
                 {
-                    _context.ReportDiagnostic(DiagnosticFactory.ReturnNotAllowed((CodeOrigin)returnStatement.Origin));
+                    _context.ReportDiagnostic(DiagnosticFactory.ReturnNotAllowed((CodeOrigin)returnStatement.Origin, _text.Path));
                     failed = true;
                 }
                 if (failed)
@@ -102,8 +102,8 @@ namespace VooDo.Generator
             {
                 foreach (Problem problem in exception.Problems)
                 {
-                    Origin origin = (problem as SourceProblem)?.Source?.Origin ?? Origin.Unknown;
-                    _context.ReportDiagnostic(DiagnosticFactory.CompilationError(problem.Description, origin, problem.Severity));
+                    Origin origin = problem.Origin ?? Origin.Unknown;
+                    _context.ReportDiagnostic(DiagnosticFactory.CompilationError(problem.Description, origin, _text.Path, problem.Severity));
                 }
             }
         }
@@ -116,6 +116,7 @@ namespace VooDo.Generator
                 .OfType<PortableExecutableReference>()
                 .Where(_r => _r.FilePath is not null)
                 .Select(_r => VC::Reference.FromFile(_r.FilePath!, _r.Properties.Aliases.Select(_a => new Identifier(_a))))
+                .Concat(new[] { VC::Reference.RuntimeReference })
                 .ToImmutableArray();
             foreach (AdditionalText text in _context.AdditionalFiles.Where(_f => Path.GetExtension(_f.Path).Equals(".voodo", StringComparison.OrdinalIgnoreCase)))
             {
@@ -123,7 +124,13 @@ namespace VooDo.Generator
             }
         }
 
-        public void Initialize(GeneratorInitializationContext _context) { }
+        public void Initialize(GeneratorInitializationContext _context)
+        {
+            /*if (!Debugger.IsAttached)
+            {
+                //Debugger.Launch();
+            }*/
+        }
 
     }
 

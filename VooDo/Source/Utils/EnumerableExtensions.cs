@@ -70,11 +70,11 @@ namespace VooDo.Utils
             }
         }
 
-        internal static IEnumerable<TOutItem> SelectNonNull<TItem, TOutItem>(this IEnumerable<TItem?> _items, Func<TItem, TOutItem?> _map)
+        internal static IEnumerable<TOutItem> SelectNonNull<TItem, TOutItem>(this IEnumerable<TItem> _items, Func<TItem, TOutItem?> _map)
         {
             foreach (TItem item in _items)
             {
-                TOutItem? mapped = _map(item!);
+                TOutItem? mapped = _map(item);
                 if (mapped is not null)
                 {
                     yield return mapped;
@@ -121,7 +121,7 @@ namespace VooDo.Utils
             => _array.Map(_map, new Identity.ReferenceComparer<TItem?>());
 
         internal static ImmutableArray<TItem?> Map<TItem>(this ImmutableArray<TItem> _array, Func<TItem, object?> _map, IEqualityComparer<TItem?> _comparer)
-            => _array.Map(_a => (TItem?) _map(_a), _comparer);
+            => _array.Map(_a => (TItem?)_map(_a), _comparer);
 
     }
 }

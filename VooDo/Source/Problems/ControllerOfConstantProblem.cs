@@ -4,7 +4,7 @@ using VooDo.AST;
 namespace VooDo.Problems
 {
 
-    public class ControllerOfConstantProblem : SourceProblem
+    public class ControllerOfConstantProblem : Problem
     {
 
         internal ControllerOfConstantProblem(Node _source)

@@ -10,16 +10,19 @@ namespace VooDo.Generator
     internal static class DiagnosticFactory
     {
 
-        private static Location GetLocation(CodeOrigin _origin)
+        private static Location GetLocation(CodeOrigin? _origin, string _file)
         {
-            if (_origin.SourcePath is null)
+            if (_origin is not null)
             {
-                return Location.None;
+                TextSpan span = new(_origin.Start, _origin.Length);
+                _origin.GetLinePosition(out int startLine, out int startCharacter, out int endLine, out int endCharacter);
+                LinePositionSpan lineSpan = new(new LinePosition(startLine, startCharacter), new LinePosition(endLine, endCharacter));
+                return Location.Create(_file, span, lineSpan);
             }
-            TextSpan span = new(_origin.Start, _origin.Length);
-            _origin.GetLinePosition(out int startLine, out int startCharacter, out int endLine, out int endCharacter);
-            LinePositionSpan lineSpan = new(new LinePosition(startLine, startCharacter), new LinePosition(endLine, endCharacter));
-            return Location.Create(_origin.SourcePath!, span, lineSpan);
+            else
+            {
+                return Location.Create(_file, default, default);
+            }
         }
 
         private static readonly DiagnosticDescriptor s_fileReadErrorDescriptor =
@@ -86,19 +89,19 @@ namespace VooDo.Generator
                 null,
                 _file);
 
-        internal static Diagnostic ReturnNotAllowed(CodeOrigin _origin)
+        internal static Diagnostic ReturnNotAllowed(CodeOrigin _origin, string _file)
             => Diagnostic.Create(
                 s_returnNotAllowedDescriptor,
-                GetLocation(_origin));
+                GetLocation(_origin, _file));
 
-        internal static Diagnostic CompilationError(string _message, Origin _origin, Problem.ESeverity _severity)
+        internal static Diagnostic CompilationError(string _message, Origin _origin, string _file, Problem.ESeverity _severity)
             => Diagnostic.Create(
                 _severity switch
                 {
                     Problem.ESeverity.Error => s_compilationErrorDescriptor,
                     Problem.ESeverity.Warning => s_compilationWarningDescriptor
                 },
-                _origin is CodeOrigin co ? GetLocation(co) : null,
+                GetLocation(_origin as CodeOrigin, _file),
                 _message);
 
         internal static Diagnostic XamlNotFound(string _scriptFile, string _xamlFile)

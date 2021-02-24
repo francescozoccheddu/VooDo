@@ -7,7 +7,7 @@ using VooDo.Compiling.Emission;
 namespace VooDo.Problems
 {
 
-    public class RoslynProblem : SourceProblem
+    public class RoslynProblem : Problem
     {
 
         private RoslynProblem(EKind _kind, ESeverity _severity, Node? _source, string _description)

@@ -23,12 +23,11 @@ namespace VooDo.AST
     public sealed class CodeOrigin : Origin
     {
 
-        public CodeOrigin(int _start, int _length, string _source, string? _sourcePath = null)
+        public CodeOrigin(int _start, int _length, string _source)
         {
             Start = _start;
             Length = _length;
             Source = _source;
-            SourcePath = _sourcePath;
             if (_start < 0)
             {
                 throw new ArgumentOutOfRangeException(nameof(_start));
@@ -43,7 +42,6 @@ namespace VooDo.AST
             }
         }
 
-        public string? SourcePath { get; }
         public string Source { get; }
         public int Start { get; }
         public int Length { get; }
@@ -94,7 +92,7 @@ namespace VooDo.AST
             {
                 position = $"LN {startLine + 1} COL {startCol + 1} to LN {endLine + 1} COL {endCol + 1}";
             }
-            return (SourcePath is null ? "" : $"'{SourcePath}' ") + position;
+            return position;
         }
 
     }

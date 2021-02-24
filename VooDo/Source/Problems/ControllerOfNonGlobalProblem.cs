@@ -4,7 +4,7 @@ using VooDo.AST;
 namespace VooDo.Problems
 {
 
-    public class ControllerOfNonGlobalProblem : SourceProblem
+    public class ControllerOfNonGlobalProblem : Problem
     {
 
         internal ControllerOfNonGlobalProblem(Node _source)
