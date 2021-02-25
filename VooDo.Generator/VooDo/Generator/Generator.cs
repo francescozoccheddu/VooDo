@@ -159,7 +159,7 @@ namespace VooDo.Generator
                 {
                     type = QualifiedType.Parse(xamlClassOption);
                 }
-                catch { }
+                catch (VooDoException) { }
                 if (type is null || type.IsArray || type.IsAliasQualified || type.IsNullable || type.Path.Any(_t => _t.IsGeneric))
                 {
                     _context.ReportDiagnostic(DiagnosticFactory.InvalidXamlClass(_text.Path, xamlClassOption));
@@ -312,7 +312,7 @@ namespace VooDo.Generator
 
         public void Initialize(GeneratorInitializationContext _context)
         {
-            //return;
+            return;
             if (!System.Diagnostics.Debugger.IsAttached)
             {
                 System.Diagnostics.Debugger.Launch();

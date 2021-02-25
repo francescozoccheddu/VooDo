@@ -33,3 +33,6 @@ dotnet_diagnostic.RS2008.severity = none
 
 # RS1017: Diagnostic Id for rule 's_fileReadErrorDescriptor' must be a non-null constant
 dotnet_diagnostic.RS1017.severity = none
+
+# CA1031: Do not catch general exception types
+dotnet_diagnostic.CA1031.severity = none

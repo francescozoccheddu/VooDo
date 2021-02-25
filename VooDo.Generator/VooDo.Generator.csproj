@@ -6,10 +6,21 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <PackageId>VooDo.Generator</PackageId>
+    <Authors>Francesco Zoccheddu</Authors>
+    <Version>0.0.1</Version>
+    <AssemblyVersion>0.0.0.1</AssemblyVersion>
+    <FileVersion>0.0.0.1</FileVersion>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/francescozoccheddu/VooDo</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/francescozoccheddu/VooDo.git</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageIcon>Icon.png</PackageIcon>
+  </PropertyGroup>
+
   <ItemGroup>
-    <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="3.3.2" PrivateAssets="all">
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
+    <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="3.3.2" PrivateAssets="all" IncludeAssets="runtime; build; native; contentfiles; analyzers; buildtransitive"/>
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="3.8.0" PrivateAssets="all" />
   </ItemGroup>
 
@@ -18,6 +29,13 @@
     <PackageReference Include="Antlr4.Runtime.Standard" Version="4.9.1" PrivateAssets="all" GeneratePathProperty="true" />
     <ProjectReference Include="..\VooDo\VooDo.csproj" PrivateAssets="all" />
     <ProjectReference Include="..\VooDo.Runtime\VooDo.Runtime.csproj" PrivateAssets="all" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\Icon\Icon.png">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
   </ItemGroup>
 
   <PropertyGroup>
@@ -30,14 +48,6 @@
       <TargetPathWithTargetPlatformMoniker Include="$(SolutionDir)VooDo.Runtime\$(OutputPath)VooDo.Runtime.dll" IncludeRuntimeDependency="false" />
       <TargetPathWithTargetPlatformMoniker Include="$(PKGAntlr4_Runtime_Standard)\lib\netstandard2.0\Antlr4.Runtime.Standard.dll" IncludeRuntimeDependency="false" />
       <TargetPathWithTargetPlatformMoniker Include="$(PKGMicrosoft_CodeAnalysis_AnalyzerUtilities)\lib\netstandard2.0\Microsoft.CodeAnalysis.AnalyzerUtilities.dll" IncludeRuntimeDependency="false" />
-    </ItemGroup>
-  </Target>
-
-  <Target Name="AddCustomAliases" BeforeTargets="FindReferenceAssembliesForReferences;ResolveReferences">
-    <ItemGroup>
-      <ReferencePath Condition="'%(FileName)' == 'VooDo.Runtime' AND '%(ReferencePath.NuGetPackageId)' == 'VooDo.Runtime'">
-        <Aliases>VooDoRuntime</Aliases>
-      </ReferencePath>
     </ItemGroup>
   </Target>
 

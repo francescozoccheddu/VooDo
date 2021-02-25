@@ -1,35 +1,42 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0</TargetFrameworks>
+    <TargetFramework>netstandard2.0</TargetFramework>
     <LangVersion>9.0</LangVersion>
     <Nullable>enable</Nullable>
-    <RootNamespace>VooDo</RootNamespace>
+  </PropertyGroup>
+    
+  <PropertyGroup>
     <PackageId>VooDo</PackageId>
-    <Version>0.0.6</Version>
     <Authors>Francesco Zoccheddu</Authors>
-    <AssemblyVersion>0.0.0.6</AssemblyVersion>
-    <FileVersion>0.0.0.6</FileVersion>
+    <Version>0.0.1</Version>
+    <AssemblyVersion>0.0.0.1</AssemblyVersion>
+    <FileVersion>0.0.0.1</FileVersion>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/francescozoccheddu/VooDo</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/francescozoccheddu/VooDo.git</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageIcon>Icon.png</PackageIcon>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Antlr4.Runtime.Standard" Version="4.9.1" PrivateAssets="compile" />
     <PackageReference Include="Antlr4BuildTasks" Version="8.13.0" PrivateAssets="all" />
-    <PackageReference Include="IsExternalInit" Version="1.0.0" PrivateAssets="all">
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
+    <PackageReference Include="IsExternalInit" Version="1.0.0" PrivateAssets="all" IncludeAssets="runtime; build; native; contentfiles; analyzers; buildtransitive"/>
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="3.8.0" PrivateAssets="compile" />
     <PackageReference Include="Microsoft.CodeAnalysis.Features" Version="3.8.0" PrivateAssets="compile" />
+    <ProjectReference Include="..\VooDo.Runtime\VooDo.Runtime.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <Antlr4 Include="$(ProjectDir)Source\Parsing\VooDoLexer.g4">
+    <Antlr4 Include="VooDo\Parsing\VooDoLexer.g4">
       <Listener>false</Listener>
       <Visitor>true</Visitor>
       <GAtn>false</GAtn>
       <Package>VooDo.Parsing.Generated</Package>
       <Error>true</Error>
     </Antlr4>
-    <Antlr4 Include="$(ProjectDir)Source\Parsing\VooDoParser.g4">
+    <Antlr4 Include="VooDo\Parsing\VooDoParser.g4">
       <Listener>false</Listener>
       <Visitor>true</Visitor>
       <GAtn>false</GAtn>
@@ -40,10 +47,10 @@
 
   <ItemGroup>
     <None Include="..\.editorconfig" Link=".editorconfig" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\VooDo.Runtime\VooDo.Runtime.csproj" />
+    <None Include="..\Icon\Icon.png">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
   </ItemGroup>
 
 </Project>

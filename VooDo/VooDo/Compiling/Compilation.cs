@@ -53,7 +53,7 @@ namespace VooDo.Compiling
                     References = references
                 };
             }
-            return new Compilation(_script, _options, _cancellationToken, _existingCompilation);
+            return new Compilation(_script, _options, _existingCompilation, _cancellationToken);
         }
 
         public static Compilation SucceedOrThrow(Script _script, Options _options, CSharpCompilation? _existingCompilation = null)
@@ -61,7 +61,7 @@ namespace VooDo.Compiling
 
         public static Compilation SucceedOrThrow(Script _script, Options _options, CancellationToken _cancellationToken, CSharpCompilation? _existingCompilation = null)
         {
-            Compilation compilation = Create(_script, _options, _existingCompilation);
+            Compilation compilation = Create(_script, _options, _cancellationToken, _existingCompilation);
             if (!compilation.Succeded)
             {
                 throw compilation.Problems.AsThrowable();
@@ -69,11 +69,11 @@ namespace VooDo.Compiling
             return compilation;
         }
 
-        private Compilation(Script _script, Options _options, CancellationToken _cancellationToken, CSharpCompilation? _existingCompilation)
+        private Compilation(Script _script, Options _options, CSharpCompilation? _existingCompilation, CancellationToken _cancellationToken)
         {
             Script = _script.SetAsRoot(this);
             Options = _options;
-            Session session = new Session(this, _cancellationToken, _existingCompilation);
+            Session session = new Session(this, _existingCompilation, _cancellationToken);
             Succeded = session.Succeeded;
             Problems = session.GetProblems();
             Globals = session.Globals.EmptyIfDefault().Select(_g => _g.Prototype).ToImmutableArray();

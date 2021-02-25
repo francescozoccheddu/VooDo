@@ -5,9 +5,9 @@
     <LangVersion>9.0</LangVersion>
     <Nullable>enable</Nullable>
   </PropertyGroup>
-  
+
   <PropertyGroup>
-    <PackageId>VooDo.Runtime</PackageId>
+    <PackageId>VooDo.WinUi.HookInitializers</PackageId>
     <Authors>Francesco Zoccheddu</Authors>
     <Version>0.0.1</Version>
     <AssemblyVersion>0.0.0.1</AssemblyVersion>

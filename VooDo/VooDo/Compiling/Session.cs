@@ -66,7 +66,7 @@ namespace VooDo.Compiling
         internal ImmutableArray<Problem> GetProblems()
             => m_problems.ToImmutableArray();
 
-        internal Session(Compilation _compilation, CancellationToken _cancellationToken, CSharpCompilation? _existingCompilation)
+        internal Session(Compilation _compilation, CSharpCompilation? _existingCompilation, CancellationToken _cancellationToken)
         {
             Compilation = _compilation;
             CancellationToken = _cancellationToken;
