@@ -1,6 +1,4 @@
-﻿
-using System;
-using System.Collections.Immutable;
+﻿using System.Collections.Immutable;
 using System.Linq;
 
 using VooDo.AST.Names;
@@ -43,15 +41,6 @@ namespace VooDo.Compiling
             set
             {
                 m_references = Reference.Merge(value.EmptyIfDefault());
-                int runtimeIndex = m_references.IndexOf(Reference.RuntimeReference, Reference.MetadataEqualityComparer);
-                if (runtimeIndex < 0)
-                {
-                    throw new CompilationOptionsPropertyProblem("No runtime reference", this, nameof(References)).AsThrowable();
-                }
-                if (!m_references[runtimeIndex].Aliases.Contains(Reference.runtimeReferenceAlias))
-                {
-                    throw new CompilationOptionsPropertyProblem($"Runtime reference must define '{Reference.runtimeReferenceAlias}' alias", this, nameof(References)).AsThrowable();
-                }
                 if (m_references.SelectMany(_r => _r.Aliases).FirstDuplicate(out Identifier? duplicateAlias))
                 {
                     throw new CompilationOptionsPropertyProblem($"Duplicate reference alias '{duplicateAlias}'", this, nameof(References)).AsThrowable();

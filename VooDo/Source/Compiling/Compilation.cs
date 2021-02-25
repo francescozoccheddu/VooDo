@@ -11,6 +11,7 @@ using System.Linq;
 using System.Reflection;
 
 using VooDo.AST;
+using VooDo.AST.Names;
 using VooDo.Compiling.Emission;
 using VooDo.Problems;
 using VooDo.Runtime;
@@ -29,14 +30,31 @@ namespace VooDo.Compiling
         public ImmutableArray<GlobalPrototype> Globals { get; }
 
         private readonly CSharpCompilation? m_cSharpCompilation;
+        private readonly CompilationUnitSyntax? m_cSharpSyntax;
         private readonly string? m_cSharpCode;
 
-        public static Compilation Create(Script _script, Options _options)
-            => new Compilation(_script, _options);
-
-        public static Compilation SucceedOrThrow(Script _script, Options _options)
+        public static Compilation Create(Script _script, Options _options, CSharpCompilation? _existingCompilation = null)
         {
-            Compilation compilation = Create(_script, _options);
+            if (_existingCompilation is not null)
+            {
+                ImmutableArray<Reference> references =
+                    _existingCompilation.References
+                    .OfType<PortableExecutableReference>()
+                    .Where(_r => _r.FilePath is not null)
+                    .Select(_r => Reference.FromFile(_r.FilePath!, _r.Properties.Aliases.Select(_a => new Identifier(_a))))
+                    .Concat(_options.References)
+                    .ToImmutableArray();
+                _options = _options with
+                {
+                    References = references
+                };
+            }
+            return new Compilation(_script, _options, _existingCompilation);
+        }
+
+        public static Compilation SucceedOrThrow(Script _script, Options _options, CSharpCompilation? _existingCompilation = null)
+        {
+            Compilation compilation = Create(_script, _options, _existingCompilation);
             if (!compilation.Succeded)
             {
                 throw compilation.Problems.AsThrowable();
@@ -44,19 +62,20 @@ namespace VooDo.Compiling
             return compilation;
         }
 
-        private Compilation(Script _script, Options _options)
+        private Compilation(Script _script, Options _options, CSharpCompilation? _existingCompilation = null)
         {
             Script = _script.SetAsRoot(this);
             Options = _options;
             Session session = new Session(this);
-            session.Run();
+            session.Run(_existingCompilation);
             Succeded = session.Succeeded;
             Problems = session.GetProblems();
             Globals = session.Globals.EmptyIfDefault().Select(_g => _g.Prototype).ToImmutableArray();
             if (Succeded)
             {
                 m_cSharpCompilation = session.CSharpCompilation;
-                m_cSharpCode = m_cSharpCompilation?.SyntaxTrees.Single().GetRoot().NormalizeWhitespace().ToFullString();
+                m_cSharpSyntax = session.Syntax!;
+                m_cSharpCode = m_cSharpSyntax.NormalizeWhitespace().ToFullString();
             }
         }
 
@@ -100,7 +119,7 @@ namespace VooDo.Compiling
             {
                 throw new InvalidOperationException("Compilation did not succeed");
             }
-            return (CompilationUnitSyntax)m_cSharpCompilation!.SyntaxTrees[0].GetRoot();
+            return m_cSharpSyntax!;
         }
 
         public void SaveCSharpSourceFile(string _file)

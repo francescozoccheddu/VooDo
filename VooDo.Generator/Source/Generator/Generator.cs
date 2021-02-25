@@ -171,7 +171,7 @@ namespace VooDo.Generator
             return true;
         }
 
-        private static void Process(AdditionalText _text, GeneratorExecutionContext _context, ImmutableArray<VC::Reference> _references, ImmutableArray<UsingDirective> _usings, NameDictionary _nameDictionary)
+        private static void Process(AdditionalText _text, GeneratorExecutionContext _context, ImmutableArray<UsingDirective> _usings, NameDictionary _nameDictionary)
         {
             SourceText? sourceText = _text.GetText(_context.CancellationToken);
             if (sourceText is null)
@@ -199,17 +199,18 @@ namespace VooDo.Generator
                     return;
                 }
                 script = script.AddUsingDirectives(_usings);
+                script = script.AddGlobals(new VC::Emission.Global(true, new QualifiedType(xamlNamespace, xamlName!), "this"));
                 VC::Options options = VC::Options.Default with
                 {
-                    References = _references,
                     Namespace = xamlNamespace,
-                    ClassName = name
+                    ClassName = name,
+                    References = default
                 };
-                VC::Compilation compilation = VC::Compilation.SucceedOrThrow(script, options);
+                VC::Compilation compilation = VC::Compilation.SucceedOrThrow(script, options, (CSharpCompilation)_context.Compilation);
                 CompilationUnitSyntax syntax = compilation.GetCSharpSyntax();
                 ClassDeclarationSyntax classDeclaration = syntax.DescendantNodes().OfType<ClassDeclarationSyntax>().Single();
                 syntax = syntax.ReplaceNode(classDeclaration,
-                    SyntaxFactory.ClassDeclaration(xamlName!)
+                    SyntaxFactory.ClassDeclaration(xamlName)
                     .WithMembers(
                         SyntaxFactory.SingletonList<MemberDeclarationSyntax>(
                             classDeclaration.WithModifiers(
@@ -298,12 +299,6 @@ namespace VooDo.Generator
                 return;
             }
             NameDictionary nameDictionary = new();
-            ImmutableArray<VC::Reference> references = _context.Compilation.References
-                .OfType<PortableExecutableReference>()
-                .Where(_r => _r.FilePath is not null && !Path.GetFileName(_r.FilePath).Equals("VooDo.Runtime.dll", StringComparison.OrdinalIgnoreCase))
-                .Select(_r => VC::Reference.FromFile(_r.FilePath!, _r.Properties.Aliases.Select(_a => new Identifier(_a))))
-                .Concat(new[] { VC::Reference.RuntimeReference })
-                .ToImmutableArray();
             foreach (AdditionalText text in _context.AdditionalFiles.Where(_f => Path.GetExtension(_f.Path).Equals(".voodo", StringComparison.OrdinalIgnoreCase)))
             {
                 if (_context.CancellationToken.IsCancellationRequested)
@@ -311,7 +306,7 @@ namespace VooDo.Generator
                     _context.ReportDiagnostic(DiagnosticFactory.Canceled());
                     return;
                 }
-                Process(text, _context, references, usingDirectives, nameDictionary);
+                Process(text, _context, usingDirectives, nameDictionary);
             }
         }
 
