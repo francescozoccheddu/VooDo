@@ -29,7 +29,7 @@ namespace VooDo.Generator
     {
 
         private const string c_projectOptionPrefix = "build_property";
-        private const string c_fileOptionPrefix = "build_metadata";
+        private const string c_fileOptionPrefix = "build_metadata.AdditionalFiles";
         private const string c_usingsOption = c_projectOptionPrefix + ".VooDoUsings";
         private const string c_xamlPathOption = c_fileOptionPrefix + ".XamlPath";
         private const string c_xamlClassOption = c_fileOptionPrefix + ".XamlClass";
@@ -83,6 +83,14 @@ namespace VooDo.Generator
             AnalyzerConfigOptions? options = _context.AnalyzerConfigOptions.GetOptions(_text);
             options.TryGetValue(c_xamlClassOption, out string? xamlClassOption);
             options.TryGetValue(c_xamlPathOption, out string? xamlPathOption);
+            if (string.IsNullOrEmpty(xamlClassOption))
+            {
+                xamlClassOption = null;
+            }
+            if (string.IsNullOrEmpty(xamlPathOption))
+            {
+                xamlPathOption = null;
+            }
             if (xamlClassOption is not null && xamlPathOption is not null)
             {
                 _context.ReportDiagnostic(DiagnosticFactory.BothXamlOptions(_text.Path));
@@ -96,7 +104,7 @@ namespace VooDo.Generator
                     {
                         string fileName = Path.GetFileNameWithoutExtension(_text.Path);
                         string directory = Path.GetDirectoryName(_text.Path);
-                        xamlCbFile = NormalizeFilePath.Normalize(Path.Combine(directory, $"{fileName}.xaml.cs"));
+                        xamlCbFile = Path.Combine(directory, $"{fileName}.xaml.cs");
                     }
                     else
                     {
@@ -111,6 +119,7 @@ namespace VooDo.Generator
                             _ => $"{path}.xaml.cs",
                         };
                     }
+                    xamlCbFile = NormalizeFilePath.Normalize(xamlCbFile);
                     SyntaxTree tree = _context.Compilation.SyntaxTrees.Single(_t => NormalizeFilePath.Normalize(_t.FilePath).Equals(xamlCbFile));
                     ImmutableArray<ClassDeclarationSyntax> classes = tree.GetRoot(_context.CancellationToken)
                         .DescendantNodesAndSelf()
@@ -158,7 +167,7 @@ namespace VooDo.Generator
                     _context.ReportDiagnostic(DiagnosticFactory.InvalidXamlClass(_text.Path, xamlClassOption));
                     return false;
                 }
-                _namespace = type.IsNamespaceQualified ? null : new Namespace(type.Path.Take(type.Path.Length - 1).Select(_t => _t.Name));
+                _namespace = type.IsNamespaceQualified ? new Namespace(type.Path.Take(type.Path.Length - 1).Select(_t => _t.Name)) : null;
                 _name = type.Path.Last().Name;
             }
             return true;
