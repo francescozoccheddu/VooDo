@@ -104,7 +104,7 @@ namespace VooDo.Compiling.Emission
             ExpressionStatement s => EnumerableExtensions.Singleton(EmitExpressionStatement(s)),
             GlobalStatement s => s.SelectMany(EmitDeclarationStatement),
             IfStatement s => EnumerableExtensions.Singleton(EmitIfStatement(s)),
-            ReturnStatement s => EnumerableExtensions.Singleton((StatementSyntax) EmitReturnStatement(s)),
+            ReturnStatement s => EnumerableExtensions.Singleton((StatementSyntax)EmitReturnStatement(s)),
         };
 
         private StatementSyntax EmitStatement(Statement _node)
@@ -155,7 +155,7 @@ namespace VooDo.Compiling.Emission
 
         private VariableDesignationSyntax EmitIdentifierOrDiscard(IdentifierOrDiscard _node)
             => (_node.IsDiscard
-                ? (VariableDesignationSyntax) SF.DiscardDesignation()
+                ? (VariableDesignationSyntax)SF.DiscardDesignation()
                 : SF.SingleVariableDesignation(EmitIdentifier(_node.Identifier!)))
             .Own(m_tagger, _node);
 
@@ -167,11 +167,11 @@ namespace VooDo.Compiling.Emission
             {
                 type = SF.AliasQualifiedName(
                     SF.IdentifierName(EmitIdentifier(_node.Alias!)),
-                    (SimpleNameSyntax) type);
+                    (SimpleNameSyntax)type);
             }
             foreach (SimpleType name in _node.Path.Skip(1))
             {
-                type = SF.QualifiedName(type, (SimpleNameSyntax) EmitSimpleType(name));
+                type = SF.QualifiedName(type, (SimpleNameSyntax)EmitSimpleType(name));
             }
             return type.Own(m_tagger, _node);
         }
@@ -182,16 +182,16 @@ namespace VooDo.Compiling.Emission
             {
                 return EmitSimpleType(_node.Path[0]);
             }
-            NameSyntax type = (NameSyntax) EmitSimpleType(_node.Path[0]);
+            NameSyntax type = (NameSyntax)EmitSimpleType(_node.Path[0]);
             if (_node.IsAliasQualified)
             {
                 type = SF.AliasQualifiedName(
                     SF.IdentifierName(EmitIdentifier(_node.Alias!)).Own(m_tagger, _node.Alias!),
-                    (SimpleNameSyntax) type);
+                    (SimpleNameSyntax)type);
             }
             foreach (SimpleType name in _node.Path.Skip(1))
             {
-                type = SF.QualifiedName(type, (SimpleNameSyntax) EmitSimpleType(name));
+                type = SF.QualifiedName(type, (SimpleNameSyntax)EmitSimpleType(name));
             }
             return type.Own(m_tagger, _node);
         }
@@ -199,14 +199,14 @@ namespace VooDo.Compiling.Emission
         private TypeSyntax EmitSimpleType(SimpleType _node)
         {
             if (_node.Parent is not null
-                && ((QualifiedType) _node.Parent).IsSimple
+                && ((QualifiedType)_node.Parent).IsSimple
                 && !_node.IsGeneric
                 && s_predefinedTypesTokens.TryGetValue(_node.Name, out SyntaxToken token))
             {
                 return SF.PredefinedType(token).Own(m_tagger, _node);
             }
             return (_node.IsGeneric
-                    ? (SimpleNameSyntax) SU.GenericName(
+                    ? (SimpleNameSyntax)SU.GenericName(
                             EmitIdentifier(_node.Name),
                             _node.TypeArguments.Select(EmitComplexType))
                     : SF.IdentifierName(EmitIdentifier(_node.Name)))
@@ -245,7 +245,7 @@ namespace VooDo.Compiling.Emission
             => SF.UsingDirective(
                     SF.Token(SK.StaticKeyword),
                     null,
-                    (NameSyntax) EmitNonArrayNonNullableQualifiedType(_node.Type))
+                    (NameSyntax)EmitNonArrayNonNullableQualifiedType(_node.Type))
                 .Own(m_tagger, _node);
 
         private ExpressionStatementSyntax EmitAssignmentStatement(AssignmentStatement _node)
@@ -297,7 +297,7 @@ namespace VooDo.Compiling.Emission
             ExpressionSyntax? initializer;
             if (_node.Parent is not null && _node.Parent.Parent is GlobalStatement globalStatement)
             {
-                Global global = new Global(globalStatement.IsConstant, ((DeclarationStatement) _node.Parent).Type, _node.Name, _node.Initializer);
+                Global global = new Global(globalStatement.IsConstant, ((DeclarationStatement)_node.Parent).Type, _node.Name, _node.Initializer);
                 Scope.GlobalDefinition globalDefinition = m_scope.AddGlobal(new GlobalPrototype(global, _node));
                 initializer = SU.ThisMemberAccess(globalDefinition.Identifier);
             }
@@ -403,7 +403,7 @@ namespace VooDo.Compiling.Emission
         private ExpressionSyntax EmitDefaultExpression(DefaultExpression _node)
             => (_node.HasType
                 ? SF.DefaultExpression(EmitComplexType(_node.Type!))
-                : (ExpressionSyntax) SF.LiteralExpression(SK.DefaultExpression))
+                : (ExpressionSyntax)SF.LiteralExpression(SK.DefaultExpression))
             .Own(m_tagger, _node);
 
         private ElementAccessExpressionSyntax EmitElementAccessExpression(ElementAccessExpression _node)
@@ -452,7 +452,7 @@ namespace VooDo.Compiling.Emission
                 SF.DeclarationPattern(
                     EmitComplexType(_node.Type),
                      EmitIdentifierOrDiscard(_node.Name!)))
-            : (ExpressionSyntax) SF.BinaryExpression(
+            : (ExpressionSyntax)SF.BinaryExpression(
                 SK.IsExpression,
                 EmitExpression(_node.Expression),
                 EmitComplexType(_node.Type)))
@@ -514,7 +514,7 @@ namespace VooDo.Compiling.Emission
             IdentifierNameSyntax name = SF.IdentifierName(EmitIdentifier(_node.Name));
             result = isGlobal
                 ? SU.MemberAccess(name, _node.IsControllerOf ? nameof(Variable<object>.ControllerFactory) : nameof(Variable<object>.Value))
-                : (ExpressionSyntax) name;
+                : (ExpressionSyntax)name;
             return result.Own(m_tagger, _node);
         }
 
@@ -522,14 +522,14 @@ namespace VooDo.Compiling.Emission
         {
             ArgumentListSyntax argumentList = SU.Arguments(_node.Arguments.Select(EmitArgument));
             return (_node.IsTypeImplicit
-                ? (ExpressionSyntax) SF.ImplicitObjectCreationExpression(argumentList, null)
+                ? (ExpressionSyntax)SF.ImplicitObjectCreationExpression(argumentList, null)
                 : SF.ObjectCreationExpression(EmitComplexType(_node.Type!), argumentList, null))
                 .Own(m_tagger, _node);
         }
 
         private ArrayCreationExpressionSyntax EmitArrayCreation(ArrayCreationExpression _node)
         {
-            ArrayTypeSyntax type = (ArrayTypeSyntax) EmitComplexType(_node.Type);
+            ArrayTypeSyntax type = (ArrayTypeSyntax)EmitComplexType(_node.Type);
             SyntaxList<ArrayRankSpecifierSyntax> rankSpecifiers = type.RankSpecifiers;
             ArrayRankSpecifierSyntax rank = rankSpecifiers[0].WithSizes(_node.Sizes.Select(EmitExpression).ToSeparatedList());
             rankSpecifiers = new[] { rank }.Concat(rankSpecifiers.Skip(1)).ToSyntaxList();
@@ -663,16 +663,18 @@ namespace VooDo.Compiling.Emission
                         .Append(variablesProperty)
                         .Append(runMethod)
                         .ToSyntaxList());
+            MemberDeclarationSyntax classOrNamespace = _session.Compilation.Options.Namespace switch
+            {
+                null => classDeclaration,
+                not null => SF.NamespaceDeclaration(_session.Compilation.Options.Namespace.ToNameSyntax())
+                                .WithMembers(classDeclaration.ToSyntaxList<MemberDeclarationSyntax>()),
+            };
             CompilationUnitSyntax root
                 = SF.CompilationUnit(
                     aliases.ToSyntaxList(),
                     usings.ToSyntaxList(),
                     SF.List<AttributeListSyntax>(),
-                    SF.NamespaceDeclaration(
-                        _session.Compilation.Options.Namespace.ToNameSyntax())
-                    .WithMembers(
-                        classDeclaration.ToSyntaxList<MemberDeclarationSyntax>())
-                    .ToSyntaxList<MemberDeclarationSyntax>())
+                    classOrNamespace.ToSyntaxList())
                 .Own(m_tagger, _node);
             return root;
         }

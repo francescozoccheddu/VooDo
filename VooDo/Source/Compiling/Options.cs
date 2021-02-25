@@ -28,7 +28,7 @@ namespace VooDo.Compiling
 
         public string? AssemblyName { get; init; }
 
-        public Namespace Namespace { get; init; }
+        public Namespace? Namespace { get; init; }
 
         public Identifier ClassName { get; init; }
 
