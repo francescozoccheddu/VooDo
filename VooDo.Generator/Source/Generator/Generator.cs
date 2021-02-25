@@ -206,7 +206,7 @@ namespace VooDo.Generator
                     ClassName = name,
                     References = default
                 };
-                VC::Compilation compilation = VC::Compilation.SucceedOrThrow(script, options, (CSharpCompilation)_context.Compilation);
+                VC::Compilation compilation = VC::Compilation.SucceedOrThrow(script, options, _context.CancellationToken, (CSharpCompilation)_context.Compilation);
                 CompilationUnitSyntax syntax = compilation.GetCSharpSyntax();
                 ClassDeclarationSyntax classDeclaration = syntax.DescendantNodes().OfType<ClassDeclarationSyntax>().Single();
                 syntax = syntax.ReplaceNode(classDeclaration,

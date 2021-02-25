@@ -14,7 +14,7 @@ namespace VooDo.Problems
 
         public enum EKind
         {
-            Syntactic, Semantic, Emission
+            Syntactic, Semantic, Emission, Other
         }
 
         internal Problem(EKind _kind, ESeverity _severity, string _description, Node? _source)

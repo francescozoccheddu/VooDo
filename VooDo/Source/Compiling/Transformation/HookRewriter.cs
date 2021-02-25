@@ -77,7 +77,7 @@ namespace VooDo.Compiling.Transformation
                 {
                     return null;
                 }
-                ISymbol? symbol = m_semantics.GetSymbolInfo((ExpressionSyntax) _expression.Parent!).Symbol;
+                ISymbol? symbol = m_semantics.GetSymbolInfo((ExpressionSyntax)_expression.Parent!).Symbol;
                 if (symbol is null ||
                     (symbol is IFieldSymbol field && (field.IsReadOnly || field.IsConst)))
                 {
@@ -103,7 +103,7 @@ namespace VooDo.Compiling.Transformation
                 {
                     entry.Locations.Add(result.Locations.First());
                 }
-                return SyntaxFactoryUtils.SubscribeHookInvocation((ExpressionSyntax) Visit(_expression), entry.Index, hookIndex);
+                return SyntaxFactoryUtils.SubscribeHookInvocation((ExpressionSyntax)Visit(_expression), entry.Index, hookIndex);
             }
 
             public override SyntaxNode? VisitElementAccessExpression(ElementAccessExpressionSyntax _node)
@@ -136,11 +136,11 @@ namespace VooDo.Compiling.Transformation
 
         }
 
-        private static PointsToAnalysisResult CreatePointsToAnalysis(MethodDeclarationSyntax _method, SemanticModel _semantics, CSharpCompilation _compilation)
+        private static PointsToAnalysisResult CreatePointsToAnalysis(MethodDeclarationSyntax _method, SemanticModel _semantics, CSharpCompilation _compilation, CancellationToken _cancellationToken)
         {
-            IMethodSymbol methodSymbol = _semantics.GetDeclaredSymbol(_method)!;
-            IMethodBodyOperation methodOperation = (IMethodBodyOperation) _semantics.GetOperation(_method)!;
-            ControlFlowGraph controlFlowGraph = ControlFlowGraph.Create(methodOperation);
+            IMethodSymbol methodSymbol = _semantics.GetDeclaredSymbol(_method, _cancellationToken)!;
+            IMethodBodyOperation methodOperation = (IMethodBodyOperation)_semantics.GetOperation(_method, _cancellationToken)!;
+            ControlFlowGraph controlFlowGraph = ControlFlowGraph.Create(methodOperation, _cancellationToken);
             AnalyzerOptions options = new AnalyzerOptions(ImmutableArray.Create<AdditionalText>());
             WellKnownTypeProvider typeProvider = WellKnownTypeProvider.GetOrCreate(_compilation);
             InterproceduralAnalysisConfiguration interproceduralAnalysis = InterproceduralAnalysisConfiguration.Create(
@@ -149,7 +149,7 @@ namespace VooDo.Compiling.Transformation
                 methodSymbol,
                 _compilation,
                 InterproceduralAnalysisKind.None,
-                CancellationToken.None);
+                _cancellationToken);
             PointsToAnalysisResult? result = PointsToAnalysis.TryGetOrComputeResult(controlFlowGraph, methodSymbol, options, typeProvider, interproceduralAnalysis, null)!;
             if (result is null)
             {
@@ -194,14 +194,15 @@ namespace VooDo.Compiling.Transformation
                 .OfType<MethodDeclarationSyntax>()
                 .Where(_m => _m.Identifier.ValueText is RuntimeHelpers.runMethodName or RuntimeHelpers.typedRunMethodName && _m.Modifiers.Any(_d => _d.IsKind(SyntaxKind.OverrideKeyword)))
                 .Single();
-            PointsToAnalysisResult pointsToAnalysis = CreatePointsToAnalysis(method, semantics, _session.CSharpCompilation!);
+            PointsToAnalysisResult pointsToAnalysis = CreatePointsToAnalysis(method, semantics, _session.CSharpCompilation!, _session.CancellationToken);
             BodyRewriter rewriter = new BodyRewriter(semantics, pointsToAnalysis, _session.Compilation.Options.HookInitializer, _session.Compilation.Options.References);
-            BlockSyntax body = (BlockSyntax) rewriter.Visit(method.Body!);
+            BlockSyntax body = (BlockSyntax)rewriter.Visit(method.Body!);
             ImmutableArray<(Expression, int)> initializers = rewriter.Initializers;
             if (initializers.IsEmpty)
             {
                 return root;
             }
+            _session.EnsureNotCanceled();
             PropertyDeclarationSyntax property = CreatePropertySyntax(rewriter.Initializers, _session.Tagger);
             ClassDeclarationSyntax newClass = classDeclaration.ReplaceNode(method.Body!, body);
             newClass = newClass.AddMembers(property);

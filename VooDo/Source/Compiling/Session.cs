@@ -5,6 +5,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Threading;
 
 using VooDo.AST.Names;
 using VooDo.Compiling.Emission;
@@ -34,6 +35,8 @@ namespace VooDo.Compiling
 
         internal Compilation Compilation { get; }
 
+        public CancellationToken CancellationToken { get; }
+
         internal Tagger Tagger { get; } = new Tagger();
 
         internal SemanticModel? Semantics { get; private set; }
@@ -57,13 +60,15 @@ namespace VooDo.Compiling
         internal ImmutableArray<Problem> GetProblems()
             => m_problems.ToImmutableArray();
 
-        internal Session(Compilation _compilation)
+        internal Session(Compilation _compilation, CancellationToken _cancellationToken)
         {
             Compilation = _compilation;
+            CancellationToken = _cancellationToken;
         }
 
         internal void Run(CSharpCompilation? _existingCompilation = null)
         {
+            EnsureNotCanceled();
             try
             {
                 if (_existingCompilation is null)
@@ -79,6 +84,17 @@ namespace VooDo.Compiling
             catch (VooDoException e)
             {
                 AddProblems(e.Problems);
+            }
+            catch
+            {
+                if (CancellationToken.IsCancellationRequested && !m_problems.Any(_p => _p is CanceledProblem))
+                {
+                    AddProblem(new CanceledProblem());
+                }
+                else
+                {
+                    throw;
+                }
             }
         }
 
@@ -102,6 +118,7 @@ namespace VooDo.Compiling
 
         private void ThrowCompilationErrors()
         {
+            EnsureNotCanceled();
             CSharpCompilation!.GetDiagnostics()
                 .Where(_d => _d.Location.SourceTree is null || _d.Location.SourceTree == Tree)
                 .SelectNonNull(_d => RoslynProblem.FromDiagnostic(_d, Tagger, Problem.EKind.Semantic))
@@ -110,6 +127,7 @@ namespace VooDo.Compiling
 
         private void ReplaceTree(CompilationUnitSyntax _syntax)
         {
+            EnsureNotCanceled();
             if (_syntax != Syntax)
             {
                 SyntaxTree newTree = CSharpSyntaxTree.Create(_syntax, s_parseOptions);
@@ -126,13 +144,22 @@ namespace VooDo.Compiling
                     Semantics = CSharpCompilation.GetSemanticModel(newTree);
                 }
                 Tree = newTree;
-                Tree.GetDiagnostics().SelectNonNull(_d => RoslynProblem.FromDiagnostic(_d, Tagger, Problem.EKind.Syntactic)).ThrowErrors();
+                Tree.GetDiagnostics(CancellationToken).SelectNonNull(_d => RoslynProblem.FromDiagnostic(_d, Tagger, Problem.EKind.Syntactic)).ThrowErrors();
                 Syntax = (CompilationUnitSyntax)Tree.GetRoot();
+            }
+        }
+
+        public void EnsureNotCanceled()
+        {
+            if (CancellationToken.IsCancellationRequested)
+            {
+                throw new CanceledProblem().AsThrowable();
             }
         }
 
         private void RunUnhandled()
         {
+            EnsureNotCanceled();
             Compilation.Script.GetSyntaxProblems().ThrowErrors();
             // Emission
             CompilationUnitSyntax originalSyntax;

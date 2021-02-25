@@ -9,6 +9,7 @@ using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Threading;
 
 using VooDo.AST;
 using VooDo.AST.Names;
@@ -34,6 +35,9 @@ namespace VooDo.Compiling
         private readonly string? m_cSharpCode;
 
         public static Compilation Create(Script _script, Options _options, CSharpCompilation? _existingCompilation = null)
+            => Create(_script, _options, CancellationToken.None, _existingCompilation);
+
+        public static Compilation Create(Script _script, Options _options, CancellationToken _cancellationToken, CSharpCompilation? _existingCompilation = null)
         {
             if (_existingCompilation is not null)
             {
@@ -49,10 +53,13 @@ namespace VooDo.Compiling
                     References = references
                 };
             }
-            return new Compilation(_script, _options, _existingCompilation);
+            return new Compilation(_script, _options, _cancellationToken, _existingCompilation);
         }
 
         public static Compilation SucceedOrThrow(Script _script, Options _options, CSharpCompilation? _existingCompilation = null)
+            => SucceedOrThrow(_script, _options, CancellationToken.None, _existingCompilation);
+
+        public static Compilation SucceedOrThrow(Script _script, Options _options, CancellationToken _cancellationToken, CSharpCompilation? _existingCompilation = null)
         {
             Compilation compilation = Create(_script, _options, _existingCompilation);
             if (!compilation.Succeded)
@@ -62,11 +69,11 @@ namespace VooDo.Compiling
             return compilation;
         }
 
-        private Compilation(Script _script, Options _options, CSharpCompilation? _existingCompilation = null)
+        private Compilation(Script _script, Options _options, CancellationToken _cancellationToken, CSharpCompilation? _existingCompilation)
         {
             Script = _script.SetAsRoot(this);
             Options = _options;
-            Session session = new Session(this);
+            Session session = new Session(this, _cancellationToken);
             session.Run(_existingCompilation);
             Succeded = session.Succeeded;
             Problems = session.GetProblems();
