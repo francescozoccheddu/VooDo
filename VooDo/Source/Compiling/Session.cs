@@ -4,6 +4,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.IO;
 using System.Linq;
 using System.Threading;
 
@@ -11,6 +12,7 @@ using VooDo.AST.Names;
 using VooDo.Compiling.Emission;
 using VooDo.Compiling.Transformation;
 using VooDo.Problems;
+using VooDo.Runtime;
 using VooDo.Utils;
 
 using static VooDo.Compiling.Emission.Scope;
@@ -39,17 +41,21 @@ namespace VooDo.Compiling
 
         internal Tagger Tagger { get; } = new Tagger();
 
-        internal SemanticModel? Semantics { get; private set; }
+        internal SemanticModel Semantics { get; private set; }
 
         internal ImmutableArray<GlobalDefinition> Globals { get; private set; }
 
-        internal CSharpCompilation? CSharpCompilation { get; private set; }
+        internal CSharpCompilation CSharpCompilation { get; private set; }
 
-        internal CompilationUnitSyntax? Syntax { get; private set; }
+        internal CompilationUnitSyntax Syntax { get; private set; }
 
-        internal SyntaxTree? Tree { get; private set; }
+        internal SyntaxTree Tree { get; private set; }
 
         internal bool Succeeded { get; private set; }
+
+        internal Identifier RuntimeAlias { get; private set; }
+
+        internal MetadataReference RuntimeReference { get; private set; }
 
         internal void AddProblem(Problem _problem)
             => m_problems.Add(_problem);
@@ -60,17 +66,57 @@ namespace VooDo.Compiling
         internal ImmutableArray<Problem> GetProblems()
             => m_problems.ToImmutableArray();
 
-        internal Session(Compilation _compilation, CancellationToken _cancellationToken)
+        internal Session(Compilation _compilation, CancellationToken _cancellationToken, CSharpCompilation? _existingCompilation)
         {
             Compilation = _compilation;
             CancellationToken = _cancellationToken;
+            RuntimeAlias = null!;
+            Semantics = null!;
+            CSharpCompilation = null!;
+            Tree = null!;
+            Syntax = null!;
+            RuntimeReference = null!;
+            Run(_existingCompilation);
         }
 
-        internal void Run(CSharpCompilation? _existingCompilation = null)
+        private bool InitializeRuntimeSymbol(MetadataReference _reference)
         {
-            EnsureNotCanceled();
+            if (CSharpCompilation.GetAssemblyOrModuleSymbol(_reference) is IAssemblySymbol symbol)
+            {
+                if (symbol.GetTypeByMetadataName(typeof(Program).FullName) is not null
+                    && symbol.GetTypeByMetadataName(typeof(Variable).FullName) is not null
+                    && symbol.GetTypeByMetadataName(typeof(RuntimeHelpers).FullName) is not null)
+                {
+                    string? alias = _reference.Properties.Aliases.FirstOrDefault();
+                    RuntimeAlias = new Identifier(alias ?? "global");
+                    RuntimeReference = _reference;
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        private void InitializeRuntimeSymbol()
+        {
+            string? runtimeReferenceFilename = Path.GetFileNameWithoutExtension(Reference.RuntimeReference.FilePath);
+            IEnumerable<IGrouping<bool, MetadataReference>> references = CSharpCompilation.References
+                .GroupBy(_r => (_r as PortableExecutableReference)?.FilePath is string p
+                    && Path.GetFileNameWithoutExtension(p).Equals(runtimeReferenceFilename, System.StringComparison.OrdinalIgnoreCase));
+            foreach (MetadataReference reference in references.OrderByDescending(_g => _g.Key).SelectMany(_g => _g))
+            {
+                if (InitializeRuntimeSymbol(reference))
+                {
+                    return;
+                }
+            }
+            throw new NoRuntimeReferenceProblem().AsThrowable();
+        }
+
+        private void Run(CSharpCompilation? _existingCompilation = null)
+        {
             try
             {
+                EnsureNotCanceled();
                 if (_existingCompilation is null)
                 {
                     InitializeCompilation();
@@ -79,6 +125,7 @@ namespace VooDo.Compiling
                 {
                     InitializeFromExistingCompilation(_existingCompilation);
                 }
+                InitializeRuntimeSymbol();
                 RunUnhandled();
             }
             catch (VooDoException e)
@@ -163,7 +210,7 @@ namespace VooDo.Compiling
             Compilation.Script.GetSyntaxProblems().ThrowErrors();
             // Emission
             CompilationUnitSyntax originalSyntax;
-            (originalSyntax, Globals) = Emitter.Emit(Compilation.Script, this);
+            (originalSyntax, Globals) = Emitter.Emit(Compilation.Script, this, RuntimeAlias);
             ReplaceTree(originalSyntax);
             // Global type inference
             ReplaceTree(ImplicitGlobalTypeRewriter.Rewrite(this));

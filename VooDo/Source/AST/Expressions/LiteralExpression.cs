@@ -12,7 +12,7 @@ namespace VooDo.AST.Expressions
     {
 
 
-        public static LiteralExpression Null { get; } = new LiteralExpression((object?) null);
+        public static LiteralExpression Null { get; } = new LiteralExpression((object?)null);
         public static LiteralExpression True { get; } = new LiteralExpression(true);
         public static LiteralExpression False { get; } = new LiteralExpression(false);
 
@@ -97,7 +97,7 @@ namespace VooDo.AST.Expressions
 
         protected internal override Node ReplaceNodes(Func<Node?, Node?> _map) => this;
 
-        public override string ToString() => Emitter.Emit(this, new Tagger()).ToFullString();
+        public override string ToString() => Emitter.Emit(this, new Tagger(), "global").ToFullString();
 
     }
 }

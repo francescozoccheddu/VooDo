@@ -73,8 +73,7 @@ namespace VooDo.Compiling
         {
             Script = _script.SetAsRoot(this);
             Options = _options;
-            Session session = new Session(this, _cancellationToken);
-            session.Run(_existingCompilation);
+            Session session = new Session(this, _cancellationToken, _existingCompilation);
             Succeded = session.Succeeded;
             Problems = session.GetProblems();
             Globals = session.Globals.EmptyIfDefault().Select(_g => _g.Prototype).ToImmutableArray();

@@ -15,6 +15,7 @@ using System.Linq;
 using System.Threading;
 
 using VooDo.AST.Expressions;
+using VooDo.AST.Names;
 using VooDo.Compiling.Emission;
 using VooDo.Hooks;
 using VooDo.Problems;
@@ -158,12 +159,12 @@ namespace VooDo.Compiling.Transformation
             return result;
         }
 
-        private static PropertyDeclarationSyntax CreatePropertySyntax(ImmutableArray<(Expression initializer, int count)> _initializers, Tagger _tagger)
+        private static PropertyDeclarationSyntax CreatePropertySyntax(ImmutableArray<(Expression initializer, int count)> _initializers, Tagger _tagger, Identifier _runtimeAlias)
         {
             ArrayTypeSyntax hookType =
                 SyntaxFactoryUtils.SingleArray(
                     SyntaxFactoryUtils.TupleType(
-                        SyntaxFactory.ParseTypeName($"{Reference.runtimeReferenceAlias}::{typeof(IHook).FullName}"),
+                        SyntaxFactory.ParseTypeName($"{_runtimeAlias}::{typeof(IHook).FullName}"),
                         SyntaxFactoryUtils.PredefinedType(SyntaxKind.IntKeyword)));
             return SyntaxFactoryUtils.ArrowProperty(
                 hookType,
@@ -175,7 +176,7 @@ namespace VooDo.Compiling.Transformation
                         _initializers.Select(_i =>
                             SyntaxFactory.TupleExpression(
                                 SyntaxFactoryUtils.Arguments(
-                                    Emitter.Emit(_i.initializer, _tagger),
+                                    Emitter.Emit(_i.initializer, _tagger, _runtimeAlias),
                                     SyntaxFactoryUtils.Literal(_i.count)).Arguments))
                         .ToSeparatedList<ExpressionSyntax>())))
                 .WithModifiers(
@@ -203,7 +204,7 @@ namespace VooDo.Compiling.Transformation
                 return root;
             }
             _session.EnsureNotCanceled();
-            PropertyDeclarationSyntax property = CreatePropertySyntax(rewriter.Initializers, _session.Tagger);
+            PropertyDeclarationSyntax property = CreatePropertySyntax(rewriter.Initializers, _session.Tagger, _session.RuntimeAlias);
             ClassDeclarationSyntax newClass = classDeclaration.ReplaceNode(method.Body!, body);
             newClass = newClass.AddMembers(property);
             return root.ReplaceNode(classDeclaration, newClass);

@@ -24,21 +24,21 @@ namespace VooDo.Compiling.Emission
     internal sealed class Emitter
     {
 
-        internal static (CompilationUnitSyntax syntax, ImmutableArray<Scope.GlobalDefinition> globals) Emit(Script _script, Session _session)
+        internal static (CompilationUnitSyntax syntax, ImmutableArray<Scope.GlobalDefinition> globals) Emit(Script _script, Session _session, Identifier _runtimeAlias)
         {
             if (_script.Root != _script)
             {
                 throw new ArgumentException("Script is not root", nameof(_script));
             }
-            Emitter emitter = new Emitter(_session.Tagger);
+            Emitter emitter = new Emitter(_session.Tagger, _runtimeAlias);
             CompilationUnitSyntax syntax = emitter.EmitScript(_script, _session);
             return (syntax, emitter.m_scope.GetGlobalDefinitions());
         }
 
-        internal static UsingDirectiveSyntax Emit(UsingDirective _node, Tagger _tagger) => new Emitter(_tagger).EmitUsingDirective(_node);
-        internal static TypeSyntax Emit(ComplexType _node, Tagger _tagger) => new Emitter(_tagger).EmitComplexType(_node);
-        internal static ExpressionSyntax Emit(Expression _node, Tagger _tagger) => new Emitter(_tagger).EmitExpression(_node);
-        internal static NameSyntax Emit(Namespace _node, Tagger _tagger) => new Emitter(_tagger).EmitNamespace(_node);
+        internal static UsingDirectiveSyntax Emit(UsingDirective _node, Tagger _tagger) => new Emitter(_tagger, "global").EmitUsingDirective(_node);
+        internal static TypeSyntax Emit(ComplexType _node, Tagger _tagger) => new Emitter(_tagger, "global").EmitComplexType(_node);
+        internal static ExpressionSyntax Emit(Expression _node, Tagger _tagger, Identifier _runtimeAlias) => new Emitter(_tagger, _runtimeAlias).EmitExpression(_node);
+        internal static NameSyntax Emit(Namespace _node, Tagger _tagger) => new Emitter(_tagger, "global").EmitNamespace(_node);
 
         private static readonly ImmutableDictionary<string, SyntaxToken> s_predefinedTypesTokens =
             new SK[] {
@@ -61,12 +61,14 @@ namespace VooDo.Compiling.Emission
             .ToImmutableDictionary(_t => _t.ValueText);
 
         private readonly Tagger m_tagger;
+        private readonly Identifier m_runtimeAlias;
         private Scope m_scope;
 
-        private Emitter(Tagger _tagger)
+        private Emitter(Tagger _tagger, Identifier _runtimeAlias)
         {
             m_scope = new Scope();
             m_tagger = _tagger;
+            m_runtimeAlias = _runtimeAlias;
         }
 
         private ExpressionSyntax EmitExpression(Expression _node) => _node switch
@@ -284,7 +286,7 @@ namespace VooDo.Compiling.Emission
             TypeSyntax type = EmitComplexTypeOrVar(_node.Type);
             if (_node.Parent is GlobalStatement && !_node.Type.IsVar)
             {
-                type = SU.VariableType(type);
+                type = SU.VariableType(m_runtimeAlias, type);
             }
             return _node.Declarators.Select(_d =>
                 SF.LocalDeclarationStatement(
@@ -417,6 +419,7 @@ namespace VooDo.Compiling.Emission
         {
             Scope.GlobalDefinition globalDefinition = m_scope.AddGlobal(new GlobalPrototype(new Global(false, ComplexTypeOrVar.Var, null, _node.Initializer), _node));
             return SU.SetControllerAndGetValueInvocation(
+                    m_runtimeAlias,
                     SU.ThisMemberAccess(globalDefinition.Identifier),
                     EmitExpression(_node.Controller).Own(m_tagger, _node.Controller))
                 .Own(m_tagger, _node);
@@ -578,7 +581,7 @@ namespace VooDo.Compiling.Emission
         private CompilationUnitSyntax EmitScript(Script _node, Session _session)
         {
             TypeSyntax? returnType = _session.Compilation.Options.ReturnType is null ? null : EmitComplexType(_session.Compilation.Options.ReturnType);
-            TypeSyntax variableType = SU.VariableType();
+            TypeSyntax variableType = SU.VariableType(m_runtimeAlias);
             IEnumerable<ExternAliasDirectiveSyntax> aliases =
                 _session.Compilation.Options.References
                 .SelectMany(_r => _r.Aliases)
@@ -606,11 +609,12 @@ namespace VooDo.Compiling.Emission
                     ? null
                     : EmitComplexTypeOrVar(_definition.Prototype.Global.Type);
                 VariableDeclarationSyntax declaration = SF.VariableDeclaration(
-                            SU.VariableType(type).Own(m_tagger, _definition.Prototype.Global.Type),
+                            SU.VariableType(m_runtimeAlias, type).Own(m_tagger, _definition.Prototype.Global.Type),
                             SF.VariableDeclarator(
                                 _definition.Identifier,
                                 null,
                                 SU.CreateVariableInvocation(
+                                    m_runtimeAlias,
                                     type,
                                     _definition.Prototype.Global.IsConstant,
                                     _definition.Prototype.Global.Name!,
@@ -626,7 +630,7 @@ namespace VooDo.Compiling.Emission
             }
             PropertyDeclarationSyntax variablesProperty = SU.ArrowProperty(
                 SU.SingleArray(
-                    SU.VariableType()),
+                    SU.VariableType(m_runtimeAlias)),
                 RuntimeHelpers.variablesPropertyName,
                 SF.ArrayCreationExpression(
                     SU.SingleArray(variableType))
@@ -656,7 +660,7 @@ namespace VooDo.Compiling.Emission
                     .WithBaseList(
                         SF.BaseList(
                             SF.SimpleBaseType(
-                                SU.ProgramType(returnType))
+                                SU.ProgramType(m_runtimeAlias, returnType))
                             .ToSeparatedList<BaseTypeSyntax>()))
                     .WithMembers(globalDeclarations
                         .Cast<MemberDeclarationSyntax>()

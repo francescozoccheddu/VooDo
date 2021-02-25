@@ -7,7 +7,6 @@ using System.Collections.Immutable;
 using System.Linq;
 
 using VooDo.AST.Names;
-using VooDo.Compiling;
 using VooDo.Compiling.Emission;
 using VooDo.Runtime;
 
@@ -30,29 +29,29 @@ namespace VooDo.Utils
             "unsafe", "ushort", "using", "virtual", "void", "volatile", "while" }
         .ToImmutableHashSet();
 
-        private static readonly QualifiedNameSyntax s_programType = (QualifiedNameSyntax)(QualifiedType.FromType<Program>() with
+        private static QualifiedNameSyntax ProgramType(Identifier _runtimeAlias) => (QualifiedNameSyntax)(QualifiedType.FromType<Program>() with
         {
-            Alias = Reference.runtimeReferenceAlias
+            Alias = _runtimeAlias
         }).ToTypeSyntax();
 
-        private static readonly QualifiedNameSyntax s_genericProgramType = (QualifiedNameSyntax)(QualifiedType.FromType<TypedProgram<object>>() with
+        private static QualifiedNameSyntax GenericProgramType(Identifier _runtimeAlias) => (QualifiedNameSyntax)(QualifiedType.FromType<TypedProgram<object>>() with
         {
-            Alias = Reference.runtimeReferenceAlias
+            Alias = _runtimeAlias
         }).ToTypeSyntax();
 
-        private static readonly QualifiedNameSyntax s_variableType = (QualifiedNameSyntax)(QualifiedType.FromType<Variable>() with
+        private static QualifiedNameSyntax VariableType(Identifier _runtimeAlias) => (QualifiedNameSyntax)(QualifiedType.FromType<Variable>() with
         {
-            Alias = Reference.runtimeReferenceAlias
+            Alias = _runtimeAlias
         }).ToTypeSyntax();
 
-        private static readonly QualifiedNameSyntax s_genericVariableType = (QualifiedNameSyntax)(QualifiedType.FromType<Variable<object>>() with
+        private static QualifiedNameSyntax GenericVariableType(Identifier _runtimeAlias) => (QualifiedNameSyntax)(QualifiedType.FromType<Variable<object>>() with
         {
-            Alias = Reference.runtimeReferenceAlias
+            Alias = _runtimeAlias
         }).ToTypeSyntax();
 
-        private static readonly QualifiedNameSyntax s_runtimeHelpersType = (QualifiedNameSyntax)(QualifiedType.FromType(typeof(RuntimeHelpers)) with
+        private static QualifiedNameSyntax RuntimeHelpersType(Identifier _runtimeAlias) => (QualifiedNameSyntax)(QualifiedType.FromType(typeof(RuntimeHelpers)) with
         {
-            Alias = Reference.runtimeReferenceAlias
+            Alias = _runtimeAlias
         }).ToTypeSyntax();
 
         internal static PredefinedTypeSyntax PredefinedType(SyntaxKind _kind)
@@ -64,10 +63,10 @@ namespace VooDo.Utils
         internal static NameSyntax ToNameSyntax(this Namespace _namespace)
             => Emitter.Emit(_namespace, new Tagger());
 
-        internal static InvocationExpressionSyntax CreateVariableInvocation(TypeSyntax? _type, bool _isConstant, string? _name, ExpressionSyntax _initialValue)
+        internal static InvocationExpressionSyntax CreateVariableInvocation(Identifier _runtimeAlias, TypeSyntax? _type, bool _isConstant, string? _name, ExpressionSyntax _initialValue)
             => Invocation(
                 MemberAccess(
-                    s_runtimeHelpersType,
+                    RuntimeHelpersType(_runtimeAlias),
                     GenericName(
                         nameof(RuntimeHelpers.CreateVariable),
                         _type!)),
@@ -75,10 +74,10 @@ namespace VooDo.Utils
                     Literal(_name),
                     _initialValue);
 
-        internal static InvocationExpressionSyntax SetControllerAndGetValueInvocation(ExpressionSyntax _variable, ExpressionSyntax _controller)
+        internal static InvocationExpressionSyntax SetControllerAndGetValueInvocation(Identifier _runtimeAlias, ExpressionSyntax _variable, ExpressionSyntax _controller)
             => Invocation(
                 MemberAccess(
-                    s_runtimeHelpersType,
+                    RuntimeHelpersType(_runtimeAlias),
                     nameof(RuntimeHelpers.SetControllerAndGetValue)),
                 _variable,
                 _controller);
@@ -90,15 +89,15 @@ namespace VooDo.Utils
                 Literal(_setIndex),
                 Literal(_hookIndex));
 
-        internal static TypeSyntax VariableType(TypeSyntax? _type = null)
+        internal static TypeSyntax VariableType(Identifier _runtimeAlias, TypeSyntax? _type = null)
         {
             if (_type is null)
             {
-                return s_variableType;
+                return VariableType(_runtimeAlias);
             }
             else
             {
-                QualifiedNameSyntax syntax = s_genericVariableType;
+                QualifiedNameSyntax syntax = GenericVariableType(_runtimeAlias);
                 GenericNameSyntax right = (GenericNameSyntax)syntax.Right;
                 right = right.WithTypeArgumentList(
                     SF.TypeArgumentList(
@@ -152,15 +151,15 @@ namespace VooDo.Utils
         internal static SyntaxList<TNode> ToSyntaxList<TNode>(this IEnumerable<TNode> _nodes) where TNode : SyntaxNode
             => SF.List(_nodes);
 
-        internal static TypeSyntax ProgramType(TypeSyntax? _returnType = null)
+        internal static TypeSyntax ProgramType(Identifier _runtimeAlias, TypeSyntax? _returnType = null)
         {
             if (_returnType is null)
             {
-                return s_programType;
+                return ProgramType(_runtimeAlias);
             }
             else
             {
-                QualifiedNameSyntax syntax = s_genericProgramType;
+                QualifiedNameSyntax syntax = GenericProgramType(_runtimeAlias);
                 GenericNameSyntax right = (GenericNameSyntax)syntax.Right;
                 right = right.WithTypeArgumentList(
                     SF.TypeArgumentList(

@@ -20,10 +20,8 @@ namespace VooDo.Compiling
     public sealed record Reference : IEquatable<Reference?>
     {
 
-        internal const string runtimeReferenceAlias = "VooDoRuntime";
-
         public static Reference RuntimeReference { get; }
-            = FromAssembly(typeof(Program).Assembly, runtimeReferenceAlias);
+            = FromAssembly(typeof(Program).Assembly, "VooDo_VooDoRuntime");
 
         private sealed class MetadataEqualityComparerImpl : IEqualityComparer<Reference>
         {
@@ -47,16 +45,16 @@ namespace VooDo.Compiling
         }
 
         public static Reference FromStream(Stream _stream, params Identifier[] _aliases)
-            => FromStream(_stream, (IEnumerable<Identifier>) _aliases);
+            => FromStream(_stream, (IEnumerable<Identifier>)_aliases);
 
         public static Reference FromFile(string _path, params Identifier[] _aliases)
-            => FromFile(_path, (IEnumerable<Identifier>) _aliases);
+            => FromFile(_path, (IEnumerable<Identifier>)_aliases);
 
         public static Reference FromImage(IEnumerable<byte> _image, params Identifier[] _aliases)
-            => FromImage(_image, (IEnumerable<Identifier>) _aliases);
+            => FromImage(_image, (IEnumerable<Identifier>)_aliases);
 
         public static Reference FromAssembly(Assembly _assembly, params Identifier[] _aliases)
-            => FromAssembly(_assembly, (IEnumerable<Identifier>) _aliases);
+            => FromAssembly(_assembly, (IEnumerable<Identifier>)_aliases);
 
         public static Reference FromStream(Stream _stream, IEnumerable<Identifier>? _aliases = null)
             => new Reference(MetadataReference.CreateFromStream(_stream), _stream is FileStream file ? file.Name : null, null, _aliases);

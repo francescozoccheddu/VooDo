@@ -36,11 +36,10 @@ namespace VooDo.Compiling.Transformation
 
         }
 
-        private static INamedTypeSymbol GetControllerFactorySymbol(SemanticModel _semantics)
+        private static INamedTypeSymbol GetControllerFactorySymbol(SemanticModel _semantics, MetadataReference _runtimeReference)
         {
-            CSharpCompilation compilation = (CSharpCompilation) _semantics.Compilation;
-            MetadataReference runtime = compilation.References.First(_r => _r.Properties.Aliases.Contains(Reference.runtimeReferenceAlias));
-            IAssemblySymbol runtimeSymbol = (IAssemblySymbol) compilation.GetAssemblyOrModuleSymbol(runtime)!;
+            CSharpCompilation compilation = (CSharpCompilation)_semantics.Compilation;
+            IAssemblySymbol runtimeSymbol = (IAssemblySymbol)compilation.GetAssemblyOrModuleSymbol(_runtimeReference)!;
             INamedTypeSymbol? controllerFactorySymbol = runtimeSymbol.GetTypeByMetadataName(typeof(IControllerFactory<>).FullName!);
             if (controllerFactorySymbol is null)
             {
@@ -73,7 +72,7 @@ namespace VooDo.Compiling.Transformation
             {
                 if (globalsMap.TryGetValue(declaration.GetTag()!, out int index))
                 {
-                    InvocationExpressionSyntax invocation = (InvocationExpressionSyntax) declaration.Variables.Single().Initializer!.Value;
+                    InvocationExpressionSyntax invocation = (InvocationExpressionSyntax)declaration.Variables.Single().Initializer!.Value;
                     ExpressionSyntax initialValue = invocation.ArgumentList.Arguments[2].Expression;
                     syntax[index] = new GlobalSyntax(declaration, initialValue, null);
                 }
@@ -108,9 +107,9 @@ namespace VooDo.Compiling.Transformation
             return ImmutableArray.Create<ITypeSymbol>();
         }
 
-        private static ImmutableArray<ImmutableArray<ITypeSymbol>> GetControllerTypes(IEnumerable<ExpressionSyntax?> _controllers, SemanticModel _semantics)
+        private static ImmutableArray<ImmutableArray<ITypeSymbol>> GetControllerTypes(IEnumerable<ExpressionSyntax?> _controllers, SemanticModel _semantics, MetadataReference _runtimeReference)
         {
-            INamedTypeSymbol controllerFactorySymbol = GetControllerFactorySymbol(_semantics);
+            INamedTypeSymbol controllerFactorySymbol = GetControllerFactorySymbol(_semantics, _runtimeReference);
             return _controllers
                 .Select(_c => GetExpressionType(_c, _semantics))
                 .Select(_t => _t is null
@@ -137,16 +136,16 @@ namespace VooDo.Compiling.Transformation
             return ImmutableArray.Create<ITypeSymbol>();
         }
 
-        private static ImmutableArray<ImmutableArray<ITypeSymbol>> InferTypes(IEnumerable<GlobalSyntax> _syntax, SemanticModel _semantics)
+        private static ImmutableArray<ImmutableArray<ITypeSymbol>> InferTypes(IEnumerable<GlobalSyntax> _syntax, SemanticModel _semantics, MetadataReference _runtimeReference)
         {
-            ImmutableArray<ImmutableArray<ITypeSymbol>> controllerTypes = GetControllerTypes(_syntax.Select(_c => _c.Controller), _semantics);
+            ImmutableArray<ImmutableArray<ITypeSymbol>> controllerTypes = GetControllerTypes(_syntax.Select(_c => _c.Controller), _semantics, _runtimeReference);
             ImmutableArray<ITypeSymbol?> initialValueTypes = GetInitialValueTypes(_syntax.Select(_iv => _iv.InitialValue), _semantics);
             return initialValueTypes.Zip(controllerTypes, (_iv, _c) => ConciliateTypes(_iv, _c)).ToImmutableArray();
         }
 
-        private static ImmutableArray<ITypeSymbol> InferSingleType(IEnumerable<GlobalSyntax> _syntax, IEnumerable<GlobalPrototype> _prototypes, SemanticModel _semantics)
+        private static ImmutableArray<ITypeSymbol> InferSingleType(IEnumerable<GlobalSyntax> _syntax, IEnumerable<GlobalPrototype> _prototypes, SemanticModel _semantics, MetadataReference _runtimeReference)
         {
-            ImmutableArray<ImmutableArray<ITypeSymbol>> types = InferTypes(_syntax, _semantics);
+            ImmutableArray<ImmutableArray<ITypeSymbol>> types = InferTypes(_syntax, _semantics, _runtimeReference);
             types.Zip(_prototypes, (_t, _p) => (types: _t, prototype: _p))
                 .Where(_t => _t.types.Length != 1)
                 .Select(_t => new GlobalTypeInferenceProblem(_t.types, _t.prototype))
@@ -159,12 +158,12 @@ namespace VooDo.Compiling.Transformation
             TypeSyntax type = SyntaxFactory.ParseTypeName(_type.ToDisplayString());
             TypeArgumentListSyntax typeArguments = SyntaxFactoryUtils.TypeArguments(type).OwnAs(_declaration.Type);
             {
-                QualifiedNameSyntax name = (QualifiedNameSyntax) _declaration.Type;
+                QualifiedNameSyntax name = (QualifiedNameSyntax)_declaration.Type;
                 _declaration = _declaration.WithType(name.WithRight(SyntaxFactory.GenericName(name.Right.Identifier, typeArguments)));
             }
             {
-                InvocationExpressionSyntax initializer = (InvocationExpressionSyntax) _declaration.Variables.Single().Initializer!.Value;
-                GenericNameSyntax methodName = (GenericNameSyntax) ((MemberAccessExpressionSyntax) initializer.Expression).Name;
+                InvocationExpressionSyntax initializer = (InvocationExpressionSyntax)_declaration.Variables.Single().Initializer!.Value;
+                GenericNameSyntax methodName = (GenericNameSyntax)((MemberAccessExpressionSyntax)initializer.Expression).Name;
                 _declaration = _declaration.ReplaceNode(methodName, methodName.WithTypeArgumentList(typeArguments));
             }
             return _declaration.OwnAs(_declaration);
@@ -189,7 +188,7 @@ namespace VooDo.Compiling.Transformation
                 return root;
             }
             ImmutableArray<GlobalSyntax> syntax = GetSyntax(classDeclaration, globals, _session.Tagger);
-            ImmutableArray<ITypeSymbol> types = InferSingleType(syntax, globals.Select(_g => _g.Prototype), _session.Semantics!);
+            ImmutableArray<ITypeSymbol> types = InferSingleType(syntax, globals.Select(_g => _g.Prototype), _session.Semantics!, _session.RuntimeReference);
             return ReplaceAll(root, syntax.Select(_s => _s.Declaration).ToImmutableArray(), types);
         }
 
