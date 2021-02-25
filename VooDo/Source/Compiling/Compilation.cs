@@ -1,6 +1,7 @@
 ﻿
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Emit;
 
 using System;
@@ -91,6 +92,15 @@ namespace VooDo.Compiling
             {
                 throw result.Diagnostics.SelectNonNull(_d => RoslynProblem.FromDiagnostic(_d, null, Problem.EKind.Emission)).AsThrowable();
             }
+        }
+
+        public CompilationUnitSyntax GetCSharpSyntax()
+        {
+            if (!Succeded)
+            {
+                throw new InvalidOperationException("Compilation did not succeed");
+            }
+            return (CompilationUnitSyntax)m_cSharpCompilation!.SyntaxTrees[0].GetRoot();
         }
 
         public void SaveCSharpSourceFile(string _file)

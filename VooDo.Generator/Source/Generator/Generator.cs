@@ -33,6 +33,7 @@ namespace VooDo.Generator
         private const string c_usingsOption = c_projectOptionPrefix + ".VooDoUsings";
         private const string c_xamlPathOption = c_fileOptionPrefix + ".XamlPath";
         private const string c_xamlClassOption = c_fileOptionPrefix + ".XamlClass";
+        private const string c_namePrefix = "VooDo_GeneratedScript_";
 
         private sealed class NameDictionary
         {
@@ -55,7 +56,8 @@ namespace VooDo.Generator
         private static string GetName(string _path)
         {
             string name = Path.GetFileNameWithoutExtension(_path);
-            StringBuilder builder = new(name.Length);
+            StringBuilder builder = new(c_namePrefix.Length + name.Length);
+            builder.Append(c_namePrefix);
             bool initial = true;
             foreach (char c in name)
             {
@@ -68,10 +70,6 @@ namespace VooDo.Generator
                 {
                     initial = true;
                 }
-            }
-            if (builder.Length == 0 || char.IsDigit(builder[0]))
-            {
-                builder.Insert(0, "Script");
             }
             return builder.ToString();
         }
@@ -208,7 +206,23 @@ namespace VooDo.Generator
                     ClassName = name
                 };
                 VC::Compilation compilation = VC::Compilation.SucceedOrThrow(script, options);
-                _context.AddSource(name, compilation.GetCSharpSourceCode());
+                CompilationUnitSyntax syntax = compilation.GetCSharpSyntax();
+                ClassDeclarationSyntax classDeclaration = syntax.DescendantNodes().OfType<ClassDeclarationSyntax>().Single();
+                syntax = syntax.ReplaceNode(classDeclaration,
+                    SyntaxFactory.ClassDeclaration(xamlName!)
+                    .WithMembers(
+                        SyntaxFactory.SingletonList<MemberDeclarationSyntax>(
+                            classDeclaration.WithModifiers(
+                                SyntaxFactory.TokenList(
+                                    SyntaxFactory.Token(
+                                        SyntaxKind.PrivateKeyword),
+                                    SyntaxFactory.Token(
+                                        SyntaxKind.SealedKeyword)))))
+                    .WithModifiers(
+                        SyntaxFactory.TokenList(
+                            SyntaxFactory.Token(
+                                SyntaxKind.PartialKeyword))));
+                _context.AddSource(name, syntax.NormalizeWhitespace().ToFullString());
             }
             catch (VooDoException exception)
             {
