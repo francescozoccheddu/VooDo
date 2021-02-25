@@ -24,6 +24,12 @@ namespace VooDo.Generator
     internal sealed class Generator : ISourceGenerator
     {
 
+        private const string c_projectOptionPrefix = "build_property";
+        private const string c_fileOptionPrefix = "build_metadata";
+        private const string c_usingsOption = c_projectOptionPrefix + ".VooDoUsings";
+        private const string c_xamlPathOption = c_fileOptionPrefix + ".XamlPath";
+        private const string c_xamlClassOption = c_fileOptionPrefix + ".XamlClass";
+
         private sealed class NameDictionary
         {
 
@@ -109,10 +115,70 @@ namespace VooDo.Generator
             }
         }
 
+        private static UsingDirective ParseUsing(string _value)
+        {
+            string[] tokens = _value.Split('=');
+            if (tokens.Length == 1)
+            {
+                string[] nameTokens = tokens[0].Split();
+                if (nameTokens.Length > 2 || (nameTokens.Length == 2 && !nameTokens[0].Equals("static", StringComparison.OrdinalIgnoreCase)))
+                {
+                    throw new FormatException("Name cannot contain whitespace");
+                }
+                if (nameTokens.Length == 1)
+                {
+                    return new UsingNamespaceDirective(nameTokens[0]);
+                }
+                else
+                {
+                    return new UsingStaticDirective(nameTokens[1]);
+                }
+            }
+            else if (tokens.Length == 2)
+            {
+                return new UsingNamespaceDirective(tokens[0], tokens[1]);
+            }
+            else
+            {
+                throw new FormatException("Multiple '=' symbols");
+            }
+        }
+
+        private static bool TryGetUsings(GeneratorExecutionContext _context, out ImmutableArray<UsingDirective> _directives)
+        {
+            if (_context.AnalyzerConfigOptions.GlobalOptions.TryGetValue(c_usingsOption, out string? option))
+            {
+                string[] tokens = option.Split(',');
+                int count = string.IsNullOrEmpty(tokens.Last()) ? tokens.Length - 1 : tokens.Length;
+                UsingDirective[] directives = new UsingDirective[count];
+                for (int i = 0; i < count; i++)
+                {
+                    try
+                    {
+                        directives[i] = ParseUsing(tokens[i]);
+                    }
+                    catch (Exception e)
+                    {
+                        _context.ReportDiagnostic(DiagnosticFactory.InvalidUsing(tokens[i], e.Message));
+                        return false;
+                    }
+                }
+                _directives = directives.ToImmutableArray();
+            }
+            else
+            {
+                _directives = ImmutableArray.Create<UsingDirective>();
+            }
+            return true;
+        }
+
         public void Execute(GeneratorExecutionContext _context)
         {
+            if (!TryGetUsings(_context, out ImmutableArray<UsingDirective> usingDirectives))
+            {
+                return;
+            }
             NameDictionary nameDictionary = new();
-            ImmutableArray<UsingDirective> usingDirectives = ImmutableArray.Create<UsingDirective>();
             ImmutableArray<VC::Reference> references = _context.Compilation.References
                 .OfType<PortableExecutableReference>()
                 .Where(_r => _r.FilePath is not null && !Path.GetFileName(_r.FilePath).Equals("VooDo.Runtime.dll", StringComparison.OrdinalIgnoreCase))
@@ -127,7 +193,6 @@ namespace VooDo.Generator
 
         public void Initialize(GeneratorInitializationContext _context)
         {
-            return;
             if (!System.Diagnostics.Debugger.IsAttached)
             {
                 System.Diagnostics.Debugger.Launch();

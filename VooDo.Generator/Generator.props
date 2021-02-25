@@ -1,0 +1,7 @@
+﻿<Project>
+  <ItemGroup>
+    <CompilerVisibleProperty Include="VooDoUsings" />
+    <CompilerVisibleItemMetadata Include="AdditionalFiles" MetadataName="XamlPath" />
+    <CompilerVisibleItemMetadata Include="AdditionalFiles" MetadataName="XamlClass" />
+  </ItemGroup>
+</Project>

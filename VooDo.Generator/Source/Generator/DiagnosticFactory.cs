@@ -77,7 +77,7 @@ namespace VooDo.Generator
             new(
                 "VD006",
                 "Invalid using directive",
-                "Invalid global using directive '{0}'",
+                "Invalid global using directive '{0}': {1}",
                 "Generator",
                 DiagnosticSeverity.Error,
                 true,
@@ -111,11 +111,12 @@ namespace VooDo.Generator
                 _scriptFile,
                 _xamlFile);
 
-        internal static Diagnostic InvalidUsing(string _directive)
+        internal static Diagnostic InvalidUsing(string _directive, string _message)
             => Diagnostic.Create(
                 s_invalidUsingDescriptor,
                 null,
-                _directive);
+                _directive,
+                _message);
 
     }
 
