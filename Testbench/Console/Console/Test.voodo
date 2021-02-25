@@ -1,1 +1,1 @@
-﻿int x = 7;
+﻿int x = this.GetType().Name.Length;

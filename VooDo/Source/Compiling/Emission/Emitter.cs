@@ -151,7 +151,7 @@ namespace VooDo.Compiling.Emission
             .Own(m_tagger, _node);
 
         private SyntaxToken EmitIdentifier(Identifier _node)
-            => SF.Identifier(_node).Own(m_tagger, _node);
+            => SU.Identifier(_node).Own(m_tagger, _node);
 
         private VariableDesignationSyntax EmitIdentifierOrDiscard(IdentifierOrDiscard _node)
             => (_node.IsDiscard
@@ -586,7 +586,7 @@ namespace VooDo.Compiling.Emission
             IEnumerable<UsingDirectiveSyntax> usings = _node.Usings.Select(EmitUsingDirective);
             MethodDeclarationSyntax? runMethod = SF.MethodDeclaration(
                                 returnType ?? SU.Void(),
-                                SF.Identifier(returnType is null
+                                SU.Identifier(returnType is null
                                     ? RuntimeHelpers.runMethodName
                                     : RuntimeHelpers.typedRunMethodName))
                             .WithModifiers(

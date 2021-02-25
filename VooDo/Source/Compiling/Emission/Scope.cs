@@ -1,5 +1,4 @@
 ﻿using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -18,7 +17,7 @@ namespace VooDo.Compiling.Emission
         internal sealed class GlobalDefinition
         {
 
-            public GlobalDefinition(GlobalPrototype _global, string _identifier) : this(_global, SyntaxFactory.Identifier(_identifier)) { }
+            public GlobalDefinition(GlobalPrototype _global, string _identifier) : this(_global, SyntaxFactoryUtils.Identifier(_identifier)) { }
 
             public GlobalDefinition(GlobalPrototype _global, SyntaxToken _identifier)
             {

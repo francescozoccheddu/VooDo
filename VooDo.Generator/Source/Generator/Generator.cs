@@ -312,6 +312,7 @@ namespace VooDo.Generator
 
         public void Initialize(GeneratorInitializationContext _context)
         {
+            return;
             if (!System.Diagnostics.Debugger.IsAttached)
             {
                 System.Diagnostics.Debugger.Launch();

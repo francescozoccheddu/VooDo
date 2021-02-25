@@ -59,7 +59,7 @@ namespace VooDo.AST
                     lastNewLine = i;
                 }
             }
-            _startColumn = Start - lastNewLine - 1;
+            _startColumn = Start - lastNewLine;
             _endLine = _startLine;
             for (int i = Start; i < End; i++)
             {
@@ -69,7 +69,7 @@ namespace VooDo.AST
                     lastNewLine = i;
                 }
             }
-            _endColumn = End - lastNewLine - 1;
+            _endColumn = End - lastNewLine;
         }
 
         public override string GetDisplayMessage()

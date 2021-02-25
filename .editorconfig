@@ -30,3 +30,6 @@ dotnet_diagnostic.CS3021.severity = none
 
 # RS2008: Enable analyzer release tracking
 dotnet_diagnostic.RS2008.severity = none
+
+# RS1017: Diagnostic Id for rule 's_fileReadErrorDescriptor' must be a non-null constant
+dotnet_diagnostic.RS1017.severity = none

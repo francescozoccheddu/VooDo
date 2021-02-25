@@ -3,6 +3,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 
 using VooDo.AST.Names;
@@ -19,27 +20,37 @@ namespace VooDo.Utils
     internal static class SyntaxFactoryUtils
     {
 
-        private static readonly QualifiedNameSyntax s_programType = (QualifiedNameSyntax) (QualifiedType.FromType<Program>() with
+        private static readonly ImmutableHashSet<string> s_keywords = new[] {
+            "abstract", "as", "base", "bool", "break", "byte", "case", "catch", "char", "checked", "class", "const",
+            "continue", "decimal", "default", "delegate", "do", "double", "else", "enum", "event", "explicit", "extern",
+            "false", "finally", "fixed", "float", "for", "foreach", "goto", "if", "implicit", "in", "int", "interface",
+            "internal", "is", "lock", "long", "namespace", "new", "null", "object", "operator", "out", "override",
+            "params", "private", "protected", "public", "readonly", "ref", "return", "sbyte", "sealed", "short", "sizeof",
+            "static", "string", "struct", "switch", "this", "throw", "true", "try", "typeof", "uint", "ulong", "unchecked",
+            "unsafe", "ushort", "using", "virtual", "void", "volatile", "while" }
+        .ToImmutableHashSet();
+
+        private static readonly QualifiedNameSyntax s_programType = (QualifiedNameSyntax)(QualifiedType.FromType<Program>() with
         {
             Alias = Reference.runtimeReferenceAlias
         }).ToTypeSyntax();
 
-        private static readonly QualifiedNameSyntax s_genericProgramType = (QualifiedNameSyntax) (QualifiedType.FromType<TypedProgram<object>>() with
+        private static readonly QualifiedNameSyntax s_genericProgramType = (QualifiedNameSyntax)(QualifiedType.FromType<TypedProgram<object>>() with
         {
             Alias = Reference.runtimeReferenceAlias
         }).ToTypeSyntax();
 
-        private static readonly QualifiedNameSyntax s_variableType = (QualifiedNameSyntax) (QualifiedType.FromType<Variable>() with
+        private static readonly QualifiedNameSyntax s_variableType = (QualifiedNameSyntax)(QualifiedType.FromType<Variable>() with
         {
             Alias = Reference.runtimeReferenceAlias
         }).ToTypeSyntax();
 
-        private static readonly QualifiedNameSyntax s_genericVariableType = (QualifiedNameSyntax) (QualifiedType.FromType<Variable<object>>() with
+        private static readonly QualifiedNameSyntax s_genericVariableType = (QualifiedNameSyntax)(QualifiedType.FromType<Variable<object>>() with
         {
             Alias = Reference.runtimeReferenceAlias
         }).ToTypeSyntax();
 
-        private static readonly QualifiedNameSyntax s_runtimeHelpersType = (QualifiedNameSyntax) (QualifiedType.FromType(typeof(RuntimeHelpers)) with
+        private static readonly QualifiedNameSyntax s_runtimeHelpersType = (QualifiedNameSyntax)(QualifiedType.FromType(typeof(RuntimeHelpers)) with
         {
             Alias = Reference.runtimeReferenceAlias
         }).ToTypeSyntax();
@@ -88,7 +99,7 @@ namespace VooDo.Utils
             else
             {
                 QualifiedNameSyntax syntax = s_genericVariableType;
-                GenericNameSyntax right = (GenericNameSyntax) syntax.Right;
+                GenericNameSyntax right = (GenericNameSyntax)syntax.Right;
                 right = right.WithTypeArgumentList(
                     SF.TypeArgumentList(
                         SF.SingletonSeparatedList(_type)));
@@ -103,7 +114,7 @@ namespace VooDo.Utils
             => SF.MemberAccessExpression(SK.SimpleMemberAccessExpression, _source, _member);
 
         internal static MemberAccessExpressionSyntax MemberAccess(ExpressionSyntax _source, string _member)
-            => MemberAccess(_source, SF.Identifier(_member));
+            => MemberAccess(_source, Identifier(_member));
 
         internal static MemberAccessExpressionSyntax ThisMemberAccess(SyntaxToken _member)
             => ThisMemberAccess(SF.IdentifierName(_member));
@@ -124,7 +135,7 @@ namespace VooDo.Utils
             => SF.BracketedArgumentList(_arguments.ToSeparatedList());
 
         internal static TypeArgumentListSyntax TypeArguments(params TypeSyntax[] _typeArguments)
-            => TypeArguments((IEnumerable<TypeSyntax>) _typeArguments);
+            => TypeArguments((IEnumerable<TypeSyntax>)_typeArguments);
 
         internal static TypeArgumentListSyntax TypeArguments(IEnumerable<TypeSyntax> _typeArguments)
             => SF.TypeArgumentList(_typeArguments.ToSeparatedList());
@@ -150,7 +161,7 @@ namespace VooDo.Utils
             else
             {
                 QualifiedNameSyntax syntax = s_genericProgramType;
-                GenericNameSyntax right = (GenericNameSyntax) syntax.Right;
+                GenericNameSyntax right = (GenericNameSyntax)syntax.Right;
                 right = right.WithTypeArgumentList(
                     SF.TypeArgumentList(
                         SF.SingletonSeparatedList(_returnType)));
@@ -208,10 +219,10 @@ namespace VooDo.Utils
             => ArrayRanks(new[] { 1 });
 
         internal static GenericNameSyntax GenericName(string _name, params TypeSyntax[] _typeArguments)
-            => GenericName(SF.Identifier(_name), _typeArguments);
+            => GenericName(Identifier(_name), _typeArguments);
 
         internal static GenericNameSyntax GenericName(SyntaxToken _name, params TypeSyntax[] _typeArguments)
-            => GenericName(_name, (IEnumerable<TypeSyntax>) _typeArguments);
+            => GenericName(_name, (IEnumerable<TypeSyntax>)_typeArguments);
 
         internal static GenericNameSyntax GenericName(SyntaxToken _name, IEnumerable<TypeSyntax> _typeArguments)
             => SF.GenericName(_name, TypeArguments(_typeArguments));
@@ -232,7 +243,7 @@ namespace VooDo.Utils
             {
                 type = type is null
                     ? name
-                    : SF.QualifiedName(type, (SimpleNameSyntax) name);
+                    : SF.QualifiedName(type, (SimpleNameSyntax)name);
             }
             return type;
         }
@@ -241,6 +252,9 @@ namespace VooDo.Utils
             => SF.PropertyDeclaration(_type, _name)
                 .WithExpressionBody(SF.ArrowExpressionClause(_expression))
                 .WithSemicolonToken(SF.Token(SK.SemicolonToken));
+
+        internal static SyntaxToken Identifier(string _name)
+            => SF.Identifier(s_keywords.Contains(_name) ? '@' + _name.TrimStart('@') : _name);
 
     }
 
