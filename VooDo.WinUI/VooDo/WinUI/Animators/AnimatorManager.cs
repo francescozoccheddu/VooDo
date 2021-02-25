@@ -7,7 +7,6 @@ using System.Diagnostics;
 using System.Linq;
 
 using VooDo.Runtime;
-using VooDo.Utils;
 
 namespace VooDo.WinUI.Animators
 {
@@ -15,8 +14,8 @@ namespace VooDo.WinUI.Animators
     internal static class AnimatorManager
     {
 
-        private static readonly HashSet<IAnimator> s_animators = new(new Identity.ReferenceComparer<IAnimator>());
-        private static readonly Dictionary<Program, int> s_programReferenceCount = new(new Identity.ReferenceComparer<Program>());
+        private static readonly HashSet<IAnimator> s_animators = new();
+        private static readonly Dictionary<Program, int> s_programReferenceCount = new();
         private static bool s_running;
         private static readonly Stopwatch s_stopwatch = new Stopwatch();
         private const double c_maxDeltaTime = 1.0 / 2.0;

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 using VooDo.Runtime;
 
-namespace VooDo.Hooks
+namespace VooDo.WinUI.Hooks
 {
 
     public abstract class Hook<TObject, TToken> : IHook where TObject : class
@@ -21,7 +21,7 @@ namespace VooDo.Hooks
 
         void IHook.Subscribe(object _object)
         {
-            TObject newObject = (TObject) _object;
+            TObject newObject = (TObject)_object;
             if (!ReferenceEquals(newObject, m_object))
             {
                 if (m_object is not null)

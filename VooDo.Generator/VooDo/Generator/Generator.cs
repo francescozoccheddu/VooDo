@@ -16,9 +16,11 @@ using VooDo.AST;
 using VooDo.AST.Directives;
 using VooDo.AST.Names;
 using VooDo.AST.Statements;
+using VooDo.Hooks;
 using VooDo.Parsing;
 using VooDo.Problems;
 using VooDo.Utils;
+using VooDo.WinUI.HookInitializers;
 
 using VC = VooDo.Compiling;
 
@@ -117,8 +119,7 @@ namespace VooDo.Generator
                             _ => $"{path}.xaml.cs",
                         };
                     }
-                    xamlCbFile = NormalizeFilePath.Normalize(xamlCbFile);
-                    SyntaxTree tree = _context.Compilation.SyntaxTrees.Single(_t => NormalizeFilePath.Normalize(_t.FilePath).Equals(xamlCbFile));
+                    SyntaxTree tree = _context.Compilation.SyntaxTrees.SingleWithFile(xamlCbFile, _t => _t!.FilePath) ?? throw new Exception();
                     ImmutableArray<ClassDeclarationSyntax> classes = tree.GetRoot(_context.CancellationToken)
                         .DescendantNodesAndSelf()
                         .OfType<ClassDeclarationSyntax>()
@@ -171,7 +172,7 @@ namespace VooDo.Generator
             return true;
         }
 
-        private static void Process(AdditionalText _text, GeneratorExecutionContext _context, ImmutableArray<UsingDirective> _usings, NameDictionary _nameDictionary)
+        private static void Process(AdditionalText _text, GeneratorExecutionContext _context, ImmutableArray<UsingDirective> _usings, NameDictionary _nameDictionary, IHookInitializer _hookInitializer)
         {
             SourceText? sourceText = _text.GetText(_context.CancellationToken);
             if (sourceText is null)
@@ -204,7 +205,8 @@ namespace VooDo.Generator
                 {
                     Namespace = xamlNamespace,
                     ClassName = name,
-                    References = default
+                    References = default,
+                    HookInitializer = _hookInitializer
                 };
                 VC::Compilation compilation = VC::Compilation.SucceedOrThrow(script, options, _context.CancellationToken, (CSharpCompilation)_context.Compilation);
                 CompilationUnitSyntax syntax = compilation.GetCSharpSyntax();
@@ -299,6 +301,7 @@ namespace VooDo.Generator
                 return;
             }
             NameDictionary nameDictionary = new();
+            IHookInitializer hookInitializer = new HookInitializerList(new DependencyPropertyHookInitializer(), new NotifyPropertyChangedHookInitializer());
             foreach (AdditionalText text in _context.AdditionalFiles.Where(_f => Path.GetExtension(_f.Path).Equals(".voodo", StringComparison.OrdinalIgnoreCase)))
             {
                 if (_context.CancellationToken.IsCancellationRequested)
@@ -306,13 +309,12 @@ namespace VooDo.Generator
                     _context.ReportDiagnostic(DiagnosticFactory.Canceled());
                     return;
                 }
-                Process(text, _context, usingDirectives, nameDictionary);
+                Process(text, _context, usingDirectives, nameDictionary, hookInitializer);
             }
         }
 
         public void Initialize(GeneratorInitializationContext _context)
         {
-            return;
             if (!System.Diagnostics.Debugger.IsAttached)
             {
                 System.Diagnostics.Debugger.Launch();

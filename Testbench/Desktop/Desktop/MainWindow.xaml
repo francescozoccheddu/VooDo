@@ -1,8 +1,7 @@
 ﻿<Window
     x:Class="VooDo.DesktopTestbench.MainWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:voodo="using:VooDo.WinUI.Xaml">
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
     <Grid>
 
@@ -15,7 +14,6 @@
 
             <Grid
                 Grid.Row="0"
-                Height="{voodo:VooDo Code='glob Smooth(root.m_Scroll.VerticalOffset &lt;= 20 ? 50 : 0)'}"
                 Padding="10"
                 Background="Gray">
 
@@ -65,12 +63,6 @@
             HorizontalAlignment="Right"
             VerticalAlignment="Bottom"
             Background="Black">
-
-            <Border.Opacity>
-                <voodo:VooDo>
-                    glob Smooth(root.m_Scroll.VerticalOffset > 20 ? 1 : 0)
-                </voodo:VooDo>
-            </Border.Opacity>
 
             <Button>
                 Go up!

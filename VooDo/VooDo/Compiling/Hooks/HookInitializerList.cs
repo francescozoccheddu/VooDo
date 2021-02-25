@@ -1,5 +1,6 @@
 ﻿
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 
 using System;
 using System.Collections;
@@ -8,7 +9,6 @@ using System.Collections.Immutable;
 using System.Linq;
 
 using VooDo.AST.Expressions;
-using VooDo.Compiling;
 using VooDo.Utils;
 
 namespace VooDo.Hooks
@@ -20,7 +20,7 @@ namespace VooDo.Hooks
         private ImmutableArray<IHookInitializer> m_hookInitializers;
 
         public HookInitializerList(params IHookInitializer[] _collection)
-            : this((IEnumerable<IHookInitializer>) _collection) { }
+            : this((IEnumerable<IHookInitializer>)_collection) { }
 
         public HookInitializerList(IEnumerable<IHookInitializer> _collection)
         {
@@ -31,16 +31,16 @@ namespace VooDo.Hooks
 
         public int Count => m_hookInitializers.Length;
 
-        public IEnumerator<IHookInitializer> GetEnumerator() => ((IEnumerable<IHookInitializer>) m_hookInitializers).GetEnumerator();
-        IEnumerator IEnumerable.GetEnumerator() => ((IEnumerable) m_hookInitializers).GetEnumerator();
+        public IEnumerator<IHookInitializer> GetEnumerator() => ((IEnumerable<IHookInitializer>)m_hookInitializers).GetEnumerator();
+        IEnumerator IEnumerable.GetEnumerator() => ((IEnumerable)m_hookInitializers).GetEnumerator();
 
         public override bool Equals(object? _obj) => Equals(_obj as HookInitializerList);
         public bool Equals(HookInitializerList? _other) => _other is not null && m_hookInitializers.SequenceEqual(_other.m_hookInitializers);
         public static bool operator ==(HookInitializerList? _left, HookInitializerList? _right) => _left is not null && _left.Equals(_right);
         public static bool operator !=(HookInitializerList? _left, HookInitializerList? _right) => !(_left == _right);
         public override int GetHashCode() => Identity.CombineHashes(m_hookInitializers);
-        public Expression? GetInitializer(ISymbol _symbol, ImmutableArray<Reference> _references)
-            => m_hookInitializers.Select(_h => _h.GetInitializer(_symbol, _references)).FirstOrDefault(_h => _h is not null);
+        public Expression? GetInitializer(ISymbol _symbol, CSharpCompilation _compilation)
+            => m_hookInitializers.Select(_h => _h.GetInitializer(_symbol, _compilation)).FirstOrDefault(_h => _h is not null);
 
     }
 

@@ -23,12 +23,6 @@
   </ItemGroup>
 
   <Import Project="..\..\..\VooDo.Generator\Generator.props" />
-
-<!--
-  <ItemGroup>
-    <ProjectReference Include="..\..\..\VooDo\VooDo.csproj" />
-  </ItemGroup>
--->
   
   <ItemGroup>
     <AdditionalFiles Include="Test.voodo" XamlPath="App" />

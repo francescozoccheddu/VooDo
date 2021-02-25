@@ -15,9 +15,17 @@
     <PackageReference Include="Microsoft.VCRTForwarders.140" Version="1.0.7" />
     <PackageReference Include="Microsoft.WinUI" Version="3.0.0-preview4.210210.4" />
     <Manifest Include="$(ApplicationManifest)" />
+    <ProjectReference Include="..\..\..\VooDo.WinUI\VooDo.WinUI.csproj" />
+    <ProjectReference Include="$(SolutionDir)VooDo.Runtime\VooDo.Runtime.csproj" PrivateAssets="All">
+      <Aliases>VooDoRuntime</Aliases>
+    </ProjectReference>
   </ItemGroup>
 
+  <Import Project="..\..\..\VooDo.Generator\Generator.props" />
+
   <ItemGroup>
-    <ProjectReference Include="..\..\..\VooDo.WinUI\VooDo.WinUI.csproj" />
+    <AdditionalFiles Include="MainWindow.voodo"/>
+    <ProjectReference Include="..\..\..\VooDo.Generator\VooDo.Generator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
   </ItemGroup>
+
 </Project>

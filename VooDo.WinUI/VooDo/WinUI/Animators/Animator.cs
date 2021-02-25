@@ -14,7 +14,7 @@ namespace VooDo.WinUI.Animators
         protected Animator(Variable<TValue> _variable, TValue _value) : base(_variable, _value)
         {
             SetRunning(true);
-            m_Target = _value;
+            Target = _value;
         }
 
         private bool m_running;
@@ -37,13 +37,13 @@ namespace VooDo.WinUI.Animators
 
         protected abstract bool Update(ref TValue _value, double _deltaTime);
 
-        protected TValue m_Target { get; private set; }
+        protected TValue Target { get; private set; }
 
         protected sealed override void SetValue(TValue _value)
         {
-            if (!EqualityComparer<TValue>.Default.Equals(_value, m_Target))
+            if (!EqualityComparer<TValue>.Default.Equals(_value, Target))
             {
-                m_Target = _value;
+                Target = _value;
                 SetRunning(true);
             }
         }
@@ -59,6 +59,9 @@ namespace VooDo.WinUI.Animators
             m_Value = value;
             SetRunning(updated);
         }
+
+        public sealed override bool Equals(object? _obj) => ReferenceEquals(this, _obj);
+        public sealed override int GetHashCode() => System.Runtime.CompilerServices.RuntimeHelpers.GetHashCode(this);
 
     }
 

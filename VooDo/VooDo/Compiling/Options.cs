@@ -16,12 +16,12 @@ namespace VooDo.Compiling
 
         private Options()
         {
-            References = Reference.GetSystemReferences().Add(Reference.RuntimeReference);
+            References = ImmutableArray.Create<Reference>();
             Namespace = "VooDo.Generated";
             ClassName = "GeneratedProgram";
             ReturnType = null;
             AssemblyName = null;
-            HookInitializer = NotifyPropertyChangedHookInitializer.Instance;
+            HookInitializer = new HookInitializerList();
         }
 
         public string? AssemblyName { get; init; }

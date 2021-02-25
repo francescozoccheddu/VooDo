@@ -46,16 +46,16 @@ namespace VooDo.Compiling.Transformation
                 internal int Count { get; set; }
             }
 
-            internal BodyRewriter(SemanticModel _semantics, PointsToAnalysisResult _pointsToAnalysis, IHookInitializer _hookInitializer, ImmutableArray<Reference> _references)
+            internal BodyRewriter(SemanticModel _semantics, PointsToAnalysisResult _pointsToAnalysis, IHookInitializer _hookInitializer, CSharpCompilation _compilation)
             {
                 m_semantics = _semantics;
                 m_pointsToAnalysis = _pointsToAnalysis;
                 m_map = new Dictionary<ISymbol, Entry>(SymbolEqualityComparer.Default);
                 m_hookInitializer = _hookInitializer;
-                m_references = _references;
+                m_compilation = _compilation;
             }
 
-            private readonly ImmutableArray<Reference> m_references;
+            private readonly CSharpCompilation m_compilation;
             private readonly SemanticModel m_semantics;
             private readonly PointsToAnalysisResult m_pointsToAnalysis;
             private readonly Dictionary<ISymbol, Entry> m_map;
@@ -90,7 +90,7 @@ namespace VooDo.Compiling.Transformation
                 {
                     return null;
                 }
-                Expression? initializer = entry?.Initializer ?? m_hookInitializer.GetInitializer(symbol, m_references);
+                Expression? initializer = entry?.Initializer ?? m_hookInitializer.GetInitializer(symbol, m_compilation);
                 if (initializer is null)
                 {
                     return null;
@@ -196,7 +196,7 @@ namespace VooDo.Compiling.Transformation
                 .Where(_m => _m.Identifier.ValueText is RuntimeHelpers.runMethodName or RuntimeHelpers.typedRunMethodName && _m.Modifiers.Any(_d => _d.IsKind(SyntaxKind.OverrideKeyword)))
                 .Single();
             PointsToAnalysisResult pointsToAnalysis = CreatePointsToAnalysis(method, semantics, _session.CSharpCompilation!, _session.CancellationToken);
-            BodyRewriter rewriter = new BodyRewriter(semantics, pointsToAnalysis, _session.Compilation.Options.HookInitializer, _session.Compilation.Options.References);
+            BodyRewriter rewriter = new BodyRewriter(semantics, pointsToAnalysis, _session.Compilation.Options.HookInitializer, _session.CSharpCompilation);
             BlockSyntax body = (BlockSyntax)rewriter.Visit(method.Body!);
             ImmutableArray<(Expression, int)> initializers = rewriter.Initializers;
             if (initializers.IsEmpty)
