@@ -1,1 +1,1 @@
-﻿this.m_Border.Opacity = this.m_Scroll.VerticalOffset > 20 ? 1 : 0;
+﻿this.m_Border.Opacity = glob Smooth(this.m_Scroll.VerticalOffset > 20 ? 1 : 0);

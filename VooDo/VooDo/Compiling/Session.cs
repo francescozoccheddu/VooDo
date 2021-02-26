@@ -4,7 +4,6 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.IO;
 using System.Linq;
 using System.Threading;
 
@@ -82,37 +81,16 @@ namespace VooDo.Compiling
             Run(_existingCompilation);
         }
 
-        private bool InitializeRuntimeSymbol(MetadataReference _reference)
-        {
-            if (CSharpCompilation.GetAssemblyOrModuleSymbol(_reference) is IAssemblySymbol symbol)
-            {
-                if (symbol.GetTypeByMetadataName(typeof(Program).FullName) is not null
-                    && symbol.GetTypeByMetadataName(typeof(Variable).FullName) is not null
-                    && symbol.GetTypeByMetadataName(typeof(RuntimeHelpers).FullName) is not null)
-                {
-                    string? alias = _reference.Properties.Aliases.FirstOrDefault();
-                    RuntimeAlias = new Identifier(alias ?? "global");
-                    RuntimeReference = _reference;
-                    return true;
-                }
-            }
-            return false;
-        }
 
         private void InitializeRuntimeSymbol()
         {
-            string? runtimeReferenceFilename = Path.GetFileNameWithoutExtension(Reference.RuntimeReference.FilePath);
-            IEnumerable<IGrouping<bool, MetadataReference>> references = CSharpCompilation.References
-                .GroupBy(_r => (_r as PortableExecutableReference)?.FilePath is string p
-                    && Path.GetFileNameWithoutExtension(p).Equals(runtimeReferenceFilename, System.StringComparison.OrdinalIgnoreCase));
-            foreach (MetadataReference reference in references.OrderByDescending(_g => _g.Key).SelectMany(_g => _g))
+            MetadataReference reference = ReferenceFinder.FindByType(typeof(Program), CSharpCompilation).FirstOrDefault();
+            if (reference is null)
             {
-                if (InitializeRuntimeSymbol(reference))
-                {
-                    return;
-                }
+                throw new NoRuntimeReferenceProblem().AsThrowable();
             }
-            throw new NoRuntimeReferenceProblem().AsThrowable();
+            RuntimeReference = reference;
+            RuntimeAlias = ReferenceFinder.GetAlias(reference);
         }
 
         private void Run(CSharpCompilation? _existingCompilation = null)

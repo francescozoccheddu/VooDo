@@ -18,11 +18,14 @@ namespace VooDo.Utils
         private static IAssemblySymbol? TryGetSymbol(MetadataReference _reference, Compilation _compilation)
             => _compilation.GetAssemblyOrModuleSymbol(_reference) as IAssemblySymbol;
 
-        public static IEnumerable<MetadataReference> OrderByFileNameHint(IEnumerable<MetadataReference> _references, string _fileName)
+        public static IEnumerable<MetadataReference> OrderByFileNameHint(IEnumerable<MetadataReference> _references, string _fileNameWithoutExt)
         {
             MetadataReference[] references = _references.ToArray();
-            return references.Where(_r => HasFileName(_r, _fileName)).Concat(references.Where(_r => !HasFileName(_r, _fileName)));
+            return references.Where(_r => HasFileName(_r, _fileNameWithoutExt)).Concat(references.Where(_r => !HasFileName(_r, _fileNameWithoutExt)));
         }
+
+        public static IEnumerable<MetadataReference> FindByType(Type _type, Compilation _compilation)
+            => FindByType(_type, _compilation, _compilation.References);
 
         public static IEnumerable<MetadataReference> FindByType(string _type, Compilation _compilation)
             => FindByType(_type, _compilation, _compilation.References);
@@ -33,17 +36,17 @@ namespace VooDo.Utils
         public static IEnumerable<MetadataReference> FindByNamespace(string _namespace, Compilation _compilation)
             => FindByNamespace(_namespace, _compilation, _compilation.References);
 
-        public static IEnumerable<MetadataReference> FindByFileName(string _fileName, IEnumerable<MetadataReference> _references)
-            => _references.Where(_r => HasFileName(_r, _fileName));
+        public static IEnumerable<MetadataReference> FindByFileName(string _fileNameWithoutExt, IEnumerable<MetadataReference> _references)
+            => _references.Where(_r => HasFileName(_r, _fileNameWithoutExt));
 
         public static IEnumerable<MetadataReference> FindByType(Type _type, Compilation _compilation, IEnumerable<MetadataReference> _references)
-            => FindByType(_type.FullName, _compilation, OrderByFileNameHint(_references, Path.GetFileName(_type.Assembly.Location)));
+            => FindByType(_type.FullName, _compilation, OrderByFileNameHint(_references, Path.GetFileNameWithoutExtension(_type.Assembly.Location)));
 
         public static IEnumerable<MetadataReference> FindByType(string _type, Compilation _compilation, IEnumerable<MetadataReference> _references)
             => _references.Where(_r => HasType(_r, _type, _compilation));
 
         public static IEnumerable<MetadataReference> FindByAssemblyName(Assembly _assembly, Compilation _compilation, IEnumerable<MetadataReference> _references)
-            => FindByType(_assembly.GetName().Name, _compilation, OrderByFileNameHint(_references, Path.GetFileName(_assembly.Location)));
+            => FindByType(_assembly.GetName().Name, _compilation, OrderByFileNameHint(_references, Path.GetFileNameWithoutExtension(_assembly.Location)));
 
         public static IEnumerable<MetadataReference> FindByAssemblyName(string _assembly, Compilation _compilation, IEnumerable<MetadataReference> _references)
             => _references.Where(_r => GetAssemblyName(_r, _compilation) == _assembly);
@@ -51,10 +54,10 @@ namespace VooDo.Utils
         public static IEnumerable<MetadataReference> FindByNamespace(string _namespace, Compilation _compilation, IEnumerable<MetadataReference> _references)
             => _references.Where(_r => HasNamespace(_r, _namespace, _compilation));
 
-        public static bool HasFileName(MetadataReference _reference, string _fileName)
+        public static bool HasFileName(MetadataReference _reference, string _fileNameWithoutExt)
             => _reference is PortableExecutableReference pe
                 && pe.FilePath is not null
-                && Path.GetFileNameWithoutExtension(pe.FilePath).Equals(_fileName, System.StringComparison.OrdinalIgnoreCase);
+                && Path.GetFileNameWithoutExtension(pe.FilePath).Equals(_fileNameWithoutExt, StringComparison.OrdinalIgnoreCase);
 
         public static bool HasType(MetadataReference _reference, string _type, Compilation _compilation)
             => TryGetSymbol(_reference, _compilation)?.GetTypeByMetadataName(_type) is not null;

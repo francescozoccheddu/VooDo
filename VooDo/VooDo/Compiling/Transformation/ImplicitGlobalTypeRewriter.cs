@@ -70,7 +70,8 @@ namespace VooDo.Compiling.Transformation
             GlobalSyntax[] syntax = new GlobalSyntax[globalsMap.Count];
             foreach (VariableDeclarationSyntax declaration in _class.Members.OfType<FieldDeclarationSyntax>().Select(_f => _f.Declaration))
             {
-                if (globalsMap.TryGetValue(declaration.GetTag()!, out int index))
+                Tagger.Tag? tag = declaration.GetTag();
+                if (tag is not null && globalsMap.TryGetValue(tag, out int index))
                 {
                     InvocationExpressionSyntax invocation = (InvocationExpressionSyntax)declaration.Variables.Single().Initializer!.Value;
                     ExpressionSyntax initialValue = invocation.ArgumentList.Arguments[2].Expression;
