@@ -179,17 +179,14 @@ namespace VooDo.Compiling.Transformation
 
         internal static CompilationUnitSyntax Rewrite(Session _session)
         {
-            CompilationUnitSyntax root = _session.Syntax!;
-            NamespaceDeclarationSyntax namespaceDeclaration = root.Members.OfType<NamespaceDeclarationSyntax>().Single();
-            ClassDeclarationSyntax classDeclaration = namespaceDeclaration.Members.OfType<ClassDeclarationSyntax>().Single();
             ImmutableArray<GlobalDefinition> globals = _session.Globals.Where(_g => _g.Prototype.Global.Type.IsVar).ToImmutableArray();
             if (globals.IsEmpty)
             {
-                return root;
+                return _session.Syntax;
             }
-            ImmutableArray<GlobalSyntax> syntax = GetSyntax(classDeclaration, globals, _session.Tagger);
+            ImmutableArray<GlobalSyntax> syntax = GetSyntax(_session.Class, globals, _session.Tagger);
             ImmutableArray<ITypeSymbol> types = InferSingleType(syntax, globals.Select(_g => _g.Prototype), _session.Semantics!, _session.RuntimeReference);
-            return ReplaceAll(root, syntax.Select(_s => _s.Declaration).ToImmutableArray(), types);
+            return ReplaceAll(_session.Syntax, syntax.Select(_s => _s.Declaration).ToImmutableArray(), types);
         }
 
     }

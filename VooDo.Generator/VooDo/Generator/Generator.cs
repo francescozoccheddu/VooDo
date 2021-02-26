@@ -206,26 +206,12 @@ namespace VooDo.Generator
                     Namespace = xamlNamespace,
                     ClassName = name,
                     References = default,
-                    HookInitializer = _hookInitializer
+                    HookInitializer = _hookInitializer,
+                    ContainingClass = xamlName,
+                    Accessibility = VC::Options.EAccessibility.Private
                 };
                 VC::Compilation compilation = VC::Compilation.SucceedOrThrow(script, options, _context.CancellationToken, (CSharpCompilation)_context.Compilation);
-                CompilationUnitSyntax syntax = compilation.GetCSharpSyntax();
-                ClassDeclarationSyntax classDeclaration = syntax.DescendantNodes().OfType<ClassDeclarationSyntax>().Single();
-                syntax = syntax.ReplaceNode(classDeclaration,
-                    SyntaxFactory.ClassDeclaration(xamlName)
-                    .WithMembers(
-                        SyntaxFactory.SingletonList<MemberDeclarationSyntax>(
-                            classDeclaration.WithModifiers(
-                                SyntaxFactory.TokenList(
-                                    SyntaxFactory.Token(
-                                        SyntaxKind.PrivateKeyword),
-                                    SyntaxFactory.Token(
-                                        SyntaxKind.SealedKeyword)))))
-                    .WithModifiers(
-                        SyntaxFactory.TokenList(
-                            SyntaxFactory.Token(
-                                SyntaxKind.PartialKeyword))));
-                _context.AddSource(name, syntax.NormalizeWhitespace().ToFullString());
+                _context.AddSource(name, compilation.GetCSharpSourceCode());
             }
             catch (VooDoException exception)
             {

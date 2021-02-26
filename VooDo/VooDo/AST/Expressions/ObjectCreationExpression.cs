@@ -13,7 +13,7 @@ namespace VooDo.AST.Expressions
     public sealed record ObjectCreationExpression : InvocationOrObjectCreationExpression
     {
 
-        
+
         public ObjectCreationExpression(ImmutableArray<Argument> _arguments) : this(null, _arguments) { }
         public ObjectCreationExpression(ComplexType? _type = null, ImmutableArray<Argument> _arguments = default)
         {
@@ -21,8 +21,6 @@ namespace VooDo.AST.Expressions
             Arguments = _arguments;
         }
 
-        
-        
         public ComplexType? Type { get; init; }
         private ImmutableArray<Argument> m_arguments;
         public ImmutableArray<Argument> Arguments
@@ -32,13 +30,11 @@ namespace VooDo.AST.Expressions
         }
         public bool IsTypeImplicit => Type is null;
 
-        
-        
         protected override EPrecedence m_Precedence => EPrecedence.Primary;
 
         protected internal override Node ReplaceNodes(Func<Node?, Node?> _map)
         {
-            ComplexType? newType = (ComplexType?) _map(Type);
+            ComplexType? newType = (ComplexType?)_map(Type);
             ImmutableArray<Argument> newArguments = Arguments.Map(_map).NonNull();
             if (ReferenceEquals(newType, Type) && newArguments == Arguments)
             {
@@ -54,12 +50,10 @@ namespace VooDo.AST.Expressions
             }
         }
 
-
-
         public override IEnumerable<Node> Children => IsTypeImplicit ? Arguments : new Node[] { Type! }.Concat(Arguments);
-        public override string ToString() => $"{GrammarConstants.newKeyword} " + (IsTypeImplicit ? $"{Type} " : "") + $"({string.Join(", ", Arguments)})";
+        public override string ToString() => $"{GrammarConstants.newKeyword} " + (IsTypeImplicit ? "" : $"{Type} ") + $"({string.Join(", ", Arguments)})";
 
-        
+
     }
 
 }

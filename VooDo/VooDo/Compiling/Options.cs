@@ -21,6 +21,7 @@ namespace VooDo.Compiling
             ClassName = "GeneratedProgram";
             ReturnType = null;
             AssemblyName = null;
+            Accessibility = EAccessibility.Public;
             HookInitializer = new HookInitializerList();
         }
 
@@ -29,6 +30,15 @@ namespace VooDo.Compiling
         public Namespace? Namespace { get; init; }
 
         public Identifier ClassName { get; init; }
+
+        public Identifier? ContainingClass { get; init; }
+
+        public enum EAccessibility
+        {
+            Public, Protected, Private, Internal, PrivateProtected, InternalProtected
+        }
+
+        public EAccessibility Accessibility { get; init; }
 
         public IHookInitializer HookInitializer { get; init; }
 

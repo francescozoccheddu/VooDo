@@ -2,6 +2,7 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 
@@ -40,7 +41,8 @@ namespace VooDo.WinUI.HookInitializers
         {
             if (m_canCache && m_cachedCompilation != _compilation)
             {
-                MetadataReference? reference = ReferenceFinder.FindByNamespace(c_hooksNamespace, _compilation).FirstOrDefault();
+                IEnumerable<MetadataReference>? references = ReferenceFinder.OrderByFileNameHint(_compilation.References, "VooDo.WinUI");
+                MetadataReference? reference = ReferenceFinder.FindByNamespace(c_hooksNamespace, _compilation, references).FirstOrDefault();
                 m_alias = reference is null ? null : ReferenceFinder.GetAlias(reference);
                 m_cachedCompilation = _compilation;
             }

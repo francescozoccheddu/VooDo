@@ -1,1 +1,1 @@
-﻿int x = 7;
+﻿this.m_Border.Opacity = this.m_Scroll.VerticalOffset;

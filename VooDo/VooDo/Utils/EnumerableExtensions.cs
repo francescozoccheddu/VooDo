@@ -15,6 +15,22 @@ namespace VooDo.Utils
             yield return _value;
         }
 
+        internal static IEnumerable<TItem> SkipLast<TItem>(this IEnumerable<TItem> _items)
+        {
+            IEnumerator<TItem> enumerator = _items.GetEnumerator();
+            if (!enumerator.MoveNext())
+            {
+                yield break;
+            }
+            TItem last = enumerator.Current;
+            while (enumerator.MoveNext())
+            {
+                yield return last;
+                last = enumerator.Current;
+            }
+            yield return last;
+        }
+
         public static ImmutableArray<TItem> EmptyIfDefault<TItem>(this ImmutableArray<TItem> _array)
             => _array.IsDefault ? ImmutableArray.Create<TItem>() : _array;
 

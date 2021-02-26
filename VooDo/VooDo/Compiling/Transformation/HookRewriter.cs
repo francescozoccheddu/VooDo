@@ -187,11 +187,8 @@ namespace VooDo.Compiling.Transformation
 
         internal static CompilationUnitSyntax Rewrite(Session _session)
         {
-            SemanticModel semantics = _session.Semantics!;
-            CompilationUnitSyntax root = _session.Syntax!;
-            NamespaceDeclarationSyntax namespaceDeclaration = root.Members.OfType<NamespaceDeclarationSyntax>().Single();
-            ClassDeclarationSyntax classDeclaration = namespaceDeclaration.Members.OfType<ClassDeclarationSyntax>().Single();
-            MethodDeclarationSyntax method = classDeclaration.Members
+            SemanticModel semantics = _session.Semantics;
+            MethodDeclarationSyntax method = _session.Class.Members
                 .OfType<MethodDeclarationSyntax>()
                 .Where(_m => _m.Identifier.ValueText is RuntimeHelpers.runMethodName or RuntimeHelpers.typedRunMethodName && _m.Modifiers.Any(_d => _d.IsKind(SyntaxKind.OverrideKeyword)))
                 .Single();
@@ -201,13 +198,13 @@ namespace VooDo.Compiling.Transformation
             ImmutableArray<(Expression, int)> initializers = rewriter.Initializers;
             if (initializers.IsEmpty)
             {
-                return root;
+                return _session.Syntax;
             }
             _session.EnsureNotCanceled();
             PropertyDeclarationSyntax property = CreatePropertySyntax(rewriter.Initializers, _session.Tagger, _session.RuntimeAlias);
-            ClassDeclarationSyntax newClass = classDeclaration.ReplaceNode(method.Body!, body);
+            ClassDeclarationSyntax newClass = _session.Class.ReplaceNode(method.Body!, body);
             newClass = newClass.AddMembers(property);
-            return root.ReplaceNode(classDeclaration, newClass);
+            return _session.Syntax.ReplaceNode(_session.Class, newClass);
         }
 
     }

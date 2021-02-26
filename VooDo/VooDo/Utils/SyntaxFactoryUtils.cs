@@ -29,6 +29,26 @@ namespace VooDo.Utils
             "unsafe", "ushort", "using", "virtual", "void", "volatile", "while" }
         .ToImmutableHashSet();
 
+        private static readonly ImmutableDictionary<string, SyntaxToken> s_predefinedTypesTokens =
+            new SK[] {
+                SK.BoolKeyword,
+                SK.CharKeyword,
+                SK.StringKeyword,
+                SK.ByteKeyword,
+                SK.SByteKeyword,
+                SK.ShortKeyword,
+                SK.UShortKeyword,
+                SK.IntKeyword,
+                SK.UIntKeyword,
+                SK.LongKeyword,
+                SK.ULongKeyword,
+                SK.DecimalKeyword,
+                SK.FloatKeyword,
+                SK.DoubleKeyword,
+                SK.ObjectKeyword
+            }.Select(_k => SF.Token(_k))
+            .ToImmutableDictionary(_t => _t.ValueText);
+
         private static QualifiedNameSyntax ProgramType(Identifier _runtimeAlias) => (QualifiedNameSyntax)(QualifiedType.FromType<Program>() with
         {
             Alias = _runtimeAlias
@@ -254,6 +274,17 @@ namespace VooDo.Utils
 
         internal static SyntaxToken Identifier(string _name)
             => SF.Identifier(s_keywords.Contains(_name) ? '@' + _name.TrimStart('@') : _name);
+
+        internal static SyntaxToken AliasIdentifier(string _name)
+            => _name == "global"
+            ? SF.Token(SK.GlobalKeyword)
+            : Identifier(_name);
+
+        internal static TypeSyntax TypeIdentifier(string _name)
+            => s_predefinedTypesTokens.TryGetValue(_name, out SyntaxToken token)
+            ? SF.PredefinedType(token)
+            : SF.IdentifierName(Identifier(_name));
+
 
     }
 

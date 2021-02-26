@@ -55,8 +55,8 @@ namespace VooDo.Problems
 
         public string GetDisplayMessage()
             => $"{Kind} {Severity}"
-            + (Source is null ? "" : $"in {GetSourceMessage()}")
-            + ((Origin ?? Source?.Origin) is Origin o ? $" @{o.GetDisplayMessage()}" : "")
+            + (Source is null ? "" : $" in {GetSourceMessage()}")
+            + ((Origin ?? Source?.Origin) is Origin o ? $" at {o.GetDisplayMessage()}" : "")
             + $" {Description}";
 
     }

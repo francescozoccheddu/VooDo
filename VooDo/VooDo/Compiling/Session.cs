@@ -49,6 +49,8 @@ namespace VooDo.Compiling
 
         internal CompilationUnitSyntax Syntax { get; private set; }
 
+        internal ClassDeclarationSyntax Class { get; private set; }
+
         internal SyntaxTree Tree { get; private set; }
 
         internal bool Succeeded { get; private set; }
@@ -76,6 +78,7 @@ namespace VooDo.Compiling
             Tree = null!;
             Syntax = null!;
             RuntimeReference = null!;
+            Class = null!;
             Run(_existingCompilation);
         }
 
@@ -193,6 +196,16 @@ namespace VooDo.Compiling
                 Tree = newTree;
                 Tree.GetDiagnostics(CancellationToken).SelectNonNull(_d => RoslynProblem.FromDiagnostic(_d, Tagger, Problem.EKind.Syntactic)).ThrowErrors();
                 Syntax = (CompilationUnitSyntax)Tree.GetRoot();
+                MemberDeclarationSyntax classDeclaration = Syntax.Members[0];
+                if (Compilation.Options.Namespace is not null)
+                {
+                    classDeclaration = ((NamespaceDeclarationSyntax)classDeclaration).Members[0];
+                }
+                if (Compilation.Options.ContainingClass is not null)
+                {
+                    classDeclaration = ((ClassDeclarationSyntax)classDeclaration).Members[0];
+                }
+                Class = (ClassDeclarationSyntax)classDeclaration;
             }
         }
 

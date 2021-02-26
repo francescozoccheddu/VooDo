@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -17,7 +18,7 @@ namespace VooDo.Utils
         private static IAssemblySymbol? TryGetSymbol(MetadataReference _reference, Compilation _compilation)
             => _compilation.GetAssemblyOrModuleSymbol(_reference) as IAssemblySymbol;
 
-        private static IEnumerable<MetadataReference> OrderByFileNameHint(IEnumerable<MetadataReference> _references, string _fileName)
+        public static IEnumerable<MetadataReference> OrderByFileNameHint(IEnumerable<MetadataReference> _references, string _fileName)
         {
             MetadataReference[] references = _references.ToArray();
             return references.Where(_r => HasFileName(_r, _fileName)).Concat(references.Where(_r => !HasFileName(_r, _fileName)));
@@ -48,7 +49,7 @@ namespace VooDo.Utils
             => _references.Where(_r => GetAssemblyName(_r, _compilation) == _assembly);
 
         public static IEnumerable<MetadataReference> FindByNamespace(string _namespace, Compilation _compilation, IEnumerable<MetadataReference> _references)
-            => _references.Where(_r => GetNamespaces(_r, _compilation).Contains(_namespace));
+            => _references.Where(_r => HasNamespace(_r, _namespace, _compilation));
 
         public static bool HasFileName(MetadataReference _reference, string _fileName)
             => _reference is PortableExecutableReference pe
@@ -58,17 +59,64 @@ namespace VooDo.Utils
         public static bool HasType(MetadataReference _reference, string _type, Compilation _compilation)
             => TryGetSymbol(_reference, _compilation)?.GetTypeByMetadataName(_type) is not null;
 
+        public static bool HasNamespace(MetadataReference _reference, string _type, Compilation _compilation)
+        {
+            HashSet<string> types = new HashSet<string>();
+            IAssemblySymbol? symbol = TryGetSymbol(_reference, _compilation);
+            if (symbol is null)
+            {
+                return false;
+            }
+            bool found = false;
+            NamespaceVisitor.Visit(symbol, _n => !(found = _n.ToDisplayString() == _type));
+            return found;
+        }
+
         public static string? GetAssemblyName(MetadataReference _reference, Compilation _compilation)
             => TryGetSymbol(_reference, _compilation)?.Name;
 
-        public static IEnumerable<string>? GetTypes(MetadataReference _reference, Compilation _compilation)
-            => TryGetSymbol(_reference, _compilation)?.TypeNames;
+        public static ImmutableHashSet<string>? GetNamespaces(MetadataReference _reference, Compilation _compilation)
+        {
+            HashSet<string> namespaces = new HashSet<string>();
+            IAssemblySymbol? symbol = TryGetSymbol(_reference, _compilation);
+            if (symbol is null)
+            {
+                return null;
+            }
+            NamespaceVisitor.Visit(symbol, _n => namespaces.Add(_n.ToDisplayString()) || true);
+            return namespaces.ToImmutableHashSet();
+        }
 
-        public static IEnumerable<string>? GetNamespaces(MetadataReference _reference, Compilation _compilation)
-            => TryGetSymbol(_reference, _compilation)?.NamespaceNames;
 
         public static Identifier GetAlias(MetadataReference _reference)
             => _reference.Properties.Aliases.FirstOrDefault() ?? "global";
+
+        private sealed class NamespaceVisitor : SymbolVisitor
+        {
+
+            internal static void Visit(IAssemblySymbol _symbol, Predicate<INamespaceSymbol> _namespaceListener)
+                => new NamespaceVisitor(_namespaceListener).Visit(_symbol.GlobalNamespace);
+
+            private readonly Predicate<INamespaceSymbol> m_namespaceListener;
+
+            private NamespaceVisitor(Predicate<INamespaceSymbol> _namespaceListener)
+            {
+                m_namespaceListener = _namespaceListener;
+            }
+
+            public override void VisitNamespace(INamespaceSymbol _symbol)
+            {
+                if (!m_namespaceListener?.Invoke(_symbol) ?? true)
+                {
+                    return;
+                }
+                foreach (INamespaceOrTypeSymbol c in _symbol.GetNamespaceMembers())
+                {
+                    c.Accept(this);
+                }
+            }
+
+        }
 
     }
 

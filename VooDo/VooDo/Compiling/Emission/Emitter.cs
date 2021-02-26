@@ -40,26 +40,6 @@ namespace VooDo.Compiling.Emission
         internal static ExpressionSyntax Emit(Expression _node, Tagger _tagger, Identifier _runtimeAlias) => new Emitter(_tagger, _runtimeAlias).EmitExpression(_node);
         internal static NameSyntax Emit(Namespace _node, Tagger _tagger) => new Emitter(_tagger, "global").EmitNamespace(_node);
 
-        private static readonly ImmutableDictionary<string, SyntaxToken> s_predefinedTypesTokens =
-            new SK[] {
-                        SK.BoolKeyword,
-                        SK.CharKeyword,
-                        SK.StringKeyword,
-                        SK.ByteKeyword,
-                        SK.SByteKeyword,
-                        SK.ShortKeyword,
-                        SK.UShortKeyword,
-                        SK.IntKeyword,
-                        SK.UIntKeyword,
-                        SK.LongKeyword,
-                        SK.ULongKeyword,
-                        SK.DecimalKeyword,
-                        SK.FloatKeyword,
-                        SK.DoubleKeyword,
-                        SK.ObjectKeyword
-            }.Select(_k => SF.Token(_k))
-            .ToImmutableDictionary(_t => _t.ValueText);
-
         private readonly Tagger m_tagger;
         private readonly Identifier m_runtimeAlias;
         private Scope m_scope;
@@ -188,7 +168,7 @@ namespace VooDo.Compiling.Emission
             if (_node.IsAliasQualified)
             {
                 type = SF.AliasQualifiedName(
-                    SF.IdentifierName(EmitIdentifier(_node.Alias!)).Own(m_tagger, _node.Alias!),
+                    SF.IdentifierName(SU.AliasIdentifier(_node.Alias!)).Own(m_tagger, _node.Alias!),
                     (SimpleNameSyntax)type);
             }
             foreach (SimpleType name in _node.Path.Skip(1))
@@ -202,10 +182,9 @@ namespace VooDo.Compiling.Emission
         {
             if (_node.Parent is not null
                 && ((QualifiedType)_node.Parent).IsSimple
-                && !_node.IsGeneric
-                && s_predefinedTypesTokens.TryGetValue(_node.Name, out SyntaxToken token))
+                && !_node.IsGeneric)
             {
-                return SF.PredefinedType(token).Own(m_tagger, _node);
+                return SU.TypeIdentifier(_node.Name);
             }
             return (_node.IsGeneric
                     ? (SimpleNameSyntax)SU.GenericName(
@@ -655,8 +634,16 @@ namespace VooDo.Compiling.Emission
                 SF.ClassDeclaration(_session.Compilation.Options.ClassName)
                     .WithModifiers(
                         SU.Tokens(
-                            SK.PublicKeyword,
-                            SK.SealedKeyword))
+                            SK.SealedKeyword)
+                        .AddRange(_session.Compilation.Options.Accessibility switch
+                        {
+                            Options.EAccessibility.Public => SU.Tokens(SK.PublicKeyword),
+                            Options.EAccessibility.Protected => SU.Tokens(SK.ProtectedKeyword),
+                            Options.EAccessibility.Private => SU.Tokens(SK.PrivateKeyword),
+                            Options.EAccessibility.Internal => SU.Tokens(SK.InternalKeyword),
+                            Options.EAccessibility.PrivateProtected => SU.Tokens(SK.PrivateKeyword, SK.ProtectedKeyword),
+                            Options.EAccessibility.InternalProtected => SU.Tokens(SK.InternalKeyword, SK.ProtectedKeyword),
+                        }))
                     .WithBaseList(
                         SF.BaseList(
                             SF.SimpleBaseType(
@@ -667,6 +654,13 @@ namespace VooDo.Compiling.Emission
                         .Append(variablesProperty)
                         .Append(runMethod)
                         .ToSyntaxList());
+            if (_session.Compilation.Options.ContainingClass is not null)
+            {
+                classDeclaration =
+                    SF.ClassDeclaration(_session.Compilation.Options.ContainingClass)
+                    .WithMembers(classDeclaration.ToSyntaxList<MemberDeclarationSyntax>())
+                    .WithModifiers(SU.Tokens(SK.PartialKeyword));
+            }
             MemberDeclarationSyntax classOrNamespace = _session.Compilation.Options.Namespace switch
             {
                 null => classDeclaration,

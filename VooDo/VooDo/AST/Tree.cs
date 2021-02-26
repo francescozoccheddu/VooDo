@@ -6,6 +6,7 @@ using VooDo.AST.Expressions;
 using VooDo.AST.Names;
 using VooDo.AST.Statements;
 using VooDo.Compiling;
+using VooDo.Utils;
 
 namespace VooDo.AST
 {
@@ -115,7 +116,7 @@ namespace VooDo.AST
             {
                 ETraversal.BreadthFirst => VisitBreadthFirst(_node, _shouldVisitChildren).Skip(1),
                 ETraversal.PreDepthFirst => VisitDepthFirstPreorder(_node, _shouldVisitChildren).Skip(1),
-                ETraversal.PostDepthFirst => VisitDepthFirstPostorder(_node, _shouldVisitChildren).Where(_n => !ReferenceEquals(_n, _node)),
+                ETraversal.PostDepthFirst => VisitDepthFirstPostorder(_node, _shouldVisitChildren).SkipLast(),
             };
 
         public static IEnumerable<(Node node, Node? parent)> DescendantNodesAndSelfWithParents(this Node _node, ETraversal _traversal = ETraversal.PostDepthFirst)
@@ -177,13 +178,13 @@ namespace VooDo.AST
             => ReplaceDescendantNodesAndSelf(_node, _map, _ => true);
 
         public static TNode? ReplaceDescendantNodesAndSelf<TNode>(this TNode _node, Func<ReplaceInfo, Node?> _map, Predicate<Node> _shouldVisitChildren) where TNode : Node
-            => (TNode?) ReplaceNodeRecursive(_node, null, _map, _shouldVisitChildren);
+            => (TNode?)ReplaceNodeRecursive(_node, null, _map, _shouldVisitChildren);
 
         public static TNode SetAsRoot<TNode>(this TNode _node) where TNode : Node
-            => (TNode) _node.SetAsRootInternal(null);
+            => (TNode)_node.SetAsRootInternal(null);
 
         internal static TNode SetAsRoot<TNode>(this TNode _node, Compilation _compilation) where TNode : Node
-            => (TNode) _node.SetAsRootInternal(_compilation);
+            => (TNode)_node.SetAsRootInternal(_compilation);
 
     }
 
