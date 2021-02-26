@@ -56,12 +56,12 @@ namespace VooDo.WinUI.Bindings
 
         internal void OnAdd()
         {
-            Lock();
+            Unlock();
         }
 
         internal void OnRemove()
         {
-            Unlock();
+            Lock();
         }
 
     }
@@ -73,7 +73,9 @@ namespace VooDo.WinUI.Bindings
 
         internal ClassBinding(Program _program, object _xamlOwner)
             : base(_program, _xamlOwner, _xamlOwner, _program.Loader.GetStringTag("SourcePath"))
-        { }
+        {
+            Program.GetVariable("this")!.Value = _xamlOwner;
+        }
 
     }
 

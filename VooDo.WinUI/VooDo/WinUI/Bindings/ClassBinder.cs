@@ -12,7 +12,6 @@ namespace VooDo.WinUI.Bindings
     public static class ClassBinder
     {
 
-        private static readonly ImmutableArray<Loader> s_noLoader = ImmutableArray.Create<Loader>();
         private static readonly LRUCache<Type, ImmutableArray<Loader>> s_loaderCache = new(256);
 
         private static ImmutableArray<Loader> GetLoaders(Type _ownerType)
@@ -20,7 +19,6 @@ namespace VooDo.WinUI.Bindings
             if (!s_loaderCache.TryGetValue(_ownerType, out ImmutableArray<Loader> loaders))
             {
                 loaders = _ownerType
-                    .GetType()
                     .GetNestedTypes(BindingFlags.NonPublic)
                     .Where(_t => _t.Name.StartsWith("VooDo_GeneratedScript_")
                         && _t.BaseType == typeof(Program))

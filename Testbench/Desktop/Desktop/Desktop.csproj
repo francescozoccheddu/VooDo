@@ -2,7 +2,6 @@
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <TargetFramework>net5.0-windows10.0.18362</TargetFramework>
-    <TargetPlatformMinVersion>10.0.17134.0</TargetPlatformMinVersion>
     <LangVersion>9.0</LangVersion>
     <Nullable>enable</Nullable>
     <RootNamespace>VooDo.Testbench.Desktop</RootNamespace>
