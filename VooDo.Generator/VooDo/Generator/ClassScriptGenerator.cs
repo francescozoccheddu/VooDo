@@ -6,7 +6,6 @@ using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Text;
 
 using System;
-using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
@@ -27,34 +26,13 @@ using VC = VooDo.Compiling;
 namespace VooDo.Generator
 {
     [Generator]
-    internal sealed class Generator : ISourceGenerator
+    internal sealed class ClassScriptGenerator : ISourceGenerator
     {
 
-        private const string c_projectOptionPrefix = "build_property.";
-        private const string c_fileOptionPrefix = "build_metadata.AdditionalFiles.";
-        private const string c_usingsOption = c_projectOptionPrefix + "VooDoUsings";
-        private const string c_xamlPathOption = c_fileOptionPrefix + "XamlPath";
-        private const string c_tagOption = c_fileOptionPrefix + "Tag";
-        private const string c_xamlClassOption = c_fileOptionPrefix + "XamlClass";
+        private const string c_xamlPathOption = "XamlPath";
+        private const string c_tagOption = "Tag";
+        private const string c_xamlClassOption = "XamlClass";
         private const string c_namePrefix = "VooDo_GeneratedScript_";
-
-        private sealed class NameDictionary
-        {
-
-            private readonly Dictionary<string, int> m_names = new();
-
-            internal string TakeName(string _name)
-            {
-                int count = m_names.TryGetValue(_name, out int value) ? value : 0;
-                m_names[_name] = count++;
-                if (count > 1)
-                {
-                    _name = $"{_name}{count}";
-                }
-                return _name;
-            }
-
-        }
 
         private static string GetName(string _path)
         {
@@ -77,19 +55,13 @@ namespace VooDo.Generator
             return builder.ToString();
         }
 
-        private static string GetTag(AdditionalText _text, GeneratorExecutionContext _context)
-        {
-            _context.AnalyzerConfigOptions.GetOptions(_text).TryGetValue(c_tagOption, out string? value);
-            return value ?? "";
-        }
-
         private static bool TryGetXamlName(AdditionalText _text, GeneratorExecutionContext _context, out Namespace? _namespace, out Identifier? _name)
         {
             _namespace = null;
             _name = null;
             AnalyzerConfigOptions? options = _context.AnalyzerConfigOptions.GetOptions(_text);
-            options.TryGetValue(c_xamlClassOption, out string? xamlClassOption);
-            options.TryGetValue(c_xamlPathOption, out string? xamlPathOption);
+            string? xamlClassOption = Options.Get(c_xamlClassOption, _context, _text);
+            string? xamlPathOption = Options.Get(c_xamlPathOption, _context, _text);
             if (string.IsNullOrEmpty(xamlClassOption))
             {
                 xamlClassOption = null;
@@ -209,7 +181,7 @@ namespace VooDo.Generator
                 script = script.AddUsingDirectives(_usings);
                 script = script.AddGlobals(new VC::Emission.Global(true, new QualifiedType(xamlNamespace, xamlName!), "this"));
                 ProgramTag pathTag = new("SourcePath", NormalFilePath.Normalize(_text.Path));
-                ProgramTag tagTag = new("Tag", GetTag(_text, _context));
+                ProgramTag tagTag = new("Tag", Options.Get(c_tagOption, _context, _text));
                 VC::Options options = VC::Options.Default with
                 {
                     Namespace = xamlNamespace,
@@ -233,66 +205,9 @@ namespace VooDo.Generator
             }
         }
 
-        private static UsingDirective ParseUsing(string _value)
-        {
-            string[] tokens = _value.Split('=');
-            if (tokens.Length == 1)
-            {
-                string[] nameTokens = tokens[0].Split();
-                if (nameTokens.Length > 2 || (nameTokens.Length == 2 && !nameTokens[0].Equals("static", StringComparison.OrdinalIgnoreCase)))
-                {
-                    throw new FormatException("Name cannot contain whitespace");
-                }
-                if (nameTokens.Length == 1)
-                {
-                    return new UsingNamespaceDirective(nameTokens[0]);
-                }
-                else
-                {
-                    return new UsingStaticDirective(nameTokens[1]);
-                }
-            }
-            else if (tokens.Length == 2)
-            {
-                return new UsingNamespaceDirective(tokens[0], tokens[1]);
-            }
-            else
-            {
-                throw new FormatException("Multiple '=' symbols");
-            }
-        }
-
-        private static bool TryGetUsings(GeneratorExecutionContext _context, out ImmutableArray<UsingDirective> _directives)
-        {
-            if (_context.AnalyzerConfigOptions.GlobalOptions.TryGetValue(c_usingsOption, out string? option))
-            {
-                string[] tokens = option.Split(',');
-                int count = string.IsNullOrEmpty(tokens.Last()) ? tokens.Length - 1 : tokens.Length;
-                UsingDirective[] directives = new UsingDirective[count];
-                for (int i = 0; i < count; i++)
-                {
-                    try
-                    {
-                        directives[i] = ParseUsing(tokens[i]);
-                    }
-                    catch (Exception e)
-                    {
-                        _context.ReportDiagnostic(DiagnosticFactory.InvalidUsing(tokens[i], e.Message));
-                        return false;
-                    }
-                }
-                _directives = directives.ToImmutableArray();
-            }
-            else
-            {
-                _directives = ImmutableArray.Create<UsingDirective>();
-            }
-            return true;
-        }
-
         public void Execute(GeneratorExecutionContext _context)
         {
-            if (!TryGetUsings(_context, out ImmutableArray<UsingDirective> usingDirectives))
+            if (!UsingsOption.TryGet(_context, out ImmutableArray<UsingDirective> usingDirectives))
             {
                 return;
             }

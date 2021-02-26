@@ -80,13 +80,13 @@ namespace VooDo.Compiling.Emission
 
         private IEnumerable<StatementSyntax> EmitStatements(Statement _node) => _node switch
         {
-            AssignmentStatement s => EnumerableExtensions.Singleton(EmitAssignmentStatement(s)),
-            BlockStatement s => EnumerableExtensions.Singleton(EmitBlockStatement(s)),
+            AssignmentStatement s => CollectionExtensions.Singleton(EmitAssignmentStatement(s)),
+            BlockStatement s => CollectionExtensions.Singleton(EmitBlockStatement(s)),
             DeclarationStatement s => EmitDeclarationStatement(s, false, false),
-            ExpressionStatement s => EnumerableExtensions.Singleton(EmitExpressionStatement(s)),
+            ExpressionStatement s => CollectionExtensions.Singleton(EmitExpressionStatement(s)),
             GlobalStatement s => s.SelectMany(_s => EmitDeclarationStatement(_s, true, s.IsConstant)),
-            IfStatement s => EnumerableExtensions.Singleton(EmitIfStatement(s)),
-            ReturnStatement s => EnumerableExtensions.Singleton((StatementSyntax)EmitReturnStatement(s)),
+            IfStatement s => CollectionExtensions.Singleton(EmitIfStatement(s)),
+            ReturnStatement s => CollectionExtensions.Singleton((StatementSyntax)EmitReturnStatement(s)),
         };
 
         private StatementSyntax EmitStatement(Statement _node)

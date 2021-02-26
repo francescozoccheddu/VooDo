@@ -27,7 +27,6 @@
   <Import Project="..\..\..\VooDo.Generator\Generator.props" />
 
   <ItemGroup>
-    <AdditionalFiles Include="MainWindow.voodo"/>
     <ProjectReference Include="..\..\..\VooDo.Generator\VooDo.Generator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
   </ItemGroup>
 
