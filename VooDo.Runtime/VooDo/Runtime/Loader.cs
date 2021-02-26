@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Reflection;
 
@@ -37,13 +39,76 @@ namespace VooDo.Runtime
                     && _m.GetBaseDefinition().DeclaringType is Type declaring
                     && (declaring == typeof(Program) || declaring.IsSubclassOf(typeof(Program))))
                 .ReturnType;
+            Tags = m_type
+                .GetFields(BindingFlags.Static | BindingFlags.NonPublic)
+                .Where(_f => _f.IsLiteral)
+                .ToImmutableDictionary(_f => _f.Name.Substring(RuntimeHelpers.tagFieldPrefix.Length), _f => _f.GetRawConstantValue())!;
         }
 
         public Program Create()
-            => (Program) Activator.CreateInstance(m_type)!;
+        {
+            Program program = (Program)Activator.CreateInstance(m_type)!;
+            program.Loader = this;
+            return program;
+        }
 
         public TypedProgram<TReturn> Create<TReturn>()
-            => (TypedProgram<TReturn>) Create();
+            => (TypedProgram<TReturn>)Create();
+
+        #region Tags
+
+        public ImmutableDictionary<string, object?> Tags { get; }
+
+        private bool TryGetTag<TValue>(string _name, out TValue _value)
+        {
+            if (Tags.TryGetValue(_name, out object? value) && value is TValue tValue)
+            {
+                _value = tValue;
+                return true;
+            }
+            else
+            {
+                _value = default!;
+                return false;
+            }
+        }
+
+        private TValue GetTag<TValue>(string _name)
+            => TryGetTag(_name, out TValue value) ? value! : throw new KeyNotFoundException();
+
+        public int GetIntTag(string _name) => GetTag<int>(_name);
+        public uint GetUIntTag(string _name) => GetTag<uint>(_name);
+        public short GetShortTag(string _name) => GetTag<short>(_name);
+        public ushort GetUShortTag(string _name) => GetTag<ushort>(_name);
+        public long GetLongTag(string _name) => GetTag<long>(_name);
+        public ulong GetULongTag(string _name) => GetTag<ulong>(_name);
+        public decimal GetDecimalTag(string _name) => GetTag<decimal>(_name);
+        public sbyte GetSByteTag(string _name) => GetTag<sbyte>(_name);
+        public byte GetByteTag(string _name) => GetTag<byte>(_name);
+        public char GetCharTag(string _name) => GetTag<char>(_name);
+        public string GetStringTag(string _name) => GetTag<string>(_name);
+        public float GetFloatTag(string _name) => GetTag<float>(_name);
+        public double GetDoubleTag(string _name) => GetTag<double>(_name);
+        public bool GetBoolTag(string _name) => GetTag<bool>(_name);
+
+        public bool TryGetIntTag(string _name, out int _value) => TryGetTag(_name, out _value);
+        public bool TryGetUIntTag(string _name, out uint _value) => TryGetTag(_name, out _value);
+        public bool TryGetShortTag(string _name, out short _value) => TryGetTag(_name, out _value);
+        public bool TryGetUShortTag(string _name, out ushort _value) => TryGetTag(_name, out _value);
+        public bool TryGetLongTag(string _name, out long _value) => TryGetTag(_name, out _value);
+        public bool TryGetULongTag(string _name, out ulong _value) => TryGetTag(_name, out _value);
+        public bool TryGetDecimalTag(string _name, out decimal _value) => TryGetTag(_name, out _value);
+        public bool TryGetSByteTag(string _name, out sbyte _value) => TryGetTag(_name, out _value);
+        public bool TryGetByteTag(string _name, out byte _value) => TryGetTag(_name, out _value);
+        public bool TryGetCharTag(string _name, out char _value) => TryGetTag(_name, out _value);
+        public bool TryGetStringTag(string _name, out string _value) => TryGetTag(_name, out _value);
+        public bool TryGetFloatTag(string _name, out float _value) => TryGetTag(_name, out _value);
+        public bool TryGetDoubleTag(string _name, out double _value) => TryGetTag(_name, out _value);
+        public bool TryGetBoolTag(string _name, out bool _value) => TryGetTag(_name, out _value);
+
+        #endregion
+
+        #region Identity
 
         public override bool Equals(object? _obj) => Equals(_obj as Loader);
         public bool Equals(Loader? _other) => _other is not null && m_type == _other.m_type;
@@ -51,6 +116,8 @@ namespace VooDo.Runtime
 
         public static bool operator ==(Loader? _left, Loader? _right) => _left is not null && _left.Equals(_right);
         public static bool operator !=(Loader? _left, Loader? _right) => !(_left == _right);
+
+        #endregion
 
     }
 

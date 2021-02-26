@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <PackageId>VooDo.WinUI.HookInitializers</PackageId>
+    <PackageId>VooDo.Utils</PackageId>
     <Authors>Francesco Zoccheddu</Authors>
     <Version>0.0.1</Version>
     <AssemblyVersion>0.0.0.1</AssemblyVersion>
@@ -24,10 +24,6 @@
       <Pack>True</Pack>
       <PackagePath></PackagePath>
     </None>
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\VooDo\VooDo.csproj" PrivateAssets="all"/>
   </ItemGroup>
 
 </Project>

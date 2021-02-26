@@ -73,17 +73,12 @@
         <Border
             Margin="20,0,0,20"
             Padding="10"
-            Background="Black"
             HorizontalAlignment="Left"
             VerticalAlignment="Bottom"
-            >
+            Background="Black">
 
-            <TextBlock
-                Text="{x:Bind m_Scroll.VerticalOffset, Mode=OneWay}"
-                >
-                
-            </TextBlock>
-            
+            <TextBlock Text="{x:Bind m_Scroll.VerticalOffset, Mode=OneWay}" />
+
         </Border>
 
     </Grid>

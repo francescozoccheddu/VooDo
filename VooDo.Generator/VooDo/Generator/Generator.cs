@@ -30,11 +30,12 @@ namespace VooDo.Generator
     internal sealed class Generator : ISourceGenerator
     {
 
-        private const string c_projectOptionPrefix = "build_property";
-        private const string c_fileOptionPrefix = "build_metadata.AdditionalFiles";
-        private const string c_usingsOption = c_projectOptionPrefix + ".VooDoUsings";
-        private const string c_xamlPathOption = c_fileOptionPrefix + ".XamlPath";
-        private const string c_xamlClassOption = c_fileOptionPrefix + ".XamlClass";
+        private const string c_projectOptionPrefix = "build_property.";
+        private const string c_fileOptionPrefix = "build_metadata.AdditionalFiles.";
+        private const string c_usingsOption = c_projectOptionPrefix + "VooDoUsings";
+        private const string c_xamlPathOption = c_fileOptionPrefix + "XamlPath";
+        private const string c_tagOption = c_fileOptionPrefix + "Tag";
+        private const string c_xamlClassOption = c_fileOptionPrefix + "XamlClass";
         private const string c_namePrefix = "VooDo_GeneratedScript_";
 
         private sealed class NameDictionary
@@ -74,6 +75,12 @@ namespace VooDo.Generator
                 }
             }
             return builder.ToString();
+        }
+
+        private static string GetTag(AdditionalText _text, GeneratorExecutionContext _context)
+        {
+            _context.AnalyzerConfigOptions.GetOptions(_text).TryGetValue(c_tagOption, out string? value);
+            return value ?? "";
         }
 
         private static bool TryGetXamlName(AdditionalText _text, GeneratorExecutionContext _context, out Namespace? _namespace, out Identifier? _name)
@@ -201,6 +208,8 @@ namespace VooDo.Generator
                 }
                 script = script.AddUsingDirectives(_usings);
                 script = script.AddGlobals(new VC::Emission.Global(true, new QualifiedType(xamlNamespace, xamlName!), "this"));
+                ProgramTag pathTag = new("SourcePath", NormalFilePath.Normalize(_text.Path));
+                ProgramTag tagTag = new("Tag", GetTag(_text, _context));
                 VC::Options options = VC::Options.Default with
                 {
                     Namespace = xamlNamespace,
@@ -208,7 +217,8 @@ namespace VooDo.Generator
                     References = default,
                     HookInitializer = _hookInitializer,
                     ContainingClass = xamlName,
-                    Accessibility = VC::Options.EAccessibility.Private
+                    Accessibility = VC::Options.EAccessibility.Private,
+                    Tags = ImmutableArray.Create(pathTag, tagTag)
                 };
                 VC::Compilation compilation = VC::Compilation.SucceedOrThrow(script, options, _context.CancellationToken, (CSharpCompilation)_context.Compilation);
                 _context.AddSource(name, compilation.GetCSharpSourceCode());
@@ -301,6 +311,7 @@ namespace VooDo.Generator
 
         public void Initialize(GeneratorInitializationContext _context)
         {
+            return;
             if (!System.Diagnostics.Debugger.IsAttached)
             {
                 System.Diagnostics.Debugger.Launch();

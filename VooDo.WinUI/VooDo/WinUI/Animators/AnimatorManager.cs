@@ -42,7 +42,7 @@ namespace VooDo.WinUI.Animators
         private static void CompositionTarget_Rendering(object? _sender, object _e)
         {
             double deltaTime = Math.Min(s_stopwatch.Elapsed.TotalSeconds, c_maxDeltaTime);
-            ImmutableArray<IDisposable> locks = s_programReferenceCount.Keys.Select(_p => _p.Lock()).ToImmutableArray();
+            ImmutableArray<IDisposable> locks = s_programReferenceCount.Keys.Select(_p => _p.Lock(true)).ToImmutableArray();
             try
             {
                 foreach (IAnimator a in s_animators)

@@ -51,7 +51,7 @@ namespace VooDo.Compiling.Emission
             m_runtimeAlias = _runtimeAlias;
         }
 
-        private ExpressionSyntax EmitExpression(Expression _node) => _node switch
+        private ExpressionSyntax EmitExpression(Expression _node, bool _isAssignmentTarget = false) => _node switch
         {
             ArrayCreationExpression e => EmitArrayCreation(e),
             AsExpression e => EmitAsExpression(e),
@@ -65,7 +65,7 @@ namespace VooDo.Compiling.Emission
             IsExpression e => EmitIsExpression(e),
             LiteralExpression e => EmitLiteralExpression(e),
             MemberAccessExpression e => EmitMemberAccessExpression(e),
-            NameExpression e => EmitNameExpression(e),
+            NameExpression e => EmitNameExpression(e, _isAssignmentTarget),
             ObjectCreationExpression e => EmitObjectCreation(e),
             TupleExpression e => EmitTupleExpression(e),
             TupleDeclarationExpression e => EmitTupleDeclarationExpression(e),
@@ -82,9 +82,9 @@ namespace VooDo.Compiling.Emission
         {
             AssignmentStatement s => EnumerableExtensions.Singleton(EmitAssignmentStatement(s)),
             BlockStatement s => EnumerableExtensions.Singleton(EmitBlockStatement(s)),
-            DeclarationStatement s => EmitDeclarationStatement(s),
+            DeclarationStatement s => EmitDeclarationStatement(s, false, false),
             ExpressionStatement s => EnumerableExtensions.Singleton(EmitExpressionStatement(s)),
-            GlobalStatement s => s.SelectMany(EmitDeclarationStatement),
+            GlobalStatement s => s.SelectMany(_s => EmitDeclarationStatement(_s, true, s.IsConstant)),
             IfStatement s => EnumerableExtensions.Singleton(EmitIfStatement(s)),
             ReturnStatement s => EnumerableExtensions.Singleton((StatementSyntax)EmitReturnStatement(s)),
         };
@@ -153,7 +153,7 @@ namespace VooDo.Compiling.Emission
             }
             foreach (SimpleType name in _node.Path.Skip(1))
             {
-                type = SF.QualifiedName(type, (SimpleNameSyntax)EmitSimpleType(name));
+                type = SF.QualifiedName(type, (SimpleNameSyntax)EmitSimpleType(name, false));
             }
             return type.Own(m_tagger, _node);
         }
@@ -162,9 +162,9 @@ namespace VooDo.Compiling.Emission
         {
             if (_node.IsSimple)
             {
-                return EmitSimpleType(_node.Path[0]);
+                return EmitSimpleType(_node.Path[0], true);
             }
-            NameSyntax type = (NameSyntax)EmitSimpleType(_node.Path[0]);
+            NameSyntax type = (NameSyntax)EmitSimpleType(_node.Path[0], false);
             if (_node.IsAliasQualified)
             {
                 type = SF.AliasQualifiedName(
@@ -173,16 +173,14 @@ namespace VooDo.Compiling.Emission
             }
             foreach (SimpleType name in _node.Path.Skip(1))
             {
-                type = SF.QualifiedName(type, (SimpleNameSyntax)EmitSimpleType(name));
+                type = SF.QualifiedName(type, (SimpleNameSyntax)EmitSimpleType(name, false));
             }
             return type.Own(m_tagger, _node);
         }
 
-        private TypeSyntax EmitSimpleType(SimpleType _node)
+        private TypeSyntax EmitSimpleType(SimpleType _node, bool _allowPredefined)
         {
-            if (_node.Parent is not null
-                && ((QualifiedType)_node.Parent).IsSimple
-                && !_node.IsGeneric)
+            if (_allowPredefined && !_node.IsGeneric)
             {
                 return SU.TypeIdentifier(_node.Name);
             }
@@ -247,7 +245,7 @@ namespace VooDo.Compiling.Emission
                         AssignmentStatement.EKind.BitwiseXor => SK.ExclusiveOrAssignmentExpression,
                         AssignmentStatement.EKind.Coalesce => SK.CoalesceAssignmentExpression,
                     },
-                     EmitExpression(_node.Target),
+                     EmitExpression(_node.Target, true),
                      EmitExpression(_node.Source)))
             .Own(m_tagger, _node);
 
@@ -260,25 +258,25 @@ namespace VooDo.Compiling.Emission
             return block;
         }
 
-        private IEnumerable<StatementSyntax> EmitDeclarationStatement(DeclarationStatement _node)
+        private IEnumerable<StatementSyntax> EmitDeclarationStatement(DeclarationStatement _node, bool _isGlobal, bool _isConstant)
         {
             TypeSyntax type = EmitComplexTypeOrVar(_node.Type);
-            if (_node.Parent is GlobalStatement && !_node.Type.IsVar)
+            if (_isGlobal && !_node.Type.IsVar)
             {
                 type = SU.VariableType(m_runtimeAlias, type);
             }
             return _node.Declarators.Select(_d =>
                 SF.LocalDeclarationStatement(
-                        SF.VariableDeclaration(type, EmitDeclarationStatementDeclarator(_d).ToSeparatedList()))
+                        SF.VariableDeclaration(type, EmitDeclarationStatementDeclarator(_d, _node, _isGlobal, _isConstant).ToSeparatedList()))
                 .Own(m_tagger, _node));
         }
 
-        private VariableDeclaratorSyntax EmitDeclarationStatementDeclarator(DeclarationStatement.Declarator _node)
+        private VariableDeclaratorSyntax EmitDeclarationStatementDeclarator(DeclarationStatement.Declarator _node, DeclarationStatement _parent, bool _isGlobal, bool _isConstant)
         {
             ExpressionSyntax? initializer;
-            if (_node.Parent is not null && _node.Parent.Parent is GlobalStatement globalStatement)
+            if (_isGlobal)
             {
-                Global global = new Global(globalStatement.IsConstant, ((DeclarationStatement)_node.Parent).Type, _node.Name, _node.Initializer);
+                Global global = new Global(_isConstant, _parent.Type, _node.Name, _node.Initializer);
                 Scope.GlobalDefinition globalDefinition = m_scope.AddGlobal(new GlobalPrototype(global, _node));
                 initializer = SU.ThisMemberAccess(globalDefinition.Identifier);
             }
@@ -473,7 +471,7 @@ namespace VooDo.Compiling.Emission
                 EmitIdentifier(_node.Member).Own(m_tagger, _node.Member))
             .Own(m_tagger, _node);
 
-        private ExpressionSyntax EmitNameExpression(NameExpression _node)
+        private ExpressionSyntax EmitNameExpression(NameExpression _node, bool _isAssignmentTarget)
         {
             bool isGlobal = m_scope.IsGlobal(_node.Name);
             bool isConstant = m_scope.IsConstant(_node.Name);
@@ -488,7 +486,7 @@ namespace VooDo.Compiling.Emission
                     throw new ControllerOfConstantProblem(_node).AsThrowable();
                 }
             }
-            if (isConstant && _node.Parent is AssignmentStatement assignment && assignment.Target == _node)
+            if (isConstant && _isAssignmentTarget)
             {
                 throw new AssignmentOfConstantProblem(_node).AsThrowable();
             }
@@ -513,7 +511,7 @@ namespace VooDo.Compiling.Emission
         {
             ArrayTypeSyntax type = (ArrayTypeSyntax)EmitComplexType(_node.Type);
             SyntaxList<ArrayRankSpecifierSyntax> rankSpecifiers = type.RankSpecifiers;
-            ArrayRankSpecifierSyntax rank = rankSpecifiers[0].WithSizes(_node.Sizes.Select(EmitExpression).ToSeparatedList());
+            ArrayRankSpecifierSyntax rank = rankSpecifiers[0].WithSizes(_node.Sizes.Select(_e => EmitExpression(_e)).ToSeparatedList());
             rankSpecifiers = new[] { rank }.Concat(rankSpecifiers.Skip(1)).ToSyntaxList();
             type = type.WithRankSpecifiers(rankSpecifiers);
             return SF.ArrayCreationExpression(type).Own(m_tagger, _node);
@@ -622,7 +620,7 @@ namespace VooDo.Compiling.Emission
                     SU.Tokens(
                         SK.ProtectedKeyword,
                         SK.OverrideKeyword));
-            IEnumerable<FieldDeclarationSyntax> globalDeclarations =
+            IEnumerable<MemberDeclarationSyntax> globalDeclarations =
                 globals.Select(_g =>
                     SF.FieldDeclaration(
                         SF.List<AttributeListSyntax>(),
@@ -630,6 +628,21 @@ namespace VooDo.Compiling.Emission
                             SK.PrivateKeyword,
                             SK.ReadOnlyKeyword),
                         EmitGlobalDeclaration(_g)));
+            IEnumerable<MemberDeclarationSyntax> tagDeclarations =
+                _session.Compilation.Options.Tags.Select(_t =>
+                    SF.FieldDeclaration(
+                        SF.List<AttributeListSyntax>(),
+                        SU.Tokens(
+                            SK.PrivateKeyword,
+                            SK.ConstKeyword),
+                        SF.VariableDeclaration(
+                            EmitComplexType(_t.Type),
+                            SF.VariableDeclarator(
+                                EmitIdentifier(RuntimeHelpers.tagFieldPrefix + _t.Name).Own(m_tagger, _t.Name),
+                                null,
+                                SF.EqualsValueClause(
+                                    EmitExpression(_t.Value)))
+                            .ToSeparatedList())));
             ClassDeclarationSyntax? classDeclaration =
                 SF.ClassDeclaration(_session.Compilation.Options.ClassName)
                     .WithModifiers(
@@ -650,7 +663,7 @@ namespace VooDo.Compiling.Emission
                                 SU.ProgramType(m_runtimeAlias, returnType))
                             .ToSeparatedList<BaseTypeSyntax>()))
                     .WithMembers(globalDeclarations
-                        .Cast<MemberDeclarationSyntax>()
+                        .Concat(tagDeclarations)
                         .Append(variablesProperty)
                         .Append(runMethod)
                         .ToSyntaxList());

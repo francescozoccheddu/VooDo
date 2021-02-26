@@ -20,12 +20,21 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Include="..\.editorconfig" Link=".editorconfig" />
+    <None Include="..\Icon\Icon.png">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Antlr4.Runtime.Standard" Version="4.9.1" PrivateAssets="compile" />
     <PackageReference Include="Antlr4BuildTasks" Version="8.13.0" PrivateAssets="all" />
-    <PackageReference Include="IsExternalInit" Version="1.0.0" PrivateAssets="all" IncludeAssets="runtime; build; native; contentfiles; analyzers; buildtransitive"/>
+    <PackageReference Include="IsExternalInit" Version="1.0.0" PrivateAssets="all" IncludeAssets="runtime; build; native; contentfiles; analyzers; buildtransitive" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="3.8.0" />
     <PackageReference Include="Microsoft.CodeAnalysis.Features" Version="3.8.0" PrivateAssets="compile" />
     <ProjectReference Include="..\VooDo.Runtime\VooDo.Runtime.csproj" />
+    <ProjectReference Include="..\VooDo.Utils\VooDo.Utils.csproj" PrivateAssets="all" />
   </ItemGroup>
 
   <ItemGroup>
@@ -43,14 +52,6 @@
       <Package>VooDo.Parsing.Generated</Package>
       <Error>true</Error>
     </Antlr4>
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Include="..\.editorconfig" Link=".editorconfig" />
-    <None Include="..\Icon\Icon.png">
-      <Pack>True</Pack>
-      <PackagePath></PackagePath>
-    </None>
   </ItemGroup>
 
 </Project>

@@ -26,4 +26,9 @@
     </None>
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="System.Collections.Immutable" Version="5.0.0" />
+    <ProjectReference Include="..\VooDo.Utils\VooDo.Utils.csproj" PrivateAssets="all" />
+  </ItemGroup>
+
 </Project>

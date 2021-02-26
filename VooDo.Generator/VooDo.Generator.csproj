@@ -20,6 +20,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Include="..\Icon\Icon.png">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="3.3.2" PrivateAssets="all" IncludeAssets="runtime; build; native; contentfiles; analyzers; buildtransitive" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="3.8.0" PrivateAssets="all" />
   </ItemGroup>
@@ -29,14 +36,8 @@
     <PackageReference Include="Antlr4.Runtime.Standard" Version="4.9.1" PrivateAssets="all" GeneratePathProperty="true" />
     <ProjectReference Include="..\VooDo\VooDo.csproj" PrivateAssets="all" />
     <ProjectReference Include="..\VooDo.Runtime\VooDo.Runtime.csproj" PrivateAssets="all" />
+    <ProjectReference Include="..\VooDo.Utils\VooDo.Utils.csproj" PrivateAssets="all" />
     <ProjectReference Include="..\VooDo.WinUI.HookInitializers\VooDo.WinUI.HookInitializers.csproj" PrivateAssets="all" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Include="..\Icon\Icon.png">
-      <Pack>True</Pack>
-      <PackagePath></PackagePath>
-    </None>
   </ItemGroup>
 
   <PropertyGroup>
@@ -47,6 +48,7 @@
     <ItemGroup>
       <TargetPathWithTargetPlatformMoniker Include="$(SolutionDir)VooDo\$(OutputPath)VooDo.dll" IncludeRuntimeDependency="false" />
       <TargetPathWithTargetPlatformMoniker Include="$(SolutionDir)VooDo.Runtime\$(OutputPath)VooDo.Runtime.dll" IncludeRuntimeDependency="false" />
+      <TargetPathWithTargetPlatformMoniker Include="$(SolutionDir)VooDo.Utils\$(OutputPath)VooDo.Utils.dll" IncludeRuntimeDependency="false" />
       <TargetPathWithTargetPlatformMoniker Include="$(SolutionDir)VooDo.WinUI.HookInitializers\$(OutputPath)VooDo.WinUI.HookInitializers.dll" IncludeRuntimeDependency="false" />
       <TargetPathWithTargetPlatformMoniker Include="$(PKGAntlr4_Runtime_Standard)\lib\netstandard2.0\Antlr4.Runtime.Standard.dll" IncludeRuntimeDependency="false" />
       <TargetPathWithTargetPlatformMoniker Include="$(PKGMicrosoft_CodeAnalysis_AnalyzerUtilities)\lib\netstandard2.0\Microsoft.CodeAnalysis.AnalyzerUtilities.dll" IncludeRuntimeDependency="false" />

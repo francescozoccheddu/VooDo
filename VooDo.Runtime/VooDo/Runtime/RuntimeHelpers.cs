@@ -17,6 +17,8 @@
         public const string hooksPropertyName = nameof(Program.GeneratedHooks);
         public const string variablesPropertyName = nameof(Program.GeneratedVariables);
         public const string subscribeHookMethodName = nameof(Program.SubscribeHook);
+        public const string tagFieldPrefix = "__VooDo_Internal_Tag_";
+
 
     }
 }

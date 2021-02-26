@@ -8,6 +8,7 @@ namespace VooDo.WinUI.Animators
     {
 
         void Update(double _deltaTime);
+
         Program Program { get; }
 
     }

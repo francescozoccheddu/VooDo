@@ -43,7 +43,6 @@ namespace VooDo.Runtime
     public abstract class Program : IHookListener
     {
 
-
         protected Program()
         {
             Variables = GeneratedVariables.ToList().AsReadOnly();
@@ -56,12 +55,18 @@ namespace VooDo.Runtime
                 variable.Program = this;
             }
             m_hookSets = GeneratedHooks.Select(_h => new HookSet(this, _h.hook, _h.count)).ToArray();
+            Loader = null!;
         }
+
+        public Loader Loader { get; internal set; }
+        public virtual Type ReturnType => typeof(void);
+
+        #region Hooks
 
         private sealed class HookSet
         {
 
-            private static readonly IEqualityComparer<object?> s_targetComparer = new ReferenceComparer<object?>();
+            private static readonly IEqualityComparer<object?> s_targetComparer = new Identity.ReferenceComparer<object?>();
 
             private readonly HashSet<object?> m_activeTargets;
             private readonly bool[] m_subscribedInThisRun;
@@ -105,9 +110,51 @@ namespace VooDo.Runtime
                 }
             }
 
+            public void UnsubscribeAll()
+            {
+                foreach (IHook h in m_hooks)
+                {
+                    h.Unsubscribe();
+                }
+            }
+
         }
 
         private readonly HookSet[] m_hookSets;
+
+        protected internal TValue? SubscribeHook<TValue>(TValue? _object, int _setIndex, int _hookIndex) where TValue : class
+        {
+            m_hookSets[_setIndex].OnSubscribe(_object, _hookIndex);
+            return _object;
+        }
+
+        public void Freeze()
+        {
+            foreach (HookSet s in m_hookSets)
+            {
+                s.UnsubscribeAll();
+            }
+            foreach (Variable v in Variables)
+            {
+                v.ControllerFactory = null;
+            }
+        }
+
+        #endregion
+
+        #region Interface
+
+        protected internal abstract void Run();
+
+#pragma warning disable CA1819 // Properties should not return arrays
+        protected internal virtual Variable[] GeneratedVariables => Array.Empty<Variable>();
+        protected internal virtual (IHook hook, int count)[] GeneratedHooks => Array.Empty<(IHook, int)>();
+#pragma warning restore CA1819 // Properties should not return arrays
+
+        #endregion
+
+        #region Variables
+
         private readonly Dictionary<string, Variable[]> m_variableMap;
         public IReadOnlyList<Variable> Variables { get; }
 
@@ -125,17 +172,10 @@ namespace VooDo.Runtime
         public Variable<TValue>? GetVariable<TValue>(string _name)
             => GetVariables<TValue>(_name).SingleOrDefault();
 
-        private bool m_running;
-        private int m_locks;
+        #endregion
 
-        protected internal abstract void Run();
 
-#pragma warning disable CA1819 // Properties should not return arrays
-        protected internal virtual Variable[] GeneratedVariables => Array.Empty<Variable>();
-        protected internal virtual (IHook hook, int count)[] GeneratedHooks => Array.Empty<(IHook, int)>();
-#pragma warning restore CA1819 // Properties should not return arrays
-
-        public virtual Type ReturnType => typeof(void);
+        #region Run requests
 
         private void PrepareAndRun()
         {
@@ -156,40 +196,50 @@ namespace VooDo.Runtime
             }
         }
 
-        private sealed class Locker : IDisposable
+        private bool m_running;
+        private int m_locks;
+        private readonly HashSet<Locker> m_overridingLockers = new();
+
+        public sealed class Locker : IDisposable
         {
 
-            internal Locker(Program _script) => m_script = _script;
-
-            private readonly Program m_script;
-
-            private bool m_disposed;
-
-            void IDisposable.Dispose()
+            internal Locker(Program _program, bool _storeRequests)
             {
-                if (!m_disposed)
+                Program = _program;
+                StoreRequests = _storeRequests;
+                if (!StoreRequests)
                 {
-                    m_disposed = true;
-                    m_script.Unlock();
+                    Program.m_overridingLockers.Add(this);
+                }
+                Program.m_locks++;
+            }
+
+            public Program Program { get; }
+            public bool StoreRequests { get; }
+            public bool IsDisposed { get; private set; }
+
+            public void Dispose()
+            {
+                if (!IsDisposed)
+                {
+                    IsDisposed = true;
+                    Program.m_locks--;
+                    if (!StoreRequests)
+                    {
+                        Program.m_overridingLockers.Remove(this);
+                    }
+                    Program.ProcessRunRequest();
                 }
             }
 
         }
 
-        public IDisposable Lock()
-        {
-            m_locks++;
-            return new Locker(this);
-        }
+        public IDisposable Lock(bool _storeRequests = true)
+            => new Locker(this, _storeRequests);
 
         public bool IsLocked => m_locks > 0;
         public bool IsRunRequested { get; private set; }
 
-        protected internal TValue? SubscribeHook<TValue>(TValue? _object, int _setIndex, int _hookIndex) where TValue : class
-        {
-            m_hookSets[_setIndex].OnSubscribe(_object, _hookIndex);
-            return _object;
-        }
 
         private void ProcessRunRequest()
         {
@@ -199,21 +249,20 @@ namespace VooDo.Runtime
             }
         }
 
-        private void Unlock()
-        {
-            m_locks--;
-            ProcessRunRequest();
-        }
-
         public void RequestRun()
         {
-            IsRunRequested = true;
-            ProcessRunRequest();
+            if (m_overridingLockers.Count == 0)
+            {
+                IsRunRequested = true;
+                ProcessRunRequest();
+            }
         }
 
         public void CancelRunRequest() => IsRunRequested = false;
 
         void IHookListener.NotifyChange() => RequestRun();
+
+        #endregion
 
     }
 

@@ -18,6 +18,13 @@
     <RepositoryType>git</RepositoryType>
     <PackageIcon>Icon.png</PackageIcon>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\Icon\Icon.png">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
+  </ItemGroup>
     
   <ItemGroup>
     <Compile Remove="VooDo\NewFolder\**" />
@@ -29,13 +36,7 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.WinUI" Version="3.0.0-preview4.210210.4" />
     <ProjectReference Include="..\VooDo.Runtime\VooDo.Runtime.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Include="..\Icon\Icon.png">
-      <Pack>True</Pack>
-      <PackagePath></PackagePath>
-    </None>
+    <ProjectReference Include="..\VooDo.Utils\VooDo.Utils.csproj" PrivateAssets="all" />
   </ItemGroup>
 
 </Project>

@@ -23,9 +23,12 @@ namespace VooDo.Compiling
             AssemblyName = null;
             Accessibility = EAccessibility.Public;
             HookInitializer = new HookInitializerList();
+            Tags = ImmutableArray.Create<ProgramTag>();
         }
 
         public string? AssemblyName { get; init; }
+
+        public ImmutableArray<ProgramTag> Tags { get; init; }
 
         public Namespace? Namespace { get; init; }
 
