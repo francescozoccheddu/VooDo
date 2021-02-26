@@ -673,6 +673,13 @@ namespace VooDo.Compiling.Emission
                     usings.ToSyntaxList(),
                     SF.List<AttributeListSyntax>(),
                     classOrNamespace.ToSyntaxList())
+                .WithLeadingTrivia(
+                    SF.TriviaList(
+                        SF.Trivia(
+                            SF.NullableDirectiveTrivia(
+                                SF.Token(
+                                    SK.DisableKeyword),
+                                true))))
                 .Own(m_tagger, _node);
             return root;
         }
