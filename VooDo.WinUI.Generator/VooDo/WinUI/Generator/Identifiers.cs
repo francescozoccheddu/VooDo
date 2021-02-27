@@ -24,7 +24,7 @@
         internal const string markupPathPropertyName = "Path";
         internal const string markupObjectNamespace = "VooDo.WinUI.Xaml";
         internal const string dependencyObjectFullName = "Microsoft.UI.Xaml.DependencyObject";
-        internal const string usingsOption = "Usings";
+        internal const string usingsOption = "VooDoUsings";
         internal const string tagOption = "Tag";
         internal const string xamlClassOption = "XamlClass";
         internal const string xamlPathOption = "XamlPath";

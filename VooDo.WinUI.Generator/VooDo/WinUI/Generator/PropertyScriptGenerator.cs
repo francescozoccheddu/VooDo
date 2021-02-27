@@ -187,7 +187,7 @@ namespace VooDo.WinUI.Generator
 
         private static bool TryResolveWinUIXamlType(string _name, GeneratorExecutionContext _context, MetadataReference _winUi, CodeOrigin _origin, out QualifiedType? _type)
         {
-            int presentationNamespaceDepth = Identifiers.xamlPresentationBaseNamespace.Count(_c => _c == '.');
+            int presentationNamespaceDepth = Identifiers.xamlPresentationBaseNamespace.Count(_c => _c == '.') + 1;
             ImmutableArray<QualifiedType>? candidates = ReferenceFinder.FindTypeByPartialName(_name, _context.Compilation, _winUi)
                 ?.Where(_c => _c.Path.Length > presentationNamespaceDepth
                 && string.Join(".", _c.Path.Take(presentationNamespaceDepth)) == Identifiers.xamlPresentationBaseNamespace)
@@ -283,7 +283,7 @@ namespace VooDo.WinUI.Generator
                 ProgramTag codeTag = new(Identifiers.propertyCodeTag, code);
                 ProgramTag propertyTag = new(Identifiers.propertyPropertyTag, _markup.Property.Value);
                 ProgramTag objectTag = new(Identifiers.propertyObjectTag, objectType with { Alias = null });
-                string name = Identifiers.classScriptPrefix + _nameDictionary.TakeName(_root.Path.Last().Name);
+                string name = Identifiers.propertyScriptPrefix + _nameDictionary.TakeName(_root.Path.Last().Name);
                 Options options = Options.Default with
                 {
                     Namespace = new Namespace(_root.Path.SkipLast().Select(_s => _s.Name)),
@@ -346,7 +346,7 @@ namespace VooDo.WinUI.Generator
         private static bool TryGetWinUISymbol(GeneratorExecutionContext _context, out MetadataReference? _winUi)
         {
             IEnumerable<MetadataReference> references = ReferenceFinder.OrderByFileNameHint(_context.Compilation.References, Identifiers.winUiName);
-            _winUi = ReferenceFinder.FindByType(Identifiers.xamlPresentationBaseNamespace + "Window", _context.Compilation, references).FirstOrDefault();
+            _winUi = ReferenceFinder.FindByType(Identifiers.xamlPresentationBaseNamespace + ".Window", _context.Compilation, references).FirstOrDefault();
             if (_winUi is null)
             {
                 _context.ReportDiagnostic(DiagnosticFactory.NoWinUI());

@@ -224,10 +224,9 @@ namespace VooDo.WinUI.Generator
 
         public void Initialize(GeneratorInitializationContext _context)
         {
-            return;
             if (!System.Diagnostics.Debugger.IsAttached)
             {
-                System.Diagnostics.Debugger.Launch();
+                //System.Diagnostics.Debugger.Launch();
             }
         }
 

@@ -31,7 +31,7 @@ namespace VooDo.WinUI.Bindings
                 loaders = _ownerType
                     .GetNestedTypes(BindingFlags.NonPublic)
                     .Where(_t => _t.Name.StartsWith(SpyProgram.scriptPrefix + Identifiers.classScriptPrefix)
-                        && _t.BaseType == typeof(IProgram))
+                        && _t.BaseType == typeof(Program))
                     .Select(_t => Loader.FromType(_t))
                     .ToImmutableArray();
                 s_classLoaderCache[_ownerType] = loaders;
@@ -74,7 +74,7 @@ namespace VooDo.WinUI.Bindings
                 loaders = _ownerType
                     .GetNestedTypes(BindingFlags.NonPublic)
                     .Where(_t => _t.Name.StartsWith(SpyProgram.scriptPrefix + Identifiers.propertyScriptPrefix)
-                        && _t.IsSubclassOf(typeof(ITypedProgram)))
+                        && _t.IsSubclassOf(typeof(TypedProgram)))
                     .Select(_t => Loader.FromType(_t))
                     .ToImmutableDictionary(_t => new PropertyKey(
                         _t.GetStringTag(Identifiers.propertyCodeTag),

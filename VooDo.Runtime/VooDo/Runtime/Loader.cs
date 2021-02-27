@@ -14,7 +14,7 @@ namespace VooDo.Runtime
 
         private abstract class SpyProgram : TypedProgram
         {
-            internal const string tagPrefix = nameof(__VooDo_Reserved_tagPrefix);
+            internal const string tagPrefix = __VooDo_Reserved_tagPrefix;
             private SpyProgram()
             { }
         }
@@ -46,7 +46,7 @@ namespace VooDo.Runtime
                 : m_type.BaseType.GenericTypeArguments.Single();
             Tags = m_type
                 .GetFields(BindingFlags.Static | BindingFlags.NonPublic)
-                .Where(_f => _f.IsLiteral)
+                .Where(_f => _f.IsLiteral && _f.Name.StartsWith(SpyProgram.tagPrefix))
                 .ToImmutableDictionary(_f => _f.Name.Substring(SpyProgram.tagPrefix.Length), _f => _f.GetRawConstantValue())!;
         }
 
