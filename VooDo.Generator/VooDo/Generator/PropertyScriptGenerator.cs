@@ -256,10 +256,6 @@ namespace VooDo.Generator
             MetadataReference _winUi,
             IHookInitializer _hookInitializer)
         {
-            if (!System.Diagnostics.Debugger.IsAttached)
-            {
-                System.Diagnostics.Debugger.Launch();
-            }
             if (!TryResolveXamlType(_markup.Object, _context, _winUi, _source, _sourcePath, out QualifiedType? objectType))
             {
                 return;
@@ -298,8 +294,9 @@ namespace VooDo.Generator
                 }
                 script = script.AddUsingDirectives(_usings);
                 script = script.AddGlobals(new VC::Emission.Global(true, objectType!, "this"), new VC::Emission.Global(true, _root, "root"));
-                ProgramTag pathTag = new("SourcePath", NormalFilePath.Normalize(_sourcePath));
-                ProgramTag tagTag = new("Tag", _markup.Tag?.Value);
+                ProgramTag codeTag = new("Code", code);
+                ProgramTag propertyTag = new("TargetProperty", _markup.Property.Value);
+                ProgramTag objectTag = new("TargetObject", objectType with { Alias = null });
                 string name = c_namePrefix + _nameDictionary.TakeName(_root.Path.Last().Name);
                 VC::Options options = VC::Options.Default with
                 {
@@ -309,7 +306,7 @@ namespace VooDo.Generator
                     HookInitializer = _hookInitializer,
                     ContainingClass = _root.Path.Last().Name,
                     Accessibility = VC::Options.EAccessibility.Private,
-                    Tags = ImmutableArray.Create(pathTag, tagTag),
+                    Tags = ImmutableArray.Create(propertyTag, objectTag, codeTag),
                     ReturnType = "object"
                 };
                 VC::Compilation compilation = VC::Compilation.SucceedOrThrow(script, options, _context.CancellationToken, (CSharpCompilation)_context.Compilation);

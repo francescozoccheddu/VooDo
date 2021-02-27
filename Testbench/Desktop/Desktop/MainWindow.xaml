@@ -13,15 +13,6 @@
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
 
-            <Grid>
-                <Grid.Opacity>
-                    <xaml:VooDo>
-                        1
-                    </xaml:VooDo>
-                </Grid.Opacity>
-
-            </Grid>
-
             <Grid
                 x:Name="m_Header"
                 Grid.Row="0"
@@ -44,7 +35,6 @@
                 x:Name="m_Scroll"
                 Grid.Row="1"
                 Padding="10,0,10,0"
-                Opacity="{xaml:VooDo Code=2}"
                 VerticalScrollBarVisibility="Visible"
                 VerticalScrollMode="Enabled">
 
@@ -89,7 +79,13 @@
             VerticalAlignment="Bottom"
             Background="Black">
 
-            <TextBlock Text="{x:Bind m_Scroll.VerticalOffset, Mode=OneWay}" />
+            <TextBlock >
+                <TextBlock.Text>
+                    <xaml:VooDo>
+                        "Offset is " + root.m_Scroll.VerticalOffset
+                    </xaml:VooDo>
+                </TextBlock.Text>
+            </TextBlock>
 
         </Border>
 
