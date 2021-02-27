@@ -21,7 +21,7 @@ namespace VooDo.WinUI.Bindings
                 loaders = _ownerType
                     .GetNestedTypes(BindingFlags.NonPublic)
                     .Where(_t => _t.Name.StartsWith("VooDo_GeneratedClassScript_")
-                        && _t.BaseType == typeof(Program))
+                        && _t.BaseType == typeof(IProgram))
                     .Select(_t => Loader.FromType(_t))
                     .ToImmutableArray();
                 s_loaderCache[_ownerType] = loaders;

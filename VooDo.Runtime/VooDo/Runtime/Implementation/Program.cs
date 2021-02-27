@@ -28,7 +28,7 @@ namespace VooDo.Runtime.Implementation
         #region Internal
 #pragma warning disable IDE1006 // Naming Styles
 
-        protected internal abstract TReturn __VooDo_Reserved_Method_TypedRun();
+        protected internal abstract TReturn __VooDo_Reserved_TypedRun();
         private protected sealed override Type ReturnType => typeof(TReturn);
 
 #pragma warning restore IDE1006 // Naming Styles
@@ -36,7 +36,7 @@ namespace VooDo.Runtime.Implementation
 
         protected sealed override void __VooDo_Reserved_Run()
         {
-            TReturn value = __VooDo_Reserved_Method_TypedRun();
+            TReturn value = __VooDo_Reserved_TypedRun();
             m_OnReturn?.Invoke(value);
             NotifyValueReturned(value);
         }
@@ -127,7 +127,7 @@ namespace VooDo.Runtime.Implementation
         bool IProgram.IsRunRequested => m_isRunRequested;
         bool IProgram.IsLocked => m_IsLocked;
         bool IProgram.IsStoringRequests => m_IsStoringRequests;
-        ILocker IProgram.Lock() => Lock();
+        ILocker IProgram.Lock(bool _storeRequests) => Lock(_storeRequests);
         void IProgram.RequestRun() => RequestRun();
         void IProgram.CancelRunRequest() => CancelRunRequest();
         void IHookListener.NotifyChange() => NotifyChange();

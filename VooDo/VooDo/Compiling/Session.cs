@@ -11,7 +11,7 @@ using VooDo.AST.Names;
 using VooDo.Compiling.Emission;
 using VooDo.Compiling.Transformation;
 using VooDo.Problems;
-using VooDo.Runtime;
+using VooDo.Runtime.Implementation;
 using VooDo.Utils;
 
 using static VooDo.Compiling.Emission.Scope;

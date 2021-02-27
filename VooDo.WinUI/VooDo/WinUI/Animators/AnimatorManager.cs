@@ -15,7 +15,7 @@ namespace VooDo.WinUI.Animators
     {
 
         private static readonly HashSet<IAnimator> s_animators = new();
-        private static readonly Dictionary<Program, int> s_programReferenceCount = new();
+        private static readonly Dictionary<IProgram, int> s_programReferenceCount = new();
         private static bool s_running;
         private static readonly Stopwatch s_stopwatch = new Stopwatch();
         private const double c_maxDeltaTime = 1.0 / 2.0;
@@ -42,7 +42,7 @@ namespace VooDo.WinUI.Animators
         private static void CompositionTarget_Rendering(object? _sender, object _e)
         {
             double deltaTime = Math.Min(s_stopwatch.Elapsed.TotalSeconds, c_maxDeltaTime);
-            ImmutableArray<IDisposable> locks = s_programReferenceCount.Keys.Select(_p => _p.Lock(true)).ToImmutableArray();
+            ImmutableArray<ILocker> locks = s_programReferenceCount.Keys.Select(_p => _p.Lock(true)).ToImmutableArray();
             try
             {
                 foreach (IAnimator a in s_animators)
@@ -64,7 +64,7 @@ namespace VooDo.WinUI.Animators
         {
             if (s_animators.Add(_animator))
             {
-                Program program = _animator.Program;
+                IProgram program = _animator.Program;
                 if (s_programReferenceCount.TryGetValue(program, out int referenceCount))
                 {
                     s_programReferenceCount[program] = referenceCount + 1;
@@ -81,7 +81,7 @@ namespace VooDo.WinUI.Animators
         {
             if (s_animators.Remove(_animator))
             {
-                Program program = _animator.Program;
+                IProgram program = _animator.Program;
                 if (s_programReferenceCount.TryGetValue(program, out int referenceCount))
                 {
                     if (referenceCount > 1)

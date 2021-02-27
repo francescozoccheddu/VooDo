@@ -50,7 +50,7 @@ namespace VooDo.WinUI.Animators
 
         protected sealed override void Destroying() => SetRunning(false);
 
-        Program IAnimator.Program => Variable.Program;
+        IProgram IAnimator.Program => Variable.Program;
 
         void IAnimator.Update(double _deltaTime)
         {

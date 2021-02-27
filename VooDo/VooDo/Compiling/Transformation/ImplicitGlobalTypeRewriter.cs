@@ -81,7 +81,7 @@ namespace VooDo.Compiling.Transformation
             ExpressionSyntax?[] controllers = new ExpressionSyntax?[globalsMap.Count];
             MethodDeclarationSyntax method = _class.Members
                 .OfType<MethodDeclarationSyntax>()
-                .Where(_m => _m.Identifier.ValueText is RuntimeHelpers.runMethodName or RuntimeHelpers.typedRunMethodName && _m.Modifiers.Any(_d => _d.IsKind(SyntaxKind.OverrideKeyword)))
+                .Where(_m => _m.Identifier.ValueText is Identifiers.runMethodName or Identifiers.typedRunMethodName && _m.Modifiers.Any(_d => _d.IsKind(SyntaxKind.OverrideKeyword)))
                 .Single();
             foreach (InvocationExpressionSyntax invocation in method.Body!.DescendantNodes().OfType<InvocationExpressionSyntax>())
             {

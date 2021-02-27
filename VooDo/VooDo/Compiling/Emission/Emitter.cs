@@ -562,8 +562,8 @@ namespace VooDo.Compiling.Emission
             MethodDeclarationSyntax? runMethod = SF.MethodDeclaration(
                                 returnType ?? SU.Void(),
                                 SU.Identifier(returnType is null
-                                    ? RuntimeHelpers.runMethodName
-                                    : RuntimeHelpers.typedRunMethodName))
+                                    ? Identifiers.runMethodName
+                                    : Identifiers.typedRunMethodName))
                             .WithModifiers(
                                 SU.Tokens(
                                     SK.ProtectedKeyword,
@@ -603,7 +603,7 @@ namespace VooDo.Compiling.Emission
             PropertyDeclarationSyntax variablesProperty = SU.ArrowProperty(
                 SU.SingleArray(
                     SU.VariableType(m_runtimeAlias)),
-                RuntimeHelpers.variablesPropertyName,
+                Identifiers.generatedVariablesName,
                 SF.ArrayCreationExpression(
                     SU.SingleArray(variableType))
                 .WithInitializer(
@@ -633,13 +633,13 @@ namespace VooDo.Compiling.Emission
                         SF.VariableDeclaration(
                             EmitComplexType(_t.Type),
                             SF.VariableDeclarator(
-                                EmitIdentifier(RuntimeHelpers.tagFieldPrefix + _t.Name).Own(m_tagger, _t.Name),
+                                SU.Identifier(Identifiers.tagPrefix + _t.Name).Own(m_tagger, _t.Name),
                                 null,
                                 SF.EqualsValueClause(
                                     EmitExpression(_t.Value)))
                             .ToSeparatedList())));
             ClassDeclarationSyntax? classDeclaration =
-                SF.ClassDeclaration(_session.Compilation.Options.ClassName)
+                SF.ClassDeclaration(Identifiers.scriptPrefix + _session.Compilation.Options.ClassName)
                     .WithModifiers(
                         SU.Tokens(
                             SK.SealedKeyword)

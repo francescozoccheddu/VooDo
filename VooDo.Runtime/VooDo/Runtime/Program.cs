@@ -8,14 +8,14 @@ namespace VooDo.Runtime
 
     public delegate void ProgramReturnedEventHandler<TReturn>(TReturn _value);
 
-    public interface ITypedProgram<TReturn>
+    public interface ITypedProgram<TReturn> : IProgram
     {
 
         event ProgramReturnedEventHandler<TReturn?>? OnReturn;
 
     }
 
-    public interface ITypedProgram
+    public interface ITypedProgram : IProgram
     {
 
         event ProgramReturnedEventHandler<object?>? OnReturn;
@@ -31,7 +31,7 @@ namespace VooDo.Runtime
         bool IsRunRequested { get; }
         bool IsLocked { get; }
         bool IsStoringRequests { get; }
-        ILocker Lock();
+        ILocker Lock(bool _storeRequests = true);
         void RequestRun();
         void CancelRunRequest();
         void Freeze();

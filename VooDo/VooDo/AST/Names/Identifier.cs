@@ -14,7 +14,6 @@ namespace VooDo.AST.Names
     public sealed record Identifier : Node
     {
 
-        
         public static Identifier Bool { get; } = "bool";
         public static Identifier Char { get; } = "char";
         public static Identifier String { get; } = "string";
@@ -31,19 +30,18 @@ namespace VooDo.AST.Names
         public static Identifier Double { get; } = "double";
         public static Identifier Object { get; } = "object";
 
-
-        
-        
         public static implicit operator Identifier(string _identifier) => _identifier is null ? null! : new Identifier(_identifier);
         public static implicit operator string(Identifier _identifier) => _identifier?.ToString()!;
 
-        
-        
         private readonly string m_identifier;
 
         public Identifier(string _identifier)
         {
             m_identifier = _identifier;
+            if (_identifier.StartsWith(Identifiers.reservedPrefix))
+            {
+                throw new SyntaxError(this, $"'{Identifiers.reservedPrefix}' is a reserved prefix").AsThrowable();
+            }
             if (!_identifier.All(_c => _c == '_' || char.IsLetterOrDigit(_c)))
             {
                 throw new SyntaxError(this, "Non alphanumeric or underscore character").AsThrowable();
@@ -58,13 +56,10 @@ namespace VooDo.AST.Names
             }
         }
 
-        
-        
         protected internal override Node ReplaceNodes(Func<Node?, Node?> _map) => this;
 
         public override string ToString() => m_identifier;
 
-        
     }
 
 }

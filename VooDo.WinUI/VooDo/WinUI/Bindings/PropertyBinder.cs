@@ -23,7 +23,7 @@ namespace VooDo.WinUI.Bindings
                 loaders = _ownerType
                     .GetNestedTypes(BindingFlags.NonPublic)
                     .Where(_t => _t.Name.StartsWith("VooDo_GeneratedPropertyScript_")
-                        && _t.IsSubclassOf(typeof(TypedProgram)))
+                        && _t.IsSubclassOf(typeof(ITypedProgram)))
                     .Select(_t => Loader.FromType(_t))
                     .ToImmutableDictionary(_t => new Key(
                         _t.GetStringTag("Code"),

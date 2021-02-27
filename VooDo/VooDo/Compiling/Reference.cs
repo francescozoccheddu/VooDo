@@ -21,7 +21,7 @@ namespace VooDo.Compiling
     {
 
         public static Reference RuntimeReference { get; }
-            = FromAssembly(typeof(Program).Assembly, "VooDo_VooDoRuntime");
+            = FromAssembly(typeof(IProgram).Assembly, "__VooDo_VooDoRuntime");
 
         private sealed class MetadataEqualityComparerImpl : IEqualityComparer<Reference>
         {

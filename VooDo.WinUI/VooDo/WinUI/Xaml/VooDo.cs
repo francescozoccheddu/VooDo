@@ -70,7 +70,7 @@ namespace VooDo.WinUI.Xaml
                 property.Name,
                 MemberTypes.Field | MemberTypes.Property,
                 BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance).Single();
-            TypedProgram program = (TypedProgram)loader.Create();
+            ITypedProgram program = (ITypedProgram)loader.Create();
             PropertyBinding? binding = member switch
             {
                 PropertyInfo m => new PropertyBinding(program, m, owner, root, xamlPath, Tag ?? ""),

@@ -5,7 +5,7 @@
     xmlns:xaml="using:VooDo.WinUI.Xaml">
 
     <Grid>
-        
+
         <Grid>
 
             <Grid.RowDefinitions>
@@ -79,10 +79,10 @@
             VerticalAlignment="Bottom"
             Background="Black">
 
-            <TextBlock >
+            <TextBlock>
                 <TextBlock.Text>
                     <xaml:VooDo>
-                        "Offset is " + glob Smooth(root.m_Scroll.VerticalOffset)
+                        &quot;Offset is &quot; + glob Smooth(root.m_Scroll.VerticalOffset)
                     </xaml:VooDo>
                 </TextBlock.Text>
             </TextBlock>

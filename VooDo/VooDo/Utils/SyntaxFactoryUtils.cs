@@ -9,6 +9,7 @@ using System.Linq;
 using VooDo.AST.Names;
 using VooDo.Compiling.Emission;
 using VooDo.Runtime;
+using VooDo.Runtime.Implementation;
 
 using SF = Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 using SK = Microsoft.CodeAnalysis.CSharp.SyntaxKind;
@@ -54,7 +55,7 @@ namespace VooDo.Utils
             Alias = _runtimeAlias
         }).ToTypeSyntax();
 
-        private static QualifiedNameSyntax GenericProgramType(Identifier _runtimeAlias) => (QualifiedNameSyntax)(QualifiedType.FromType<TypedProgram<object>>() with
+        private static QualifiedNameSyntax TypedProgramType(Identifier _runtimeAlias) => (QualifiedNameSyntax)(QualifiedType.FromType<TypedProgram<object>>() with
         {
             Alias = _runtimeAlias
         }).ToTypeSyntax();
@@ -65,11 +66,6 @@ namespace VooDo.Utils
         }).ToTypeSyntax();
 
         private static QualifiedNameSyntax GenericVariableType(Identifier _runtimeAlias) => (QualifiedNameSyntax)(QualifiedType.FromType<Variable<object>>() with
-        {
-            Alias = _runtimeAlias
-        }).ToTypeSyntax();
-
-        private static QualifiedNameSyntax RuntimeHelpersType(Identifier _runtimeAlias) => (QualifiedNameSyntax)(QualifiedType.FromType(typeof(RuntimeHelpers)) with
         {
             Alias = _runtimeAlias
         }).ToTypeSyntax();
@@ -86,9 +82,9 @@ namespace VooDo.Utils
         internal static InvocationExpressionSyntax CreateVariableInvocation(Identifier _runtimeAlias, TypeSyntax? _type, bool _isConstant, string? _name, ExpressionSyntax _initialValue)
             => Invocation(
                 MemberAccess(
-                    RuntimeHelpersType(_runtimeAlias),
+                    ProgramType(_runtimeAlias),
                     GenericName(
-                        nameof(RuntimeHelpers.CreateVariable),
+                        Identifiers.createVariableMethodName,
                         _type!)),
                     Literal(_isConstant),
                     Literal(_name),
@@ -97,14 +93,14 @@ namespace VooDo.Utils
         internal static InvocationExpressionSyntax SetControllerAndGetValueInvocation(Identifier _runtimeAlias, ExpressionSyntax _variable, ExpressionSyntax _controller)
             => Invocation(
                 MemberAccess(
-                    RuntimeHelpersType(_runtimeAlias),
-                    nameof(RuntimeHelpers.SetControllerAndGetValue)),
+                    ProgramType(_runtimeAlias),
+                    Identifiers.setControllerAndGetValueMethodName),
                 _variable,
                 _controller);
 
         internal static InvocationExpressionSyntax SubscribeHookInvocation(ExpressionSyntax _source, int _setIndex, int _hookIndex)
             => Invocation(
-                ThisMemberAccess(RuntimeHelpers.subscribeHookMethodName),
+                ThisMemberAccess(Identifiers.subscribeHookMethodName),
                 _source,
                 Literal(_setIndex),
                 Literal(_hookIndex));
@@ -179,7 +175,7 @@ namespace VooDo.Utils
             }
             else
             {
-                QualifiedNameSyntax syntax = GenericProgramType(_runtimeAlias);
+                QualifiedNameSyntax syntax = TypedProgramType(_runtimeAlias);
                 GenericNameSyntax right = (GenericNameSyntax)syntax.Right;
                 right = right.WithTypeArgumentList(
                     SF.TypeArgumentList(

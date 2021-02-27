@@ -17,16 +17,14 @@ namespace VooDo.Compiling.Emission
         internal sealed class GlobalDefinition
         {
 
-            public GlobalDefinition(GlobalPrototype _global, string _identifier) : this(_global, SyntaxFactoryUtils.Identifier(_identifier)) { }
-
-            public GlobalDefinition(GlobalPrototype _global, SyntaxToken _identifier)
+            internal GlobalDefinition(GlobalPrototype _global, int _index)
             {
                 Prototype = _global;
-                Identifier = _identifier;
+                Identifier = SyntaxFactoryUtils.Identifier(Identifiers.globalPrefix + _index);
             }
 
-            public GlobalPrototype Prototype { get; }
-            public SyntaxToken Identifier { get; }
+            internal GlobalPrototype Prototype { get; }
+            internal SyntaxToken Identifier { get; }
 
         }
 
@@ -59,9 +57,6 @@ namespace VooDo.Compiling.Emission
         public ImmutableArray<GlobalDefinition> GetGlobalDefinitions()
             => m_globals.ToImmutableArray();
 
-        private static GlobalDefinition CreateGlobalDefinition(GlobalPrototype _global, int _index)
-            => new GlobalDefinition(_global, $"global_{_index}");
-
         public void AddLocal(Node _source, Identifier _name)
         {
             if (IsNameTaken(_name))
@@ -81,7 +76,7 @@ namespace VooDo.Compiling.Emission
                 }
                 m_names.Add(_global.Global.Name, _global.Global.IsConstant ? EKind.GlobalConst : EKind.GlobalVariable);
             }
-            GlobalDefinition definition = CreateGlobalDefinition(_global, m_globals.Count);
+            GlobalDefinition definition = new GlobalDefinition(_global, m_globals.Count);
             m_globals.Add(definition);
             return definition;
         }
