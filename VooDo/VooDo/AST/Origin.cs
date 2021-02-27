@@ -30,7 +30,7 @@ namespace VooDo.AST
             Start = _start;
             Length = _length;
             Source = _source;
-            SourcePath = _sourcePath is null ? null : NormalFilePath.Normalize(_sourcePath);
+            SourcePath = FilePaths.NormalizeOrNull(_sourcePath);
             if (_start < 0)
             {
                 throw new ArgumentOutOfRangeException(nameof(_start));

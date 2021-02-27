@@ -24,11 +24,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VooDo.WinUI", "VooDo.WinUI\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VooDo.Runtime", "VooDo.Runtime\VooDo.Runtime.csproj", "{0A302884-2BCD-4C56-B0CE-992DC15767F7}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VooDo.Generator", "VooDo.Generator\VooDo.Generator.csproj", "{028ADBA0-0EC9-4300-8D32-CE42EEC46BE8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VooDo.WinUI.Generator", "VooDo.WinUI.Generator\VooDo.WinUI.Generator.csproj", "{028ADBA0-0EC9-4300-8D32-CE42EEC46BE8}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VooDo.WinUI.HookInitializers", "VooDo.WinUI.HookInitializers\VooDo.WinUI.HookInitializers.csproj", "{F95BA810-3D50-4DDE-A9EB-5AB70D6B3228}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VooDo.Utils", "VooDo.Utils\VooDo.Utils.csproj", "{5317AF84-F94A-4833-95DD-84880FB763D1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VooDo.Utils", "VooDo.Utils\VooDo.Utils.csproj", "{5317AF84-F94A-4833-95DD-84880FB763D1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -174,22 +172,6 @@ Global
 		{028ADBA0-0EC9-4300-8D32-CE42EEC46BE8}.Release|x64.Build.0 = Release|Any CPU
 		{028ADBA0-0EC9-4300-8D32-CE42EEC46BE8}.Release|x86.ActiveCfg = Release|Any CPU
 		{028ADBA0-0EC9-4300-8D32-CE42EEC46BE8}.Release|x86.Build.0 = Release|Any CPU
-		{F95BA810-3D50-4DDE-A9EB-5AB70D6B3228}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{F95BA810-3D50-4DDE-A9EB-5AB70D6B3228}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{F95BA810-3D50-4DDE-A9EB-5AB70D6B3228}.Debug|arm64.ActiveCfg = Debug|Any CPU
-		{F95BA810-3D50-4DDE-A9EB-5AB70D6B3228}.Debug|arm64.Build.0 = Debug|Any CPU
-		{F95BA810-3D50-4DDE-A9EB-5AB70D6B3228}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{F95BA810-3D50-4DDE-A9EB-5AB70D6B3228}.Debug|x64.Build.0 = Debug|Any CPU
-		{F95BA810-3D50-4DDE-A9EB-5AB70D6B3228}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{F95BA810-3D50-4DDE-A9EB-5AB70D6B3228}.Debug|x86.Build.0 = Debug|Any CPU
-		{F95BA810-3D50-4DDE-A9EB-5AB70D6B3228}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{F95BA810-3D50-4DDE-A9EB-5AB70D6B3228}.Release|Any CPU.Build.0 = Release|Any CPU
-		{F95BA810-3D50-4DDE-A9EB-5AB70D6B3228}.Release|arm64.ActiveCfg = Release|Any CPU
-		{F95BA810-3D50-4DDE-A9EB-5AB70D6B3228}.Release|arm64.Build.0 = Release|Any CPU
-		{F95BA810-3D50-4DDE-A9EB-5AB70D6B3228}.Release|x64.ActiveCfg = Release|Any CPU
-		{F95BA810-3D50-4DDE-A9EB-5AB70D6B3228}.Release|x64.Build.0 = Release|Any CPU
-		{F95BA810-3D50-4DDE-A9EB-5AB70D6B3228}.Release|x86.ActiveCfg = Release|Any CPU
-		{F95BA810-3D50-4DDE-A9EB-5AB70D6B3228}.Release|x86.Build.0 = Release|Any CPU
 		{5317AF84-F94A-4833-95DD-84880FB763D1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{5317AF84-F94A-4833-95DD-84880FB763D1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5317AF84-F94A-4833-95DD-84880FB763D1}.Debug|arm64.ActiveCfg = Debug|Any CPU

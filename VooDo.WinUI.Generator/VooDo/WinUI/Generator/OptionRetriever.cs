@@ -1,9 +1,9 @@
 ﻿using Microsoft.CodeAnalysis;
 
-namespace VooDo.Generator
+namespace VooDo.WinUI.Generator
 {
 
-    internal static class Options
+    internal static class OptionRetriever
     {
 
         private const string c_projectOptionPrefix = "build_property.";

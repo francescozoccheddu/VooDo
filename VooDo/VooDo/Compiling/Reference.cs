@@ -72,7 +72,7 @@ namespace VooDo.Compiling
         {
             Aliases = _aliases.EmptyIfNull().ToImmutableHashSet();
             m_metadata = _metadata;
-            FilePath = NormalFilePath.NormalizeOrNull(_path);
+            FilePath = FilePaths.NormalizeOrNull(_path);
             Assembly = _assembly;
         }
 

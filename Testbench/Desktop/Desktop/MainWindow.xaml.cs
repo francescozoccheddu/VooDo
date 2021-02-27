@@ -14,7 +14,7 @@ namespace VooDo.DesktopTestbench
             Closed += MainWindow_Closed;
         }
 
-        private void MainWindow_Closed(object _sender, WindowEventArgs _args) => ClassBinder.Unbind(this);
-        private void MainWindow_Activated(object _sender, WindowActivatedEventArgs _args) => ClassBinder.Bind(this);
+        private void MainWindow_Closed(object _sender, WindowEventArgs _args) => Binder.Unbind(this);
+        private void MainWindow_Activated(object _sender, WindowActivatedEventArgs _args) => Binder.Bind(this);
     }
 }

@@ -15,30 +15,28 @@ using VooDo.AST;
 using VooDo.AST.Directives;
 using VooDo.AST.Names;
 using VooDo.AST.Statements;
+using VooDo.Compiling;
+using VooDo.Compiling.Emission;
 using VooDo.Hooks;
 using VooDo.Parsing;
 using VooDo.Problems;
 using VooDo.Utils;
 using VooDo.WinUI.HookInitializers;
 
-using VC = VooDo.Compiling;
+using Compilation = VooDo.Compiling.Compilation;
 
-namespace VooDo.Generator
+namespace VooDo.WinUI.Generator
 {
     [Generator]
     internal sealed class ClassScriptGenerator : ISourceGenerator
     {
 
-        private const string c_xamlPathOption = "XamlPath";
-        private const string c_tagOption = "Tag";
-        private const string c_xamlClassOption = "XamlClass";
-        private const string c_namePrefix = "VooDo_GeneratedClassScript_";
 
         private static string GetName(string _path)
         {
             string name = Path.GetFileNameWithoutExtension(_path);
-            StringBuilder builder = new(c_namePrefix.Length + name.Length);
-            builder.Append(c_namePrefix);
+            StringBuilder builder = new(Identifiers.classScriptPrefix.Length + name.Length);
+            builder.Append(Identifiers.classScriptPrefix);
             bool initial = true;
             foreach (char c in name)
             {
@@ -60,8 +58,8 @@ namespace VooDo.Generator
             _namespace = null;
             _name = null;
             AnalyzerConfigOptions? options = _context.AnalyzerConfigOptions.GetOptions(_text);
-            string? xamlClassOption = Options.Get(c_xamlClassOption, _context, _text);
-            string? xamlPathOption = Options.Get(c_xamlPathOption, _context, _text);
+            string? xamlClassOption = OptionRetriever.Get(Identifiers.xamlClassOption, _context, _text);
+            string? xamlPathOption = OptionRetriever.Get(Identifiers.xamlPathOption, _context, _text);
             if (string.IsNullOrEmpty(xamlClassOption))
             {
                 xamlClassOption = null;
@@ -179,20 +177,20 @@ namespace VooDo.Generator
                     return;
                 }
                 script = script.AddUsingDirectives(_usings);
-                script = script.AddGlobals(new VC::Emission.Global(true, new QualifiedType(xamlNamespace, xamlName!), "this"));
-                ProgramTag pathTag = new("SourcePath", NormalFilePath.Normalize(_text.Path));
-                ProgramTag tagTag = new("Tag", Options.Get(c_tagOption, _context, _text));
-                VC::Options options = VC::Options.Default with
+                script = script.AddGlobals(new Global(true, new QualifiedType(xamlNamespace, xamlName!), Identifiers.classThisVariableName));
+                ProgramTag pathTag = new(Identifiers.classSourceTag, FilePaths.Normalize(_text.Path));
+                ProgramTag tagTag = new(Identifiers.classTagTag, OptionRetriever.Get(Identifiers.tagOption, _context, _text));
+                Options options = Options.Default with
                 {
                     Namespace = xamlNamespace,
                     ClassName = name,
                     References = default,
                     HookInitializer = _hookInitializer,
                     ContainingClass = xamlName,
-                    Accessibility = VC::Options.EAccessibility.Private,
+                    Accessibility = Options.EAccessibility.Private,
                     Tags = ImmutableArray.Create(pathTag, tagTag)
                 };
-                VC::Compilation compilation = VC::Compilation.SucceedOrThrow(script, options, _context.CancellationToken, (CSharpCompilation)_context.Compilation);
+                Compilation compilation = Compilation.SucceedOrThrow(script, options, _context.CancellationToken, (CSharpCompilation)_context.Compilation);
                 _context.AddSource(name, compilation.GetCSharpSourceCode());
             }
             catch (VooDoException exception)
@@ -213,7 +211,7 @@ namespace VooDo.Generator
             }
             NameDictionary nameDictionary = new();
             IHookInitializer hookInitializer = new HookInitializerList(new DependencyPropertyHookInitializer(), new NotifyPropertyChangedHookInitializer());
-            foreach (AdditionalText text in _context.AdditionalFiles.Where(_f => Path.GetExtension(_f.Path).Equals(".voodo", StringComparison.OrdinalIgnoreCase)))
+            foreach (AdditionalText text in _context.AdditionalFiles.Where(_f => Path.GetExtension(_f.Path).Equals(Identifiers.scriptFileExtension, FilePaths.SystemComparison)))
             {
                 if (_context.CancellationToken.IsCancellationRequested)
                 {

@@ -2,6 +2,7 @@
 using System.Reflection;
 
 using VooDo.Runtime;
+using VooDo.WinUI.Generator;
 using VooDo.WinUI.Utils;
 
 namespace VooDo.WinUI.Bindings
@@ -72,9 +73,9 @@ namespace VooDo.WinUI.Bindings
         public override ETarget Target => ETarget.Class;
 
         internal ClassBinding(IProgram _program, object _xamlOwner)
-            : base(_program, _xamlOwner, _xamlOwner, _program.Loader.GetStringTag("SourcePath"), _program.Loader.GetStringTag("Tag"))
+            : base(_program, _xamlOwner, _xamlOwner, _program.Loader.GetStringTag(Identifiers.classSourceTag), _program.Loader.GetStringTag(Identifiers.classTagTag))
         {
-            Program.GetVariable("this")!.Value = _xamlOwner;
+            Program.GetVariable(Identifiers.classThisVariableName)!.Value = _xamlOwner;
         }
 
     }
@@ -90,8 +91,8 @@ namespace VooDo.WinUI.Bindings
             : base(_program, _xamlOwner, _xamlRoot, _xamlPath, _tag)
         {
             Property = _property;
-            Program.GetVariable("this")!.Value = _xamlOwner;
-            Program.GetVariable("root")!.Value = _xamlRoot;
+            Program.GetVariable(Identifiers.propertyThisVariableName)!.Value = _xamlOwner;
+            Program.GetVariable(Identifiers.propertyRootVariableName)!.Value = _xamlRoot;
             Program.OnReturn += _o => _setter(_o);
         }
 

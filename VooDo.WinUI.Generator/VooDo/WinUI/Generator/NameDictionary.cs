@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace VooDo.Generator
+namespace VooDo.WinUI.Generator
 {
 
     internal sealed class NameDictionary

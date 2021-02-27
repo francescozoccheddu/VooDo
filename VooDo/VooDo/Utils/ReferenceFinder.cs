@@ -58,7 +58,7 @@ namespace VooDo.Utils
         public static bool HasFileName(MetadataReference _reference, string _fileNameWithoutExt)
             => _reference is PortableExecutableReference pe
                 && pe.FilePath is not null
-                && Path.GetFileNameWithoutExtension(pe.FilePath).Equals(_fileNameWithoutExt, StringComparison.OrdinalIgnoreCase);
+                && Path.GetFileNameWithoutExtension(pe.FilePath).Equals(_fileNameWithoutExt, FilePaths.SystemComparison);
 
         private static string GetMetadataName(SimpleType _type)
             => _type.IsGeneric

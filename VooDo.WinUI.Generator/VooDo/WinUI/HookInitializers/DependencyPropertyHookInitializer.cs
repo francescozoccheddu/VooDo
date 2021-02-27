@@ -4,23 +4,24 @@ using Microsoft.CodeAnalysis.CSharp;
 
 using VooDo.AST.Expressions;
 using VooDo.AST.Names;
+using VooDo.WinUI.Generator;
 
 namespace VooDo.WinUI.HookInitializers
 {
 
-    public sealed class DependencyPropertyHookInitializer : HookInitializer
+    internal sealed class DependencyPropertyHookInitializer : HookInitializer
     {
 
-        public DependencyPropertyHookInitializer() : base() { }
+        internal DependencyPropertyHookInitializer() : base() { }
 
-        public DependencyPropertyHookInitializer(Identifier? _alias) : base(_alias) { }
+        internal DependencyPropertyHookInitializer(Identifier? _alias) : base(_alias) { }
 
-        protected override Identifier HookTypeName => "DependencyPropertyHook";
+        protected override Identifier HookTypeName => Identifiers.dependencyPropertyHookName;
 
         public override Expression? GetInitializer(ISymbol _symbol, CSharpCompilation _compilation)
         {
             INamedTypeSymbol? baseType = _symbol.ContainingType;
-            while (baseType is not null && baseType.ToDisplayString() != "Microsoft.UI.Xaml.DependencyObject")
+            while (baseType is not null && baseType.ToDisplayString() != Identifiers.dependencyObjectFullName)
             {
                 baseType = baseType.BaseType;
             }

@@ -10,6 +10,8 @@ using VooDo.Runtime;
 using VooDo.WinUI.Bindings;
 using VooDo.WinUI.Utils;
 
+using Binder = VooDo.WinUI.Bindings.Binder;
+
 namespace VooDo.WinUI.Xaml
 {
 
@@ -64,8 +66,8 @@ namespace VooDo.WinUI.Xaml
             object root = rootObjectProvider.RootObject;
             string xamlPath = uriContext.BaseUri.ToString();
             string code = Code ?? GetCode(Path!);
-            PropertyBinder.Key key = new PropertyBinder.Key(code, property.Name, property.DeclaringType.FullName!);
-            Loader loader = PropertyBinder.GetLoader(key, root.GetType());
+            Binder.PropertyKey key = new Binder.PropertyKey(code, property.Name, property.DeclaringType.FullName!);
+            Loader loader = Binder.GetPropertyLoader(key, root.GetType());
             MemberInfo member = property.DeclaringType.GetMember(
                 property.Name,
                 MemberTypes.Field | MemberTypes.Property,

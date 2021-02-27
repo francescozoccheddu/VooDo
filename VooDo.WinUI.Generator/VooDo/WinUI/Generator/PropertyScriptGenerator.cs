@@ -4,7 +4,6 @@ using Microsoft.CodeAnalysis.Text;
 
 using Portable.Xaml;
 
-using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
@@ -13,31 +12,32 @@ using System.Linq;
 using VooDo.AST;
 using VooDo.AST.Directives;
 using VooDo.AST.Names;
+using VooDo.Compiling;
+using VooDo.Compiling.Emission;
 using VooDo.Hooks;
 using VooDo.Parsing;
 using VooDo.Problems;
 using VooDo.Utils;
 using VooDo.WinUI.HookInitializers;
 
-using VC = VooDo.Compiling;
+using Compilation = VooDo.Compiling.Compilation;
 
-namespace VooDo.Generator
+namespace VooDo.WinUI.Generator
 {
 
     [Generator]
     internal sealed class PropertyScriptGenerator : ISourceGenerator
     {
 
-        private const string c_namePrefix = "VooDo_GeneratedPropertyScript_";
+
 
         private readonly struct Markup
         {
 
-            public Markup(Token? _code, Token? _path, Token? _tag, Token _property, TypeToken _object, Token _markupObject)
+            public Markup(Token? _code, Token? _path, Token _property, TypeToken _object, Token _markupObject)
             {
                 Code = _code;
                 Path = _path;
-                Tag = _tag;
                 Property = _property;
                 Object = _object;
                 MarkupObject = _markupObject;
@@ -45,7 +45,6 @@ namespace VooDo.Generator
 
             public Token? Code { get; }
             public Token? Path { get; }
-            public Token? Tag { get; }
             public Token Property { get; }
             public TypeToken Object { get; }
             public Token MarkupObject { get; }
@@ -98,7 +97,7 @@ namespace VooDo.Generator
             List<Markup> markups = new();
             Token targetProperty = default;
             TypeToken targetObject = default;
-            Token? code = null, tag = null, path = null;
+            Token? code = null, path = null;
             XamlMember markupProperty = null!;
             Token? markupObject = null;
             bool isRootSet = false;
@@ -124,7 +123,7 @@ namespace VooDo.Generator
                         case XamlNodeType.Value when isRootClass:
                             string[] tokens = ((string)reader.Value).Split('.');
                             string name = tokens.Last();
-                            string nameSpace = "using:" + string.Join(".", tokens.SkipLast());
+                            string nameSpace = Identifiers.xamlUsingNamespacePrefix + string.Join(".", tokens.SkipLast());
                             _root = new TypeToken(name, nameSpace, reader.LineNumber - 1, reader.LinePosition - 1, 0);
                             isRootConfirmed = true;
                             break;
@@ -132,15 +131,16 @@ namespace VooDo.Generator
                 }
                 switch (reader.NodeType)
                 {
-                    case XamlNodeType.StartObject when reader.Type.Name == "VooDo" && reader.Type.PreferredXamlNamespace.StartsWith("using:VooDo.WinUI.Xaml"):
+                    case XamlNodeType.StartObject when reader.Type.Name == Identifiers.markupObjectName
+                                && reader.Type.PreferredXamlNamespace == Identifiers.xamlUsingNamespacePrefix + Identifiers.markupObjectNamespace:
                         markupObject = new Token(reader.Type.Name, reader.LineNumber - 1, reader.LinePosition - 1);
-                        code = tag = path = null;
+                        code = path = null;
                         break;
                     case XamlNodeType.StartObject:
                         targetObject = new TypeToken(reader.Type.Name, reader.Type.PreferredXamlNamespace, reader.LineNumber - 1, reader.LinePosition - 1);
                         break;
                     case XamlNodeType.EndObject when markupObject is not null:
-                        markups.Add(new Markup(code, path, tag, targetProperty, targetObject, markupObject.Value));
+                        markups.Add(new Markup(code, path, targetProperty, targetObject, markupObject.Value));
                         markupObject = null;
                         break;
                     case XamlNodeType.StartMember when markupObject is not null:
@@ -149,13 +149,10 @@ namespace VooDo.Generator
                     case XamlNodeType.StartMember when reader.Member != XamlLanguage.UnknownContent:
                         targetProperty = new Token(reader.Member.Name, reader.LineNumber - 1, reader.LinePosition - 1);
                         break;
-                    case XamlNodeType.Value when markupObject is not null && (markupProperty.Name == "Code" || markupProperty == XamlLanguage.Initialization):
+                    case XamlNodeType.Value when markupObject is not null && (markupProperty.Name == Identifiers.markupCodePropertyName || markupProperty == XamlLanguage.Initialization):
                         code = new Token((string)reader.Value, reader.LineNumber - 1, reader.LinePosition - 1);
                         break;
-                    case XamlNodeType.Value when markupObject is not null && markupProperty.Name == "Tag":
-                        tag = new Token((string)reader.Value, reader.LineNumber - 1, reader.LinePosition - 1);
-                        break;
-                    case XamlNodeType.Value when markupObject is not null && markupProperty.Name == "Path":
+                    case XamlNodeType.Value when markupObject is not null && markupProperty.Name == Identifiers.markupPathPropertyName:
                         path = new Token((string)reader.Value, reader.LineNumber - 1, reader.LinePosition - 1);
                         break;
                 }
@@ -164,18 +161,6 @@ namespace VooDo.Generator
         }
 
         public void Initialize(GeneratorInitializationContext _context) { }
-
-        private static IEnumerable<string> GetXamlFilePaths(GeneratorExecutionContext _context)
-        {
-            foreach (SyntaxTree tree in _context.Compilation.SyntaxTrees)
-            {
-                string csPath = tree.FilePath;
-                if (csPath.EndsWith(".xaml.cs"))
-                {
-                    yield return csPath.Substring(0, csPath.Length - 3);
-                }
-            }
-        }
 
         private static int GetCharacterIndex(int _line, int _column, string _source)
         {
@@ -202,11 +187,10 @@ namespace VooDo.Generator
 
         private static bool TryResolveWinUIXamlType(string _name, GeneratorExecutionContext _context, MetadataReference _winUi, CodeOrigin _origin, out QualifiedType? _type)
         {
+            int presentationNamespaceDepth = Identifiers.xamlPresentationBaseNamespace.Count(_c => _c == '.');
             ImmutableArray<QualifiedType>? candidates = ReferenceFinder.FindTypeByPartialName(_name, _context.Compilation, _winUi)
-                ?.Where(_c => _c.Path.Length > 3
-                    && _c.Path[0].Name == "Microsoft"
-                    && _c.Path[1].Name == "UI"
-                    && _c.Path[2].Name == "Xaml")
+                ?.Where(_c => _c.Path.Length > presentationNamespaceDepth
+                && string.Join(".", _c.Path.Take(presentationNamespaceDepth)) == Identifiers.xamlPresentationBaseNamespace)
                 .ToImmutableArray();
             if (!candidates.HasValue)
             {
@@ -239,9 +223,9 @@ namespace VooDo.Generator
             CodeOrigin origin = GetOrigin(_token, _source, _sourcePath);
             return _token.Namespace switch
             {
-                "http://schemas.microsoft.com/winfx/2006/xaml/presentation" => TryResolveWinUIXamlType(_token.Name, _context, _winUi, origin, out _type),
-                "using:" => TryResolveQualifiedXamlType(_token.Name, null, origin, out _type),
-                string ns => TryResolveQualifiedXamlType(_token.Name, ns.Substring("using:".Length), origin, out _type)
+                Identifiers.xamlPresentationNamespace => TryResolveWinUIXamlType(_token.Name, _context, _winUi, origin, out _type),
+                Identifiers.xamlUsingNamespacePrefix => TryResolveQualifiedXamlType(_token.Name, null, origin, out _type),
+                string ns => TryResolveQualifiedXamlType(_token.Name, ns.Substring(Identifiers.xamlUsingNamespacePrefix.Length), origin, out _type)
             };
         }
 
@@ -293,23 +277,25 @@ namespace VooDo.Generator
                     return;
                 }
                 script = script.AddUsingDirectives(_usings);
-                script = script.AddGlobals(new VC::Emission.Global(true, objectType!, "this"), new VC::Emission.Global(true, _root, "root"));
-                ProgramTag codeTag = new("Code", code);
-                ProgramTag propertyTag = new("TargetProperty", _markup.Property.Value);
-                ProgramTag objectTag = new("TargetObject", objectType with { Alias = null });
-                string name = c_namePrefix + _nameDictionary.TakeName(_root.Path.Last().Name);
-                VC::Options options = VC::Options.Default with
+                script = script.AddGlobals(
+                    new Global(true, objectType!, Identifiers.propertyThisVariableName),
+                    new Global(true, _root, Identifiers.propertyRootVariableName));
+                ProgramTag codeTag = new(Identifiers.propertyCodeTag, code);
+                ProgramTag propertyTag = new(Identifiers.propertyPropertyTag, _markup.Property.Value);
+                ProgramTag objectTag = new(Identifiers.propertyObjectTag, objectType with { Alias = null });
+                string name = Identifiers.classScriptPrefix + _nameDictionary.TakeName(_root.Path.Last().Name);
+                Options options = Options.Default with
                 {
                     Namespace = new Namespace(_root.Path.SkipLast().Select(_s => _s.Name)),
                     ClassName = name,
                     References = default,
                     HookInitializer = _hookInitializer,
                     ContainingClass = _root.Path.Last().Name,
-                    Accessibility = VC::Options.EAccessibility.Private,
+                    Accessibility = Options.EAccessibility.Private,
                     Tags = ImmutableArray.Create(propertyTag, objectTag, codeTag),
                     ReturnType = "object"
                 };
-                VC::Compilation compilation = VC::Compilation.SucceedOrThrow(script, options, _context.CancellationToken, (CSharpCompilation)_context.Compilation);
+                Compilation compilation = Compilation.SucceedOrThrow(script, options, _context.CancellationToken, (CSharpCompilation)_context.Compilation);
                 _context.AddSource(name, compilation.GetCSharpSourceCode());
             }
             catch (VooDoException exception)
@@ -359,8 +345,8 @@ namespace VooDo.Generator
 
         private static bool TryGetWinUISymbol(GeneratorExecutionContext _context, out MetadataReference? _winUi)
         {
-            IEnumerable<MetadataReference> references = ReferenceFinder.OrderByFileNameHint(_context.Compilation.References, "Microsoft.WinUI");
-            _winUi = ReferenceFinder.FindByType("Microsoft.UI.Xaml.Window", _context.Compilation, references).FirstOrDefault();
+            IEnumerable<MetadataReference> references = ReferenceFinder.OrderByFileNameHint(_context.Compilation.References, Identifiers.winUiName);
+            _winUi = ReferenceFinder.FindByType(Identifiers.xamlPresentationBaseNamespace + "Window", _context.Compilation, references).FirstOrDefault();
             if (_winUi is null)
             {
                 _context.ReportDiagnostic(DiagnosticFactory.NoWinUI());
@@ -380,7 +366,7 @@ namespace VooDo.Generator
             }
             IHookInitializer hookInitializer = new HookInitializerList(new DependencyPropertyHookInitializer(), new NotifyPropertyChangedHookInitializer());
             NameDictionary nameDictionary = new();
-            foreach (AdditionalText text in _context.AdditionalFiles.Where(_f => Path.GetExtension(_f.Path).Equals(".xaml", StringComparison.OrdinalIgnoreCase)))
+            foreach (AdditionalText text in _context.AdditionalFiles.Where(_f => Path.GetExtension(_f.Path).Equals(".xaml", FilePaths.SystemComparison)))
             {
                 if (_context.CancellationToken.IsCancellationRequested)
                 {

@@ -10,14 +10,13 @@ using VooDo.AST.Expressions;
 using VooDo.AST.Names;
 using VooDo.Hooks;
 using VooDo.Utils;
+using VooDo.WinUI.Generator;
 
 namespace VooDo.WinUI.HookInitializers
 {
 
-    public abstract class HookInitializer : IHookInitializer
+    internal abstract class HookInitializer : IHookInitializer
     {
-
-        private const string c_hooksNamespace = "VooDo.WinUI.Hooks";
 
         private Identifier? m_alias;
         private Compilation? m_cachedCompilation;
@@ -32,7 +31,7 @@ namespace VooDo.WinUI.HookInitializers
         internal HookInitializer(Identifier? _alias)
         {
             m_alias = _alias;
-            m_type = new(Namespace.Parse(c_hooksNamespace), new Identifier(HookTypeName));
+            m_type = new(Namespace.Parse(Identifiers.hooksNamespace), new Identifier(HookTypeName));
         }
 
         protected abstract Identifier HookTypeName { get; }
@@ -41,8 +40,8 @@ namespace VooDo.WinUI.HookInitializers
         {
             if (m_canCache && m_cachedCompilation != _compilation)
             {
-                IEnumerable<MetadataReference>? references = ReferenceFinder.OrderByFileNameHint(_compilation.References, "VooDo.WinUI");
-                MetadataReference? reference = ReferenceFinder.FindByNamespace(c_hooksNamespace, _compilation, references).FirstOrDefault();
+                IEnumerable<MetadataReference>? references = ReferenceFinder.OrderByFileNameHint(_compilation.References, Identifiers.vooDoWinUiName);
+                MetadataReference? reference = ReferenceFinder.FindByNamespace(Identifiers.hooksNamespace, _compilation, references).FirstOrDefault();
                 m_alias = reference is null ? null : ReferenceFinder.GetAlias(reference);
                 m_cachedCompilation = _compilation;
             }

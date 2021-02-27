@@ -7,7 +7,7 @@ using VooDo.AST;
 using VooDo.AST.Names;
 using VooDo.Problems;
 
-namespace VooDo.Generator
+namespace VooDo.WinUI.Generator
 {
 
     internal static class DiagnosticFactory

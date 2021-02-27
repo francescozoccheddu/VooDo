@@ -71,7 +71,7 @@ namespace VooDo.WinUI.Bindings
         private static readonly Map<string> s_tagMap = new(_b => _b.SourceTag);
         private static readonly Map<object> s_ownerMap = new(_b => _b.XamlOwner, ReferenceEqualityComparer.Instance);
         private static readonly Map<object> s_rootMap = new(_b => _b.XamlRoot, ReferenceEqualityComparer.Instance);
-        private static readonly Map<string> s_sourcePath = new(_b => _b.SourcePath, StringComparer.OrdinalIgnoreCase);
+        private static readonly Map<string> s_sourcePath = new(_b => _b.SourcePath, StringComparer.FromComparison(FilePaths.SystemComparison));
         private static readonly HashSet<Binding> s_bindings = new();
 
         public static IReadOnlySet<Binding> Bindings => s_bindings.AsReadOnly();
@@ -86,7 +86,7 @@ namespace VooDo.WinUI.Bindings
             => s_rootMap[_root];
 
         public static IReadOnlySet<Binding> GetByXamlPath(string _file)
-            => s_sourcePath[NormalFilePath.Normalize(_file)];
+            => s_sourcePath[FilePaths.Normalize(_file)];
 
         public static bool Add(Binding _binding)
         {

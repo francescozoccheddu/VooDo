@@ -5,15 +5,17 @@ using System.Linq;
 namespace VooDo.Utils
 {
 
-    public static class NormalFilePath
+    public static class FilePaths
     {
 
-        public static IEqualityComparer<string> Comparer { get; } = new PathComparer();
+        public static StringComparer Comparer { get; } = new PathComparer();
+        public static StringComparison SystemComparison { get; } = StringComparison.OrdinalIgnoreCase;
 
-        private sealed class PathComparer : IEqualityComparer<string>
+        private sealed class PathComparer : StringComparer
         {
-            public bool Equals(string _x, string _y) => AreEqual(_x, _y);
-            public int GetHashCode(string _obj) => Normalize(_obj).GetHashCode();
+            public override int Compare(string _x, string _y) => string.Compare(Normalize(_x), Normalize(_y), SystemComparison);
+            public override bool Equals(string _x, string _y) => AreEqual(_x, _y);
+            public override int GetHashCode(string _obj) => Normalize(_obj).GetHashCode();
         }
 
         public static TItem? FirstWithFile<TItem>(this IEnumerable<TItem?> _items, string _file, Func<TItem?, string?> _fileSelector)
@@ -35,7 +37,7 @@ namespace VooDo.Utils
         }
 
         private static bool AreEqualNormalized(string _a, string _b)
-            => _a.Equals(_b, StringComparison.OrdinalIgnoreCase);
+            => _a.Equals(_b, SystemComparison);
 
         public static bool AreEqual(string _a, string _b)
             => AreEqualNormalized(Normalize(_a), Normalize(_b));

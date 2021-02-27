@@ -6,18 +6,19 @@ using System.Linq;
 
 using VooDo.AST.Expressions;
 using VooDo.AST.Names;
+using VooDo.WinUI.Generator;
 
 namespace VooDo.WinUI.HookInitializers
 {
 
-    public sealed class NotifyPropertyChangedHookInitializer : HookInitializer
+    internal sealed class NotifyPropertyChangedHookInitializer : HookInitializer
     {
 
-        public NotifyPropertyChangedHookInitializer() : base() { }
+        internal NotifyPropertyChangedHookInitializer() : base() { }
 
-        public NotifyPropertyChangedHookInitializer(Identifier? _alias) : base(_alias) { }
+        internal NotifyPropertyChangedHookInitializer(Identifier? _alias) : base(_alias) { }
 
-        protected override Identifier HookTypeName => "NotifyPropertyChangedHook";
+        protected override Identifier HookTypeName => Identifiers.notifyPropertyChangedHookName;
 
         public override Expression? GetInitializer(ISymbol _symbol, CSharpCompilation _compilation)
         {

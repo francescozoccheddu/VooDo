@@ -6,12 +6,10 @@ using System.Linq;
 
 using VooDo.AST.Directives;
 
-namespace VooDo.Generator
+namespace VooDo.WinUI.Generator
 {
     internal static class UsingsOption
     {
-
-        private const string c_usingsOption = "VooDoUsings";
 
         private static UsingDirective ParseSingle(string _value)
         {
@@ -44,7 +42,7 @@ namespace VooDo.Generator
 
         internal static bool TryGet(GeneratorExecutionContext _context, out ImmutableArray<UsingDirective> _directives)
         {
-            string option = Options.Get(c_usingsOption, _context);
+            string option = OptionRetriever.Get(Identifiers.usingsOption, _context);
             string[] tokens = option.Split(',');
             int count = string.IsNullOrEmpty(tokens.Last()) ? tokens.Length - 1 : tokens.Length;
             UsingDirective[] directives = new UsingDirective[count];
