@@ -32,7 +32,7 @@ namespace VooDo.Generator
         private const string c_xamlPathOption = "XamlPath";
         private const string c_tagOption = "Tag";
         private const string c_xamlClassOption = "XamlClass";
-        private const string c_namePrefix = "VooDo_GeneratedScript_";
+        private const string c_namePrefix = "VooDo_GeneratedClassScript_";
 
         private static string GetName(string _path)
         {
@@ -167,11 +167,11 @@ namespace VooDo.Generator
             string code = sourceText.ToString();
             try
             {
-                Script script = Parser.Script(code);
+                Script script = Parser.Script(code, _text.Path);
                 bool failed = false;
                 foreach (ReturnStatement returnStatement in script.DescendantNodesAndSelf().OfType<ReturnStatement>())
                 {
-                    _context.ReportDiagnostic(DiagnosticFactory.ReturnNotAllowed((CodeOrigin)returnStatement.Origin, _text.Path));
+                    _context.ReportDiagnostic(DiagnosticFactory.ReturnNotAllowed((CodeOrigin)returnStatement.Origin));
                     failed = true;
                 }
                 if (failed)
@@ -200,7 +200,7 @@ namespace VooDo.Generator
                 foreach (Problem problem in exception.Problems)
                 {
                     Origin origin = problem.Origin ?? Origin.Unknown;
-                    _context.ReportDiagnostic(DiagnosticFactory.CompilationError(problem.Description, origin, _text.Path, problem.Severity));
+                    _context.ReportDiagnostic(DiagnosticFactory.CompilationError(problem.Description, origin as CodeOrigin, problem.Severity));
                 }
             }
         }

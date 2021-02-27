@@ -16,18 +16,18 @@ namespace VooDo.Generator
         private static int s_idCount = 0;
         private static string s_Id => $"VD{++s_idCount:00}";
 
-        private static Location GetLocation(CodeOrigin? _origin, string _file)
+        private static Location? GetLocation(CodeOrigin? _origin)
         {
             if (_origin is not null)
             {
                 TextSpan span = new(_origin.Start, _origin.Length);
                 _origin.GetLinePosition(out int startLine, out int startCharacter, out int endLine, out int endCharacter);
                 LinePositionSpan lineSpan = new(new LinePosition(startLine, startCharacter), new LinePosition(endLine, endCharacter));
-                return Location.Create(_file, span, lineSpan);
+                return Location.Create(_origin.SourcePath!, span, lineSpan);
             }
             else
             {
-                return Location.Create(_file, default, default);
+                return null;
             }
         }
 
@@ -145,6 +145,15 @@ namespace VooDo.Generator
                 DiagnosticSeverity.Error,
                 true);
 
+        private static readonly DiagnosticDescriptor s_xamlCodePropertyErrorDescriptor =
+            new(
+                s_Id,
+                "XAML code property error",
+                "Xaml markup extension must specify either Code or Path property",
+                "Generator",
+                DiagnosticSeverity.Error,
+                true);
+
         private static readonly DiagnosticDescriptor s_ambiguousXamlPresentationTypeDescriptor =
             new(
                 s_Id,
@@ -169,19 +178,19 @@ namespace VooDo.Generator
                 null,
                 _file);
 
-        internal static Diagnostic ReturnNotAllowed(CodeOrigin _origin, string _file)
+        internal static Diagnostic ReturnNotAllowed(CodeOrigin _origin)
             => Diagnostic.Create(
                 s_returnNotAllowedDescriptor,
-                GetLocation(_origin, _file));
+                GetLocation(_origin));
 
-        internal static Diagnostic CompilationError(string _message, Origin _origin, string _file, Problem.ESeverity _severity)
+        internal static Diagnostic CompilationError(string _message, CodeOrigin? _origin, Problem.ESeverity _severity)
             => Diagnostic.Create(
                 _severity switch
                 {
                     Problem.ESeverity.Error => s_compilationErrorDescriptor,
                     Problem.ESeverity.Warning => s_compilationWarningDescriptor
                 },
-                GetLocation(_origin as CodeOrigin, _file),
+                GetLocation(_origin),
                 _message);
 
         internal static Diagnostic InvalidXamlPath(string _scriptFile, string _xamlPath)
@@ -204,10 +213,10 @@ namespace VooDo.Generator
                 null,
                 _scriptFile);
 
-        internal static Diagnostic XamlParseError(string _xamlFile, string _error, CodeOrigin _origin)
+        internal static Diagnostic XamlParseError(string _error, CodeOrigin _origin)
             => Diagnostic.Create(
                 s_xamlParseError,
-                GetLocation(_origin, _xamlFile),
+                GetLocation(_origin),
                 _error);
 
         internal static Diagnostic InvalidUsing(string _directive, string _message)
@@ -233,12 +242,17 @@ namespace VooDo.Generator
                 s_noWinUIReferenceDescriptor,
                 null);
 
-        internal static Diagnostic XamlPresentationTypeResolveError(string _type, ImmutableArray<QualifiedType> _candidates, CodeOrigin _origin, string _file)
+        internal static Diagnostic XamlCodePropertyError(CodeOrigin _origin)
+            => Diagnostic.Create(
+                s_xamlCodePropertyErrorDescriptor,
+                GetLocation(_origin));
+
+        internal static Diagnostic XamlPresentationTypeResolveError(string _type, ImmutableArray<QualifiedType> _candidates, CodeOrigin _origin)
             => Diagnostic.Create(
                 _candidates.IsEmpty
                     ? s_unknownXamlPresentationTypeDescriptor
                     : s_ambiguousXamlPresentationTypeDescriptor,
-                GetLocation(_origin, _file),
+                GetLocation(_origin),
                 _type,
                 _candidates.Length switch
                 {

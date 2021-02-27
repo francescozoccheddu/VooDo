@@ -1,5 +1,7 @@
 ﻿using System;
 
+using VooDo.Utils;
+
 namespace VooDo.AST
 {
     public abstract class Origin
@@ -23,11 +25,12 @@ namespace VooDo.AST
     public sealed class CodeOrigin : Origin
     {
 
-        public CodeOrigin(int _start, int _length, string _source)
+        public CodeOrigin(int _start, int _length, string _source, string? _sourcePath)
         {
             Start = _start;
             Length = _length;
             Source = _source;
+            SourcePath = _sourcePath is null ? null : NormalFilePath.Normalize(_sourcePath);
             if (_start < 0)
             {
                 throw new ArgumentOutOfRangeException(nameof(_start));
@@ -43,6 +46,7 @@ namespace VooDo.AST
         }
 
         public string Source { get; }
+        public string? SourcePath { get; }
         public int Start { get; }
         public int Length { get; }
         public int End => Start + Length;

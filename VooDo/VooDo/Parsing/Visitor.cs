@@ -26,14 +26,16 @@ namespace VooDo.Parsing
     {
 
         private readonly string m_source;
+        private readonly string? m_sourcePath;
 
-        internal Visitor(string _source)
+        internal Visitor(string _source, string? _sourcePath)
         {
             m_source = _source;
+            m_sourcePath = _sourcePath;
         }
 
         private Origin MakeOrigin(int _start, int _end)
-            => new CodeOrigin(_start, _end - _start, m_source);
+            => new CodeOrigin(_start, _end - _start, m_source, m_sourcePath);
 
         private Origin GetOrigin(IToken _token)
             => MakeOrigin(_token.StartIndex, _token.StopIndex);

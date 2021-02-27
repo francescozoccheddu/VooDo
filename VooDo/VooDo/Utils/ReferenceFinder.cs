@@ -6,6 +6,7 @@ using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 
 using VooDo.AST.Names;
 
@@ -105,6 +106,22 @@ namespace VooDo.Utils
             return namespaces.Select(Namespace.Parse).ToImmutableHashSet();
         }
 
+        private static string GetMetadataName(INamedTypeSymbol _symbol)
+        {
+            StringBuilder builder = new();
+            INamespaceOrTypeSymbol? current = _symbol;
+            while (current is not null)
+            {
+                if (!ReferenceEquals(current, _symbol))
+                {
+                    builder.Insert(0, '.');
+                }
+                builder.Insert(0, current.MetadataName);
+                current = current.ContainingSymbol as INamespaceOrTypeSymbol;
+            }
+            return builder.ToString();
+        }
+
         public static ImmutableArray<QualifiedType>? FindTypeByPartialName(QualifiedType _name, Compilation _compilation, MetadataReference _reference)
         {
             IAssemblySymbol? symbol = TryGetSymbol(_reference, _compilation);
@@ -112,10 +129,16 @@ namespace VooDo.Utils
             {
                 return null;
             }
-            string name = GetMetadataName(_name);
+            string name = '.' + GetMetadataName(_name);
             Identifier alias = GetAlias(_reference);
             HashSet<string> types = new HashSet<string>();
-            TypeVisitor.Visit(symbol, _t => types.Add(_t.MetadataName));
+            TypeVisitor.Visit(symbol, _t =>
+            {
+                if (GetMetadataName(_t).EndsWith(name))
+                {
+                    types.Add(_t.ToDisplayString());
+                }
+            });
             QualifiedType[] qTypes = types.Select(_t => QualifiedType.Parse(string.Concat(_t.TakeWhile(_c => _c != '`')))).ToArray();
             for (int q = 0; q < qTypes.Length; q++)
             {
@@ -165,7 +188,7 @@ namespace VooDo.Utils
 
             public override void VisitNamespace(INamespaceSymbol _symbol)
             {
-                foreach (INamespaceOrTypeSymbol c in _symbol.GetNamespaceMembers())
+                foreach (INamespaceOrTypeSymbol c in _symbol.GetMembers())
                 {
                     c.Accept(this);
                 }
@@ -192,7 +215,7 @@ namespace VooDo.Utils
                 {
                     return;
                 }
-                foreach (INamespaceOrTypeSymbol c in _symbol.GetNamespaceMembers())
+                foreach (INamespaceSymbol c in _symbol.GetNamespaceMembers())
                 {
                     c.Accept(this);
                 }
