@@ -4,11 +4,20 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Reflection;
 
+using VooDo.Runtime.Implementation;
+
 namespace VooDo.Runtime
 {
 
     public sealed class Loader : IEquatable<Loader?>
     {
+
+        private abstract class SpyProgram : TypedProgram
+        {
+            internal const string tagPrefix = nameof(__VooDo_Reserved_tagPrefix);
+            private SpyProgram()
+            { }
+        }
 
         public static Loader FromType(Type _type)
             => new Loader(_type);
@@ -32,28 +41,24 @@ namespace VooDo.Runtime
                 throw new ArgumentException("Type does not have a parameterless constructor", nameof(_type));
             }
             m_type = _type;
-            ReturnType = m_type
-                .GetMethods(BindingFlags.Instance | BindingFlags.NonPublic)
-                .Single(_m => _m.IsVirtual && !_m.IsFinal
-                    && _m.Name is nameof(Program.Run) or nameof(TypedProgram<object>.TypedRun)
-                    && _m.GetBaseDefinition().DeclaringType is Type declaring
-                    && (declaring == typeof(Program) || declaring.IsSubclassOf(typeof(Program))))
-                .ReturnType;
+            ReturnType = m_type.BaseType == typeof(Program)
+                ? typeof(void)
+                : m_type.BaseType.GenericTypeArguments.Single();
             Tags = m_type
                 .GetFields(BindingFlags.Static | BindingFlags.NonPublic)
                 .Where(_f => _f.IsLiteral)
-                .ToImmutableDictionary(_f => _f.Name.Substring(RuntimeHelpers.tagFieldPrefix.Length), _f => _f.GetRawConstantValue())!;
+                .ToImmutableDictionary(_f => _f.Name.Substring(SpyProgram.tagPrefix.Length), _f => _f.GetRawConstantValue())!;
         }
 
-        public Program Create()
+        public IProgram Create()
         {
             Program program = (Program)Activator.CreateInstance(m_type)!;
-            program.Loader = this;
+            program.loader = this;
             return program;
         }
 
-        public TypedProgram<TReturn> Create<TReturn>()
-            => (TypedProgram<TReturn>)Create();
+        public ITypedProgram<TReturn> Create<TReturn>()
+            => (ITypedProgram<TReturn>)Create();
 
         #region Tags
 

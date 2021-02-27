@@ -23,7 +23,7 @@ namespace VooDo.Runtime
         public object? Value { get => DynamicValue; set => DynamicValue = value; }
         public object? ControllerFactory { get => DynamicControllerFactory; set => DynamicControllerFactory = value; }
         public abstract bool HasController { get; }
-        public Program Program { get; internal set; } = null!;
+        public IProgram Program { get; internal set; } = null!;
 
         public Variable<TValue> OfType<TValue>() => (Variable<TValue>)this;
 

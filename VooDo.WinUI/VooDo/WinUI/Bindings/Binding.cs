@@ -40,7 +40,7 @@ namespace VooDo.WinUI.Bindings
             if (m_lock is null)
             {
                 m_lock = Program.Lock(false);
-                Program.Freeze();
+                ((IProgram)Program).Freeze();
             }
         }
 
@@ -50,7 +50,7 @@ namespace VooDo.WinUI.Bindings
             {
                 m_lock.Dispose();
                 m_lock = null;
-                Program.RequestRun();
+                ((IProgram)Program).RequestRun();
             }
         }
 
@@ -72,7 +72,7 @@ namespace VooDo.WinUI.Bindings
         public override ETarget Target => ETarget.Class;
 
         internal ClassBinding(Program _program, object _xamlOwner)
-            : base(_program, _xamlOwner, _xamlOwner, _program.Loader.GetStringTag("SourcePath"), _program.Loader.GetStringTag("Tag"))
+            : base(_program, _xamlOwner, _xamlOwner, ((IProgram)_program).Loader.GetStringTag("SourcePath"), ((IProgram)_program).Loader.GetStringTag("Tag"))
         {
             Program.GetVariable("this")!.Value = _xamlOwner;
         }
