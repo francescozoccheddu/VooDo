@@ -5,7 +5,7 @@
     xmlns:xaml="using:VooDo.WinUI.Xaml">
 
     <Grid>
-
+        
         <Grid>
 
             <Grid.RowDefinitions>
@@ -16,7 +16,7 @@
             <Grid>
                 <Grid.Opacity>
                     <xaml:VooDo>
-                        Ciao sooo
+                        1
                     </xaml:VooDo>
                 </Grid.Opacity>
 
@@ -44,7 +44,7 @@
                 x:Name="m_Scroll"
                 Grid.Row="1"
                 Padding="10,0,10,0"
-                Opacity="{xaml:VooDo Code=Ciao}"
+                Opacity="{xaml:VooDo Code=2}"
                 VerticalScrollBarVisibility="Visible"
                 VerticalScrollMode="Enabled">
 
@@ -77,11 +77,6 @@
             Background="Black">
 
             <Button>
-                <Button.Opacity>
-                    <xaml:VooDo>
-                        Ciao come va?
-                    </xaml:VooDo>
-                </Button.Opacity>
                 Go up!
             </Button>
 

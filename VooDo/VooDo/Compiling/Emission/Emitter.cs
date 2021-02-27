@@ -1,7 +1,6 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -26,10 +25,6 @@ namespace VooDo.Compiling.Emission
 
         internal static (CompilationUnitSyntax syntax, ImmutableArray<Scope.GlobalDefinition> globals) Emit(Script _script, Session _session, Identifier _runtimeAlias)
         {
-            if (_script.Root != _script)
-            {
-                throw new ArgumentException("Script is not root", nameof(_script));
-            }
             Emitter emitter = new Emitter(_session.Tagger, _runtimeAlias);
             CompilationUnitSyntax syntax = emitter.EmitScript(_script, _session);
             return (syntax, emitter.m_scope.GetGlobalDefinitions());

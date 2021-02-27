@@ -300,7 +300,7 @@ namespace VooDo.Generator
                 script = script.AddGlobals(new VC::Emission.Global(true, objectType!, "this"), new VC::Emission.Global(true, _root, "root"));
                 ProgramTag pathTag = new("SourcePath", NormalFilePath.Normalize(_sourcePath));
                 ProgramTag tagTag = new("Tag", _markup.Tag?.Value);
-                string name = _nameDictionary.TakeName(_root.Path.Last().Name);
+                string name = c_namePrefix + _nameDictionary.TakeName(_root.Path.Last().Name);
                 VC::Options options = VC::Options.Default with
                 {
                     Namespace = new Namespace(_root.Path.SkipLast().Select(_s => _s.Name)),

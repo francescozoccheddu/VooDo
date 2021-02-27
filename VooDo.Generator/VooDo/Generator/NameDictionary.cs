@@ -11,7 +11,7 @@ namespace VooDo.Generator
         internal string TakeName(string _name)
         {
             int count = m_names.TryGetValue(_name, out int value) ? value : 0;
-            m_names[_name] = count++;
+            m_names[_name] = ++count;
             if (count > 1)
             {
                 _name = $"{_name}{count}";

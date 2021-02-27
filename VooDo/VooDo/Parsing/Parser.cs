@@ -88,7 +88,7 @@ namespace VooDo.Parsing
         }
 
         private static TNode Parse<TNode>(string _source, string? _sourcePath, Func<VooDoParser, ParserRuleContext> _ruleProvider) where TNode : Node
-            => (TNode)new Visitor(_source, _sourcePath).Visit(_ruleProvider(MakeParser(_source, _sourcePath)));
+            => (TNode)new Visitor(_source, _sourcePath).Visit(_ruleProvider(MakeParser(_source, _sourcePath))).SetAsRoot();
 
         // Script
         public static Script Script(string _source, string? _sourcePath = null) => Parse<Script>(_source, _sourcePath, _p => _p.script_Greedy());
