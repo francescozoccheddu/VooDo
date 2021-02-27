@@ -46,7 +46,7 @@ namespace VooDo.Utils
             => Uri.UnescapeDataString(new Uri(_path).AbsolutePath);
 
         public static string? NormalizeOrNull(string? _path)
-            => Uri.UnescapeDataString(new Uri(_path).AbsolutePath);
+            => _path is null ? null : Uri.UnescapeDataString(new Uri(_path).AbsolutePath);
 
     }
 
