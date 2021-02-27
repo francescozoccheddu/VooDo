@@ -27,22 +27,22 @@ namespace VooDo.Utils
         public static IEnumerable<MetadataReference> FindByType(Type _type, Compilation _compilation)
             => FindByType(_type, _compilation, _compilation.References);
 
-        public static IEnumerable<MetadataReference> FindByType(string _type, Compilation _compilation)
+        public static IEnumerable<MetadataReference> FindByType(QualifiedType _type, Compilation _compilation)
             => FindByType(_type, _compilation, _compilation.References);
 
         public static IEnumerable<MetadataReference> FindByAssemblyName(string _assembly, Compilation _compilation)
             => FindByAssemblyName(_assembly, _compilation, _compilation.References);
 
-        public static IEnumerable<MetadataReference> FindByNamespace(string _namespace, Compilation _compilation)
+        public static IEnumerable<MetadataReference> FindByNamespace(Namespace _namespace, Compilation _compilation)
             => FindByNamespace(_namespace, _compilation, _compilation.References);
 
         public static IEnumerable<MetadataReference> FindByFileName(string _fileNameWithoutExt, IEnumerable<MetadataReference> _references)
             => _references.Where(_r => HasFileName(_r, _fileNameWithoutExt));
 
         public static IEnumerable<MetadataReference> FindByType(Type _type, Compilation _compilation, IEnumerable<MetadataReference> _references)
-            => FindByType(_type.FullName, _compilation, OrderByFileNameHint(_references, Path.GetFileNameWithoutExtension(_type.Assembly.Location)));
+            => FindByType(QualifiedType.FromType(_type, true), _compilation, OrderByFileNameHint(_references, Path.GetFileNameWithoutExtension(_type.Assembly.Location)));
 
-        public static IEnumerable<MetadataReference> FindByType(string _type, Compilation _compilation, IEnumerable<MetadataReference> _references)
+        public static IEnumerable<MetadataReference> FindByType(QualifiedType _type, Compilation _compilation, IEnumerable<MetadataReference> _references)
             => _references.Where(_r => HasType(_r, _type, _compilation));
 
         public static IEnumerable<MetadataReference> FindByAssemblyName(Assembly _assembly, Compilation _compilation, IEnumerable<MetadataReference> _references)
@@ -51,7 +51,7 @@ namespace VooDo.Utils
         public static IEnumerable<MetadataReference> FindByAssemblyName(string _assembly, Compilation _compilation, IEnumerable<MetadataReference> _references)
             => _references.Where(_r => GetAssemblyName(_r, _compilation) == _assembly);
 
-        public static IEnumerable<MetadataReference> FindByNamespace(string _namespace, Compilation _compilation, IEnumerable<MetadataReference> _references)
+        public static IEnumerable<MetadataReference> FindByNamespace(Namespace _namespace, Compilation _compilation, IEnumerable<MetadataReference> _references)
             => _references.Where(_r => HasNamespace(_r, _namespace, _compilation));
 
         public static bool HasFileName(MetadataReference _reference, string _fileNameWithoutExt)
@@ -59,11 +59,26 @@ namespace VooDo.Utils
                 && pe.FilePath is not null
                 && Path.GetFileNameWithoutExtension(pe.FilePath).Equals(_fileNameWithoutExt, StringComparison.OrdinalIgnoreCase);
 
-        public static bool HasType(MetadataReference _reference, string _type, Compilation _compilation)
-            => TryGetSymbol(_reference, _compilation)?.GetTypeByMetadataName(_type) is not null;
+        private static string GetMetadataName(SimpleType _type)
+            => _type.IsGeneric
+                ? $"{_type.Name}`{_type.TypeArguments.Length}"
+                : $"{_type.Name}";
 
-        public static bool HasNamespace(MetadataReference _reference, string _type, Compilation _compilation)
+        private static string GetMetadataName(QualifiedType _type)
         {
+            if (_type.IsArray || _type.IsNullable || _type.IsAliasQualified)
+            {
+                throw new ArgumentException("Type cannot be nullable, array or alias qualified", nameof(_type));
+            }
+            return string.Join(".", _type.Path.Select(GetMetadataName));
+        }
+
+        public static bool HasType(MetadataReference _reference, QualifiedType _type, Compilation _compilation)
+            => TryGetSymbol(_reference, _compilation)?.GetTypeByMetadataName(GetMetadataName(_type)) is not null;
+
+        public static bool HasNamespace(MetadataReference _reference, Namespace _namespace, Compilation _compilation)
+        {
+            string name = _namespace.ToString();
             HashSet<string> types = new HashSet<string>();
             IAssemblySymbol? symbol = TryGetSymbol(_reference, _compilation);
             if (symbol is null)
@@ -71,28 +86,92 @@ namespace VooDo.Utils
                 return false;
             }
             bool found = false;
-            NamespaceVisitor.Visit(symbol, _n => !(found = _n.ToDisplayString() == _type));
+            NamespaceVisitor.Visit(symbol, _n => !(found = _n.ToDisplayString() == name));
             return found;
         }
 
         public static string? GetAssemblyName(MetadataReference _reference, Compilation _compilation)
             => TryGetSymbol(_reference, _compilation)?.Name;
 
-        public static ImmutableHashSet<string>? GetNamespaces(MetadataReference _reference, Compilation _compilation)
+        public static ImmutableHashSet<Namespace>? GetNamespaces(MetadataReference _reference, Compilation _compilation)
         {
-            HashSet<string> namespaces = new HashSet<string>();
             IAssemblySymbol? symbol = TryGetSymbol(_reference, _compilation);
             if (symbol is null)
             {
                 return null;
             }
+            HashSet<string> namespaces = new HashSet<string>();
             NamespaceVisitor.Visit(symbol, _n => namespaces.Add(_n.ToDisplayString()) || true);
-            return namespaces.ToImmutableHashSet();
+            return namespaces.Select(Namespace.Parse).ToImmutableHashSet();
         }
 
+        public static ImmutableArray<QualifiedType>? FindTypeByPartialName(QualifiedType _name, Compilation _compilation, MetadataReference _reference)
+        {
+            IAssemblySymbol? symbol = TryGetSymbol(_reference, _compilation);
+            if (symbol is null)
+            {
+                return null;
+            }
+            string name = GetMetadataName(_name);
+            Identifier alias = GetAlias(_reference);
+            HashSet<string> types = new HashSet<string>();
+            TypeVisitor.Visit(symbol, _t => types.Add(_t.MetadataName));
+            QualifiedType[] qTypes = types.Select(_t => QualifiedType.Parse(string.Concat(_t.TakeWhile(_c => _c != '`')))).ToArray();
+            for (int q = 0; q < qTypes.Length; q++)
+            {
+                SimpleType[] path = qTypes[q].Path.ToArray();
+                int count = _name.Path.Length;
+                for (int s = 0; s < count; s++)
+                {
+                    ref SimpleType pathItem = ref path[path.Length - count + s];
+                    pathItem = pathItem with
+                    {
+                        TypeArguments = _name.Path[s].TypeArguments
+                    };
+                }
+                qTypes[q] = qTypes[q] with
+                {
+                    Alias = alias,
+                    Path = path.ToImmutableArray()
+                };
+            }
+            return qTypes.ToImmutableArray();
+        }
 
         public static Identifier GetAlias(MetadataReference _reference)
             => _reference.Properties.Aliases.FirstOrDefault() ?? "global";
+
+        private sealed class TypeVisitor : SymbolVisitor
+        {
+
+            internal static void Visit(IAssemblySymbol _symbol, Action<INamedTypeSymbol> _typeListener)
+                => new TypeVisitor(_typeListener).Visit(_symbol.GlobalNamespace);
+
+            private readonly Action<INamedTypeSymbol> m_typeListener;
+
+            private TypeVisitor(Action<INamedTypeSymbol> _typeListener)
+            {
+                m_typeListener = _typeListener;
+            }
+
+            public override void VisitNamedType(INamedTypeSymbol _symbol)
+            {
+                m_typeListener(_symbol);
+                foreach (INamedTypeSymbol c in _symbol.GetMembers().OfType<INamedTypeSymbol>())
+                {
+                    c.Accept(this);
+                }
+            }
+
+            public override void VisitNamespace(INamespaceSymbol _symbol)
+            {
+                foreach (INamespaceOrTypeSymbol c in _symbol.GetNamespaceMembers())
+                {
+                    c.Accept(this);
+                }
+            }
+
+        }
 
         private sealed class NamespaceVisitor : SymbolVisitor
         {

@@ -22,12 +22,13 @@
     <ProjectReference Include="$(SolutionDir)VooDo.Runtime\VooDo.Runtime.csproj" PrivateAssets="All">
       <Aliases>VooDoRuntime</Aliases>
     </ProjectReference>
+    <ProjectReference Include="..\..\..\VooDo.Generator\VooDo.Generator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
   </ItemGroup>
 
   <Import Project="..\..\..\VooDo.Generator\Generator.props" />
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\VooDo.Generator\VooDo.Generator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+    <AdditionalFiles Include="MainWindow.xaml"/>
   </ItemGroup>
 
 </Project>

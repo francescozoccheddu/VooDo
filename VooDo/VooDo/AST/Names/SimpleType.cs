@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 
+using VooDo.Parsing;
 using VooDo.Utils;
 
 namespace VooDo.AST.Names
@@ -12,7 +13,7 @@ namespace VooDo.AST.Names
     public sealed record SimpleType : Node
     {
 
-        
+
         private static readonly Dictionary<Type, string> s_typenames =
                 new Dictionary<Type, string>()
             {
@@ -34,7 +35,7 @@ namespace VooDo.AST.Names
             };
 
         public static SimpleType Parse(string _type)
-            => SimpleType.Parse(_type);
+            => Parser.SimpleType(_type);
 
         public static SimpleType FromType<TType>(bool _ignoreUnboundGenerics = false)
             => FromType(typeof(TType), _ignoreUnboundGenerics);
@@ -83,20 +84,20 @@ namespace VooDo.AST.Names
             }
         }
 
-        
-        
+
+
         public static implicit operator SimpleType(string _type) => Parse(_type);
         public static implicit operator SimpleType(Identifier _name) => new SimpleType(_name);
         public static implicit operator SimpleType(Type _type) => FromType(_type);
         public static implicit operator string(SimpleType _simpleType) => _simpleType.ToString();
 
-        
-        
+
+
         public SimpleType(Identifier _name, params ComplexType[] _typeArguments) : this(_name, _typeArguments.ToImmutableArray()) { }
         public SimpleType(Identifier _name, IEnumerable<ComplexType>? _typeArguments) : this(_name, _typeArguments.EmptyIfNull().ToImmutableArray()) { }
 
-        
-        
+
+
         public SimpleType(Identifier _name, ImmutableArray<ComplexType> _typeArguments = default)
         {
             Name = _name;
@@ -113,12 +114,12 @@ namespace VooDo.AST.Names
         }
         public bool IsGeneric => !TypeArguments.IsEmpty;
 
-        
-        
+
+
 
         protected internal override Node ReplaceNodes(Func<Node?, Node?> _map)
         {
-            Identifier newName = (Identifier) _map(Name).NonNull();
+            Identifier newName = (Identifier)_map(Name).NonNull();
             ImmutableArray<ComplexType> newTypeArguments = TypeArguments.Map(_map).NonNull();
             if (ReferenceEquals(newName, Name) && newTypeArguments == TypeArguments)
             {
@@ -137,7 +138,7 @@ namespace VooDo.AST.Names
         public override IEnumerable<Node> Children => new Node[] { Name }.Concat(TypeArguments);
         public override string ToString() => IsGeneric ? $"{Name}<{string.Join(", ", TypeArguments)}>" : $"{Name}";
 
-        
+
     }
 
 }

@@ -1,7 +1,10 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Text;
 
+using System.Collections.Immutable;
+
 using VooDo.AST;
+using VooDo.AST.Names;
 using VooDo.Problems;
 
 namespace VooDo.Generator
@@ -32,7 +35,7 @@ namespace VooDo.Generator
             new(
                 s_Id,
                 "File read error",
-                "Error while reading script file '{0}'",
+                "Error while reading file '{0}'",
                 "Generator",
                 DiagnosticSeverity.Error,
                 true,
@@ -96,6 +99,14 @@ namespace VooDo.Generator
                 true,
                 "Make sure that the file has the same name and is in the same directory of the XAML owner or manually specify either XamlClass or XamlPath.");
 
+        private static readonly DiagnosticDescriptor s_xamlParseError =
+            new(
+                s_Id,
+                "XAML parse error",
+                "{0}",
+                "Generator",
+                DiagnosticSeverity.Error,
+                true);
 
         private static readonly DiagnosticDescriptor s_invalidUsingDescriptor =
             new(
@@ -123,6 +134,33 @@ namespace VooDo.Generator
                 "Generation canceled",
                 "Generator",
                 DiagnosticSeverity.Warning,
+                true);
+
+        private static readonly DiagnosticDescriptor s_noWinUIReferenceDescriptor =
+            new(
+                s_Id,
+                "No WinUI reference",
+                "No WinUI reference",
+                "Generator",
+                DiagnosticSeverity.Error,
+                true);
+
+        private static readonly DiagnosticDescriptor s_ambiguousXamlPresentationTypeDescriptor =
+            new(
+                s_Id,
+                "Failed to resolve Xaml type",
+                "Cannot resolve Xaml presentation type '{0}' because it is ambiguous between {2}",
+                "Generator",
+                DiagnosticSeverity.Error,
+                true);
+
+        private static readonly DiagnosticDescriptor s_unknownXamlPresentationTypeDescriptor =
+            new(
+                s_Id,
+                "Failed to resolve Xaml type",
+                "Cannot find Xaml presentation type '{0}'",
+                "Generator",
+                DiagnosticSeverity.Error,
                 true);
 
         internal static Diagnostic FileReadError(string _file)
@@ -166,6 +204,12 @@ namespace VooDo.Generator
                 null,
                 _scriptFile);
 
+        internal static Diagnostic XamlParseError(string _xamlFile, string _error, CodeOrigin _origin)
+            => Diagnostic.Create(
+                s_xamlParseError,
+                GetLocation(_origin, _xamlFile),
+                _error);
+
         internal static Diagnostic InvalidUsing(string _directive, string _message)
             => Diagnostic.Create(
                 s_invalidUsingDescriptor,
@@ -183,6 +227,25 @@ namespace VooDo.Generator
             => Diagnostic.Create(
                 s_canceledDescriptor,
                 null);
+
+        internal static Diagnostic NoWinUI()
+            => Diagnostic.Create(
+                s_noWinUIReferenceDescriptor,
+                null);
+
+        internal static Diagnostic XamlPresentationTypeResolveError(string _type, ImmutableArray<QualifiedType> _candidates, CodeOrigin _origin, string _file)
+            => Diagnostic.Create(
+                _candidates.IsEmpty
+                    ? s_unknownXamlPresentationTypeDescriptor
+                    : s_ambiguousXamlPresentationTypeDescriptor,
+                GetLocation(_origin, _file),
+                _type,
+                _candidates.Length switch
+                {
+                    < 2 => "",
+                    2 => $"'{_candidates[0]}' and '{_candidates[1]}'",
+                    > 2 => $"'{_candidates[0]}' and '{_candidates[1]}' and '{_candidates.Length - 2}' more"
+                });
 
     }
 

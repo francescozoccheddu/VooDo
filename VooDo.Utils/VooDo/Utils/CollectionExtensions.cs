@@ -27,7 +27,6 @@ namespace VooDo.Utils
                 yield return last;
                 last = enumerator.Current;
             }
-            yield return last;
         }
 
         public static ImmutableArray<TItem> EmptyIfDefault<TItem>(this ImmutableArray<TItem> _array)
