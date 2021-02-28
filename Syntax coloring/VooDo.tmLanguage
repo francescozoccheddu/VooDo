@@ -28,43 +28,56 @@
       <array> 
         <dict>
           <key>include</key>
-          <string>#comment</string>
-        </dict>
-        <dict>
-          <key>include</key>
-          <string>#string</string>
-        </dict>
-        <dict>
-          <key>include</key>
-          <string>#char</string>
-        </dict>
-        <dict>
-          <key>include</key>
           <string>#using</string>
         </dict>
         <dict>
           <key>include</key>
-          <string>#builtin_type</string>
+          <string>#statement</string>
         </dict>
+       </array>
+    </dict>
+    <key>block</key>
+    <dict>
+      <key>patterns</key>
+      <array> 
+        <dict>
+          <key>begin</key>
+          <string>({)</string>
+          <key>beginCaptures</key>
+          <dict>
+            <key>1</key>
+            <dict>
+              <key>name</key>
+              <string>punctuation.VooDo</string>
+            </dict>
+          </dict>
+          <key>patterns</key>
+          <array> 
+            <dict>
+              <key>include</key>
+              <string>#block__1</string>
+            </dict>
+           </array>
+          <key>end</key>
+          <string>(})</string>
+          <key>endCaptures</key>
+          <dict>
+            <key>1</key>
+            <dict>
+              <key>name</key>
+              <string>punctuation.VooDo</string>
+            </dict>
+          </dict>
+        </dict>
+       </array>
+    </dict>
+    <key>block__1</key>
+    <dict>
+      <key>patterns</key>
+      <array> 
         <dict>
           <key>include</key>
-          <string>#keyword</string>
-        </dict>
-        <dict>
-          <key>include</key>
-          <string>#identifier</string>
-        </dict>
-        <dict>
-          <key>include</key>
-          <string>#numeric</string>
-        </dict>
-        <dict>
-          <key>include</key>
-          <string>#punctuation</string>
-        </dict>
-        <dict>
-          <key>include</key>
-          <string>#invalid</string>
+          <string>#statement</string>
         </dict>
        </array>
     </dict>
@@ -76,7 +89,7 @@
           <key>match</key>
           <string>(bool|short|ushort|int|uint|long|ulong|float|double|decimal|char|string|object)</string>
           <key>name</key>
-          <string>keyword.type.VooDo</string>
+          <string>entity.name.type storage.type keyword.type support.type.VooDo</string>
         </dict>
        </array>
     </dict>
@@ -161,6 +174,92 @@
         </dict>
        </array>
     </dict>
+    <key>expression</key>
+    <dict>
+      <key>patterns</key>
+      <array> 
+        <dict>
+          <key>include</key>
+          <string>#comment</string>
+        </dict>
+        <dict>
+          <key>include</key>
+          <string>#string</string>
+        </dict>
+        <dict>
+          <key>include</key>
+          <string>#char</string>
+        </dict>
+        <dict>
+          <key>include</key>
+          <string>#parentheses</string>
+        </dict>
+        <dict>
+          <key>include</key>
+          <string>#builtin_type</string>
+        </dict>
+        <dict>
+          <key>include</key>
+          <string>#expression_invalid_keyword</string>
+        </dict>
+        <dict>
+          <key>include</key>
+          <string>#expression_keyword</string>
+        </dict>
+        <dict>
+          <key>include</key>
+          <string>#identifier</string>
+        </dict>
+        <dict>
+          <key>include</key>
+          <string>#numeric</string>
+        </dict>
+        <dict>
+          <key>include</key>
+          <string>#expression_punctuation</string>
+        </dict>
+        <dict>
+          <key>include</key>
+          <string>#invalid</string>
+        </dict>
+       </array>
+    </dict>
+    <key>expression_invalid_keyword</key>
+    <dict>
+      <key>patterns</key>
+      <array> 
+        <dict>
+          <key>match</key>
+          <string>(const|else|global|if|return)</string>
+          <key>name</key>
+          <string>invalid.broken.VooDo</string>
+        </dict>
+       </array>
+    </dict>
+    <key>expression_keyword</key>
+    <dict>
+      <key>patterns</key>
+      <array> 
+        <dict>
+          <key>match</key>
+          <string>(as|default|false|glob|init|in|is|new|null|out|ref|true|var)</string>
+          <key>name</key>
+          <string>keyword.VooDo</string>
+        </dict>
+       </array>
+    </dict>
+    <key>expression_punctuation</key>
+    <dict>
+      <key>patterns</key>
+      <array> 
+        <dict>
+          <key>match</key>
+          <string>([.\x{002c}\x{003a}\x{003f}\x{002b}\-\x{002f}\x{002a}\x{0025}\x{0026}\x{007c}\x{005e}\x{0021}\x{007e}\x{003c}\x{003e}\x{005b}\]\x{0024}]|[\x{003c}\x{003e}\x{003d}\x{0021}]=)</string>
+          <key>name</key>
+          <string>punctuation.VooDo</string>
+        </dict>
+       </array>
+    </dict>
     <key>identifier</key>
     <dict>
       <key>patterns</key>
@@ -178,7 +277,7 @@
             <key>2</key>
             <dict>
               <key>name</key>
-              <string>invalid.VooDo</string>
+              <string>invalid.illegal.VooDo</string>
             </dict>
           </dict>
         </dict>
@@ -209,19 +308,7 @@
           <key>match</key>
           <string>([^\s])</string>
           <key>name</key>
-          <string>invalid.VooDo</string>
-        </dict>
-       </array>
-    </dict>
-    <key>keyword</key>
-    <dict>
-      <key>patterns</key>
-      <array> 
-        <dict>
-          <key>match</key>
-          <string>(as|const|default|else|false|global|glob|if|init|in|is|new|null|out|ref|return|true|var)</string>
-          <key>name</key>
-          <string>keyword.VooDo</string>
+          <string>invalid.broken.VooDo</string>
         </dict>
        </array>
     </dict>
@@ -309,15 +396,48 @@
         </dict>
        </array>
     </dict>
-    <key>punctuation</key>
+    <key>parentheses</key>
     <dict>
       <key>patterns</key>
       <array> 
         <dict>
-          <key>match</key>
-          <string>([.\x{002c}\x{003a}\x{003c}\x{003e}\x{003d}\x{007b}\x{007d}\x{0028}\x{0029}\x{003f}\x{0021}\x{007e}\x{002f}\x{002a}\x{002b}\-\x{0026}\x{0025}\x{007c}\x{0024}\x{003b}\x{005b}\]])</string>
-          <key>name</key>
-          <string>punctuation.VooDo</string>
+          <key>begin</key>
+          <string>(\()</string>
+          <key>beginCaptures</key>
+          <dict>
+            <key>1</key>
+            <dict>
+              <key>name</key>
+              <string>punctuation.VooDo</string>
+            </dict>
+          </dict>
+          <key>patterns</key>
+          <array> 
+            <dict>
+              <key>include</key>
+              <string>#parentheses__1</string>
+            </dict>
+           </array>
+          <key>end</key>
+          <string>(\))</string>
+          <key>endCaptures</key>
+          <dict>
+            <key>1</key>
+            <dict>
+              <key>name</key>
+              <string>punctuation.VooDo</string>
+            </dict>
+          </dict>
+        </dict>
+       </array>
+    </dict>
+    <key>parentheses__1</key>
+    <dict>
+      <key>patterns</key>
+      <array> 
+        <dict>
+          <key>include</key>
+          <string>#expression</string>
         </dict>
        </array>
     </dict>
@@ -372,6 +492,52 @@
         </dict>
        </array>
     </dict>
+    <key>statement</key>
+    <dict>
+      <key>patterns</key>
+      <array> 
+        <dict>
+          <key>include</key>
+          <string>#block</string>
+        </dict>
+        <dict>
+          <key>include</key>
+          <string>#statement_keyword</string>
+        </dict>
+        <dict>
+          <key>include</key>
+          <string>#statement_punctuation</string>
+        </dict>
+        <dict>
+          <key>include</key>
+          <string>#expression</string>
+        </dict>
+       </array>
+    </dict>
+    <key>statement_keyword</key>
+    <dict>
+      <key>patterns</key>
+      <array> 
+        <dict>
+          <key>match</key>
+          <string>(const|else|global|if|return)</string>
+          <key>name</key>
+          <string>keyword.VooDo</string>
+        </dict>
+       </array>
+    </dict>
+    <key>statement_punctuation</key>
+    <dict>
+      <key>patterns</key>
+      <array> 
+        <dict>
+          <key>match</key>
+          <string>(;|([\x{002b}\-\x{0026}\x{007c}\x{007e}]|&lt;&lt;|&gt;&gt;|\?\?)?=)</string>
+          <key>name</key>
+          <string>punctuation.VooDo</string>
+        </dict>
+       </array>
+    </dict>
     <key>string</key>
     <dict>
       <key>patterns</key>
@@ -383,18 +549,6 @@
         <dict>
           <key>include</key>
           <string>#simple_string</string>
-        </dict>
-       </array>
-    </dict>
-    <key>type_punctuation</key>
-    <dict>
-      <key>patterns</key>
-      <array> 
-        <dict>
-          <key>match</key>
-          <string>([.\x{002c}\x{003a}\x{003c}\x{003e}\x{003d}])</string>
-          <key>name</key>
-          <string>punctuation.VooDo</string>
         </dict>
        </array>
     </dict>
@@ -453,15 +607,43 @@
         </dict>
         <dict>
           <key>include</key>
+          <string>#using_invalid_keyword</string>
+        </dict>
+        <dict>
+          <key>include</key>
           <string>#identifier</string>
         </dict>
         <dict>
           <key>include</key>
-          <string>#type_punctuation</string>
+          <string>#using_punctuation</string>
         </dict>
         <dict>
           <key>include</key>
           <string>#invalid</string>
+        </dict>
+       </array>
+    </dict>
+    <key>using_invalid_keyword</key>
+    <dict>
+      <key>patterns</key>
+      <array> 
+        <dict>
+          <key>match</key>
+          <string>(as|const|default|else|false|global|glob|if|init|in|is|new|null|out|ref|return|true|var)</string>
+          <key>name</key>
+          <string>invalid.broken.VooDo</string>
+        </dict>
+       </array>
+    </dict>
+    <key>using_punctuation</key>
+    <dict>
+      <key>patterns</key>
+      <array> 
+        <dict>
+          <key>match</key>
+          <string>([.\x{002c}\x{003a}\x{003c}\x{003e}\x{003d}])</string>
+          <key>name</key>
+          <string>punctuation.VooDo</string>
         </dict>
        </array>
     </dict>

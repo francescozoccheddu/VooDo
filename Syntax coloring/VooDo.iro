@@ -41,7 +41,7 @@ styles[]{
 
 	.builtin_type:style{
 		color			= violet
-		textmate_scope	= keyword.type
+		textmate_scope	= entity.name.type storage.type keyword.type support.type
 	}
 
 	.numeric:style{
@@ -71,7 +71,12 @@ styles[]{
 
 	.invalid:style{
 		color			= red
-		textmate_scope	= invalid
+		textmate_scope	= invalid.broken
+	}
+
+	.illegal:style{
+		color			= red
+		textmate_scope	= invalid.illegal
 	}
 
 }
@@ -81,15 +86,28 @@ styles[]{
 contexts[]{
 
 	main:context{
+		:include				"using";
+		:include				"statement";
+	}
+
+	statement:context{
+		:include				"block";
+		:include				"statement_keyword";
+		:include				"statement_punctuation";
+		:include				"expression";
+	}
+
+	expression:context{
 		:include				"comment";
 		:include				"string";
 		:include				"char";
-		:include				"using";
+		:include				"parentheses";
 		:include				"builtin_type";
-		:include				"keyword";
+		:include				"expression_invalid_keyword";
+		:include				"expression_keyword";
 		:include				"identifier";
 		:include				"numeric";
-		:include				"punctuation";
+		:include				"expression_punctuation";
 		:include				"invalid";
 	}
 
@@ -107,8 +125,9 @@ contexts[]{
 			}
 			:include			"comment";
 			:include			"builtin_type";
+			:include			"using_invalid_keyword";
 			:include			"identifier";
-			:include			"type_punctuation";
+			:include			"using_punctuation";
 			:include			"invalid";
 		}
 	}
@@ -186,10 +205,31 @@ contexts[]{
 		}
 	}
 
-	keyword:context{
+	statement_keyword:context{
+		:pattern{
+			regex				 \= (const|else|global|if|return)
+			styles				[]= .keyword;
+		}
+	}
+
+	expression_keyword:context{
+		:pattern{
+			regex				 \= (as|default|false|glob|init|in|is|new|null|out|ref|true|var)
+			styles				[]= .keyword;
+		}
+	}
+
+	expression_invalid_keyword:context{
+		:pattern{
+			regex				 \= (const|else|global|if|return)
+			styles				[]= .invalid;
+		}
+	}
+
+	using_invalid_keyword:context{
 		:pattern{
 			regex				 \= (as|const|default|else|false|global|glob|if|init|in|is|new|null|out|ref|return|true|var)
-			styles				[]= .keyword;
+			styles				[]= .invalid;
 		}
 	}
 
@@ -203,7 +243,7 @@ contexts[]{
 	identifier:context{
 		:pattern{
 			regex				 \= (@?)(__VooDo_Reserved[a-zA-Z_][a-zA-Z0-9_]*)
-			styles				[]= .punctuation,.invalid;
+			styles				[]= .punctuation,.illegal;
 		}
 		:pattern{
 			regex				 \= (@?)([a-zA-Z_][a-zA-Z0-9_]*)
@@ -235,17 +275,48 @@ contexts[]{
 		}
 	}
 
-	punctuation:context{
+	expression_punctuation:context{
 		:pattern{
-			regex				 \= ([.,:<>={}()?!~/*+\-&%|$;[\]])
+			regex				 \= ([.,:?+\-/*%&|^!~<>[\]$]|[<>=!]=)
 			styles				[]= .punctuation;
 		}
 	}
 
-	type_punctuation:context{
+	statement_punctuation:context{
+		:pattern{
+			regex				 \= (;|([+\-&|~]|<<|>>|\?\?)?=)
+			styles				[]= .punctuation;
+		}
+	}
+
+	using_punctuation:context{
 		:pattern{
 			regex				 \= ([.,:<>=])
 			styles				[]= .punctuation;
+		}
+	}
+
+	block:context{
+		:inline_push{
+			regex				 \= ({)
+			styles				[]= .punctuation;
+			:pop{
+				regex			 \= (})
+				styles			[]= .punctuation;
+			}
+			:include			"statement";
+		}
+	}
+
+	parentheses:context{
+		:inline_push{
+			regex				 \= (\()
+			styles				[]= .punctuation;
+			:pop{
+				regex			 \= (\))
+				styles			[]= .punctuation;
+			}
+			:include			"expression";
 		}
 	}
 
