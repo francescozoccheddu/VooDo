@@ -12,6 +12,10 @@ script_Greedy
 	: script EOF
 ;
 
+scriptOrExpression_Greedy
+	: scriptOrExpression EOF
+;
+
 usingDirective_Greedy
 	: usingDirective EOF
 ;
@@ -62,8 +66,12 @@ complexTypeOrExpression_Greedy
 
 // Script
 
+scriptOrExpression
+	: script | expression
+;
+
 script
-	: mExpr = expression # inlineScript | mUsings += usingDirective* mBody += statement+ # fullScript
+	: mUsings += usingDirective* mBody += statement+
 ;
 
 // Statements

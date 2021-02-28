@@ -6,6 +6,7 @@ using Antlr4.Runtime.Tree;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
+using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -192,7 +193,7 @@ namespace VooDo.Parsing
             => new ExpressionStatement(Get<InvocationOrObjectCreationExpression>(_c.mExpr));
         public override Node VisitFalseLiteralExpression([NotNull] VooDoParser.FalseLiteralExpressionContext _c)
             => LiteralExpression.False;
-        public override Node VisitFullScript([NotNull] VooDoParser.FullScriptContext _c)
+        public override Node VisitScript([NotNull] VooDoParser.ScriptContext _c)
             => new Script(Get<UsingDirective>(_c._mUsings), Get<Statement>(_c._mBody));
         public override Node VisitGlobalExpression([NotNull] VooDoParser.GlobalExpressionContext _c)
             => new GlobalExpression(Get<Expression>(_c.mController), TryGet<Expression>(_c.mInitializer));
@@ -204,11 +205,19 @@ namespace VooDo.Parsing
             => _c.mIdentifier is null ? IdentifierOrDiscard.Discard : Get<Identifier>(_c.mIdentifier);
         public override Node VisitIfStatement([NotNull] VooDoParser.IfStatementContext _c)
             => new IfStatement(Get<Expression>(_c.mCondition), Get<Statement>(_c.mThen), TryGet<Statement>(_c.mElse));
-        public override Node VisitInlineScript([NotNull] VooDoParser.InlineScriptContext _c)
+        public override Node VisitScriptOrExpression([NotNull] VooDoParser.ScriptOrExpressionContext _c)
         {
-            Origin origin = GetOrigin(_c);
-            ReturnStatement expression = new ReturnStatement(Get<Expression>(_c.mExpr)) with { Origin = origin };
-            return new Script(default, ImmutableArray.Create<Statement>(expression));
+            switch (Variant<Node>(_c))
+            {
+                case Script script:
+                    return script;
+                case Expression expression:
+                    Origin origin = GetOrigin(_c);
+                    ReturnStatement statement = new ReturnStatement(expression) with { Origin = origin };
+                    return new Script(default, ImmutableArray.Create<Statement>(statement));
+                default:
+                    throw new InvalidCastException();
+            }
         }
         public override Node VisitIsExpression([NotNull] VooDoParser.IsExpressionContext _c)
             => new IsExpression(Get<Expression>(_c.mSource), Get<ComplexType>(_c.mType), TryGet<IdentifierOrDiscard>(_c.mName));
@@ -296,6 +305,7 @@ namespace VooDo.Parsing
             => new ValueArgument(null, Get<Expression>(_c.mValue));
 
         public override Node VisitScript_Greedy([NotNull] VooDoParser.Script_GreedyContext _c) => Variant<Script>(_c);
+        public override Node VisitScriptOrExpression_Greedy([NotNull] VooDoParser.ScriptOrExpression_GreedyContext _c) => Variant<Script>(_c);
         public override Node VisitUsingDirective_Greedy([NotNull] VooDoParser.UsingDirective_GreedyContext _c) => Variant<UsingDirective>(_c);
         public override Node VisitStatement_Greedy([NotNull] VooDoParser.Statement_GreedyContext _c) => Variant<Statement>(_c);
         public override Node VisitExpression_Greedy([NotNull] VooDoParser.Expression_GreedyContext _c) => Variant<Expression>(_c);

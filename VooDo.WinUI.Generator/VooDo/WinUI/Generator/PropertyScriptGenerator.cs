@@ -270,7 +270,7 @@ namespace VooDo.WinUI.Generator
             }
             try
             {
-                Script script = Parser.Script(code, _sourcePath);
+                Script script = Parser.ScriptOrExpression(code, _sourcePath);
                 bool failed = false;
                 if (failed)
                 {

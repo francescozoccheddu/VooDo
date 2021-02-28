@@ -92,6 +92,7 @@ namespace VooDo.Parsing
 
         // Script
         public static Script Script(string _source, string? _sourcePath = null) => Parse<Script>(_source, _sourcePath, _p => _p.script_Greedy());
+        public static Script ScriptOrExpression(string _source, string? _sourcePath = null) => Parse<Script>(_source, _sourcePath, _p => _p.scriptOrExpression_Greedy());
         // Directives
         public static UsingDirective UsingDirective(string _source, string? _sourcePath = null) => Parse<UsingDirective>(_source, _sourcePath, _p => _p.usingDirective_Greedy());
         // Expressions
