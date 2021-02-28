@@ -87,7 +87,7 @@
       <array> 
         <dict>
           <key>match</key>
-          <string>(bool|short|ushort|int|uint|long|ulong|float|double|decimal|char|string|object)</string>
+          <string>(\b(bool|short|ushort|int|uint|long|ulong|float|double|decimal|char|string|object)\b)</string>
           <key>name</key>
           <string>entity.name.type storage.type keyword.type support.type.VooDo</string>
         </dict>
@@ -230,7 +230,7 @@
       <array> 
         <dict>
           <key>match</key>
-          <string>(const|else|global|if|return)</string>
+          <string>(\b(const|else|global|if|return)\b)</string>
           <key>name</key>
           <string>invalid.broken.VooDo</string>
         </dict>
@@ -242,7 +242,7 @@
       <array> 
         <dict>
           <key>match</key>
-          <string>(as|default|false|glob|init|in|is|new|null|out|ref|true|var)</string>
+          <string>(\b(as|default|false|glob|init|in|is|new|null|out|ref|true|var)\b)</string>
           <key>name</key>
           <string>keyword.VooDo</string>
         </dict>
@@ -520,7 +520,7 @@
       <array> 
         <dict>
           <key>match</key>
-          <string>(const|else|global|if|return)</string>
+          <string>(\b(const|else|global|if|return)\b)</string>
           <key>name</key>
           <string>keyword.VooDo</string>
         </dict>
@@ -629,7 +629,7 @@
       <array> 
         <dict>
           <key>match</key>
-          <string>(as|const|default|else|false|global|glob|if|init|in|is|new|null|out|ref|return|true|var)</string>
+          <string>(\b(as|const|default|else|false|global|glob|if|init|in|is|new|null|out|ref|return|true|var)\b)</string>
           <key>name</key>
           <string>invalid.broken.VooDo</string>
         </dict>

@@ -207,35 +207,35 @@ contexts[]{
 
 	statement_keyword:context{
 		:pattern{
-			regex				 \= (const|else|global|if|return)
+			regex				 \= (\b(const|else|global|if|return)\b)
 			styles				[]= .keyword;
 		}
 	}
 
 	expression_keyword:context{
 		:pattern{
-			regex				 \= (as|default|false|glob|init|in|is|new|null|out|ref|true|var)
+			regex				 \= (\b(as|default|false|glob|init|in|is|new|null|out|ref|true|var)\b)
 			styles				[]= .keyword;
 		}
 	}
 
 	expression_invalid_keyword:context{
 		:pattern{
-			regex				 \= (const|else|global|if|return)
+			regex				 \= (\b(const|else|global|if|return)\b)
 			styles				[]= .invalid;
 		}
 	}
 
 	using_invalid_keyword:context{
 		:pattern{
-			regex				 \= (as|const|default|else|false|global|glob|if|init|in|is|new|null|out|ref|return|true|var)
+			regex				 \= (\b(as|const|default|else|false|global|glob|if|init|in|is|new|null|out|ref|return|true|var)\b)
 			styles				[]= .invalid;
 		}
 	}
 
 	builtin_type:context{
 		:pattern{
-			regex				 \= (bool|short|ushort|int|uint|long|ulong|float|double|decimal|char|string|object)
+			regex				 \= (\b(bool|short|ushort|int|uint|long|ulong|float|double|decimal|char|string|object)\b)
 			styles				[]= .builtin_type;
 		}
 	}
