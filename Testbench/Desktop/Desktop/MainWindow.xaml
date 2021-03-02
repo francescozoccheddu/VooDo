@@ -83,7 +83,7 @@
                 <TextBlock.Text>
                     <xaml:VooDo>
                         var __VooDo_Reserved_Ciao = 3;
-                        "Offset is " + glob Smooth(root.m_Scroll.VerticalOffset)
+                        &quot;Offset is &quot; + glob Smooth(root.m_Scroll.VerticalOffset)
                     </xaml:VooDo>
                 </TextBlock.Text>
             </TextBlock>

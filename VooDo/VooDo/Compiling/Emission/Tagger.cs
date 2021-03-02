@@ -81,9 +81,9 @@ namespace VooDo.Compiling.Emission
         private static TNode Own<TNode>(TNode _node, int _index, EMode _mode = EMode.UnownedDescendants) where TNode : SyntaxNode
             => _mode switch
             {
-                EMode.Single => (TNode) SetIndex(_node, _index, true)?.AsNode()!,
-                EMode.AllDescendants => (TNode) new IndexRewriter(_index, true).Visit(_node)!,
-                EMode.UnownedDescendants => (TNode) new IndexRewriter(_index, false).Visit(_node)!,
+                EMode.Single => (TNode)SetIndex(_node, _index, true)?.AsNode()!,
+                EMode.AllDescendants => (TNode)new IndexRewriter(_index, true).Visit(_node)!,
+                EMode.UnownedDescendants => (TNode)new IndexRewriter(_index, false).Visit(_node)!,
             };
         private static SyntaxToken Own(SyntaxToken _token, int _index)
             => SetIndex(_token, _index, true)!.Value.AsToken();
@@ -142,7 +142,7 @@ namespace VooDo.Compiling.Emission
             Single, AllDescendants, UnownedDescendants
         }
 
-        private readonly Dictionary<Node, int> m_forward = new Dictionary<Node, int>(new Identity.ReferenceComparer<Node>());
+        private readonly Dictionary<Node, int> m_forward = new Dictionary<Node, int>(Identity.ReferenceComparer<Node>.Instance);
         private readonly List<Node> m_reverse = new List<Node>();
 
         private int GetOwnerIndex(Node _owner)

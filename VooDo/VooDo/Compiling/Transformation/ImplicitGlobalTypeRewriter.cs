@@ -62,13 +62,13 @@ namespace VooDo.Compiling.Transformation
             return type;
         }
 
-        private static ImmutableArray<GlobalSyntax> GetSyntax(ClassDeclarationSyntax _class, IEnumerable<GlobalDefinition> _globals, Tagger _tagger)
+        private static ImmutableArray<GlobalSyntax> GetSyntax(Session _session, ImmutableArray<GlobalDefinition> _globals)
         {
             ImmutableDictionary<Tagger.Tag, int> globalsMap = _globals
                 .Enumerate()
-                .ToImmutableDictionary(_e => _e.item.Prototype.Source.GetTag(_tagger)!, _e => _e.index);
+                .ToImmutableDictionary(_e => _e.item.Prototype.Source.GetTag(_session.Tagger)!, _e => _e.index);
             GlobalSyntax[] syntax = new GlobalSyntax[globalsMap.Count];
-            foreach (VariableDeclarationSyntax declaration in _class.Members.OfType<FieldDeclarationSyntax>().Select(_f => _f.Declaration))
+            foreach (VariableDeclarationSyntax declaration in _session.Class.Members.OfType<FieldDeclarationSyntax>().Select(_f => _f.Declaration))
             {
                 Tagger.Tag? tag = declaration.GetTag();
                 if (tag is not null && globalsMap.TryGetValue(tag, out int index))
@@ -79,11 +79,7 @@ namespace VooDo.Compiling.Transformation
                 }
             }
             ExpressionSyntax?[] controllers = new ExpressionSyntax?[globalsMap.Count];
-            MethodDeclarationSyntax method = _class.Members
-                .OfType<MethodDeclarationSyntax>()
-                .Where(_m => _m.Identifier.ValueText is Identifiers.runMethodName or Identifiers.typedRunMethodName && _m.Modifiers.Any(_d => _d.IsKind(SyntaxKind.OverrideKeyword)))
-                .Single();
-            foreach (InvocationExpressionSyntax invocation in method.Body!.DescendantNodes().OfType<InvocationExpressionSyntax>())
+            foreach (InvocationExpressionSyntax invocation in _session.RunMethodBody.DescendantNodes().OfType<InvocationExpressionSyntax>())
             {
                 if (globalsMap.TryGetValue(invocation.GetTag()!, out int index))
                 {
@@ -156,8 +152,7 @@ namespace VooDo.Compiling.Transformation
 
         private static VariableDeclarationSyntax Replace(VariableDeclarationSyntax _declaration, ITypeSymbol _type)
         {
-            TypeSyntax type = SyntaxFactory.ParseTypeName(_type.ToDisplayString());
-            TypeArgumentListSyntax typeArguments = SyntaxFactoryUtils.TypeArguments(type).OwnAs(_declaration.Type);
+            TypeArgumentListSyntax typeArguments = SyntaxFactoryUtils.TypeArguments(_type.ToTypeSyntax()).OwnAs(_declaration.Type);
             {
                 QualifiedNameSyntax name = (QualifiedNameSyntax)_declaration.Type;
                 _declaration = _declaration.WithType(name.WithRight(SyntaxFactory.GenericName(name.Right.Identifier, typeArguments)));
@@ -185,7 +180,7 @@ namespace VooDo.Compiling.Transformation
             {
                 return _session.Syntax;
             }
-            ImmutableArray<GlobalSyntax> syntax = GetSyntax(_session.Class, globals, _session.Tagger);
+            ImmutableArray<GlobalSyntax> syntax = GetSyntax(_session, globals);
             ImmutableArray<ITypeSymbol> types = InferSingleType(syntax, globals.Select(_g => _g.Prototype), _session.Semantics!, _session.RuntimeReference);
             return ReplaceAll(_session.Syntax, syntax.Select(_s => _s.Declaration).ToImmutableArray(), types);
         }

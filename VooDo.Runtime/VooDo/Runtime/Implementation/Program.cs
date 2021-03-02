@@ -74,13 +74,24 @@ namespace VooDo.Runtime.Implementation
             m_variableMap = m_variables
                 .Where(_v => _v.Name is not null)
                 .GroupBy(_v => _v.Name)
-                .ToDictionary(_g => _g.Key, _g => _g.ToArray());
+                .ToDictionary(_g => _g.Key, _g => _g.ToImmutableArray());
             foreach (Variable variable in m_variables)
             {
                 variable.Program = this;
             }
-            m_hookSets = __VooDo_Reserved_GeneratedHooks.Select(_h => new HookSet(this, _h.hook, _h.count)).ToArray();
+            (IHook hook, int count)[] plainHooks = __VooDo_Reserved_GeneratedHooks;
+            (__VooDo_Reserved_EventHook hook, int count)[] eventHooks = __VooDo_Reserved_GeneratedEventHooks;
+            for (int i = 0; i < eventHooks.Length; i++)
+            {
+                eventHooks[i].hook.setIndex = i;
+            }
+            m_hookSets = plainHooks
+                            .Concat(eventHooks.Cast<(IHook hook, int count)>())
+                            .Select(_h => new HookSet(this, _h.hook, _h.count))
+                            .ToImmutableArray();
             loader = null!;
+            m_eventQueue = new();
+            m_plainHookCount = plainHooks.Length;
         }
 
         internal Loader loader;
@@ -92,9 +103,8 @@ namespace VooDo.Runtime.Implementation
         protected const string __VooDo_Reserved_reservedPrefix = "__VooDo_Reserved_";
         protected const string __VooDo_Reserved_scriptPrefix = __VooDo_Reserved_reservedPrefix + "Script_";
         protected const string __VooDo_Reserved_globalPrefix = __VooDo_Reserved_reservedPrefix + "Global_";
-        protected const string __VooDo_Reserved_eventSubscribeMethodPrefix = __VooDo_Reserved_reservedPrefix + "SubscribeEvent_";
-        protected const string __VooDo_Reserved_eventPollMethodPrefix = __VooDo_Reserved_reservedPrefix + "PollEvent_";
         protected const string __VooDo_Reserved_tagPrefix = __VooDo_Reserved_reservedPrefix + "Tag_";
+        protected const string __VooDo_Reserved_eventHookClassPrefix = __VooDo_Reserved_reservedPrefix + "EventHook_";
 
         protected static Variable<TValue> __VooDo_Reserved_CreateVariable<TValue>(bool _isConstant, string _name, TValue _value = default!)
             => new(_isConstant, _name, _value!);
@@ -110,9 +120,13 @@ namespace VooDo.Runtime.Implementation
 
         protected abstract void __VooDo_Reserved_Run();
 
+        protected bool __VooDo_Reserved_SubscribeEvent(object _object, int _setIndex, int _hookIndex)
+            => SubscribeEvent(_object, _setIndex, _hookIndex);
+
 #pragma warning disable CA1819 // Properties should not return arrays
         protected virtual Variable[] __VooDo_Reserved_GeneratedVariables => Array.Empty<Variable>();
         protected virtual (IHook hook, int count)[] __VooDo_Reserved_GeneratedHooks => Array.Empty<(IHook, int)>();
+        protected virtual (__VooDo_Reserved_EventHook hook, int count)[] __VooDo_Reserved_GeneratedEventHooks => Array.Empty<(__VooDo_Reserved_EventHook, int)>();
 #pragma warning restore CA1819 // Properties should not return arrays
 
 #pragma warning restore IDE1006 // Naming Styles
@@ -131,10 +145,82 @@ namespace VooDo.Runtime.Implementation
         void IProgram.RequestRun() => RequestRun();
         void IProgram.CancelRunRequest() => CancelRunRequest();
         void IHookListener.NotifyChange() => NotifyChange();
-        IEnumerable<Variable> IProgram.GetVariables(string _name) => GetVariables(_name);
+        ImmutableArray<Variable> IProgram.GetVariables(string _name) => GetVariables(_name);
         IEnumerable<Variable<TValue>> IProgram.GetVariables<TValue>(string _name) => GetVariables<TValue>(_name);
         Variable? IProgram.GetVariable(string _name) => GetVariable(_name);
         Variable<TValue>? IProgram.GetVariable<TValue>(string _name) => GetVariable<TValue>(_name);
+
+        #endregion
+
+        #region Event hooks
+
+        private readonly Queue<(object obj, int set)> m_eventQueue;
+        private readonly int m_plainHookCount;
+
+#pragma warning disable IDE1006 // Naming Styles
+        protected abstract class __VooDo_Reserved_EventHook : IHook
+#pragma warning restore IDE1006 // Naming Styles
+        {
+
+            private Program? m_program;
+            private object? m_target;
+            internal int setIndex;
+
+            IHookListener? IHook.Listener { set => m_program = (Program?)value; }
+
+            IHook IHook.Clone() => (IHook)MemberwiseClone();
+
+            void IHook.Subscribe(object _object)
+            {
+                ((IHook)this).Unsubscribe();
+                __VooDo_Reserved_SetSubscribed(_object, true);
+                m_target = _object;
+            }
+
+            void IHook.Unsubscribe()
+            {
+                if (m_target is not null)
+                {
+                    __VooDo_Reserved_SetSubscribed(m_target, false);
+                    m_target = null;
+                }
+            }
+
+            private void Notify()
+            {
+                if (m_program is not null)
+                {
+                    m_program.m_eventQueue.Enqueue((m_target!, setIndex));
+                    m_program.ProcessRunRequest();
+                }
+            }
+
+#pragma warning disable IDE1006 // Naming Styles
+
+            protected const string __VooDo_Reserved_onEventMethodName = __VooDo_Reserved_reservedPrefix + "OnEvent";
+
+            protected void __VooDo_Reserved_Notify()
+                => Notify();
+
+            protected abstract void __VooDo_Reserved_SetSubscribed(object _object, bool _subscribed);
+
+#pragma warning restore IDE1006 // Naming Styles
+
+        }
+
+        private bool SubscribeEvent(object _object, int _setIndex, int _hookIndex)
+        {
+            m_hookSets[_setIndex + m_plainHookCount].OnSubscribe(_object, _hookIndex);
+            if (m_eventQueue.Count > 0)
+            {
+                (object qObject, int qSet) = m_eventQueue.Peek();
+                return qSet == _setIndex && ReferenceEquals(qObject, _object);
+            }
+            else
+            {
+                return false;
+            }
+        }
 
         #endregion
 
@@ -143,15 +229,13 @@ namespace VooDo.Runtime.Implementation
         private sealed class HookSet
         {
 
-            private static readonly IEqualityComparer<object?> s_targetComparer = new Identity.ReferenceComparer<object?>();
-
-            private readonly HashSet<object?> m_activeTargets;
+            private readonly HashSet<object> m_activeTargets;
             private readonly bool[] m_subscribedInThisRun;
             private readonly IHook[] m_hooks;
 
             internal HookSet(IHookListener _listener, IHook _hook, int _count)
             {
-                m_activeTargets = new HashSet<object?>(s_targetComparer);
+                m_activeTargets = new(Identity.ReferenceComparer<object>.Instance);
                 m_subscribedInThisRun = new bool[_count];
                 m_hooks = new IHook[_count];
                 m_hooks[0] = _hook;
@@ -163,7 +247,7 @@ namespace VooDo.Runtime.Implementation
                 }
             }
 
-            public void OnRunEnd()
+            internal void OnRunEnd()
             {
                 for (int i = 0; i < m_subscribedInThisRun.Length; i++)
                 {
@@ -176,7 +260,7 @@ namespace VooDo.Runtime.Implementation
                 m_activeTargets.Clear();
             }
 
-            public void OnSubscribe(object? _target, int _hookIndex)
+            internal void OnSubscribe(object? _target, int _hookIndex)
             {
                 if (_target is not null && !m_activeTargets.Contains(_target))
                 {
@@ -187,7 +271,7 @@ namespace VooDo.Runtime.Implementation
                 }
             }
 
-            public void UnsubscribeAll()
+            internal void UnsubscribeAll()
             {
                 foreach (IHook h in m_hooks)
                 {
@@ -197,7 +281,7 @@ namespace VooDo.Runtime.Implementation
 
         }
 
-        private readonly HookSet[] m_hookSets;
+        private readonly ImmutableArray<HookSet> m_hookSets;
 
         private void Freeze()
         {
@@ -205,6 +289,7 @@ namespace VooDo.Runtime.Implementation
             {
                 s.UnsubscribeAll();
             }
+            m_eventQueue.Clear();
             foreach (Variable v in m_variables)
             {
                 v.ControllerFactory = null;
@@ -221,11 +306,11 @@ namespace VooDo.Runtime.Implementation
 
         #region Variables
 
-        private readonly Dictionary<string, Variable[]> m_variableMap;
+        private readonly Dictionary<string, ImmutableArray<Variable>> m_variableMap;
         private readonly ImmutableArray<Variable> m_variables;
 
-        private IEnumerable<Variable> GetVariables(string _name)
-            => m_variableMap.TryGetValue(_name, out Variable[] variables) ? variables : Enumerable.Empty<Variable>();
+        private ImmutableArray<Variable> GetVariables(string _name)
+            => m_variableMap.TryGetValue(_name, out ImmutableArray<Variable> variables) ? variables : ImmutableArray.Create<Variable>();
 
         private IEnumerable<Variable<TValue>> GetVariables<TValue>(string _name)
             => GetVariables(_name)
@@ -251,11 +336,19 @@ namespace VooDo.Runtime.Implementation
             using (Lock())
             {
                 m_running = true;
-                __VooDo_Reserved_Run();
-                foreach (HookSet hookSet in m_hookSets)
+                do
                 {
-                    hookSet.OnRunEnd();
+                    __VooDo_Reserved_Run();
+                    foreach (HookSet hookSet in m_hookSets)
+                    {
+                        hookSet.OnRunEnd();
+                    }
+                    if (m_eventQueue.Count > 0)
+                    {
+                        m_eventQueue.Dequeue();
+                    }
                 }
+                while (m_eventQueue.Count > 0);
                 CancelRunRequest();
                 m_running = false;
             }
@@ -316,7 +409,7 @@ namespace VooDo.Runtime.Implementation
 
         private void ProcessRunRequest()
         {
-            if (m_isRunRequested && !m_IsLocked)
+            if ((m_isRunRequested || m_eventQueue.Count > 0) && !m_IsLocked)
             {
                 PrepareAndRun();
             }

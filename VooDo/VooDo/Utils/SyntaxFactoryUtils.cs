@@ -90,6 +90,9 @@ namespace VooDo.Utils
                     Literal(_name),
                     _initialValue);
 
+        internal static PredefinedTypeSyntax Bool()
+            => PredefinedType(SK.BoolKeyword);
+
         internal static InvocationExpressionSyntax SetControllerAndGetValueInvocation(Identifier _runtimeAlias, ExpressionSyntax _variable, ExpressionSyntax _controller)
             => Invocation(
                 MemberAccess(
@@ -104,6 +107,32 @@ namespace VooDo.Utils
                 _source,
                 Literal(_setIndex),
                 Literal(_hookIndex));
+
+
+        internal static BlockSyntax Body(StatementSyntax _statement)
+            => _statement is BlockSyntax block
+            ? block
+            : SF.Block(_statement);
+
+        internal static PredefinedTypeSyntax Int() => PredefinedType(SK.IntKeyword);
+
+        internal static MethodDeclarationSyntax MethodDeclaration(string _name, StatementSyntax _body, TypeSyntax? _returnType, params (TypeSyntax, string)[] _parameters)
+            => MethodDeclaration(_name, _body, _returnType, (IEnumerable<(TypeSyntax, string)>)_parameters);
+
+        internal static MethodDeclarationSyntax MethodDeclaration(string _name, StatementSyntax _body, TypeSyntax? _returnType, IEnumerable<(TypeSyntax type, string name)> _parameters)
+            => SF.MethodDeclaration(_returnType ?? Void(), Identifier(_name))
+                .WithModifiers(Tokens(SK.PrivateKeyword))
+                .WithBody(Body(_body))
+                .WithParameterList(
+                    SF.ParameterList(
+                        _parameters.Select(_p =>
+                            SF.Parameter(Identifier(_p.name))
+                                .WithType(_p.type))
+                        .ToSeparatedList()));
+
+        internal static MethodDeclarationSyntax MethodOverride(string _name, StatementSyntax _body, TypeSyntax? _returnType, params (TypeSyntax type, string name)[] _parameters)
+            => MethodDeclaration(_name, _body, _returnType, _parameters)
+                .WithModifiers(Tokens(SK.ProtectedKeyword, SK.OverrideKeyword));
 
         internal static TypeSyntax VariableType(Identifier _runtimeAlias, TypeSyntax? _type = null)
         {
@@ -139,6 +168,9 @@ namespace VooDo.Utils
 
         internal static MemberAccessExpressionSyntax ThisMemberAccess(string _name)
             => ThisMemberAccess(SF.IdentifierName(_name));
+
+        internal static MemberAccessExpressionSyntax BaseMemberAccess(string _name)
+            => MemberAccess(SF.BaseExpression(), _name);
 
         internal static ArgumentListSyntax Arguments(params ExpressionSyntax[] _arguments)
             => Arguments(_arguments.Select(_a => SF.Argument(_a)));
@@ -183,6 +215,11 @@ namespace VooDo.Utils
                 return syntax.WithRight(right);
             }
         }
+
+        internal static TypeSyntax EventHookType(Identifier _runtimeAlias)
+            => SF.QualifiedName(
+                ProgramType(_runtimeAlias),
+                SF.IdentifierName(Identifiers.eventHookClassName));
 
         internal static SyntaxTokenList Tokens(params SK[] _kinds)
             => SF.TokenList(_kinds.Select(_k => SF.Token(_k)));
@@ -263,9 +300,16 @@ namespace VooDo.Utils
             return type;
         }
 
-        internal static PropertyDeclarationSyntax ArrowProperty(TypeSyntax _type, string _name, ExpressionSyntax _expression)
+        internal static PropertyDeclarationSyntax ArrayPropertyOverride(TypeSyntax _type, string _name, IEnumerable<ExpressionSyntax> _expressions)
+            => PropertyOverride(
+                SingleArray(_type),
+                _name,
+                SimpleArrayCreation(_type, _expressions));
+
+        internal static PropertyDeclarationSyntax PropertyOverride(TypeSyntax _type, string _name, ExpressionSyntax _expression)
             => SF.PropertyDeclaration(_type, _name)
                 .WithExpressionBody(SF.ArrowExpressionClause(_expression))
+                .WithModifiers(Tokens(SK.ProtectedKeyword, SK.OverrideKeyword))
                 .WithSemicolonToken(SF.Token(SK.SemicolonToken));
 
         internal static SyntaxToken Identifier(string _name)
@@ -281,6 +325,24 @@ namespace VooDo.Utils
             ? SF.PredefinedType(token)
             : SF.IdentifierName(Identifier(_name));
 
+        internal static IfStatementSyntax IfElse(ExpressionSyntax _condition, StatementSyntax _then, StatementSyntax? _else = null)
+            => SF.IfStatement(
+                SF.List<AttributeListSyntax>(),
+                _condition,
+                _then,
+                _else is null
+                ? null
+                : SF.ElseClause(_else));
+
+        internal static ArrayCreationExpressionSyntax SimpleArrayCreation(TypeSyntax _type, IEnumerable<ExpressionSyntax> _elements)
+            => SF.ArrayCreationExpression(
+                SingleArray(_type),
+                SF.InitializerExpression(
+                    SK.ArrayInitializerExpression,
+                    _elements.ToSeparatedList()));
+
+        internal static TypeSyntax ToTypeSyntax(this ITypeSymbol _symbol)
+            => SF.ParseTypeName(_symbol.ToDisplayString());
 
     }
 

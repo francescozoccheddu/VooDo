@@ -35,28 +35,19 @@ namespace VooDo.Compiling
         private readonly List<Problem> m_problems = new List<Problem>();
 
         internal Compilation Compilation { get; }
-
         public CancellationToken CancellationToken { get; }
-
         internal Tagger Tagger { get; } = new Tagger();
-
         internal SemanticModel Semantics { get; private set; }
-
         internal ImmutableArray<GlobalDefinition> Globals { get; private set; }
-
         internal CSharpCompilation CSharpCompilation { get; private set; }
-
         internal CompilationUnitSyntax Syntax { get; private set; }
-
         internal ClassDeclarationSyntax Class { get; private set; }
-
         internal SyntaxTree Tree { get; private set; }
-
         internal bool Succeeded { get; private set; }
-
         internal Identifier RuntimeAlias { get; private set; }
-
         internal MetadataReference RuntimeReference { get; private set; }
+        internal MethodDeclarationSyntax RunMethod { get; private set; }
+        internal BlockSyntax RunMethodBody { get; private set; }
 
         internal void AddProblem(Problem _problem)
             => m_problems.Add(_problem);
@@ -78,6 +69,8 @@ namespace VooDo.Compiling
             Syntax = null!;
             RuntimeReference = null!;
             Class = null!;
+            RunMethod = null!;
+            RunMethodBody = null!;
             Run(_existingCompilation);
         }
 
@@ -173,18 +166,31 @@ namespace VooDo.Compiling
                 }
                 Tree = newTree;
                 Tree.GetDiagnostics(CancellationToken).SelectNonNull(_d => RoslynProblem.FromDiagnostic(_d, Tagger, Problem.EKind.Syntactic)).ThrowErrors();
-                Syntax = (CompilationUnitSyntax)Tree.GetRoot();
-                MemberDeclarationSyntax classDeclaration = Syntax.Members[0];
-                if (Compilation.Options.Namespace is not null)
-                {
-                    classDeclaration = ((NamespaceDeclarationSyntax)classDeclaration).Members[0];
-                }
-                if (Compilation.Options.ContainingClass is not null)
-                {
-                    classDeclaration = ((ClassDeclarationSyntax)classDeclaration).Members[0];
-                }
-                Class = (ClassDeclarationSyntax)classDeclaration;
+                Syntax = (CompilationUnitSyntax)Tree.GetRoot(CancellationToken);
+                Class = GetClass(Syntax);
+                RunMethod = GetRunMethod(Class);
+                RunMethodBody = RunMethod.Body!;
             }
+        }
+
+        internal MethodDeclarationSyntax GetRunMethod(ClassDeclarationSyntax _class) => _class.Members
+                .OfType<MethodDeclarationSyntax>()
+                .Where(_m => _m.Identifier.ValueText is Identifiers.runMethodName or Identifiers.typedRunMethodName
+                        && _m.Modifiers.Any(_d => _d.IsKind(SyntaxKind.OverrideKeyword)))
+                .Single();
+
+        internal ClassDeclarationSyntax GetClass(CompilationUnitSyntax _syntax)
+        {
+            MemberDeclarationSyntax classDeclaration = Syntax.Members[0];
+            if (Compilation.Options.Namespace is not null)
+            {
+                classDeclaration = ((NamespaceDeclarationSyntax)classDeclaration).Members[0];
+            }
+            if (Compilation.Options.ContainingClass is not null)
+            {
+                classDeclaration = ((ClassDeclarationSyntax)classDeclaration).Members[0];
+            }
+            return (ClassDeclarationSyntax)classDeclaration;
         }
 
         public void EnsureNotCanceled()
@@ -206,9 +212,11 @@ namespace VooDo.Compiling
             // Global type inference
             ReplaceTree(ImplicitGlobalTypeRewriter.Rewrite(this));
             // Events
-            ThrowCompilationErrors();
+            ReplaceTree(EventHookRewriter.Rewrite(this));
             // Hooks
+            ThrowCompilationErrors();
             ReplaceTree(HookRewriter.Rewrite(this));
+            // Finalization
             ThrowCompilationErrors();
             Succeeded = true;
         }

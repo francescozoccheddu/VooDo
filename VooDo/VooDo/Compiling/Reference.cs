@@ -36,10 +36,10 @@ namespace VooDo.Compiling
             string directory = RuntimeEnvironment.GetRuntimeDirectory();
             string[] names =
             {
-                "System.Runtime.dll",
+                "netstandard.dll",
                 "mscorlib.dll",
-                "System.dll",
-                typeof(object).Assembly.Location,
+                "System.Runtime.dll",
+                "System.Private.Corelib.dll",
             };
             return Merge(names.Select(_n => FromFile(Path.Combine(directory, _n))).ToImmutableArray());
         }

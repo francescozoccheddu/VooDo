@@ -46,26 +46,27 @@ namespace VooDo.Compiling.Emission
             m_runtimeAlias = _runtimeAlias;
         }
 
-        private ExpressionSyntax EmitExpression(Expression _node, bool _isAssignmentTarget = false) => _node switch
-        {
-            ArrayCreationExpression e => EmitArrayCreation(e),
-            AsExpression e => EmitAsExpression(e),
-            BinaryExpression e => EmitBinaryExpressions(e),
-            CastExpression e => EmitCastExpression(e),
-            ConditionalExpression e => EmitConditionalExpression(e),
-            DefaultExpression e => EmitDefaultExpression(e),
-            ElementAccessExpression e => EmitElementAccessExpression(e),
-            GlobalExpression e => EmitGlobalExpression(e),
-            InvocationExpression e => EmitInvocation(e),
-            IsExpression e => EmitIsExpression(e),
-            LiteralExpression e => EmitLiteralExpression(e),
-            MemberAccessExpression e => EmitMemberAccessExpression(e),
-            NameExpression e => EmitNameExpression(e, _isAssignmentTarget),
-            ObjectCreationExpression e => EmitObjectCreation(e),
-            TupleExpression e => EmitTupleExpression(e),
-            TupleDeclarationExpression e => EmitTupleDeclarationExpression(e),
-            UnaryExpression e => EmitUnaryExpression(e)
-        };
+        private ExpressionSyntax EmitExpression(Expression _node, bool _isAssignmentTarget = false) =>
+            SF.ParenthesizedExpression(_node switch
+            {
+                ArrayCreationExpression e => EmitArrayCreation(e),
+                AsExpression e => EmitAsExpression(e),
+                BinaryExpression e => EmitBinaryExpressions(e),
+                CastExpression e => EmitCastExpression(e),
+                ConditionalExpression e => EmitConditionalExpression(e),
+                DefaultExpression e => EmitDefaultExpression(e),
+                ElementAccessExpression e => EmitElementAccessExpression(e),
+                GlobalExpression e => EmitGlobalExpression(e),
+                InvocationExpression e => EmitInvocation(e),
+                IsExpression e => EmitIsExpression(e),
+                LiteralExpression e => EmitLiteralExpression(e),
+                MemberAccessExpression e => EmitMemberAccessExpression(e),
+                NameExpression e => EmitNameExpression(e, _isAssignmentTarget),
+                ObjectCreationExpression e => EmitObjectCreation(e),
+                TupleExpression e => EmitTupleExpression(e),
+                TupleDeclarationExpression e => EmitTupleDeclarationExpression(e),
+                UnaryExpression e => EmitUnaryExpression(e)
+            }).Own(m_tagger, _node);
 
         private ExpressionSyntax EmitComplexTypeOrExpression(ComplexTypeOrExpression _node) => _node switch
         {
@@ -291,10 +292,8 @@ namespace VooDo.Compiling.Emission
         {
             ExpressionSyntax condition = EmitExpression(_node.Condition);
             StatementSyntax then = EmitStatement(_node.Then);
-            return (_node.HasElse
-                ? SF.IfStatement(condition, then, SF.ElseClause(EmitStatement(_node.Else!)))
-                : SF.IfStatement(condition, then))
-                .Own(m_tagger, _node);
+            StatementSyntax? @else = _node.HasElse ? EmitStatement(_node.Else!) : null;
+            return SU.IfElse(condition, then, @else).Own(m_tagger, _node);
         }
 
         private ReturnStatementSyntax EmitReturnStatement(ReturnStatement _node)
@@ -559,19 +558,12 @@ namespace VooDo.Compiling.Emission
                 .SelectMany(_r => _r.Aliases)
                 .Select(_r => SF.ExternAliasDirective(_r).Own(m_tagger, _r));
             IEnumerable<UsingDirectiveSyntax> usings = _node.Usings.Select(EmitUsingDirective);
-            MethodDeclarationSyntax? runMethod = SF.MethodDeclaration(
-                                returnType ?? SU.Void(),
-                                SU.Identifier(returnType is null
+            MethodDeclarationSyntax? runMethod = SU.MethodOverride(
+                                returnType is null
                                     ? Identifiers.runMethodName
-                                    : Identifiers.typedRunMethodName))
-                            .WithModifiers(
-                                SU.Tokens(
-                                    SK.ProtectedKeyword,
-                                    SK.OverrideKeyword))
-                            .WithBody(
-                                SF.Block(
-                                    _node.Statements.SelectMany(EmitStatements)));
-
+                                    : Identifiers.typedRunMethodName,
+                                SF.Block(_node.Statements.SelectMany(EmitStatements)),
+                                returnType);
             ImmutableArray<Scope.GlobalDefinition> globals = m_scope.GetGlobalDefinitions();
             VariableDeclarationSyntax EmitGlobalDeclaration(Scope.GlobalDefinition _definition)
             {
@@ -600,21 +592,10 @@ namespace VooDo.Compiling.Emission
                 m_scope = oldScope;
                 return declaration;
             }
-            PropertyDeclarationSyntax variablesProperty = SU.ArrowProperty(
-                SU.SingleArray(
-                    SU.VariableType(m_runtimeAlias)),
+            PropertyDeclarationSyntax variablesProperty = SU.ArrayPropertyOverride(
+                SU.VariableType(m_runtimeAlias),
                 Identifiers.generatedVariablesName,
-                SF.ArrayCreationExpression(
-                    SU.SingleArray(variableType))
-                .WithInitializer(
-                    SF.InitializerExpression(
-                        SK.ArrayInitializerExpression,
-                        globals.Select(_g => SU.ThisMemberAccess(_g.Identifier))
-                    .ToSeparatedList<ExpressionSyntax>())))
-                .WithModifiers(
-                    SU.Tokens(
-                        SK.ProtectedKeyword,
-                        SK.OverrideKeyword));
+                globals.Select(_g => SU.ThisMemberAccess(_g.Identifier)));
             IEnumerable<MemberDeclarationSyntax> globalDeclarations =
                 globals.Select(_g =>
                     SF.FieldDeclaration(

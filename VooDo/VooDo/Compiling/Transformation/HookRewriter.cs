@@ -28,7 +28,7 @@ namespace VooDo.Compiling.Transformation
     internal static class HookRewriter
     {
 
-        private sealed class BodyRewriter : CSharpSyntaxRewriter
+        private sealed class Rewriter : CSharpSyntaxRewriter
         {
 
             private sealed class Entry
@@ -46,7 +46,7 @@ namespace VooDo.Compiling.Transformation
                 internal int Count { get; set; }
             }
 
-            internal BodyRewriter(SemanticModel _semantics, PointsToAnalysisResult _pointsToAnalysis, IHookInitializer _hookInitializer, CSharpCompilation _compilation)
+            internal Rewriter(SemanticModel _semantics, PointsToAnalysisResult _pointsToAnalysis, IHookInitializer _hookInitializer, CSharpCompilation _compilation)
             {
                 m_semantics = _semantics;
                 m_pointsToAnalysis = _pointsToAnalysis;
@@ -160,41 +160,22 @@ namespace VooDo.Compiling.Transformation
         }
 
         private static PropertyDeclarationSyntax CreatePropertySyntax(ImmutableArray<(Expression initializer, int count)> _initializers, Tagger _tagger, Identifier _runtimeAlias)
-        {
-            ArrayTypeSyntax hookType =
-                SyntaxFactoryUtils.SingleArray(
-                    SyntaxFactoryUtils.TupleType(
-                        SyntaxFactory.ParseTypeName($"{_runtimeAlias}::{typeof(IHook).FullName}"),
-                        SyntaxFactoryUtils.PredefinedType(SyntaxKind.IntKeyword)));
-            return SyntaxFactoryUtils.ArrowProperty(
-                hookType,
+            => SyntaxFactoryUtils.ArrayPropertyOverride(
+                SyntaxFactoryUtils.TupleType(
+                    SyntaxFactory.ParseTypeName($"{_runtimeAlias}::{typeof(IHook).FullName}"),
+                    SyntaxFactoryUtils.PredefinedType(SyntaxKind.IntKeyword)),
                 Identifiers.generatedHooksName,
-                SyntaxFactory.ArrayCreationExpression(
-                    hookType,
-                    SyntaxFactory.InitializerExpression(
-                        SyntaxKind.ArrayInitializerExpression,
-                        _initializers.Select(_i =>
-                            SyntaxFactory.TupleExpression(
-                                SyntaxFactoryUtils.Arguments(
-                                    Emitter.Emit(_i.initializer, _tagger, _runtimeAlias),
-                                    SyntaxFactoryUtils.Literal(_i.count)).Arguments))
-                        .ToSeparatedList<ExpressionSyntax>())))
-                .WithModifiers(
-                    SyntaxFactoryUtils.Tokens(
-                        SyntaxKind.ProtectedKeyword,
-                        SyntaxKind.OverrideKeyword));
-        }
+                _initializers.Select(_i =>
+                    SyntaxFactory.TupleExpression(
+                        SyntaxFactoryUtils.Arguments(
+                            Emitter.Emit(_i.initializer, _tagger, _runtimeAlias),
+                            SyntaxFactoryUtils.Literal(_i.count)).Arguments)));
 
         internal static CompilationUnitSyntax Rewrite(Session _session)
         {
-            SemanticModel semantics = _session.Semantics;
-            MethodDeclarationSyntax method = _session.Class.Members
-                .OfType<MethodDeclarationSyntax>()
-                .Where(_m => _m.Identifier.ValueText is Identifiers.runMethodName or Identifiers.typedRunMethodName && _m.Modifiers.Any(_d => _d.IsKind(SyntaxKind.OverrideKeyword)))
-                .Single();
-            PointsToAnalysisResult pointsToAnalysis = CreatePointsToAnalysis(method, semantics, _session.CSharpCompilation!, _session.CancellationToken);
-            BodyRewriter rewriter = new BodyRewriter(semantics, pointsToAnalysis, _session.Compilation.Options.HookInitializer, _session.CSharpCompilation);
-            BlockSyntax body = (BlockSyntax)rewriter.Visit(method.Body!);
+            PointsToAnalysisResult pointsToAnalysis = CreatePointsToAnalysis(_session.RunMethod, _session.Semantics, _session.CSharpCompilation, _session.CancellationToken);
+            Rewriter rewriter = new Rewriter(_session.Semantics, pointsToAnalysis, _session.Compilation.Options.HookInitializer, _session.CSharpCompilation);
+            BlockSyntax body = (BlockSyntax)rewriter.Visit(_session.RunMethodBody);
             ImmutableArray<(Expression, int)> initializers = rewriter.Initializers;
             if (initializers.IsEmpty)
             {
@@ -202,9 +183,9 @@ namespace VooDo.Compiling.Transformation
             }
             _session.EnsureNotCanceled();
             PropertyDeclarationSyntax property = CreatePropertySyntax(rewriter.Initializers, _session.Tagger, _session.RuntimeAlias);
-            ClassDeclarationSyntax newClass = _session.Class.ReplaceNode(method.Body!, body);
-            newClass = newClass.AddMembers(property);
-            return _session.Syntax.ReplaceNode(_session.Class, newClass);
+            return _session.Syntax.ReplaceNode(_session.Class, _session.Class
+                .ReplaceNode(_session.RunMethodBody, body)
+                .AddMembers(property));
         }
 
     }

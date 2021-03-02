@@ -91,6 +91,8 @@ namespace VooDo.Parsing
             => (TNode)new Visitor(_source, _sourcePath).Visit(_ruleProvider(MakeParser(_source, _sourcePath))).SetAsRoot();
 
         // Script
+        public static Script ScriptFile(string _sourcePath) => Parse<Script>(File.ReadAllText(_sourcePath), _sourcePath, _p => _p.script_Greedy());
+        public static Script ScriptOrExpressionFile(string _sourcePath) => Parse<Script>(File.ReadAllText(_sourcePath), _sourcePath, _p => _p.scriptOrExpression_Greedy());
         public static Script Script(string _source, string? _sourcePath = null) => Parse<Script>(_source, _sourcePath, _p => _p.script_Greedy());
         public static Script ScriptOrExpression(string _source, string? _sourcePath = null) => Parse<Script>(_source, _sourcePath, _p => _p.scriptOrExpression_Greedy());
         // Directives

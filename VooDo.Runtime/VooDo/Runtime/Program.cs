@@ -37,7 +37,7 @@ namespace VooDo.Runtime
         void Freeze();
 
         ImmutableArray<Variable> Variables { get; }
-        IEnumerable<Variable> GetVariables(string _name);
+        ImmutableArray<Variable> GetVariables(string _name);
         IEnumerable<Variable<TValue>> GetVariables<TValue>(string _name);
         Variable? GetVariable(string _name);
         Variable<TValue>? GetVariable<TValue>(string _name);

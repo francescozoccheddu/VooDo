@@ -10,6 +10,11 @@ namespace VooDo.Utils
 
         public sealed class ReferenceComparer<T> : IEqualityComparer<T>
         {
+
+            public static ReferenceComparer<T> Instance { get; } = new ReferenceComparer<T>();
+
+            private ReferenceComparer() { }
+
             public bool Equals(T? _x, T? _y) => ReferenceEquals(_x, _y);
             public int GetHashCode(T? _obj) => RuntimeHelpers.GetHashCode(_obj);
         }

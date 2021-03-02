@@ -70,7 +70,7 @@ namespace VooDo.Utils
             int i = 0;
             foreach (TItem? item in _items)
             {
-                yield return _map(item, i);
+                yield return _map(item, i++);
             }
         }
 
@@ -87,7 +87,7 @@ namespace VooDo.Utils
         }
 
         public static ImmutableArray<TItem?> Map<TItem>(this ImmutableArray<TItem> _array, Func<TItem, TItem?> _map)
-            => _array.Map(_map, new Identity.ReferenceComparer<TItem?>());
+            => _array.Map(_map, Identity.ReferenceComparer<TItem?>.Instance);
 
         public static ImmutableArray<TItem?> Map<TItem>(this ImmutableArray<TItem> _array, Func<TItem, TItem?> _map, IEqualityComparer<TItem?> _comparer)
         {
@@ -122,7 +122,7 @@ namespace VooDo.Utils
         }
 
         public static ImmutableArray<TItem?> Map<TItem>(this ImmutableArray<TItem> _array, Func<TItem, object?> _map)
-            => _array.Map(_map, new Identity.ReferenceComparer<TItem?>());
+            => _array.Map(_map, Identity.ReferenceComparer<TItem?>.Instance);
 
         public static ImmutableArray<TItem?> Map<TItem>(this ImmutableArray<TItem> _array, Func<TItem, object?> _map, IEqualityComparer<TItem?> _comparer)
             => _array.Map(_a => (TItem?)_map(_a), _comparer);

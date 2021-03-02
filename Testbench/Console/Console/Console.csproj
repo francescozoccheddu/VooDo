@@ -25,8 +25,14 @@
   <Import Project="..\..\..\VooDo.WinUI.Generator\Generator.props" />
   
   <ItemGroup>
-    <AdditionalFiles Include="Test.voodo" XamlPath="App" />
     <ProjectReference Include="..\..\..\VooDo.WinUI.Generator\VooDo.WinUI.Generator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+    <ProjectReference Include="..\..\..\VooDo\VooDo.csproj" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <None Update="Test.voodo">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   
 </Project>
