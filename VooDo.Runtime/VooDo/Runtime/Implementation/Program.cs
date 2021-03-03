@@ -75,7 +75,7 @@ namespace VooDo.Runtime.Implementation
                 .Where(_v => _v.Name is not null)
                 .GroupBy(_v => _v.Name)
                 .ToDictionary(_g => _g.Key, _g => _g.ToImmutableArray());
-            foreach (Variable variable in m_variables)
+            foreach (IVariable variable in m_variables)
             {
                 variable.Program = this;
             }
@@ -106,10 +106,10 @@ namespace VooDo.Runtime.Implementation
         protected const string __VooDo_Reserved_tagPrefix = __VooDo_Reserved_reservedPrefix + "Tag_";
         protected const string __VooDo_Reserved_eventHookClassPrefix = __VooDo_Reserved_reservedPrefix + "EventHook_";
 
-        protected static Variable<TValue> __VooDo_Reserved_CreateVariable<TValue>(bool _isConstant, string _name, TValue _value = default!)
+        protected static Variable<TValue> __VooDo_Reserved_CreateVariable<TValue>(bool _isConstant, string _name, TValue _value = default!) where TValue : notnull
             => new(_isConstant, _name, _value!);
 
-        protected static TValue __VooDo_Reserved_SetControllerAndGetValue<TValue>(Variable<TValue> _variable, IControllerFactory<TValue> _controllerFactory)
+        protected static TValue? __VooDo_Reserved_SetControllerAndGetValue<TValue>(Variable<TValue> _variable, IControllerFactory<TValue> _controllerFactory) where TValue : notnull
         {
             _variable.ControllerFactory = _controllerFactory;
             return _variable.Value;
@@ -124,7 +124,7 @@ namespace VooDo.Runtime.Implementation
             => SubscribeEvent(_object, _setIndex, _hookIndex);
 
 #pragma warning disable CA1819 // Properties should not return arrays
-        protected virtual Variable[] __VooDo_Reserved_GeneratedVariables => Array.Empty<Variable>();
+        protected virtual IVariable[] __VooDo_Reserved_GeneratedVariables => Array.Empty<IVariable>();
         protected virtual (IHook hook, int count)[] __VooDo_Reserved_GeneratedHooks => Array.Empty<(IHook, int)>();
         protected virtual (__VooDo_Reserved_EventHook hook, int count)[] __VooDo_Reserved_GeneratedEventHooks => Array.Empty<(__VooDo_Reserved_EventHook, int)>();
 #pragma warning restore CA1819 // Properties should not return arrays
@@ -137,7 +137,7 @@ namespace VooDo.Runtime.Implementation
         Loader IProgram.Loader => loader;
         Type IProgram.ReturnType => ReturnType;
         void IProgram.Freeze() => Freeze();
-        ImmutableArray<Variable> IProgram.Variables { get; }
+        ImmutableArray<IVariable> IProgram.Variables { get; }
         bool IProgram.IsRunRequested => m_isRunRequested;
         bool IProgram.IsLocked => m_IsLocked;
         bool IProgram.IsStoringRequests => m_IsStoringRequests;
@@ -145,9 +145,9 @@ namespace VooDo.Runtime.Implementation
         void IProgram.RequestRun() => RequestRun();
         void IProgram.CancelRunRequest() => CancelRunRequest();
         void IHookListener.NotifyChange() => NotifyChange();
-        ImmutableArray<Variable> IProgram.GetVariables(string _name) => GetVariables(_name);
+        ImmutableArray<IVariable> IProgram.GetVariables(string _name) => GetVariables(_name);
         IEnumerable<Variable<TValue>> IProgram.GetVariables<TValue>(string _name) => GetVariables<TValue>(_name);
-        Variable? IProgram.GetVariable(string _name) => GetVariable(_name);
+        IVariable? IProgram.GetVariable(string _name) => GetVariable(_name);
         Variable<TValue>? IProgram.GetVariable<TValue>(string _name) => GetVariable<TValue>(_name);
 
         #endregion
@@ -290,9 +290,9 @@ namespace VooDo.Runtime.Implementation
                 s.UnsubscribeAll();
             }
             m_eventQueue.Clear();
-            foreach (Variable v in m_variables)
+            foreach (IVariable v in m_variables)
             {
-                v.ControllerFactory = null;
+                v.Freeze();
             }
         }
 
@@ -306,21 +306,21 @@ namespace VooDo.Runtime.Implementation
 
         #region Variables
 
-        private readonly Dictionary<string, ImmutableArray<Variable>> m_variableMap;
-        private readonly ImmutableArray<Variable> m_variables;
+        private readonly Dictionary<string, ImmutableArray<IVariable>> m_variableMap;
+        private readonly ImmutableArray<IVariable> m_variables;
 
-        private ImmutableArray<Variable> GetVariables(string _name)
-            => m_variableMap.TryGetValue(_name, out ImmutableArray<Variable> variables) ? variables : ImmutableArray.Create<Variable>();
+        private ImmutableArray<IVariable> GetVariables(string _name)
+            => m_variableMap.TryGetValue(_name, out ImmutableArray<IVariable> variables) ? variables : ImmutableArray.Create<IVariable>();
 
-        private IEnumerable<Variable<TValue>> GetVariables<TValue>(string _name)
+        private IEnumerable<Variable<TValue>> GetVariables<TValue>(string _name) where TValue : notnull
             => GetVariables(_name)
             .Where(_v => typeof(TValue).IsAssignableFrom(_v.Type))
             .Cast<Variable<TValue>>();
 
-        private Variable? GetVariable(string _name)
+        private IVariable? GetVariable(string _name)
             => GetVariables(_name).SingleOrDefault();
 
-        private Variable<TValue>? GetVariable<TValue>(string _name)
+        private Variable<TValue>? GetVariable<TValue>(string _name) where TValue : notnull
             => GetVariables<TValue>(_name).SingleOrDefault();
 
         #endregion

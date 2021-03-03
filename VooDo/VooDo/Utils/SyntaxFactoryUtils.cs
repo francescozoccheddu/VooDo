@@ -60,7 +60,7 @@ namespace VooDo.Utils
             Alias = _runtimeAlias
         }).ToTypeSyntax();
 
-        private static QualifiedNameSyntax VariableType(Identifier _runtimeAlias) => (QualifiedNameSyntax)(QualifiedType.FromType<Variable>() with
+        private static QualifiedNameSyntax VariableType(Identifier _runtimeAlias) => (QualifiedNameSyntax)(QualifiedType.FromType<IVariable>() with
         {
             Alias = _runtimeAlias
         }).ToTypeSyntax();

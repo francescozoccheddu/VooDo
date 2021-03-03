@@ -36,11 +36,11 @@ namespace VooDo.Runtime
         void CancelRunRequest();
         void Freeze();
 
-        ImmutableArray<Variable> Variables { get; }
-        ImmutableArray<Variable> GetVariables(string _name);
-        IEnumerable<Variable<TValue>> GetVariables<TValue>(string _name);
-        Variable? GetVariable(string _name);
-        Variable<TValue>? GetVariable<TValue>(string _name);
+        ImmutableArray<IVariable> Variables { get; }
+        ImmutableArray<IVariable> GetVariables(string _name);
+        IEnumerable<Variable<TValue>> GetVariables<TValue>(string _name) where TValue : notnull;
+        IVariable? GetVariable(string _name);
+        Variable<TValue>? GetVariable<TValue>(string _name) where TValue : notnull;
 
     }
 

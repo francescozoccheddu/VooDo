@@ -6,25 +6,58 @@ using VooDo.Runtime;
 namespace VooDo.WinUI.Animators
 {
 
-    public abstract class Animator<TValue> : Controller<TValue>, IAnimator
+    public abstract class Animator<TValue> : Controller<TValue>, IAnimator where TValue : notnull
     {
 
-        protected Animator(Variable<TValue> _variable) : this(_variable, default!) { }
-
-        protected Animator(Variable<TValue> _variable, TValue _value) : base(_variable, _value)
+        public abstract record Factory() : IControllerFactory<TValue>
         {
-            SetRunning(true);
-            Target = _value;
+            protected abstract Animator<TValue> Create(TValue? _value);
+            IController<TValue> IControllerFactory<TValue>.CreateController(Variable<TValue> _variable) => Create(_variable.Value ?? default);
+            IController IControllerFactory.CreateController(IVariable _variable) => ((IControllerFactory<TValue>)this).CreateController((Variable<TValue>)_variable);
+        }
+
+        public Animator(TValue? _value)
+        {
+            SetValue(_value, false);
         }
 
         private bool m_running;
+
+        private void UpdateInternal(double _deltaTime)
+        {
+            SetRunning(Update(_deltaTime));
+        }
+
+        protected abstract bool Update(double _deltaTime);
+
+        protected void RequestUpdate()
+        {
+            if (Variable is not null)
+            {
+                UpdateInternal(0);
+            }
+        }
+
+        IProgram IAnimator.Program => Variable!.Program;
+        void IAnimator.Update(double _deltaTime) => UpdateInternal(_deltaTime);
+
+        protected sealed override Controller<TValue> CloneForVariable(Variable<TValue> _newVariable)
+        {
+            Animator<TValue> clone = (Animator<TValue>)MemberwiseClone();
+            clone.m_running = false;
+            clone.Cloned();
+            return clone;
+        }
+
+        protected sealed override void PrepareForVariable(Variable<TValue> _variable, Variable<TValue>? _oldVariable) { }
+
+        protected virtual void Cloned() { }
 
         private void SetRunning(bool _running)
         {
             if (m_running != _running)
             {
-                m_running = _running;
-                if (m_running)
+                if (_running)
                 {
                     AnimatorManager.RegisterAnimator(this);
                 }
@@ -32,36 +65,50 @@ namespace VooDo.WinUI.Animators
                 {
                     AnimatorManager.UnregisterAnimator(this);
                 }
+                m_running = _running;
             }
         }
 
-        protected abstract bool Update(ref TValue _value, double _deltaTime);
-
-        protected TValue Target { get; private set; }
-
-        protected sealed override void SetValue(TValue _value)
+        protected sealed override void Attached(Variable<TValue> _variable)
         {
-            if (!EqualityComparer<TValue>.Default.Equals(_value, Target))
-            {
-                Target = _value;
-                SetRunning(true);
-            }
+            RequestUpdate();
         }
 
-        protected sealed override void Destroying() => SetRunning(false);
-
-        IProgram IAnimator.Program => Variable.Program;
-
-        void IAnimator.Update(double _deltaTime)
+        protected sealed override void Detached(Variable<TValue> _variable)
         {
-            TValue value = m_Value;
-            bool updated = Update(ref value, _deltaTime);
-            m_Value = value;
-            SetRunning(updated);
+            SetRunning(false);
         }
 
-        public sealed override bool Equals(object? _obj) => ReferenceEquals(this, _obj);
-        public sealed override int GetHashCode() => System.Runtime.CompilerServices.RuntimeHelpers.GetHashCode(this);
+    }
+
+    public abstract class TargetedAnimator<TValue> : Animator<TValue> where TValue : notnull
+    {
+
+        public abstract record TargetedFactory(TValue Target) : Factory;
+
+        public TValue Target { get; protected set; }
+
+        protected TargetedAnimator(TValue _value, TValue _target) : base(_value)
+        {
+            Target = _target;
+        }
+
+        protected sealed override bool Update(double _deltaTime)
+        {
+            TValue oldValue = Value!;
+            TValue newValue = Update(_deltaTime, oldValue, Target);
+            SetValue(newValue, true);
+            return !EqualityComparer<TValue?>.Default.Equals(newValue, oldValue);
+        }
+
+        protected abstract TValue Update(double _deltaTime, TValue _current, TValue _target);
+
+    }
+
+    public interface IAnimatorWithSpeed<TSpeed> where TSpeed : notnull
+    {
+
+        TSpeed Speed { get; }
 
     }
 

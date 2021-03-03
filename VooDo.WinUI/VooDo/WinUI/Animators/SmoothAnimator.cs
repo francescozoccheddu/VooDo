@@ -1,66 +1,57 @@
 ﻿using System;
 
-using VooDo.Runtime;
-
 namespace VooDo.WinUI.Animators
 {
 
-    public sealed class SmoothAnimator : Animator<double>
+    public abstract class SmoothAnimator<TValue> : TargetedAnimator<TValue> where TValue : notnull
     {
 
-        private static SmoothAnimator GetOrCreate(Variable<double> _variable)
+        public abstract record SmoothFactory(TValue Target, double SpeedFactor, double MinDifference) : TargetedFactory(Target);
+
+        protected SmoothAnimator(TValue _value, TValue _target) : base(_value, _target)
+        { }
+
+        public const double defaultSpeedFactor = 100;
+        public const double defaultMinDifference = double.Epsilon * 100;
+
+        public double SpeedFactor { get; protected set; } = 100;
+        public double MinDifference { get; protected set; } = double.Epsilon * 100;
+
+        protected sealed override TValue Update(double _deltaTime, TValue _current, TValue _target)
+            => Smooth(_current, _target, Math.Min(_deltaTime * SpeedFactor, 1));
+
+        protected double SmoothScalar(double _current, double _target, double _alpha)
         {
-            if (_variable.Controller is SmoothAnimator animator)
+            _current = (_current * (1 - _alpha)) + (_target * _alpha);
+            if (Math.Abs(_current - _target) < MinDifference)
             {
-                return animator;
+                _current = _target;
             }
-            else
-            {
-                return new SmoothAnimator(_variable, _variable.Value);
-            }
+            return _current;
         }
 
-        public sealed class Factory : IControllerFactory<double>
+        protected abstract TValue Smooth(TValue _current, TValue _target, double _alpha);
+
+    }
+
+    public sealed class DoubleSmoothAnimator : SmoothAnimator<double>
+    {
+
+        public sealed record DoubleSmoothFactory(double Target, double SpeedFactor, double MinDifference) : SmoothFactory(Target, SpeedFactor, MinDifference)
         {
-
-            public double Target { get; }
-
-            public Factory(double _target)
-            {
-                Target = _target;
-            }
-
-            public Controller<double> Create(Variable<double> _variable)
-            {
-                SmoothAnimator controller = GetOrCreate(_variable);
-                controller.SetValue(Target);
-                return controller;
-            }
-
+            protected override Animator<double> Create(double _value)
+                => new DoubleSmoothAnimator(_value, Target)
+                {
+                    SpeedFactor = SpeedFactor,
+                    MinDifference = MinDifference
+                };
         }
 
-        public SmoothAnimator(Variable<double> _variable) : base(_variable)
-        {
-        }
+        public DoubleSmoothAnimator(double _value, double _target) : base(_value, _target)
+        { }
 
-        public SmoothAnimator(Variable<double> _variable, double _value) : base(_variable, _value)
-        {
-        }
-
-        public override Controller<double> Create(Variable<double> _variable)
-            => GetOrCreate(_variable);
-
-        protected override bool Update(ref double _value, double _deltaTime)
-        {
-            double alpha = Math.Min(_deltaTime * 10, 1);
-            _value = (_value * (1 - alpha)) + (Target * alpha);
-            if (Math.Abs(_value - Target) < 0.0001)
-            {
-                _value = Target;
-                return false;
-            }
-            return true;
-        }
+        protected override double Smooth(double _current, double _target, double _alpha)
+            => SmoothScalar(_current, _target, _alpha);
 
     }
 

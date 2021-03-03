@@ -1,10 +1,17 @@
 ﻿namespace VooDo.Runtime
 {
 
-    public interface IControllerFactory<TValue>
+    public interface IControllerFactory
     {
 
-        Controller<TValue> Create(Variable<TValue> _variable);
+        IController CreateController(IVariable _variable);
+
+    }
+
+    public interface IControllerFactory<TValue> : IControllerFactory where TValue : notnull
+    {
+
+        IController<TValue> CreateController(Variable<TValue> _variable);
 
     }
 

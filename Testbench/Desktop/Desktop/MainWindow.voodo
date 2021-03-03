@@ -1,8 +1,8 @@
 ﻿if (this.m_header.PointerEntered) 
 {
-	this.m_headerText.Text = "Entered";
+	this.m_header.Opacity = glob Smooth(1);
 }
 if (this.m_header.PointerExited) 
 {
-	this.m_headerText.Text = "Exited";
+	this.m_header.Opacity = glob Smooth(0.5);
 }
