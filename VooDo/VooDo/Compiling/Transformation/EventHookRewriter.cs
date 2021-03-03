@@ -76,10 +76,9 @@ namespace VooDo.Compiling.Transformation
             string objectName = "_object";
             string subscribedName = "_subscribed";
             ExpressionSyntax left = SyntaxFactoryUtils.MemberAccess(
-                    SyntaxFactory.ParenthesizedExpression(
-                        SyntaxFactory.CastExpression(
-                            _symbol.ContainingType.ToTypeSyntax(),
-                            SyntaxFactory.IdentifierName(objectName))),
+                    SyntaxFactory.CastExpression(
+                        _symbol.ContainingType.ToTypeSyntax(),
+                        SyntaxFactory.IdentifierName(objectName)),
                     _symbol.Name);
             ExpressionSyntax right = SyntaxFactoryUtils.ThisMemberAccess(
                     Identifiers.eventHookOnEventMethodName);

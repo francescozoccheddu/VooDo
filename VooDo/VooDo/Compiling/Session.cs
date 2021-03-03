@@ -32,7 +32,7 @@ namespace VooDo.Compiling
                 .WithNullableContextOptions(NullableContextOptions.Disable)
                 .WithMetadataImportOptions(MetadataImportOptions.Public);
 
-        private readonly List<Problem> m_problems = new List<Problem>();
+        private readonly List<Problem> m_problems = new();
 
         internal Compilation Compilation { get; }
         public CancellationToken CancellationToken { get; }

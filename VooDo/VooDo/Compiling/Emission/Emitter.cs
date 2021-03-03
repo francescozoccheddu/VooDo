@@ -25,7 +25,7 @@ namespace VooDo.Compiling.Emission
 
         internal static (CompilationUnitSyntax syntax, ImmutableArray<Scope.GlobalDefinition> globals) Emit(Script _script, Session _session, Identifier _runtimeAlias)
         {
-            Emitter emitter = new Emitter(_session.Tagger, _runtimeAlias);
+            Emitter emitter = new(_session.Tagger, _runtimeAlias);
             CompilationUnitSyntax syntax = emitter.EmitScript(_script, _session);
             return (syntax, emitter.m_scope.GetGlobalDefinitions());
         }
@@ -47,7 +47,7 @@ namespace VooDo.Compiling.Emission
         }
 
         private ExpressionSyntax EmitExpression(Expression _node, bool _isAssignmentTarget = false) =>
-            SF.ParenthesizedExpression(_node switch
+            _node switch
             {
                 ArrayCreationExpression e => EmitArrayCreation(e),
                 AsExpression e => EmitAsExpression(e),
@@ -66,7 +66,7 @@ namespace VooDo.Compiling.Emission
                 TupleExpression e => EmitTupleExpression(e),
                 TupleDeclarationExpression e => EmitTupleDeclarationExpression(e),
                 UnaryExpression e => EmitUnaryExpression(e)
-            }).Own(m_tagger, _node);
+            };
 
         private ExpressionSyntax EmitComplexTypeOrExpression(ComplexTypeOrExpression _node) => _node switch
         {
@@ -272,7 +272,7 @@ namespace VooDo.Compiling.Emission
             ExpressionSyntax? initializer;
             if (_isGlobal)
             {
-                Global global = new Global(_isConstant, _parent.Type, _node.Name, _node.Initializer);
+                Global global = new(_isConstant, _parent.Type, _node.Name, _node.Initializer);
                 Scope.GlobalDefinition globalDefinition = m_scope.AddGlobal(new GlobalPrototype(global, _node));
                 initializer = SU.ThisMemberAccess(globalDefinition.Identifier);
             }
@@ -488,7 +488,7 @@ namespace VooDo.Compiling.Emission
             IdentifierNameSyntax name = SF.IdentifierName(EmitIdentifier(_node.Name));
             result = isGlobal
                 ? SU.MemberAccess(name, _node.IsControllerOf ? nameof(Variable<object>.ControllerFactory) : nameof(Variable<object>.Value))
-                : (ExpressionSyntax)name;
+                : name;
             return result.Own(m_tagger, _node);
         }
 

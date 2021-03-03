@@ -14,6 +14,7 @@ using System.Threading;
 using VooDo.AST;
 using VooDo.AST.Names;
 using VooDo.Compiling.Emission;
+using VooDo.Compiling.Transformation;
 using VooDo.Problems;
 using VooDo.Runtime;
 using VooDo.Utils;
@@ -73,14 +74,14 @@ namespace VooDo.Compiling
         {
             Script = _script.SetAsRoot(this);
             Options = _options;
-            Session session = new Session(this, _existingCompilation, _cancellationToken);
+            Session session = new(this, _existingCompilation, _cancellationToken);
             Succeded = session.Succeeded;
             Problems = session.GetProblems();
             Globals = session.Globals.EmptyIfDefault().Select(_g => _g.Prototype).ToImmutableArray();
             if (Succeded)
             {
                 m_cSharpCompilation = session.CSharpCompilation;
-                m_cSharpSyntax = session.Syntax!;
+                m_cSharpSyntax = ExpandRewriter.Rewrite(session.Syntax!);
                 m_cSharpCode = m_cSharpSyntax.NormalizeWhitespace().ToFullString();
             }
         }

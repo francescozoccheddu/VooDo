@@ -66,10 +66,6 @@ namespace VooDo.Compiling.Transformation
 
             private ExpressionSyntax? TryReplaceExpression(ExpressionSyntax _expression)
             {
-                while (_expression is ParenthesizedExpressionSyntax parenthesizedExpression)
-                {
-                    _expression = parenthesizedExpression.Expression;
-                }
                 IOperation sourceOperation = m_semantics.GetOperation(_expression)!;
                 if (sourceOperation.Kind is not OperationKind.ArrayElementReference
                     and not OperationKind.FieldReference
