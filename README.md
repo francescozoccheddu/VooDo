@@ -29,4 +29,6 @@ Work in progress… 🤥
 - `_existingCompilation` argument is not validated.
 - Rewriters do not always use `Session`'s `CancelationToken`.
 - Roslyn should not be directly exposed in `HookInitializer` and `ReferenceFinder`.
+- Ensure that converting the syntax tree to a string does not change the semantics.
+- Enable multithreading support by using thread local `AnimatorFactory`, `BindingManager` and caches.
 - Code quality sucks.
