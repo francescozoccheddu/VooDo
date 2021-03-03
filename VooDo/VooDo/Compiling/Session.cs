@@ -181,7 +181,7 @@ namespace VooDo.Compiling
 
         internal ClassDeclarationSyntax GetClass(CompilationUnitSyntax _syntax)
         {
-            MemberDeclarationSyntax classDeclaration = Syntax.Members[0];
+            MemberDeclarationSyntax classDeclaration = _syntax.Members[0];
             if (Compilation.Options.Namespace is not null)
             {
                 classDeclaration = ((NamespaceDeclarationSyntax)classDeclaration).Members[0];

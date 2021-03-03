@@ -66,6 +66,10 @@ namespace VooDo.Compiling.Transformation
 
             private ExpressionSyntax? TryReplaceExpression(ExpressionSyntax _expression)
             {
+                while (_expression is ParenthesizedExpressionSyntax parenthesizedExpression)
+                {
+                    _expression = parenthesizedExpression.Expression;
+                }
                 IOperation sourceOperation = m_semantics.GetOperation(_expression)!;
                 if (sourceOperation.Kind is not OperationKind.ArrayElementReference
                     and not OperationKind.FieldReference
@@ -142,7 +146,7 @@ namespace VooDo.Compiling.Transformation
             IMethodSymbol methodSymbol = _semantics.GetDeclaredSymbol(_method, _cancellationToken)!;
             IMethodBodyOperation methodOperation = (IMethodBodyOperation)_semantics.GetOperation(_method, _cancellationToken)!;
             ControlFlowGraph controlFlowGraph = ControlFlowGraph.Create(methodOperation, _cancellationToken);
-            AnalyzerOptions options = new AnalyzerOptions(ImmutableArray.Create<AdditionalText>());
+            AnalyzerOptions options = new(ImmutableArray.Create<AdditionalText>());
             WellKnownTypeProvider typeProvider = WellKnownTypeProvider.GetOrCreate(_compilation);
             InterproceduralAnalysisConfiguration interproceduralAnalysis = InterproceduralAnalysisConfiguration.Create(
                 options,
@@ -174,7 +178,7 @@ namespace VooDo.Compiling.Transformation
         internal static CompilationUnitSyntax Rewrite(Session _session)
         {
             PointsToAnalysisResult pointsToAnalysis = CreatePointsToAnalysis(_session.RunMethod, _session.Semantics, _session.CSharpCompilation, _session.CancellationToken);
-            Rewriter rewriter = new Rewriter(_session.Semantics, pointsToAnalysis, _session.Compilation.Options.HookInitializer, _session.CSharpCompilation);
+            Rewriter rewriter = new(_session.Semantics, pointsToAnalysis, _session.Compilation.Options.HookInitializer, _session.CSharpCompilation);
             BlockSyntax body = (BlockSyntax)rewriter.Visit(_session.RunMethodBody);
             ImmutableArray<(Expression, int)> initializers = rewriter.Initializers;
             if (initializers.IsEmpty)

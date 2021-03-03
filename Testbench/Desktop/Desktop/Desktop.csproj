@@ -12,23 +12,20 @@
 
   <PropertyGroup>
     <VooDoUsings>static VooDo.WinUI.Animators.AnimatorFactory</VooDoUsings>
+    <StartupObject>VooDo.DesktopTestbench.Program</StartupObject>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.VCRTForwarders.140" Version="1.0.7" />
     <PackageReference Include="Microsoft.WinUI" Version="3.0.0-preview4.210210.4" />
     <Manifest Include="$(ApplicationManifest)" />
-    <ProjectReference Include="..\..\..\VooDo.WinUI\VooDo.WinUI.csproj" />
-    <ProjectReference Include="$(SolutionDir)VooDo.Runtime\VooDo.Runtime.csproj" PrivateAssets="All">
-      <Aliases>VooDoRuntime</Aliases>
-    </ProjectReference>
     <ProjectReference Include="..\..\..\VooDo.WinUI.Generator\VooDo.WinUI.Generator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+    <ProjectReference Include="..\..\..\VooDo.WinUI\VooDo.WinUI.csproj" />
   </ItemGroup>
 
   <Import Project="..\..\..\VooDo.WinUI.Generator\Generator.props" />
 
   <ItemGroup>
-    <AdditionalFiles Include="MainWindow.xaml" />
+    <AdditionalFiles Include="MainWindow.voodo" />
   </ItemGroup>
 
 </Project>

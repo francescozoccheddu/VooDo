@@ -28,9 +28,9 @@
     
   <ItemGroup>
     <PackageReference Include="Microsoft.WinUI" Version="3.0.0-preview4.210210.4" />
-    <ProjectReference Include="..\VooDo.WinUI.Generator\VooDo.WinUI.Generator.csproj" PrivateAssets="all" IncludeAssets="compile" />
+    <ProjectReference Include="..\VooDo.WinUI.Generator\VooDo.WinUI.Generator.csproj" PrivateAssets="all" />
     <ProjectReference Include="..\VooDo.Runtime\VooDo.Runtime.csproj" />
-    <ProjectReference Include="..\VooDo.Utils\VooDo.Utils.csproj" PrivateAssets="all" />
+    <ProjectReference Include="..\VooDo.Utils\VooDo.Utils.csproj"/>
   </ItemGroup>
 
 </Project>

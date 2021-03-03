@@ -93,7 +93,7 @@ namespace VooDo.WinUI.Generator
         private static void Parse(string _xaml, out TypeToken _root, out ImmutableArray<Markup> _markups)
         {
             _root = default;
-            XamlXmlReader? reader = new XamlXmlReader(new StringReader(_xaml));
+            XamlXmlReader? reader = new(new StringReader(_xaml));
             List<Markup> markups = new();
             Token targetProperty = default;
             TypeToken targetObject = default;
@@ -177,13 +177,13 @@ namespace VooDo.WinUI.Generator
         }
 
         private static CodeOrigin GetOrigin(int _line, int _column, string _source, string _sourcePath, int _length = 0)
-            => new CodeOrigin(GetCharacterIndex(_line, _column, _source), _length, _source, _sourcePath);
+            => new(GetCharacterIndex(_line, _column, _source), _length, _source, _sourcePath);
 
         private static CodeOrigin GetOrigin(Token _token, string _source, string _sourcePath)
-            => new CodeOrigin(GetCharacterIndex(_token.Line, _token.Column, _source), _token.Length, _source, _sourcePath);
+            => new(GetCharacterIndex(_token.Line, _token.Column, _source), _token.Length, _source, _sourcePath);
 
         private static CodeOrigin GetOrigin(TypeToken _token, string _source, string _sourcePath)
-            => new CodeOrigin(GetCharacterIndex(_token.Line, _token.Column, _source), _token.Length, _source, _sourcePath);
+            => new(GetCharacterIndex(_token.Line, _token.Column, _source), _token.Length, _source, _sourcePath);
 
         private static bool TryResolveWinUIXamlType(string _name, GeneratorExecutionContext _context, MetadataReference _winUi, CodeOrigin _origin, out QualifiedType? _type)
         {
@@ -282,7 +282,7 @@ namespace VooDo.WinUI.Generator
                     new Global(true, _root, Identifiers.propertyRootVariableName));
                 ProgramTag codeTag = new(Identifiers.propertyCodeTag, code);
                 ProgramTag propertyTag = new(Identifiers.propertyPropertyTag, _markup.Property.Value);
-                ProgramTag objectTag = new(Identifiers.propertyObjectTag, objectType with { Alias = null });
+                ProgramTag objectTag = new(Identifiers.propertyObjectTag, objectType! with { Alias = null });
                 string name = Identifiers.propertyScriptPrefix + _nameDictionary.TakeName(_root.Path.Last().Name);
                 Options options = Options.Default with
                 {

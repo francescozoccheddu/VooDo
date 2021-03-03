@@ -86,7 +86,7 @@ namespace VooDo.Runtime.Implementation
                 eventHooks[i].hook.setIndex = i;
             }
             m_hookSets = plainHooks
-                            .Concat(eventHooks.Cast<(IHook hook, int count)>())
+                            .Concat(eventHooks.Select(_e => (hook: (IHook)_e.hook, _e.count)))
                             .Select(_h => new HookSet(this, _h.hook, _h.count))
                             .ToImmutableArray();
             loader = null!;
@@ -405,7 +405,7 @@ namespace VooDo.Runtime.Implementation
         }
 
         private Locker Lock(bool _storeRequests = true)
-            => new Locker(this, _storeRequests);
+            => new(this, _storeRequests);
 
         private void ProcessRunRequest()
         {

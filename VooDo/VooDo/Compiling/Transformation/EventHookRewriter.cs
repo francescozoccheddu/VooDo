@@ -49,7 +49,7 @@ namespace VooDo.Compiling.Transformation
             {
                 if (m_semantics.GetOperation(_node) is IEventReferenceOperation operation)
                 {
-                    if (operation.Instance.Type.IsReferenceType)
+                    if (operation.Instance!.Type!.IsReferenceType)
                     {
                         IEventSymbol symbol = operation.Event;
                         if (!m_map.TryGetValue(symbol, out Entry entry))
@@ -150,7 +150,7 @@ namespace VooDo.Compiling.Transformation
 
         internal static CompilationUnitSyntax Rewrite(Session _session)
         {
-            Rewriter rewriter = new Rewriter(_session.Semantics);
+            Rewriter rewriter = new(_session.Semantics);
             BlockSyntax newRunMethodBody = (BlockSyntax)rewriter.Visit(_session.RunMethodBody);
             ImmutableArray<(IEventSymbol symbol, int count)> eventSets = rewriter.EventSets;
             if (eventSets.IsEmpty)

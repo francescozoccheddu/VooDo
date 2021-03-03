@@ -14,7 +14,7 @@
             </Grid.RowDefinitions>
 
             <Grid
-                x:Name="m_Header"
+                x:Name="m_header"
                 Grid.Row="0"
                 Padding="10"
                 Background="Gray">
@@ -24,7 +24,9 @@
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
 
-                <TextBlock VerticalAlignment="Center">
+                <TextBlock 
+                    x:Name="m_headerText"
+                    VerticalAlignment="Center">
                     Header
                 </TextBlock>
 
@@ -32,7 +34,7 @@
 
             <ScrollViewer
                 xmlns:xaml="using:VooDo.WinUI.Xaml"
-                x:Name="m_Scroll"
+                x:Name="m_scroll"
                 Grid.Row="1"
                 Padding="10,0,10,0"
                 VerticalScrollBarVisibility="Visible"
@@ -59,34 +61,16 @@
         </Grid>
 
         <Border
-            x:Name="m_Border"
+            x:Name="m_buttonBorder"
             Margin="0,0,30,20"
             Padding="10"
             HorizontalAlignment="Right"
             VerticalAlignment="Bottom"
             Background="Black">
 
-            <Button>
+            <Button x:Name="m_button">
                 Go up!
             </Button>
-
-        </Border>
-
-        <Border
-            Margin="20,0,0,20"
-            Padding="10"
-            HorizontalAlignment="Left"
-            VerticalAlignment="Bottom"
-            Background="Black">
-
-            <TextBlock>
-                <TextBlock.Text>
-                    <xaml:VooDo>
-                        var __VooDo_Reserved_Ciao = 3;
-                        &quot;Offset is &quot; + glob Smooth(root.m_Scroll.VerticalOffset)
-                    </xaml:VooDo>
-                </TextBlock.Text>
-            </TextBlock>
 
         </Border>
 
