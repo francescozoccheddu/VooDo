@@ -16,9 +16,13 @@ namespace VooDo.WinUI.Animators
 
         private static readonly HashSet<IAnimator> s_animators = new();
         private static readonly Dictionary<IProgram, int> s_programReferenceCount = new();
+        private static readonly List<(IAnimator animator, bool add)> s_edits = new();
+        private static bool s_updating;
+
         private static bool s_running;
-        private static readonly Stopwatch s_stopwatch = new Stopwatch();
+        private static readonly Stopwatch s_stopwatch = new();
         private const double c_maxDeltaTime = 1.0 / 2.0;
+
 
         private static void UpdateRunningState()
         {
@@ -41,6 +45,7 @@ namespace VooDo.WinUI.Animators
 
         private static void CompositionTarget_Rendering(object? _sender, object _e)
         {
+            s_updating = true;
             double deltaTime = Math.Min(s_stopwatch.Elapsed.TotalSeconds, c_maxDeltaTime);
             ImmutableArray<ILocker> locks = s_programReferenceCount.Keys.Select(_p => _p.Lock(true)).ToImmutableArray();
             try
@@ -58,10 +63,28 @@ namespace VooDo.WinUI.Animators
                 }
                 s_stopwatch.Restart();
             }
+            s_updating = false;
+            foreach ((IAnimator animator, bool add) in s_edits)
+            {
+                if (add)
+                {
+                    RegisterAnimator(animator);
+                }
+                else
+                {
+                    UnregisterAnimator(animator);
+                }
+            }
+            s_edits.Clear();
         }
 
         internal static void RegisterAnimator(IAnimator _animator)
         {
+            if (s_updating)
+            {
+                s_edits.Add((_animator, true));
+                return;
+            }
             if (s_animators.Add(_animator))
             {
                 IProgram program = _animator.Program;
@@ -79,6 +102,11 @@ namespace VooDo.WinUI.Animators
 
         internal static void UnregisterAnimator(IAnimator _animator)
         {
+            if (s_updating)
+            {
+                s_edits.Add((_animator, false));
+                return;
+            }
             if (s_animators.Remove(_animator))
             {
                 IProgram program = _animator.Program;

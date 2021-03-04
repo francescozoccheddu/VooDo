@@ -54,7 +54,7 @@ namespace VooDo.Runtime
             void IController<TValue>.OnDetach(Variable<TValue> _variable) { }
             void IController.OnAttach(IVariable _variable) { }
             void IController.OnDetach(IVariable _variable) { }
-
+            void IController.Freeze(IVariable _program) { }
         }
 
         private TValue? m_value;
@@ -107,7 +107,7 @@ namespace VooDo.Runtime
         {
             TValue? oldValue = m_value;
             m_value = Controller.Value;
-            if (EqualityComparer<TValue?>.Default.Equals(m_value, oldValue))
+            if (!EqualityComparer<TValue?>.Default.Equals(m_value, oldValue))
             {
                 OnValueChange?.Invoke(this, oldValue);
                 m_OnValueChangeDynamic?.Invoke(this, oldValue);
@@ -138,7 +138,7 @@ namespace VooDo.Runtime
         public static Variable<TValue> OfType<TValue>(this IVariable _variable) where TValue : notnull
             => (Variable<TValue>)_variable;
 
-        public static void Freeze(this IVariable _variable) => _variable.Value = _variable.Value;
+        public static void Freeze(this IVariable _variable) => _variable.Controller.Freeze(_variable);
 
     }
 

@@ -1,8 +1,10 @@
-﻿if (this.m_header.PointerEntered) 
+﻿global double opacity = 1;
+if (this.m_header.PointerEntered) 
 {
-	this.m_header.Opacity = glob Smooth(1);
+	$opacity = Smooth(1);
 }
 if (this.m_header.PointerExited) 
 {
-	this.m_header.Opacity = glob Smooth(0.5);
+	$opacity = Smooth(0.5);
 }
+this.m_header.Opacity = opacity;

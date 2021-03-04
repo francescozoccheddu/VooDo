@@ -11,6 +11,10 @@ namespace VooDo.WinUI.Generator
     internal static class UsingsOption
     {
 
+        private static ImmutableArray<UsingDirective> s_defaultDirectives = ImmutableArray.Create<UsingDirective>(
+                new UsingStaticDirective("VooDo.WinUI.Animators.AnimatorFactory")
+            );
+
         private static UsingDirective ParseSingle(string _value)
         {
             string[] tokens = _value.Split('=');
@@ -58,7 +62,7 @@ namespace VooDo.WinUI.Generator
                     return false;
                 }
             }
-            _directives = directives.ToImmutableArray();
+            _directives = s_defaultDirectives.AddRange(directives);
             return true;
         }
 

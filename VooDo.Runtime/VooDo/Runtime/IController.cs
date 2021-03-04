@@ -12,6 +12,8 @@ namespace VooDo.Runtime
 
         object? Value { get; }
 
+        void Freeze(IVariable _program);
+
     }
 
     public interface IController<TValue> : IController, IControllerFactory<TValue> where TValue : notnull
@@ -40,10 +42,11 @@ namespace VooDo.Runtime
 
         IController<TValue> IControllerFactory<TValue>.CreateController(Variable<TValue> _variable)
         {
-            Controller<TValue> clone = _variable == Variable ? this : CloneForVariable(_variable);
-            clone.Variable = null;
-            if (_variable != Variable)
+            bool reuse = _variable == Variable;
+            Controller<TValue> clone = reuse ? this : CloneForVariable(_variable);
+            if (!reuse)
             {
+                clone.Variable = null;
                 clone.PrepareForVariable(_variable, Variable);
             }
             return clone;
@@ -65,8 +68,8 @@ namespace VooDo.Runtime
             {
                 throw new InvalidOperationException("Controller is not attached to this variable");
             }
-            Variable = null;
             Detached(_variable);
+            Variable = null;
         }
 
         protected virtual Controller<TValue> CloneForVariable(Variable<TValue> _newVariable) => (Controller<TValue>)MemberwiseClone();
@@ -81,6 +84,23 @@ namespace VooDo.Runtime
             {
                 Variable?.NotifyChanged();
             }
+        }
+
+        protected void Detach()
+        {
+            if (Variable is not null)
+            {
+                Variable.Value = Value;
+            }
+        }
+
+        public virtual void Freeze(IVariable _variable)
+        {
+            if (Variable != _variable)
+            {
+                throw new InvalidOperationException("Controller is not attached to this variable");
+            }
+            Detach();
         }
 
     }

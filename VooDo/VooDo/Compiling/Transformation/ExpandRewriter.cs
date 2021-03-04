@@ -16,7 +16,6 @@ namespace VooDo.Compiling.Transformation
                 BinaryExpressionSyntax
                 or PostfixUnaryExpressionSyntax
                 or ElementAccessExpressionSyntax
-                or MemberAccessExpressionSyntax
                 or CastExpressionSyntax
                 or ConditionalExpressionSyntax
                 or InvocationExpressionSyntax

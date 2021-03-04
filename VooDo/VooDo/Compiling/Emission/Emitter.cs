@@ -552,7 +552,6 @@ namespace VooDo.Compiling.Emission
         private CompilationUnitSyntax EmitScript(Script _node, Session _session)
         {
             TypeSyntax? returnType = _session.Compilation.Options.ReturnType is null ? null : EmitComplexType(_session.Compilation.Options.ReturnType);
-            TypeSyntax variableType = SU.VariableType(m_runtimeAlias);
             IEnumerable<ExternAliasDirectiveSyntax> aliases =
                 _session.Compilation.Options.References
                 .SelectMany(_r => _r.Aliases)
@@ -573,7 +572,7 @@ namespace VooDo.Compiling.Emission
                     ? null
                     : EmitComplexTypeOrVar(_definition.Prototype.Global.Type);
                 VariableDeclarationSyntax declaration = SF.VariableDeclaration(
-                            SU.VariableType(m_runtimeAlias, type).Own(m_tagger, _definition.Prototype.Global.Type),
+                            SU.VariableType(m_runtimeAlias, type ?? SU.Object()).Own(m_tagger, _definition.Prototype.Global.Type),
                             SF.VariableDeclarator(
                                 _definition.Identifier,
                                 null,

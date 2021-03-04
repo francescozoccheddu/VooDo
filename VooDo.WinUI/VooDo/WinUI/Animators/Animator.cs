@@ -1,5 +1,4 @@
-﻿
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 using VooDo.Runtime;
 
@@ -9,11 +8,25 @@ namespace VooDo.WinUI.Animators
     public abstract class Animator<TValue> : Controller<TValue>, IAnimator where TValue : notnull
     {
 
-        public abstract record Factory() : IControllerFactory<TValue>
+        public abstract record Factory<TAnimator>() : IControllerFactory<TValue> where TAnimator : Animator<TValue>
         {
-            protected abstract Animator<TValue> Create(TValue? _value);
-            IController<TValue> IControllerFactory<TValue>.CreateController(Variable<TValue> _variable) => Create(_variable.Value ?? default);
+
+            protected abstract TAnimator Create(TValue? _value);
+
+            protected abstract void Set(TAnimator _animator);
+
+            IController<TValue> IControllerFactory<TValue>.CreateController(Variable<TValue> _variable)
+            {
+                TAnimator animator = (TAnimator)(_variable.Controller is TAnimator old
+                               ? ((IControllerFactory<TValue>)old).CreateController(_variable)
+                               : Create(_variable.Value ?? default));
+                Set(animator);
+                animator.RequestUpdate();
+                return animator;
+            }
+
             IController IControllerFactory.CreateController(IVariable _variable) => ((IControllerFactory<TValue>)this).CreateController((Variable<TValue>)_variable);
+
         }
 
         public Animator(TValue? _value)
@@ -57,6 +70,7 @@ namespace VooDo.WinUI.Animators
         {
             if (m_running != _running)
             {
+                m_running = _running;
                 if (_running)
                 {
                     AnimatorManager.RegisterAnimator(this);
@@ -65,7 +79,6 @@ namespace VooDo.WinUI.Animators
                 {
                     AnimatorManager.UnregisterAnimator(this);
                 }
-                m_running = _running;
             }
         }
 
@@ -84,7 +97,12 @@ namespace VooDo.WinUI.Animators
     public abstract class TargetedAnimator<TValue> : Animator<TValue> where TValue : notnull
     {
 
-        public abstract record TargetedFactory(TValue Target) : Factory;
+        public abstract record TargetedFactory<TAnimator>(TValue Target) : Factory<TAnimator> where TAnimator : TargetedAnimator<TValue>
+        {
+
+            protected override void Set(TAnimator _animator) => _animator.Target = Target;
+
+        }
 
         public TValue Target { get; protected set; }
 
@@ -98,10 +116,18 @@ namespace VooDo.WinUI.Animators
             TValue oldValue = Value!;
             TValue newValue = Update(_deltaTime, oldValue, Target);
             SetValue(newValue, true);
-            return !EqualityComparer<TValue?>.Default.Equals(newValue, oldValue);
+            return !EqualityComparer<TValue?>.Default.Equals(newValue, Target);
         }
 
         protected abstract TValue Update(double _deltaTime, TValue _current, TValue _target);
+
+        protected void JumpToTarget(bool _notifyValueChanged = true) => SetValue(Target, _notifyValueChanged);
+
+        public sealed override void Freeze(IVariable _variable)
+        {
+            JumpToTarget(false);
+            Detach();
+        }
 
     }
 
