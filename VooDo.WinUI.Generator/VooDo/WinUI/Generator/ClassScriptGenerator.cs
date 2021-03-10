@@ -226,7 +226,7 @@ namespace VooDo.WinUI.Generator
         {
             if (!System.Diagnostics.Debugger.IsAttached)
             {
-                //System.Diagnostics.Debugger.Launch();
+                System.Diagnostics.Debugger.Launch();
             }
         }
 

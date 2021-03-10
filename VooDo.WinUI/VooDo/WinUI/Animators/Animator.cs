@@ -13,14 +13,14 @@ namespace VooDo.WinUI.Animators
 
             protected abstract TAnimator Create(TValue? _value);
 
-            protected abstract void Set(TAnimator _animator);
+            protected abstract void Set(TAnimator _animator, IController<TValue> _oldController);
 
             IController<TValue> IControllerFactory<TValue>.CreateController(Variable<TValue> _variable)
             {
                 TAnimator animator = (TAnimator)(_variable.Controller is TAnimator old
                                ? ((IControllerFactory<TValue>)old).CreateController(_variable)
                                : Create(_variable.Value ?? default));
-                Set(animator);
+                Set(animator, _variable.Controller);
                 animator.RequestUpdate();
                 return animator;
             }
@@ -100,7 +100,7 @@ namespace VooDo.WinUI.Animators
         public abstract record TargetedFactory<TAnimator>(TValue Target) : Factory<TAnimator> where TAnimator : TargetedAnimator<TValue>
         {
 
-            protected override void Set(TAnimator _animator) => _animator.Target = Target;
+            protected override void Set(TAnimator _animator, IController<TValue> _oldController) => _animator.Target = Target;
 
         }
 
@@ -110,16 +110,6 @@ namespace VooDo.WinUI.Animators
         {
             Target = _target;
         }
-
-        protected sealed override bool Update(double _deltaTime)
-        {
-            TValue oldValue = Value!;
-            TValue newValue = Update(_deltaTime, oldValue, Target);
-            SetValue(newValue, true);
-            return !EqualityComparer<TValue?>.Default.Equals(newValue, Target);
-        }
-
-        protected abstract TValue Update(double _deltaTime, TValue _current, TValue _target);
 
         protected void JumpToTarget(bool _notifyValueChanged = true) => SetValue(Target, _notifyValueChanged);
 
@@ -131,10 +121,20 @@ namespace VooDo.WinUI.Animators
 
     }
 
-    public interface IAnimatorWithSpeed<TSpeed> where TSpeed : notnull
+    public abstract class NoOvershootTargetedAnimator<TValue> : TargetedAnimator<TValue> where TValue : notnull
     {
 
-        TSpeed Speed { get; }
+        protected NoOvershootTargetedAnimator(TValue _value, TValue _target) : base(_value, _target) { }
+
+        protected sealed override bool Update(double _deltaTime)
+        {
+            TValue oldValue = Value!;
+            TValue newValue = Update(_deltaTime, oldValue, Target);
+            SetValue(newValue, true);
+            return !EqualityComparer<TValue?>.Default.Equals(newValue, Target);
+        }
+
+        protected abstract TValue Update(double _deltaTime, TValue _current, TValue _target);
 
     }
 

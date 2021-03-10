@@ -130,7 +130,6 @@ tupleDeclarationExpressionElement
 expression
 	: NEW mType = complexType OPEN_BRACKET mSizes += expression (COMMA mSizes += expression)* CLOSE_BRACKET mRanks += rankSpecifier*												# arrayCreationExpression
 	| mControllerOf = CONTROLLEROF? mName = identifier																																# nameExpression
-	| OPEN_PARENS mExpr = expression CLOSE_PARENS																																	# parenthesizedExpression
 	| NEW mType = complexType? OPEN_PARENS (mArgs += argument (COMMA mArgs += argument)*)? CLOSE_PARENS																				# objectCreationExpression
 	| mSource = expression DOT mMember = identifier																																	# memberAccessExpression
 	| mSource = expression OPEN_BRACKET mArgs += expression (COMMA mArgs += expression)* CLOSE_BRACKET																				# elementAccessExpression
@@ -159,6 +158,7 @@ expression
 	| FALSE																																											# falseLiteralExpression
 	| TRUE																																											# trueLiteralExpression
 	| mLiteral = (INTEGER_LITERAL | CHAR_LITERAL | REAL_LITERAL | BIN_INTEGER_LITERAL | HEX_INTEGER_LITERAL | STRING_LITERAL | VERBATIUM_STRING_LITERAL)							# otherLiteralExpression
+	| OPEN_PARENS mExpr = expression CLOSE_PARENS																																	# parenthesizedExpression
 ;
 
 // Directives

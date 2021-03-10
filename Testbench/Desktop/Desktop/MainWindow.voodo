@@ -1,10 +1,10 @@
-﻿global double opacity = 1;
+﻿global double y = 0;
 if (this.m_header.PointerEntered) 
 {
-	$opacity = Smooth(1);
+	$y = Spring(100);
 }
 if (this.m_header.PointerExited) 
 {
-	$opacity = Smooth(0.5);
+	$y = Smooth(0);
 }
-this.m_header.Opacity = opacity;
+this.m_buttonBorder.Translation = new System.Numerics.Vector3(0, (float) -y, 0);

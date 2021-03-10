@@ -109,13 +109,16 @@ namespace VooDo.Compiling.Transformation
 
             public override SyntaxNode? VisitElementAccessExpression(ElementAccessExpressionSyntax _node)
             {
-                IOperation? operation = m_semantics.GetOperation(_node);
-                if (operation is not null && operation.Kind is OperationKind.PropertyReference)
+                if (_node.Parent is not AssignmentExpressionSyntax assignment || _node != assignment.Left)
                 {
-                    ExpressionSyntax? expression = TryReplaceExpression(_node.Expression);
-                    if (expression is not null)
+                    IOperation? operation = m_semantics.GetOperation(_node);
+                    if (operation is not null && operation.Kind is OperationKind.PropertyReference)
                     {
-                        return _node.WithExpression(expression);
+                        ExpressionSyntax? expression = TryReplaceExpression(_node.Expression);
+                        if (expression is not null)
+                        {
+                            return _node.WithExpression(expression);
+                        }
                     }
                 }
                 return base.VisitElementAccessExpression(_node);
@@ -123,13 +126,16 @@ namespace VooDo.Compiling.Transformation
 
             public override SyntaxNode? VisitMemberAccessExpression(MemberAccessExpressionSyntax _node)
             {
-                IOperation? operation = m_semantics.GetOperation(_node);
-                if (operation is not null && operation.Kind is OperationKind.FieldReference or OperationKind.PropertyReference)
+                if (_node.Parent is not AssignmentExpressionSyntax assignment || _node != assignment.Left)
                 {
-                    ExpressionSyntax? expression = TryReplaceExpression(_node.Expression);
-                    if (expression is not null)
+                    IOperation? operation = m_semantics.GetOperation(_node);
+                    if (operation is not null && operation.Kind is OperationKind.FieldReference or OperationKind.PropertyReference)
                     {
-                        return _node.WithExpression(expression);
+                        ExpressionSyntax? expression = TryReplaceExpression(_node.Expression);
+                        if (expression is not null)
+                        {
+                            return _node.WithExpression(expression);
+                        }
                     }
                 }
                 return base.VisitMemberAccessExpression(_node);

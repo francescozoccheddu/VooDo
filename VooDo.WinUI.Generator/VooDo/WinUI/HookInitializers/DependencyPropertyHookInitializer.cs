@@ -20,7 +20,12 @@ namespace VooDo.WinUI.HookInitializers
 
         public override Expression? GetInitializer(ISymbol _symbol, CSharpCompilation _compilation)
         {
-            INamedTypeSymbol? baseType = _symbol.ContainingType;
+            INamedTypeSymbol type = _symbol.ContainingType;
+            INamedTypeSymbol? baseType = type;
+            if (type.GetMembers($"{_symbol.Name}Property").IsEmpty)
+            {
+                return null;
+            }
             while (baseType is not null && baseType.ToDisplayString() != Identifiers.dependencyObjectFullName)
             {
                 baseType = baseType.BaseType;
