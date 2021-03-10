@@ -1,6 +1,6 @@
 ﻿using Microsoft.UI.Xaml;
 
-namespace VooDo.DesktopTestbench
+namespace VooDo.Testbench.Desktop
 {
     public sealed partial class App : Application
     {

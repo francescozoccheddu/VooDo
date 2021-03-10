@@ -12,7 +12,7 @@
 
   <PropertyGroup>
     <VooDoUsings>static VooDo.WinUI.Animators.AnimatorFactory</VooDoUsings>
-    <StartupObject>VooDo.DesktopTestbench.Program</StartupObject>
+    <StartupObject>VooDo.Testbench.Desktop.Program</StartupObject>
   </PropertyGroup>
 
   <ItemGroup>
@@ -26,6 +26,7 @@
 
   <ItemGroup>
     <AdditionalFiles Include="MainWindow.voodo" />
+    <AdditionalFiles Include="MainWindow.xaml" />
   </ItemGroup>
 
 </Project>

@@ -92,6 +92,7 @@ namespace VooDo.WinUI.Generator
 
         private static void Parse(string _xaml, out TypeToken _root, out ImmutableArray<Markup> _markups)
         {
+            _xaml = _xaml.Replace("x:DataType", "__notSupportedDataTypeProperty");
             _root = default;
             XamlXmlReader? reader = new(new StringReader(_xaml));
             List<Markup> markups = new();
@@ -356,6 +357,10 @@ namespace VooDo.WinUI.Generator
 
         public void Execute(GeneratorExecutionContext _context)
         {
+            if (!System.Diagnostics.Debugger.IsAttached)
+            {
+                System.Diagnostics.Debugger.Launch();
+            }
             if (!UsingsOption.TryGet(_context, out ImmutableArray<UsingDirective> usingDirectives))
             {
                 return;

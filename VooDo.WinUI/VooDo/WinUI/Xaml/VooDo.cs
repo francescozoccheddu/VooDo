@@ -66,7 +66,7 @@ namespace VooDo.WinUI.Xaml
             object root = rootObjectProvider.RootObject;
             string xamlPath = uriContext.BaseUri.ToString();
             string code = Code ?? GetCode(Path!);
-            Binder.PropertyKey key = new Binder.PropertyKey(code, property.Name, property.DeclaringType.FullName!);
+            Binder.PropertyKey key = new(code, property.Name, owner.GetType().FullName!);
             Loader loader = Binder.GetPropertyLoader(key, root.GetType());
             MemberInfo member = property.DeclaringType.GetMember(
                 property.Name,
