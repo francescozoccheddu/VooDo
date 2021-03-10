@@ -22,8 +22,9 @@ namespace VooDo.WinUI.Animators
             double _stiffness = DoubleSpringAnimator.defaultStiffness,
             double _damping = DoubleSpringAnimator.defaultDamping,
             double _mass = DoubleSpringAnimator.defaultMass,
-            double _minVelocity = DoubleSpringAnimator.defaultMinVelocity)
-            => new DoubleSpringAnimator.DoubleSpringFactory(_target, _stiffness, _damping, _mass, _minVelocity);
+            double _minVelocity = DoubleSpringAnimator.defaultMinVelocity,
+            double _minDifference = DoubleSpringAnimator.defaultMinDifference)
+            => new DoubleSpringAnimator.DoubleSpringFactory(_target, _stiffness, _damping, _mass, _minVelocity, _minDifference);
 
     }
 
