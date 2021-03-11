@@ -1,0 +1,6 @@
+﻿double bubbleRight = root.m_snakeButton.Width;
+double myLeft = this.TransformToVisual(root.m_snakeButton).TransformPoint(new(0,0)).X;
+bool visible = bubbleRight > myLeft;
+double visibility = glob Smooth(visible ? 1 : 0, visible ? 10 : 40);
+this.Opacity = visibility;
+this.Translation = new(0, (float) Lerp(20, 0, visibility), 0);
