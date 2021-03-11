@@ -1,5 +1,5 @@
 ﻿double bubbleTop = root.m_frameButton.Height;
-double myTop = -this.TransformToVisual(root.m_frameButton).TransformPoint(new(0, -this.ActualHeight)).Y;
-bool visible = bubbleTop > myTop;
+double myTop = this.TransformToVisual(root.m_frameButton).TransformPoint(new(0, 0)).Y;
+bool visible = myTop > 0;
 double visibility = glob Smooth(visible ? 1 : 0, visible ? 10 : 40);
 this.Opacity = visibility;

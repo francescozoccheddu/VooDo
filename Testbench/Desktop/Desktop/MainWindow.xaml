@@ -24,6 +24,16 @@
                 Padding="10"
                 Background="Gray">
 
+                <voodo:Object.Binding>
+                    <voodo:Property>
+                        global bool isHovered;
+                        isHovered |= this.PointerEntered;
+                        isHovered &amp;= !this.PointerExited;
+                        bool hasScrolled = root.m_gridView.ScrollViewer.VerticalOffset >= 20;
+                        this.Height = glob Smooth(isHovered ? 100 : (hasScrolled ? 20 : 50));
+                    </voodo:Property>
+                </voodo:Object.Binding>
+
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="Auto" />
@@ -35,11 +45,12 @@
 
             </Grid>
 
-            <GridView
+            <tb:CustomGridView
                 x:Name="m_gridView"
                 Grid.Row="1"
-                Margin="10"
-                HorizontalAlignment="Center"
+                Padding="10"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Center"
                 SelectionMode="None">
 
                 <GridView.ItemTemplate>
@@ -85,7 +96,7 @@
                     </DataTemplate>
                 </GridView.ItemTemplate>
 
-            </GridView>
+            </tb:CustomGridView>
 
         </Grid>
 
@@ -152,6 +163,7 @@
                             PlaceholderText="Type your message here" />
 
                         <StackPanel
+                            HorizontalAlignment="Stretch"
                             VerticalAlignment="Bottom"
                             Orientation="Vertical"
                             Spacing="10">
@@ -159,8 +171,8 @@
                             <Border
                                 Width="80"
                                 Height="20"
-                                Background="Violet"
                                 voodo:Object.Binding="{voodo:Property Path=FrameButtonItem.voodo}"
+                                Background="Violet"
                                 CornerRadius="10">
 
                                 <TextBlock
@@ -172,8 +184,9 @@
                             </Border>
 
                             <Border
-                                Margin="0,0,30,0"
+                                MaxWidth="240"
                                 Padding="10"
+                                HorizontalAlignment="Left"
                                 voodo:Object.Binding="{voodo:Property Path=FrameButtonItem.voodo}"
                                 Background="Violet"
                                 CornerRadius="0,10,10,10">
@@ -190,8 +203,9 @@
                             </Border>
 
                             <Border
-                                Margin="30,0,0,0"
+                                MaxWidth="240"
                                 Padding="10"
+                                HorizontalAlignment="Right"
                                 voodo:Object.Binding="{voodo:Property Path=FrameButtonItem.voodo}"
                                 Background="PaleVioletRed"
                                 CornerRadius="10,10,0,10">
@@ -211,8 +225,9 @@
                             <StackPanel Orientation="Vertical" Spacing="5">
 
                                 <Border
-                                    Margin="0,0,30,0"
+                                    MaxWidth="240"
                                     Padding="10"
+                                    HorizontalAlignment="Left"
                                     voodo:Object.Binding="{voodo:Property Path=FrameButtonItem.voodo}"
                                     Background="Violet"
                                     CornerRadius="0,10,2,2">
@@ -229,8 +244,9 @@
                                 </Border>
 
                                 <Border
-                                    Margin="0,0,30,0"
+                                    MaxWidth="240"
                                     Padding="10"
+                                    HorizontalAlignment="Left"
                                     voodo:Object.Binding="{voodo:Property Path=FrameButtonItem.voodo}"
                                     Background="Violet"
                                     CornerRadius="2,2,10,10">
