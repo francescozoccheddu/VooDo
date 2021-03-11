@@ -1,5 +1,6 @@
 ﻿using Microsoft.UI.Xaml;
 
+using System.Linq;
 using System.Reflection;
 
 using VooDo.Runtime;
@@ -24,10 +25,13 @@ namespace VooDo.WinUI.Hooks
         {
             if (m_property is null)
             {
-                m_property = (DependencyProperty)_object
+                m_property = (DependencyProperty)(_object
                     .GetType()
-                    .GetProperty($"{m_name}Property", BindingFlags.Public | BindingFlags.FlattenHierarchy | BindingFlags.Static)!
-                    .GetValue(null)!;
+                    .GetMember($"{m_name}Property", MemberTypes.Field | MemberTypes.Property, BindingFlags.Public | BindingFlags.FlattenHierarchy | BindingFlags.Static).Single()! switch
+                {
+                    FieldInfo m => m.GetValue(null)!,
+                    PropertyInfo m => m.GetValue(null)!
+                });
             }
             return (_object, _object.RegisterPropertyChangedCallback(m_property, PropertyChanged));
         }

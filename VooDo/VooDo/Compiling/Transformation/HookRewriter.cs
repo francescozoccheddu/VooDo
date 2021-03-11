@@ -66,8 +66,9 @@ namespace VooDo.Compiling.Transformation
 
             private ExpressionSyntax? TryReplaceExpression(ExpressionSyntax _expression)
             {
-                IOperation sourceOperation = m_semantics.GetOperation(_expression)!;
-                if (sourceOperation.Kind is not OperationKind.ArrayElementReference
+                IOperation? sourceOperation = m_semantics.GetOperation(_expression);
+                if (sourceOperation is not null && sourceOperation.Kind
+                    is not OperationKind.ArrayElementReference
                     and not OperationKind.FieldReference
                     and not OperationKind.PropertyReference
                     and not OperationKind.LocalReference)

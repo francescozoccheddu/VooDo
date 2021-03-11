@@ -5,10 +5,65 @@
     xmlns:tb="using:VooDo.Testbench.Desktop"
     xmlns:voodo="using:VooDo.WinUI.Xaml">
 
-    <Grid Background="LightGray">
+    <Grid x:Name="m_root" Background="LightGray">
 
         <Grid.Resources>
             <ThemeShadow x:Name="m_shadow" />
+            <DataTemplate x:Name="m_itemTemplate" x:DataType="tb:Item">
+                <Border
+                    Width="150"
+                    Height="200"
+                    Margin="10">
+
+                    <Grid
+                        Width="140"
+                        Height="190"
+                        Background="White"
+                        CornerRadius="5"
+                        Shadow="{StaticResource m_shadow}">
+
+                        <voodo:Object.Binding>
+                            <voodo:Property>
+                                <![CDATA[
+                                global bool isHovered, isPressed;
+                                isHovered |= this.PointerEntered;
+                                isHovered &= !this.PointerExited;
+                                isPressed |= this.PointerPressed;
+                                isPressed &= isHovered && !(this.PointerReleased || this.PointerCanceled || this.PointerCaptureLost);
+                                double focus = glob Smooth(isPressed ? 0.5 : (isHovered ? 1 : 0), isPressed ? 20 : 10);
+                                double margin = Lerp(5, 0, focus);
+                                FrameworkElement parent = (FrameworkElement) this.Parent;
+                                this.Width = parent.Width - margin;
+                                this.Height = parent.Height - margin;
+                                this.Opacity = Lerp(0.75, 1, focus);
+                                this.CornerRadius = new(Lerp(5, 2, focus));
+                                ]]>
+                            </voodo:Property>
+                        </voodo:Object.Binding>
+
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*" />
+                            <RowDefinition Height="Auto" /> 
+                            <RowDefinition Height="Auto" /> 
+                        </Grid.RowDefinitions>
+
+                        <TextBlock 
+                            Grid.Row="1"
+                            Margin="10,0,10,0"
+                            Foreground="#202020"
+                            Text="{x:Bind Title}" />
+
+                        <TextBlock
+                            Grid.Row="2"
+                            Margin="10,0,10,10"
+                            FontSize="12"
+                            Foreground="#505050"
+                            Text="{x:Bind Price}"/>
+
+                    </Grid>
+
+                </Border>
+            </DataTemplate>
         </Grid.Resources>
 
         <Grid>
@@ -29,7 +84,7 @@
                         global bool isHovered;
                         isHovered |= this.PointerEntered;
                         isHovered &amp;= !this.PointerExited;
-                        bool hasScrolled = root.m_gridView.ScrollViewer.VerticalOffset >= 20;
+                        bool hasScrolled = root.m_gridView.ScrollViewer.VerticalOffset &gt;= 20;
                         this.Height = glob Smooth(isHovered ? 100 : (hasScrolled ? 20 : 50));
                     </voodo:Property>
                 </voodo:Object.Binding>
@@ -51,52 +106,89 @@
                 Padding="10"
                 HorizontalAlignment="Stretch"
                 HorizontalContentAlignment="Center"
-                SelectionMode="None">
+                ItemTemplate="{StaticResource m_itemTemplate}"
+                SelectionMode="None"/>
 
-                <GridView.ItemTemplate>
-                    <DataTemplate x:DataType="tb:Item">
-                        <Border
-                            Width="150"
-                            Height="200"
-                            Margin="10">
+            <Rectangle
+                x:Name="m_dimmer"
+                Grid.Row="1"
+                HorizontalAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                Fill="Black"
+                IsHitTestVisible="{x:Bind m_pane.IsOpen, Mode=OneWay}"
+                IsTapEnabled="true"
+                Opacity="{voodo:Property Code=glob Smooth(root.m_pane.IsOpen ? 0.5 : 0)}" />
 
-                            <Grid
-                                Width="140"
-                                Height="190"
-                                Background="White"
-                                CornerRadius="5"
-                                Shadow="{StaticResource m_shadow}">
+            <tb:Pane
+                x:Name="m_pane"
+                Grid.Row="1"
+                Height="500"
+                VerticalAlignment="Bottom"
+                BorderBrush="Orange"
+                BorderThickness="0,5,0,0"
+                Background="LightGray">
 
-                                <voodo:Object.Binding>
-                                    <voodo:Property>
-                                        global double focus = 0;
-                                        if (this.PointerEntered)
-                                        $focus = Smooth(1);
-                                        if (this.PointerExited)
-                                        $focus = Smooth(0);
-                                        double margin = Lerp(5, 0, focus);
-                                        FrameworkElement parent = (FrameworkElement) this.Parent;
-                                        this.Width = parent.Width - margin;
-                                        this.Height = parent.Height - margin;
-                                        this.Opacity = Lerp(0.75, 1, focus);
-                                        this.CornerRadius = new(Lerp(5, 2, focus));
-                                    </voodo:Property>
-                                </voodo:Object.Binding>
+                <voodo:Object.Binding>
+                    <voodo:Property>
+                        <![CDATA[
+                        global double alpha = 1;
+                        this.IsOpen ^= root.m_paneButton.PointerReleased;
+                        this.IsOpen ^= root.m_dimmer.Tapped;
+                        $alpha = Smooth(this.IsOpen ? 0 : 1);
+                        this.Translation = new(0, (float) Lerp(0, this.Height, alpha), 0);
+                        double cardTop = this.TransformToVisual(root.m_root).TransformPoint(new(0,0)).Y;
+                        double buttonTop = root.m_paneButtonContainer.TransformToVisual(root.m_root).TransformPoint(new(0,0)).Y;
+                        double originalButtonTop = buttonTop - root.m_paneButtonContainer.Translation.Y;
+                        bool over = cardTop < originalButtonTop;
+                        root.m_paneButton.VerticalAlignment = over ? VerticalAlignment.Top : VerticalAlignment.Bottom;
+                        double topCorner = Lerp(0, 30, Quintic.Out(alpha));
+                        double bottomCorner = Lerp(30, 0, Quintic.In(alpha));
+                        root.m_paneButton.CornerRadius = new(topCorner, topCorner, bottomCorner, bottomCorner);
+                        double buttonTranslation = Math.Min(0, cardTop - originalButtonTop);
+                        root.m_paneButtonContainer.Translation = new(0, (float) buttonTranslation, 0);
+                        ]]>
+                    </voodo:Property>
+                </voodo:Object.Binding>
 
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="*" />
-                                    <RowDefinition Height="Auto" />
-                                </Grid.RowDefinitions>
+                <tb:Pane.RowDefinitions>
+                    <RowDefinition Height="70"/>
+                    <RowDefinition Height="*"/>
+                </tb:Pane.RowDefinitions>
 
-                                <TextBlock Text="{x:Bind Title}" />
+                <StackPanel
+                    Orientation="Horizontal"
+                    Spacing="10"
+                    Grid.Row="0"
+                    Margin="20,0,0,20"
+                    >
+                    <SymbolIcon 
+                        Symbol="Favorite" 
+                        VerticalAlignment="Center"/>
+                    <TextBlock 
+                        Style="{StaticResource HeaderTextBlockStyle}"
+                        VerticalAlignment="Center"
+                        Text="Saved items"/>
 
-                            </Grid>
+                    <Rectangle Translation="0,0,32" Width="100" Height="50" Fill="Red">
+                        <Rectangle.Shadow>
+                            <ThemeShadow/>
+                        </Rectangle.Shadow>
 
-                        </Border>
-                    </DataTemplate>
-                </GridView.ItemTemplate>
+                    </Rectangle>
 
-            </tb:CustomGridView>
+                </StackPanel>
+
+                <tb:CustomGridView
+                    x:Name="m_paneGridView"
+                    Grid.Row="1"
+                    Padding="10"
+                    HorizontalAlignment="Stretch"
+                    HorizontalContentAlignment="Center"
+                    ItemTemplate="{StaticResource m_itemTemplate}"
+                    SelectionMode="None"/>
+
+
+            </tb:Pane>
 
         </Grid>
 
@@ -344,6 +436,43 @@
             </Border>
 
         </StackPanel>
+
+        <Border
+            x:Name="m_paneButtonContainer"
+            Width="60"
+            Height="85"
+            Margin="0,0,30,0"
+            HorizontalAlignment="Right"
+            VerticalAlignment="Bottom">
+
+            <Border
+                x:Name="m_paneButton"
+                Width="60"
+                Height="80"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Top"
+                Background="Orange"
+                CornerRadius="30">
+
+                <voodo:Object.Binding>
+                    <voodo:Property>
+                        <![CDATA[
+                        global bool isHovered, isPressed;
+                        isHovered |= this.PointerEntered;
+                        isHovered &= !this.PointerExited;
+                        isPressed |= this.PointerPressed;
+                        isPressed &= isHovered && !(this.PointerReleased || this.PointerCanceled || this.PointerCaptureLost);
+                        double size = glob Smooth( isPressed ? 75 : (isHovered ? 85 : 80), 20) init 80.0;
+                        this.Height = size;
+                        ]]>
+                    </voodo:Property>
+                </voodo:Object.Binding>
+
+                <SymbolIcon Symbol="Up" />
+
+            </Border>
+
+        </Border>
 
     </Grid>
 
