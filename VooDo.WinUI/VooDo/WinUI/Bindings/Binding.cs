@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Microsoft.UI.Xaml;
+
+using System;
 using System.Reflection;
 
 using VooDo.Runtime;
@@ -29,7 +31,7 @@ namespace VooDo.WinUI.Bindings
 
         public enum ETarget
         {
-            Class, Property
+            Class, Property, Object
         }
 
         public abstract ETarget Target { get; }
@@ -73,9 +75,9 @@ namespace VooDo.WinUI.Bindings
         public override ETarget Target => ETarget.Class;
 
         internal ClassBinding(IProgram _program, object _xamlOwner)
-            : base(_program, _xamlOwner, _xamlOwner, _program.Loader.GetStringTag(Identifiers.classSourceTag), _program.Loader.GetStringTag(Identifiers.classTagTag))
+            : base(_program, _xamlOwner, _xamlOwner, _program.Loader.GetStringTag(Identifiers.ClassScripts.pathTag), _program.Loader.GetStringTag(Identifiers.ClassScripts.tagTag))
         {
-            Program.GetVariable(Identifiers.classThisVariableName)!.Value = _xamlOwner;
+            Program.GetVariable(Identifiers.ClassScripts.thisVariableName)!.Value = _xamlOwner;
         }
 
     }
@@ -91,8 +93,8 @@ namespace VooDo.WinUI.Bindings
             : base(_program, _xamlOwner, _xamlRoot, _xamlPath, _tag)
         {
             Property = _property;
-            Program.GetVariable(Identifiers.propertyThisVariableName)!.Value = _xamlOwner;
-            Program.GetVariable(Identifiers.propertyRootVariableName)!.Value = _xamlRoot;
+            Program.GetVariable(Identifiers.PropertyScripts.thisVariableName)!.Value = _xamlOwner;
+            Program.GetVariable(Identifiers.PropertyScripts.rootVariableName)!.Value = _xamlRoot;
             Program.OnReturn += _o => _setter(_o);
         }
 
@@ -103,6 +105,20 @@ namespace VooDo.WinUI.Bindings
         internal PropertyBinding(ITypedProgram _program, FieldInfo _property, object _xamlOwner, object _xamlRoot, string _xamlPath, string _tag)
             : this(_program, _property, _xamlOwner, _xamlRoot, _xamlPath, _tag, DynamicSetterHelper.GetSetter(_property, _xamlOwner))
         { }
+
+    }
+
+    public sealed class ObjectBinding : Binding
+    {
+
+        public override ETarget Target => ETarget.Object;
+
+        internal ObjectBinding(IProgram _program, DependencyObject _xamlOwner, object _xamlRoot, string _tag, string _xamlPath)
+            : base(_program, _xamlOwner, _xamlRoot, _xamlPath, _tag)
+        {
+            Program.GetVariable(Identifiers.PropertyScripts.thisVariableName)!.Value = _xamlOwner;
+            Program.GetVariable(Identifiers.PropertyScripts.rootVariableName)!.Value = _xamlRoot;
+        }
 
     }
 

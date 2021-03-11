@@ -16,14 +16,14 @@ namespace VooDo.WinUI.Xaml
 {
 
     [ContentProperty(Name = nameof(Code))]
-    public sealed class VooDo : MarkupExtension
+    public sealed class Property : MarkupExtension
     {
 
         private static readonly LRUCache<string, string> s_scriptCache = new(256);
 
-        public VooDo() { }
+        public Property() { }
 
-        public VooDo(string _code)
+        public Property(string _code)
         {
             Code = _code;
         }
@@ -68,17 +68,32 @@ namespace VooDo.WinUI.Xaml
             string code = Code ?? GetCode(Path!);
             Binder.PropertyKey key = new(code, property.Name, owner.GetType().FullName!);
             Loader loader = Binder.GetPropertyLoader(key, root.GetType());
-            MemberInfo member = property.DeclaringType.GetMember(
-                property.Name,
-                MemberTypes.Field | MemberTypes.Property,
-                BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance).Single();
-            ITypedProgram program = (ITypedProgram)loader.Create();
-            PropertyBinding? binding = member switch
+            IProgram program = loader.Create();
+            object? returnValue;
+            Binding binding;
+            if (property.DeclaringType == typeof(Object) && property.Name == "Binding")
             {
-                PropertyInfo m => new PropertyBinding(program, m, owner, root, xamlPath, Tag ?? ""),
-                FieldInfo m => new PropertyBinding(program, m, owner, root, xamlPath, Tag ?? ""),
-                _ => throw new InvalidOperationException("Failed to retrieve original property value")
-            };
+                binding = new ObjectBinding(program, (DependencyObject)owner, root, xamlPath, Tag ?? "");
+                returnValue = binding;
+            }
+            else
+            {
+                MemberInfo member = property.DeclaringType.GetMember(
+                    property.Name,
+                    MemberTypes.Field | MemberTypes.Property,
+                    BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance).Single();
+                binding = member switch
+                {
+                    PropertyInfo m => new PropertyBinding((ITypedProgram)program, m, owner, root, xamlPath, Tag ?? ""),
+                    FieldInfo m => new PropertyBinding((ITypedProgram)program, m, owner, root, xamlPath, Tag ?? ""),
+                    _ => throw new InvalidOperationException("Failed to retrieve original property value")
+                };
+                returnValue = member switch
+                {
+                    PropertyInfo m => m.GetValue(owner),
+                    FieldInfo m => m.GetValue(owner),
+                };
+            }
             if (owner is FrameworkElement element)
             {
                 element.Loaded += (_, _) => BindingManager.Add(binding);
@@ -92,11 +107,7 @@ namespace VooDo.WinUI.Xaml
             {
                 BindingManager.Add(binding);
             }
-            return member switch
-            {
-                PropertyInfo m => m.GetValue(owner),
-                FieldInfo m => m.GetValue(owner),
-            };
+            return returnValue;
         }
 
     }

@@ -35,8 +35,8 @@ namespace VooDo.WinUI.Generator
         private static string GetName(string _path)
         {
             string name = Path.GetFileNameWithoutExtension(_path);
-            StringBuilder builder = new(Identifiers.classScriptPrefix.Length + name.Length);
-            builder.Append(Identifiers.classScriptPrefix);
+            StringBuilder builder = new(Identifiers.ClassScripts.scriptPrefix.Length + name.Length);
+            builder.Append(Identifiers.ClassScripts.scriptPrefix);
             bool initial = true;
             foreach (char c in name)
             {
@@ -58,8 +58,8 @@ namespace VooDo.WinUI.Generator
             _namespace = null;
             _name = null;
             AnalyzerConfigOptions? options = _context.AnalyzerConfigOptions.GetOptions(_text);
-            string? xamlClassOption = OptionRetriever.Get(Identifiers.xamlClassOption, _context, _text);
-            string? xamlPathOption = OptionRetriever.Get(Identifiers.xamlPathOption, _context, _text);
+            string? xamlClassOption = OptionRetriever.Get(Identifiers.ClassScripts.xamlClassOption, _context, _text);
+            string? xamlPathOption = OptionRetriever.Get(Identifiers.ClassScripts.xamlPathOption, _context, _text);
             if (string.IsNullOrEmpty(xamlClassOption))
             {
                 xamlClassOption = null;
@@ -177,9 +177,9 @@ namespace VooDo.WinUI.Generator
                     return;
                 }
                 script = script.AddUsingDirectives(_usings);
-                script = script.AddGlobals(new Global(true, new QualifiedType(xamlNamespace, xamlName!), Identifiers.classThisVariableName));
-                ProgramTag pathTag = new(Identifiers.classSourceTag, FilePaths.Normalize(_text.Path));
-                ProgramTag tagTag = new(Identifiers.classTagTag, OptionRetriever.Get(Identifiers.tagOption, _context, _text));
+                script = script.AddGlobals(new Global(true, new QualifiedType(xamlNamespace, xamlName!), Identifiers.ClassScripts.thisVariableName));
+                ProgramTag pathTag = new(Identifiers.ClassScripts.pathTag, FilePaths.Normalize(_text.Path));
+                ProgramTag tagTag = new(Identifiers.ClassScripts.tagTag, OptionRetriever.Get(Identifiers.ClassScripts.tagOption, _context, _text));
                 Options options = Options.Default with
                 {
                     Namespace = xamlNamespace,
