@@ -43,16 +43,34 @@
                         <Border
                             Width="150"
                             Height="200"
-                            Margin="10"
-                            Padding="10"
-                            Background="White"
-                            CornerRadius="4"
-                            Translation="0,0,20">
-                            <Border.Shadow>
-                                <ThemeShadow />
-                            </Border.Shadow>
+                            Margin="10">
 
-                            <Grid>
+                            <Grid
+                                Width="140"
+                                Height="190"
+                                Background="White"
+                                CornerRadius="5">
+
+                                <voodo:Object.Binding>
+                                    <voodo:Property>
+                                        global double focus = 0;
+                                        if (this.PointerEntered)
+                                            $focus = Smooth(1);
+                                        if (this.PointerExited)
+                                            $focus = Smooth(0);
+                                        double margin = Lerp(5, 0, focus);
+                                        FrameworkElement parent = (FrameworkElement) this.Parent;
+                                        this.Width = parent.Width - margin;
+                                        this.Height = parent.Height - margin;
+                                        this.Opacity = Lerp(0.75, 1, focus);
+                                        this.CornerRadius = new(Lerp(5, 2, focus));
+                                    </voodo:Property>
+                                </voodo:Object.Binding>
+
+                                <Grid.Shadow>
+                                    <ThemeShadow/>
+                                </Grid.Shadow>
+
 
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="*" />
@@ -79,11 +97,6 @@
             HorizontalAlignment="Right"
             VerticalAlignment="Bottom"
             Background="Black">
-            <voodo:Object.Binding>
-                <voodo:Property>
-                    this.Opacity = 0.5;
-                </voodo:Property>
-            </voodo:Object.Binding>
 
             <Button x:Name="m_button">
                 Go up!

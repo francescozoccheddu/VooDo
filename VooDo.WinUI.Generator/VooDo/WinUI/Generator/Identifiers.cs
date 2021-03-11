@@ -15,6 +15,7 @@
             public const string propertyTag = "Property";
             public const string objectTag = "Object";
             public const string codeTag = "Code";
+            public const string pathTag = "Path";
             internal const string markupObjectName = "Property";
             internal const string markupCodePropertyName = "Code";
             internal const string markupPathPropertyName = "Path";

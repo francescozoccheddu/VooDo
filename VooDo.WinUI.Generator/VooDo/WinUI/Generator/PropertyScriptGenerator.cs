@@ -155,6 +155,7 @@ namespace VooDo.WinUI.Generator
                     new Global(true, _root, Identifiers.PropertyScripts.rootVariableName));
                 ProgramTag codeTag = new(Identifiers.PropertyScripts.codeTag, code);
                 ProgramTag propertyTag = new(Identifiers.PropertyScripts.propertyTag, _markup.Property.Value);
+                ProgramTag pathTag = new(Identifiers.PropertyScripts.pathTag, FilePaths.Normalize(_sourcePath));
                 ProgramTag objectTag = new(Identifiers.PropertyScripts.objectTag, objectType! with { Alias = null });
                 string name = Identifiers.PropertyScripts.scriptPrefix + _nameDictionary.TakeName(_root.Path.Last().Name);
                 Options options = Options.Default with
@@ -165,7 +166,7 @@ namespace VooDo.WinUI.Generator
                     HookInitializer = _hookInitializer,
                     ContainingClass = _root.Path.Last().Name,
                     Accessibility = Options.EAccessibility.Private,
-                    Tags = ImmutableArray.Create(propertyTag, objectTag, codeTag),
+                    Tags = ImmutableArray.Create(propertyTag, objectTag, codeTag, pathTag),
                     ReturnType = _markup.IsObjectBinding ? null : ComplexType.Parse("object")
                 };
                 Compilation compilation = Compilation.SucceedOrThrow(script, options, _context.CancellationToken, (CSharpCompilation)_context.Compilation);

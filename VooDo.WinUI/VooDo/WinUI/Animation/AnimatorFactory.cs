@@ -1,6 +1,7 @@
 ﻿using VooDo.Runtime;
+using VooDo.WinUI.Animators;
 
-namespace VooDo.WinUI.Animators
+namespace VooDo.WinUI.Animation
 {
 
     public static class AnimatorFactory

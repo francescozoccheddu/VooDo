@@ -12,7 +12,11 @@ namespace VooDo.WinUI.Generator
     {
 
         private static ImmutableArray<UsingDirective> s_defaultDirectives = ImmutableArray.Create<UsingDirective>(
-                new UsingStaticDirective("VooDo.WinUI.Animators.AnimatorFactory")
+                new UsingStaticDirective("VooDo.WinUI.Animation.AnimatorFactory"),
+                new UsingStaticDirective("VooDo.WinUI.Animation.AnimationUtils"),
+                new UsingNamespaceDirective("Microsoft.UI.Xaml"),
+                new UsingNamespaceDirective("System.Numerics"),
+                new UsingNamespaceDirective("System")
             );
 
         private static UsingDirective ParseSingle(string _value)

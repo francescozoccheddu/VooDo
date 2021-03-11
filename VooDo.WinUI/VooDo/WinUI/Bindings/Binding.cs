@@ -98,12 +98,12 @@ namespace VooDo.WinUI.Bindings
             Program.OnReturn += _o => _setter(_o);
         }
 
-        internal PropertyBinding(ITypedProgram _program, PropertyInfo _property, object _xamlOwner, object _xamlRoot, string _xamlPath, string _tag)
-            : this(_program, _property, _xamlOwner, _xamlRoot, _xamlPath, _tag, DynamicSetterHelper.GetSetter(_property, _xamlOwner))
+        internal PropertyBinding(ITypedProgram _program, PropertyInfo _property, object _xamlOwner, object _xamlRoot, string _tag)
+            : this(_program, _property, _xamlOwner, _xamlRoot, _program.Loader.GetStringTag(Identifiers.PropertyScripts.pathTag), _tag, DynamicSetterHelper.GetSetter(_property, _xamlOwner))
         { }
 
-        internal PropertyBinding(ITypedProgram _program, FieldInfo _property, object _xamlOwner, object _xamlRoot, string _xamlPath, string _tag)
-            : this(_program, _property, _xamlOwner, _xamlRoot, _xamlPath, _tag, DynamicSetterHelper.GetSetter(_property, _xamlOwner))
+        internal PropertyBinding(ITypedProgram _program, FieldInfo _property, object _xamlOwner, object _xamlRoot, string _tag)
+            : this(_program, _property, _xamlOwner, _xamlRoot, _program.Loader.GetStringTag(Identifiers.PropertyScripts.pathTag), _tag, DynamicSetterHelper.GetSetter(_property, _xamlOwner))
         { }
 
     }
@@ -113,8 +113,8 @@ namespace VooDo.WinUI.Bindings
 
         public override ETarget Target => ETarget.Object;
 
-        internal ObjectBinding(IProgram _program, DependencyObject _xamlOwner, object _xamlRoot, string _tag, string _xamlPath)
-            : base(_program, _xamlOwner, _xamlRoot, _xamlPath, _tag)
+        internal ObjectBinding(IProgram _program, DependencyObject _xamlOwner, object _xamlRoot, string _tag)
+            : base(_program, _xamlOwner, _xamlRoot, _program.Loader.GetStringTag(Identifiers.PropertyScripts.pathTag), _tag)
         {
             Program.GetVariable(Identifiers.PropertyScripts.thisVariableName)!.Value = _xamlOwner;
             Program.GetVariable(Identifiers.PropertyScripts.rootVariableName)!.Value = _xamlRoot;

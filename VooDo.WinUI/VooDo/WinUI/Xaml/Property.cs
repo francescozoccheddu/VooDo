@@ -64,7 +64,6 @@ namespace VooDo.WinUI.Xaml
             }
             object owner = provideValueTarget.TargetObject;
             object root = rootObjectProvider.RootObject;
-            string xamlPath = uriContext.BaseUri.ToString();
             string code = Code ?? GetCode(Path!);
             Binder.PropertyKey key = new(code, property.Name, owner.GetType().FullName!);
             Loader loader = Binder.GetPropertyLoader(key, root.GetType());
@@ -73,7 +72,7 @@ namespace VooDo.WinUI.Xaml
             Binding binding;
             if (property.DeclaringType == typeof(Object) && property.Name == "Binding")
             {
-                binding = new ObjectBinding(program, (DependencyObject)owner, root, xamlPath, Tag ?? "");
+                binding = new ObjectBinding(program, (DependencyObject)owner, root, Tag ?? "");
                 returnValue = binding;
             }
             else
@@ -84,8 +83,8 @@ namespace VooDo.WinUI.Xaml
                     BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance).Single();
                 binding = member switch
                 {
-                    PropertyInfo m => new PropertyBinding((ITypedProgram)program, m, owner, root, xamlPath, Tag ?? ""),
-                    FieldInfo m => new PropertyBinding((ITypedProgram)program, m, owner, root, xamlPath, Tag ?? ""),
+                    PropertyInfo m => new PropertyBinding((ITypedProgram)program, m, owner, root, Tag ?? ""),
+                    FieldInfo m => new PropertyBinding((ITypedProgram)program, m, owner, root, Tag ?? ""),
                     _ => throw new InvalidOperationException("Failed to retrieve original property value")
                 };
                 returnValue = member switch
