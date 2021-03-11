@@ -7,6 +7,10 @@
 
     <Grid Background="LightGray">
 
+        <Grid.Resources>
+            <ThemeShadow x:Name="m_shadow"/>
+        </Grid.Resources>
+
         <Grid>
 
             <Grid.RowDefinitions>
@@ -49,7 +53,9 @@
                                 Width="140"
                                 Height="190"
                                 Background="White"
-                                CornerRadius="5">
+                                CornerRadius="5"
+                                Shadow="{StaticResource m_shadow}"
+                                >
 
                                 <voodo:Object.Binding>
                                     <voodo:Property>
@@ -67,11 +73,6 @@
                                     </voodo:Property>
                                 </voodo:Object.Binding>
 
-                                <Grid.Shadow>
-                                    <ThemeShadow/>
-                                </Grid.Shadow>
-
-
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="*" />
                                     <RowDefinition Height="Auto" />
@@ -87,22 +88,76 @@
 
             </GridView>
 
-
         </Grid>
 
-        <Border
-            x:Name="m_buttonBorder"
-            Margin="0,0,30,20"
-            Padding="10"
-            HorizontalAlignment="Right"
+        <StackPanel
+            Orientation="Vertical"
+            Spacing="10"
+            Margin="20"
+            HorizontalAlignment="Left"
             VerticalAlignment="Bottom"
-            Background="Black">
+            >
 
-            <Button x:Name="m_button">
-                Go up!
-            </Button>
+            <Grid
+                HorizontalAlignment="Left">
 
-        </Border>
+                <Border
+                    Background="BlueViolet"
+                    CornerRadius="10"
+                    Height="60"
+                    Width="60"
+                    Shadow="{StaticResource m_shadow}"
+                    HorizontalAlignment="Left"
+                    x:Name="m_barButtonBubble"
+                    >
+
+                    <voodo:Object.Binding>
+                        <voodo:Property>
+                            global double focus = 0;
+                            if (this.PointerEntered)
+                                $focus = Spring(1);
+                            if (this.PointerExited)
+                                $focus = Smooth(0);
+                            this.Width = Lerp(60, root.m_barButton.Width, focus);
+                            this.CornerRadius = new(Lerp(30, 10, focus));
+                        </voodo:Property>
+                    </voodo:Object.Binding>
+                    
+                </Border>
+
+                <Grid
+                    HorizontalAlignment="Left"
+                    x:Name="m_barButton"
+                    Height="60"
+                    Width="300"
+                    IsHitTestVisible="False"
+                    >
+                    <Grid.Resources>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="HorizontalAlignment" Value="Center"/>
+                            <Setter Property="VerticalAlignment" Value="Center"/>
+                        </Style>
+                    </Grid.Resources>
+
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="60"/>
+                        <ColumnDefinition Width="60"/>
+                        <ColumnDefinition Width="60"/>
+                        <ColumnDefinition Width="60"/>
+                        <ColumnDefinition Width="60"/>
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Grid.Column="0" Text="A"/>
+                    <TextBlock Grid.Column="1" Text="B" voodo:Object.Binding="{voodo:Property Path=BarButtonItem.voodo}"/>
+                    <TextBlock Grid.Column="2" Text="C" voodo:Object.Binding="{voodo:Property Path=BarButtonItem.voodo}"/>
+                    <TextBlock Grid.Column="3" Text="D" voodo:Object.Binding="{voodo:Property Path=BarButtonItem.voodo}"/>
+                    <TextBlock Grid.Column="4" Text="E" voodo:Object.Binding="{voodo:Property Path=BarButtonItem.voodo}"/>
+
+                </Grid>
+                
+            </Grid>
+
+        </StackPanel>
 
     </Grid>
 

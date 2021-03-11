@@ -178,7 +178,7 @@ namespace VooDo.WinUI.Generator
                 }
                 script = script.AddUsingDirectives(_usings);
                 script = script.AddGlobals(new Global(true, new QualifiedType(xamlNamespace, xamlName!), Identifiers.ClassScripts.thisVariableName));
-                ProgramTag pathTag = new(Identifiers.ClassScripts.pathTag, FilePaths.Normalize(_text.Path));
+                ProgramTag pathTag = new(Identifiers.ClassScripts.scriptPathTag, FilePaths.Normalize(_text.Path));
                 ProgramTag tagTag = new(Identifiers.ClassScripts.tagTag, OptionRetriever.Get(Identifiers.ClassScripts.tagOption, _context, _text));
                 Options options = Options.Default with
                 {

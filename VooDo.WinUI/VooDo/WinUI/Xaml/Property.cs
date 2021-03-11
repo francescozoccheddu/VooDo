@@ -2,13 +2,11 @@
 using Microsoft.UI.Xaml.Markup;
 
 using System;
-using System.IO;
 using System.Linq;
 using System.Reflection;
 
 using VooDo.Runtime;
 using VooDo.WinUI.Bindings;
-using VooDo.WinUI.Utils;
 
 using Binder = VooDo.WinUI.Bindings.Binder;
 
@@ -18,8 +16,6 @@ namespace VooDo.WinUI.Xaml
     [ContentProperty(Name = nameof(Code))]
     public sealed class Property : MarkupExtension
     {
-
-        private static readonly LRUCache<string, string> s_scriptCache = new(256);
 
         public Property() { }
 
@@ -31,15 +27,6 @@ namespace VooDo.WinUI.Xaml
         public string? Code { get; set; }
         public string? Path { get; set; }
         public string? Tag { get; set; }
-
-        private static string GetCode(string _file)
-        {
-            if (!s_scriptCache.TryGetValue(_file, out string code))
-            {
-                s_scriptCache[_file] = code = File.ReadAllText(_file);
-            }
-            return code;
-        }
 
         protected override object? ProvideValue(IXamlServiceProvider _serviceProvider)
         {
@@ -64,8 +51,7 @@ namespace VooDo.WinUI.Xaml
             }
             object owner = provideValueTarget.TargetObject;
             object root = rootObjectProvider.RootObject;
-            string code = Code ?? GetCode(Path!);
-            Binder.PropertyKey key = new(code, property.Name, owner.GetType().FullName!);
+            Binder.PropertyKey key = new(Code, Path, property.Name, owner.GetType().FullName!);
             Loader loader = Binder.GetPropertyLoader(key, root.GetType());
             IProgram program = loader.Create();
             object? returnValue;

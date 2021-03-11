@@ -34,6 +34,20 @@ namespace VooDo.WinUI.Generator
         private readonly struct Markup
         {
 
+            internal static IEqualityComparer<Markup> ValueComparer { get; } = new Comparer();
+
+            private sealed class Comparer : IEqualityComparer<Markup>
+            {
+                public bool Equals(Markup _x, Markup _y) =>
+                    (ReferenceEquals(_x.Code, _y.Code) || (_x.Code is not null && _y.Code is not null && Token.ValueComparer.Equals(_x.Code.Value, _y.Code.Value))) &&
+                    (ReferenceEquals(_x.Code, _y.Code) || (_x.Code is not null && _y.Code is not null && Token.ValueComparer.Equals(_x.Code.Value, _y.Code.Value))) &&
+                    Token.ValueComparer.Equals(_x.Property, _y.Property) &&
+                    TypeToken.ValueComparer.Equals(_x.Object, _y.Object) &&
+                    Token.ValueComparer.Equals(_x.MarkupObject, _y.MarkupObject) &&
+                    _x.IsObjectBinding == _y.IsObjectBinding;
+                public int GetHashCode(Markup _obj) => Identity.CombineHash(_obj.Code, _obj.Path, _obj.Property.Value, _obj.Object.Name, _obj.Object.Namespace, _obj.IsObjectBinding);
+            }
+
             public Markup(Token? _code, Token? _path, Token _property, TypeToken _object, Token _markupObject, bool _isObjectBinding)
             {
                 Code = _code;
@@ -60,7 +74,7 @@ namespace VooDo.WinUI.Generator
             _root = root;
             List<Markup> markups = new();
             Token targetProperty = default;
-            TypeToken targetObject = default;
+            Stack<TypeToken> targetObjects = new();
             Token? code = null, path = null;
             XamlMember markupProperty = null!;
             Token? markupObject = null;
@@ -72,32 +86,43 @@ namespace VooDo.WinUI.Generator
                 {
                     case XamlNodeType.StartObject when reader.Type.Name == Identifiers.PropertyScripts.markupObjectName
                                 && reader.Type.PreferredXamlNamespace == Identifiers.xamlUsingNamespacePrefix + Identifiers.PropertyScripts.markupObjectNamespace:
-                        markupObject = new Token(reader.Type.Name, reader.LineNumber - 1, reader.LinePosition - 1);
+                        markupObject = new(reader.Type.Name, reader.LineNumber - 1, reader.LinePosition - 1);
                         code = path = null;
                         break;
                     case XamlNodeType.StartObject:
-                        targetObject = new TypeToken(reader.Type.Name, reader.Type.PreferredXamlNamespace, reader.LineNumber - 1, reader.LinePosition - 1);
+                        targetObjects.Push(new(reader.Type.Name, reader.Type.PreferredXamlNamespace, reader.LineNumber - 1, reader.LinePosition - 1));
                         break;
                     case XamlNodeType.EndObject when markupObject is not null:
-                        markups.Add(new Markup(code, path, targetProperty, targetObject, markupObject.Value, isObjectBinding));
+                        markups.Add(new Markup(code, path, targetProperty, targetObjects.Peek(), markupObject.Value, isObjectBinding));
                         markupObject = null;
+                        break;
+                    case XamlNodeType.EndObject:
+                        if (targetObjects.Count > 0)
+                        {
+                            targetObjects.Pop();
+                        }
                         break;
                     case XamlNodeType.StartMember when markupObject is not null:
                         markupProperty = reader.Member;
                         break;
                     case XamlNodeType.StartMember when reader.Member != XamlLanguage.UnknownContent:
-                        isObjectBinding = reader.Member.Name == Identifiers.PropertyScripts.attachmentPropertyName;
-                        targetProperty = new Token(reader.Member.Name, reader.LineNumber - 1, reader.LinePosition - 1);
+                        string propertyName = reader.Member.Name;
+                        isObjectBinding = propertyName is Identifiers.PropertyScripts.attachmentPropertyName or Identifiers.PropertyScripts.attachmentPropertyOwnerName + "." + Identifiers.PropertyScripts.attachmentPropertyName;
+                        if (propertyName.StartsWith(Identifiers.PropertyScripts.attachmentPropertyOwnerName + "."))
+                        {
+                            propertyName = propertyName.Substring(Identifiers.PropertyScripts.attachmentPropertyOwnerName.Length + 1);
+                        }
+                        targetProperty = new(propertyName, reader.LineNumber - 1, reader.LinePosition - 1);
                         break;
                     case XamlNodeType.Value when markupObject is not null && (markupProperty.Name == Identifiers.PropertyScripts.markupCodePropertyName || markupProperty == XamlLanguage.Initialization):
-                        code = new Token((string)reader.Value, reader.LineNumber - 1, reader.LinePosition - 1);
+                        code = new((string)reader.Value, reader.LineNumber - 1, reader.LinePosition - 1);
                         break;
                     case XamlNodeType.Value when markupObject is not null && markupProperty.Name == Identifiers.PropertyScripts.markupPathPropertyName:
-                        path = new Token((string)reader.Value, reader.LineNumber - 1, reader.LinePosition - 1);
+                        path = new((string)reader.Value, reader.LineNumber - 1, reader.LinePosition - 1);
                         break;
                 }
             }
-            _markups = markups.ToImmutableArray();
+            _markups = markups.Distinct(Markup.ValueComparer).ToImmutableArray();
         }
 
         public void Initialize(GeneratorInitializationContext _context) { }
@@ -130,7 +155,12 @@ namespace VooDo.WinUI.Generator
             }
             else
             {
-                string? path = _markup.Path?.Value!;
+                string path = _markup.Path?.Value!;
+                string fileDirectory = Path.GetDirectoryName(_sourcePath);
+                if (!Path.IsPathRooted(path))
+                {
+                    path = Path.Combine(fileDirectory, path);
+                }
                 try
                 {
                     code = File.ReadAllText(path);
@@ -153,9 +183,10 @@ namespace VooDo.WinUI.Generator
                 script = script.AddGlobals(
                     new Global(true, objectType!, Identifiers.PropertyScripts.thisVariableName),
                     new Global(true, _root, Identifiers.PropertyScripts.rootVariableName));
-                ProgramTag codeTag = new(Identifiers.PropertyScripts.codeTag, code);
+                ProgramTag codeTag = new(Identifiers.PropertyScripts.codeTag, _markup.Code?.Value);
                 ProgramTag propertyTag = new(Identifiers.PropertyScripts.propertyTag, _markup.Property.Value);
-                ProgramTag pathTag = new(Identifiers.PropertyScripts.pathTag, FilePaths.Normalize(_sourcePath));
+                ProgramTag pathTag = new(Identifiers.PropertyScripts.pathTag, _markup.Path?.Value);
+                ProgramTag xamlPathTag = new(Identifiers.PropertyScripts.xamlPathTag, FilePaths.Normalize(_sourcePath));
                 ProgramTag objectTag = new(Identifiers.PropertyScripts.objectTag, objectType! with { Alias = null });
                 string name = Identifiers.PropertyScripts.scriptPrefix + _nameDictionary.TakeName(_root.Path.Last().Name);
                 Options options = Options.Default with
@@ -166,7 +197,7 @@ namespace VooDo.WinUI.Generator
                     HookInitializer = _hookInitializer,
                     ContainingClass = _root.Path.Last().Name,
                     Accessibility = Options.EAccessibility.Private,
-                    Tags = ImmutableArray.Create(propertyTag, objectTag, codeTag, pathTag),
+                    Tags = ImmutableArray.Create(propertyTag, objectTag, codeTag, pathTag, xamlPathTag),
                     ReturnType = _markup.IsObjectBinding ? null : ComplexType.Parse("object")
                 };
                 Compilation compilation = Compilation.SucceedOrThrow(script, options, _context.CancellationToken, (CSharpCompilation)_context.Compilation);

@@ -75,7 +75,7 @@ namespace VooDo.WinUI.Bindings
         public override ETarget Target => ETarget.Class;
 
         internal ClassBinding(IProgram _program, object _xamlOwner)
-            : base(_program, _xamlOwner, _xamlOwner, _program.Loader.GetStringTag(Identifiers.ClassScripts.pathTag), _program.Loader.GetStringTag(Identifiers.ClassScripts.tagTag))
+            : base(_program, _xamlOwner, _xamlOwner, _program.Loader.GetStringTag(Identifiers.ClassScripts.scriptPathTag)!, _program.Loader.GetStringTag(Identifiers.ClassScripts.tagTag)!)
         {
             Program.GetVariable(Identifiers.ClassScripts.thisVariableName)!.Value = _xamlOwner;
         }
@@ -99,11 +99,11 @@ namespace VooDo.WinUI.Bindings
         }
 
         internal PropertyBinding(ITypedProgram _program, PropertyInfo _property, object _xamlOwner, object _xamlRoot, string _tag)
-            : this(_program, _property, _xamlOwner, _xamlRoot, _program.Loader.GetStringTag(Identifiers.PropertyScripts.pathTag), _tag, DynamicSetterHelper.GetSetter(_property, _xamlOwner))
+            : this(_program, _property, _xamlOwner, _xamlRoot, _program.Loader.GetStringTag(Identifiers.PropertyScripts.xamlPathTag)!, _tag, DynamicSetterHelper.GetSetter(_property, _xamlOwner))
         { }
 
         internal PropertyBinding(ITypedProgram _program, FieldInfo _property, object _xamlOwner, object _xamlRoot, string _tag)
-            : this(_program, _property, _xamlOwner, _xamlRoot, _program.Loader.GetStringTag(Identifiers.PropertyScripts.pathTag), _tag, DynamicSetterHelper.GetSetter(_property, _xamlOwner))
+            : this(_program, _property, _xamlOwner, _xamlRoot, _program.Loader.GetStringTag(Identifiers.PropertyScripts.xamlPathTag)!, _tag, DynamicSetterHelper.GetSetter(_property, _xamlOwner))
         { }
 
     }
@@ -114,7 +114,7 @@ namespace VooDo.WinUI.Bindings
         public override ETarget Target => ETarget.Object;
 
         internal ObjectBinding(IProgram _program, DependencyObject _xamlOwner, object _xamlRoot, string _tag)
-            : base(_program, _xamlOwner, _xamlRoot, _program.Loader.GetStringTag(Identifiers.PropertyScripts.pathTag), _tag)
+            : base(_program, _xamlOwner, _xamlRoot, _program.Loader.GetStringTag(Identifiers.PropertyScripts.xamlPathTag)!, _tag)
         {
             Program.GetVariable(Identifiers.PropertyScripts.thisVariableName)!.Value = _xamlOwner;
             Program.GetVariable(Identifiers.PropertyScripts.rootVariableName)!.Value = _xamlRoot;

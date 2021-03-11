@@ -16,6 +16,7 @@
             public const string objectTag = "Object";
             public const string codeTag = "Code";
             public const string pathTag = "Path";
+            public const string xamlPathTag = "XamlPath";
             internal const string markupObjectName = "Property";
             internal const string markupCodePropertyName = "Code";
             internal const string markupPathPropertyName = "Path";
@@ -28,7 +29,7 @@
         public static class ClassScripts
         {
             public const string scriptPrefix = "ClassScript_";
-            public const string pathTag = "Source";
+            public const string scriptPathTag = "ScriptPath";
             public const string tagTag = "Tag";
             public const string thisVariableName = c_thisVariableName;
             internal const string tagOption = "Tag";

@@ -7,4 +7,3 @@ if (this.m_header.PointerExited)
 {
 	$y = Smooth(0);
 }
-this.m_buttonBorder.Translation = new System.Numerics.Vector3(0, (float) -y, 0);

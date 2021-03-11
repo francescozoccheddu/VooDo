@@ -63,7 +63,7 @@ namespace VooDo.WinUI.Bindings
 
         #region Property
 
-        internal sealed record PropertyKey(string Code, string Property, string Object);
+        internal sealed record PropertyKey(string? Code, string? Path, string Property, string Object);
 
         private static readonly LRUCache<Type, ImmutableDictionary<PropertyKey, Loader>> s_propertyLoaderCache = new(256);
 
@@ -78,8 +78,9 @@ namespace VooDo.WinUI.Bindings
                     .Select(_t => Loader.FromType(_t))
                     .ToImmutableDictionary(_t => new PropertyKey(
                         _t.GetStringTag(Identifiers.PropertyScripts.codeTag),
-                        _t.GetStringTag(Identifiers.PropertyScripts.propertyTag),
-                        _t.GetStringTag(Identifiers.PropertyScripts.objectTag)
+                        _t.GetStringTag(Identifiers.PropertyScripts.pathTag),
+                        _t.GetStringTag(Identifiers.PropertyScripts.propertyTag)!,
+                        _t.GetStringTag(Identifiers.PropertyScripts.objectTag)!
                         ));
                 s_propertyLoaderCache[_ownerType] = loaders;
             }

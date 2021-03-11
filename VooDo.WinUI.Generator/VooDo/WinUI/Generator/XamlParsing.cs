@@ -98,6 +98,14 @@ namespace VooDo.WinUI.Generator
         internal readonly struct Token
         {
 
+            internal static IEqualityComparer<Token> ValueComparer { get; } = new Comparer();
+
+            private sealed class Comparer : IEqualityComparer<Token>
+            {
+                public bool Equals(Token _x, Token _y) => _x.Value == _y.Value;
+                public int GetHashCode(Token _obj) => _obj.Value.GetHashCode();
+            }
+
             public Token(string _value, int _line, int _column)
             {
                 Value = _value;
@@ -114,6 +122,14 @@ namespace VooDo.WinUI.Generator
 
         internal readonly struct TypeToken
         {
+
+            internal static IEqualityComparer<TypeToken> ValueComparer { get; } = new Comparer();
+
+            private sealed class Comparer : IEqualityComparer<TypeToken>
+            {
+                public bool Equals(TypeToken _x, TypeToken _y) => _x.Name == _y.Name && _x.Namespace == _y.Namespace;
+                public int GetHashCode(TypeToken _obj) => Identity.CombineHash(_obj.Name, _obj.Namespace);
+            }
 
             public TypeToken(string _name, string _namespace, int _line, int _column)
                 : this(_name, _namespace, _line, _column, _name.Length) { }

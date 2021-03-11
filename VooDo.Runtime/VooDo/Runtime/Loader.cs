@@ -20,10 +20,10 @@ namespace VooDo.Runtime
         }
 
         public static Loader FromType(Type _type)
-            => new Loader(_type);
+            => new(_type);
 
         public static Loader FromAssembly(Assembly _assembly)
-            => new Loader(_assembly.GetTypes().Single(_t => _t.IsSubclassOf(typeof(Program))));
+            => new(_assembly.GetTypes().Single(_t => _t.IsSubclassOf(typeof(Program))));
 
         private readonly Type m_type;
 
@@ -64,11 +64,11 @@ namespace VooDo.Runtime
 
         public ImmutableDictionary<string, object?> Tags { get; }
 
-        private bool TryGetTag<TValue>(string _name, out TValue _value)
+        private bool TryGetTag<TValue>(string _name, out TValue? _value) where TValue : notnull
         {
-            if (Tags.TryGetValue(_name, out object? value) && value is TValue tValue)
+            if (Tags.TryGetValue(_name, out object? value) && value is null or TValue)
             {
-                _value = tValue;
+                _value = (TValue?)value;
                 return true;
             }
             else
@@ -78,8 +78,8 @@ namespace VooDo.Runtime
             }
         }
 
-        private TValue GetTag<TValue>(string _name)
-            => TryGetTag(_name, out TValue value) ? value! : throw new KeyNotFoundException();
+        private TValue GetTag<TValue>(string _name) where TValue : notnull
+            => TryGetTag(_name, out TValue? value) ? value! : throw new KeyNotFoundException();
 
         public int GetIntTag(string _name) => GetTag<int>(_name);
         public uint GetUIntTag(string _name) => GetTag<uint>(_name);
@@ -91,7 +91,7 @@ namespace VooDo.Runtime
         public sbyte GetSByteTag(string _name) => GetTag<sbyte>(_name);
         public byte GetByteTag(string _name) => GetTag<byte>(_name);
         public char GetCharTag(string _name) => GetTag<char>(_name);
-        public string GetStringTag(string _name) => GetTag<string>(_name);
+        public string? GetStringTag(string _name) => GetTag<string>(_name);
         public float GetFloatTag(string _name) => GetTag<float>(_name);
         public double GetDoubleTag(string _name) => GetTag<double>(_name);
         public bool GetBoolTag(string _name) => GetTag<bool>(_name);
