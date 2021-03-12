@@ -1,10 +1,12 @@
-﻿global bool isHovered, isPressed;
-isHovered |= this.PointerEntered;
+﻿global bool isHovered;
+if (this.PointerEntered) 
+{
+	isHovered = true;
+	root.m_status.SelectedItem = (Item) this.DataContext;
+}
 isHovered &= !this.PointerExited;
-isPressed |= this.PointerPressed;
-isPressed &= isHovered && !(this.PointerReleased || this.PointerCanceled || this.PointerCaptureLost);
-double focus = glob Smooth(isPressed ? 0.5 : (isHovered ? 1 : 0), isPressed ? 20 : 10);
-float scale = (float) Lerp(0.95, 1, focus);
+double focus = glob Smooth(isHovered ? 1 : 0);
+float scale = (float) Lerp(0.975, 1, focus);
 ((ScaleTransform)this.RenderTransform).ScaleX = scale;
 ((ScaleTransform)this.RenderTransform).ScaleY = scale;
 this.Opacity = Lerp(0.75, 1, focus);

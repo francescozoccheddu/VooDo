@@ -4,11 +4,13 @@ if (this.PointerEntered)
 {
 	$focus = Spring(1);
 	$swype = Smooth(1);
+	root.m_status.IsFrameButtonOpen = true;
 }
 if (this.PointerExited)
 {
 	$focus = Smooth(0);
 	$swype = Smooth(0);
+	root.m_status.IsFrameButtonOpen = false;
 }
 this.Width = Lerp(60, 300, focus);
 this.Height = Lerp(60, 400, focus);

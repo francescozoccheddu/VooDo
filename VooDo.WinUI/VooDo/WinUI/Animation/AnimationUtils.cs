@@ -6,9 +6,19 @@ namespace VooDo.WinUI.Animation
     public static class AnimationUtils
     {
 
+        public static double TriLerp(double _a, double _b, double _c, double _alpha)
+            => _alpha switch
+            {
+                < 0.5 => Lerp(_a, _b, _alpha * 2),
+                >= 0.5 => Lerp(_b, _c, (_alpha * 2) - 1)
+            };
+
         public static double Lerp(double _a, double _b, double _alpha)
             => (_a * (1 - _alpha)) + (_b * _alpha);
 
+        public static double TriLerpClamped(double _a, double _b, double _alpha)
+            => Lerp(_a, _b, Math.Clamp(_alpha, 0, 1));
+        
         public static double LerpClamped(double _a, double _b, double _alpha)
             => Lerp(_a, _b, Math.Clamp(_alpha, 0, 1));
 

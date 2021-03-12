@@ -1,5 +1,11 @@
-﻿global bool isHovered;
-isHovered |= this.PointerEntered;
-isHovered &= !this.PointerExited;
+﻿bool isHeaderExpanded = root.m_status.IsHeaderExpanded;
+isHeaderExpanded |= this.PointerEntered;
+isHeaderExpanded &= !this.PointerExited;
 bool hasScrolled = root.m_gridView.ScrollViewer.VerticalOffset >= 20;
-this.Height = glob Smooth(isHovered ? 100 : (hasScrolled ? 20 : 50));
+double alpha = glob Smooth(isHeaderExpanded ? 1 : (hasScrolled ? 0 : 0.5));
+this.Height = TriLerp(20,50,80,alpha);
+root.m_headerTitle.FontSize = TriLerp(11, 16, 20, alpha);
+root.m_headerPrice.FontSize = TriLerp(11, 17, 22, alpha);
+root.m_headerTitle.Opacity = TriLerp(0, 0.9, 1, alpha);
+root.m_headerPrice.Opacity = TriLerp(0, 0.9, 1, alpha);
+root.m_status.IsHeaderExpanded = isHeaderExpanded;

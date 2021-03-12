@@ -1,4 +1,6 @@
 ﻿using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
 
 using System.Linq;
@@ -9,6 +11,8 @@ namespace VooDo.Testbench.Desktop
 {
     public sealed partial class MainWindow : Window
     {
+
+        private readonly Status m_status = new();
 
         public MainWindow()
         {

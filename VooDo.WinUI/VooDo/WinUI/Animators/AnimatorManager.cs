@@ -18,6 +18,7 @@ namespace VooDo.WinUI.Animators
 
         private static readonly HashSet<IAnimator> s_animators = new();
         private static readonly Dictionary<IProgram, int> s_programReferenceCount = new();
+        private static readonly Dictionary<IAnimator, IProgram> s_programDictionary = new();
         private static readonly List<(IAnimator animator, bool add)> s_edits = new();
         private static bool s_updating;
 
@@ -111,6 +112,7 @@ namespace VooDo.WinUI.Animators
             if (s_animators.Add(_animator))
             {
                 IProgram program = _animator.Program;
+                s_programDictionary[_animator] = program;
                 if (s_programReferenceCount.TryGetValue(program, out int referenceCount))
                 {
                     s_programReferenceCount[program] = referenceCount + 1;
@@ -132,16 +134,16 @@ namespace VooDo.WinUI.Animators
             }
             if (s_animators.Remove(_animator))
             {
-                IProgram program = _animator.Program;
-                if (s_programReferenceCount.TryGetValue(program, out int referenceCount))
+                s_programDictionary.Remove(_animator, out IProgram? program);
+                if (s_programReferenceCount.TryGetValue(program!, out int referenceCount))
                 {
                     if (referenceCount > 1)
                     {
-                        s_programReferenceCount[program] = referenceCount - 1;
+                        s_programReferenceCount[program!] = referenceCount - 1;
                     }
                     else
                     {
-                        s_programReferenceCount.Remove(program);
+                        s_programReferenceCount.Remove(program!);
                     }
                 }
                 UpdateRunningState();

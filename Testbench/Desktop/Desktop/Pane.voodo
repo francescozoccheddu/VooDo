@@ -1,7 +1,7 @@
 ﻿global double alpha = 1;
-this.IsOpen ^= root.m_paneButton.PointerReleased;
-this.IsOpen ^= root.m_dimmer.Tapped;
-$alpha = Smooth(this.IsOpen ? 0 : 1);
+root.m_status.IsPaneOpen ^= root.m_paneButton.PointerReleased;
+root.m_status.IsPaneOpen ^= root.m_dimmer.Tapped;
+$alpha = Smooth(root.m_status.IsPaneOpen ? 0 : 1);
 this.Translation = new(0, (float) Lerp(0, this.Height, alpha), 0);
 double cardTop = this.TransformToVisual(root.m_root).TransformPoint(new(0,0)).Y;
 double buttonTop = root.m_paneButtonContainer.TransformToVisual(root.m_root).TransformPoint(new(0,0)).Y;
