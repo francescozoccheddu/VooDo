@@ -24,7 +24,7 @@ namespace VooDo.WinUI.Animators
         { }
 
         public const double defaultSpeedFactor = 10;
-        public const double defaultMinDifference = double.Epsilon * 100;
+        public const double defaultMinDifference = 0.001;
 
         public double SpeedFactor { get; protected set; } = defaultSpeedFactor;
         public double MinDifference { get; protected set; } = defaultMinDifference;

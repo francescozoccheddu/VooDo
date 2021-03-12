@@ -8,7 +8,6 @@
     <Grid x:Name="m_root" Background="LightGray">
 
         <Grid.Resources>
-            <ThemeShadow x:Name="m_shadow" />
             <DataTemplate x:Name="m_itemTemplate" x:DataType="tb:Item">
                 <Border
                     Width="150"
@@ -18,9 +17,7 @@
                     <Grid
                         Width="140"
                         Height="190"
-                        Background="White"
-                        CornerRadius="5"
-                        Shadow="{StaticResource m_shadow}">
+                        CornerRadius="5">
 
                         <voodo:Object.Binding>
                             <voodo:Property>
@@ -41,6 +38,10 @@
                             </voodo:Property>
                         </voodo:Object.Binding>
 
+                        <Grid.Background>
+                            <ImageBrush ImageSource="{x:Bind ImageUrl}"/>
+                        </Grid.Background>
+
                         <Grid.RowDefinitions>
                             <RowDefinition Height="*" />
                             <RowDefinition Height="Auto" /> 
@@ -58,7 +59,7 @@
                             Margin="10,0,10,10"
                             FontSize="12"
                             Foreground="#505050"
-                            Text="{x:Bind Price}"/>
+                            Text="{x:Bind FormattedPrice}"/>
 
                     </Grid>
 
@@ -205,8 +206,7 @@
                 Height="60"
                 HorizontalAlignment="Left"
                 Background="BlueViolet"
-                CornerRadius="10"
-                Shadow="{StaticResource m_shadow}">
+                CornerRadius="10">
 
                 <voodo:Object.Binding>
                     <voodo:Property>
@@ -376,8 +376,7 @@
                 Height="60"
                 HorizontalAlignment="Left"
                 Background="BlueViolet"
-                CornerRadius="10"
-                Shadow="{StaticResource m_shadow}">
+                CornerRadius="10">
 
                 <voodo:Object.Binding>
                     <voodo:Property>

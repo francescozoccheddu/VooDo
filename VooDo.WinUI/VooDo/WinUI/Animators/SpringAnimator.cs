@@ -29,8 +29,8 @@ namespace VooDo.WinUI.Animators
         public const double defaultStiffness = 100;
         public const double defaultDamping = 10;
         public const double defaultMass = 1;
-        public const double defaultMinVelocity = double.Epsilon * 100;
-        public const double defaultMinDifference = double.Epsilon * 100;
+        public const double defaultMinVelocity = 0.001;
+        public const double defaultMinDifference = 0.001;
 
         public double Stiffness { get; protected set; } = defaultStiffness;
         public double Damping { get; protected set; } = defaultDamping;
