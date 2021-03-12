@@ -21,6 +21,7 @@
     <PackageReference Include="Microsoft.ProjectReunion" Version="0.5.0-prerelease" />
     <PackageReference Include="Microsoft.ProjectReunion.Foundation" Version="0.5.0-prerelease" />
     <PackageReference Include="Microsoft.ProjectReunion.WinUI" Version="0.5.0-prerelease" />
+    <PackageReference Include="PInvoke.User32" Version="0.7.104" />
     <Manifest Include="$(ApplicationManifest)" />
   </ItemGroup>
 

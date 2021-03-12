@@ -1,5 +1,8 @@
 ﻿using Microsoft.UI.Xaml;
 
+using System;
+using System.Runtime.InteropServices;
+
 namespace VooDo.Testbench.Desktop
 {
     public partial class App : Application
@@ -9,6 +12,14 @@ namespace VooDo.Testbench.Desktop
             InitializeComponent();
         }
 
-        protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs _args) => new MainWindow().Activate();
+        protected override void OnLaunched(LaunchActivatedEventArgs _args)
+        {
+            MainWindow? window = new()
+            {
+                Title = "VooDo Testbench (Desktop)"
+            };
+            window.Activate();
+        }
+
     }
 }
