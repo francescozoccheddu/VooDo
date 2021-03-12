@@ -1,0 +1,17 @@
+﻿global double focus = 0;
+global double swype = 0;
+if (this.PointerEntered)
+{
+	$focus = Spring(1);
+	$swype = Smooth(1);
+}
+if (this.PointerExited)
+{
+	$focus = Smooth(0);
+	$swype = Smooth(0);
+}
+this.Width = Lerp(60, 300, focus);
+this.Height = Lerp(60, 400, focus);
+this.CornerRadius = new(Lerp(30, 10, focus));
+root.m_frameButtonIcon.Translation = new((float) Lerp(0, -60, swype), 0, 0);
+root.m_frameButtonTextBox.Margin = new((float) Lerp(60, 0, swype), 0, 0, 0);

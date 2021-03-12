@@ -27,6 +27,7 @@ namespace VooDo.WinUI.Animators
         private static double s_fps;
         private static double s_renderingTime;
         private static readonly Stopwatch s_stopwatch = new Stopwatch();
+        private static readonly EventHandler<object> s_renderingEventHandler = CompositionTarget_Rendering;
 
         static AnimatorManager()
         {
@@ -34,7 +35,7 @@ namespace VooDo.WinUI.Animators
             {
                 while (true)
                 {
-                    Debug.WriteLine($"{s_animators.Count} active animators at {s_fps:F3} fps with average render time of {s_renderingTime}ms");
+                    Debug.WriteLine($"{s_animators.Count} active animators at {s_fps:F2} fps with average render time of {s_renderingTime:F4}ms");
                     await Task.Delay(1000, CancellationToken.None);
                 }
             });
@@ -49,11 +50,11 @@ namespace VooDo.WinUI.Animators
                 if (s_running)
                 {
                     s_lastTick = Environment.TickCount;
-                    CompositionTarget.Rendering += CompositionTarget_Rendering;
+                    CompositionTarget.Rendering += s_renderingEventHandler;
                 }
                 else
                 {
-                    CompositionTarget.Rendering -= CompositionTarget_Rendering;
+                    CompositionTarget.Rendering -= s_renderingEventHandler;
                 }
             }
         }

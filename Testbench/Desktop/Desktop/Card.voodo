@@ -1,0 +1,11 @@
+﻿global bool isHovered, isPressed;
+isHovered |= this.PointerEntered;
+isHovered &= !this.PointerExited;
+isPressed |= this.PointerPressed;
+isPressed &= isHovered && !(this.PointerReleased || this.PointerCanceled || this.PointerCaptureLost);
+double focus = glob Smooth(isPressed ? 0.5 : (isHovered ? 1 : 0), isPressed ? 20 : 10);
+float scale = (float) Lerp(0.95, 1, focus);
+((ScaleTransform)this.RenderTransform).ScaleX = scale;
+((ScaleTransform)this.RenderTransform).ScaleY = scale;
+this.Opacity = Lerp(0.75, 1, focus);
+this.CornerRadius = new(Lerp(5, 2, focus));

@@ -1,0 +1,5 @@
+﻿global bool isHovered;
+isHovered |= this.PointerEntered;
+isHovered &= !this.PointerExited;
+bool hasScrolled = root.m_gridView.ScrollViewer.VerticalOffset >= 20;
+this.Height = glob Smooth(isHovered ? 100 : (hasScrolled ? 20 : 50));

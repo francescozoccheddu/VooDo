@@ -1,0 +1,7 @@
+﻿global double focus = 0;
+if (this.PointerEntered)
+	$focus = Spring(1);
+if (this.PointerExited)
+	$focus = Smooth(0);
+this.Width = Lerp(60, root.m_snakeButtonContent.Width, focus);
+this.CornerRadius = new(Lerp(30, 10, focus));

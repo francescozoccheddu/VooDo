@@ -15,6 +15,7 @@ namespace VooDo.WinUI.Generator
                 new UsingStaticDirective("VooDo.WinUI.Animation.AnimatorFactory"),
                 new UsingStaticDirective("VooDo.WinUI.Animation.AnimationUtils"),
                 new UsingNamespaceDirective("Microsoft.UI.Xaml"),
+                new UsingNamespaceDirective("Microsoft.UI.Xaml.Media"),
                 new UsingNamespaceDirective("System.Numerics"),
                 new UsingNamespaceDirective("System")
             );

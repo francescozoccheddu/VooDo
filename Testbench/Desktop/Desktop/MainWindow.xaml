@@ -9,61 +9,46 @@
 
         <Grid.Resources>
             <DataTemplate x:Name="m_itemTemplate" x:DataType="tb:Item">
-                <Border
+
+                <Grid
                     Width="150"
                     Height="200"
-                    Margin="10">
+                    voodo:Object.Binding="{voodo:Property Path=Card.voodo}"
+                    VerticalAlignment="Center"
+                    HorizontalAlignment="Center"
+                    Margin="10"
+                    CornerRadius="5">
 
-                    <Grid
-                        Width="140"
-                        Height="190"
-                        CornerRadius="5">
+                    <Grid.RenderTransform>
+                        <ScaleTransform CenterX="75" CenterY="100"/>
+                    </Grid.RenderTransform>
 
-                        <voodo:Object.Binding>
-                            <voodo:Property>
-                                <![CDATA[
-                                global bool isHovered, isPressed;
-                                isHovered |= this.PointerEntered;
-                                isHovered &= !this.PointerExited;
-                                isPressed |= this.PointerPressed;
-                                isPressed &= isHovered && !(this.PointerReleased || this.PointerCanceled || this.PointerCaptureLost);
-                                double focus = glob Smooth(isPressed ? 0.5 : (isHovered ? 1 : 0), isPressed ? 20 : 10);
-                                double margin = Lerp(5, 0, focus);
-                                FrameworkElement parent = (FrameworkElement) this.Parent;
-                                this.Width = parent.Width - margin;
-                                this.Height = parent.Height - margin;
-                                this.Opacity = Lerp(0.75, 1, focus);
-                                this.CornerRadius = new(Lerp(5, 2, focus));
-                                ]]>
-                            </voodo:Property>
-                        </voodo:Object.Binding>
+                    <Grid.Background>
+                        <ImageBrush ImageSource="{x:Bind ImageUrl}"/>
+                    </Grid.Background>
 
-                        <Grid.Background>
-                            <ImageBrush ImageSource="{x:Bind ImageUrl}"/>
-                        </Grid.Background>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" /> 
+                        <RowDefinition Height="Auto" /> 
+                    </Grid.RowDefinitions>
 
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="*" />
-                            <RowDefinition Height="Auto" /> 
-                            <RowDefinition Height="Auto" /> 
-                        </Grid.RowDefinitions>
+                    <TextBlock 
+                        Grid.Row="1"
+                        Margin="10,0,10,0"
+                        TextWrapping="WrapWholeWords"
+                        Foreground="#202020"
+                        Text="{x:Bind Title}" />
 
-                        <TextBlock 
-                            Grid.Row="1"
-                            Margin="10,0,10,0"
-                            Foreground="#202020"
-                            Text="{x:Bind Title}" />
+                    <TextBlock
+                        Grid.Row="2"
+                        Margin="10,0,10,10"
+                        FontSize="12"
+                        Foreground="#505050"
+                        Text="{x:Bind FormattedPrice}"/>
 
-                        <TextBlock
-                            Grid.Row="2"
-                            Margin="10,0,10,10"
-                            FontSize="12"
-                            Foreground="#505050"
-                            Text="{x:Bind FormattedPrice}"/>
+                </Grid>
 
-                    </Grid>
-
-                </Border>
             </DataTemplate>
         </Grid.Resources>
 
@@ -78,17 +63,8 @@
                 x:Name="m_header"
                 Grid.Row="0"
                 Padding="10"
+                voodo:Object.Binding="{voodo:Property Path=Header.voodo}"
                 Background="Gray">
-
-                <voodo:Object.Binding>
-                    <voodo:Property>
-                        global bool isHovered;
-                        isHovered |= this.PointerEntered;
-                        isHovered &amp;= !this.PointerExited;
-                        bool hasScrolled = root.m_gridView.ScrollViewer.VerticalOffset &gt;= 20;
-                        this.Height = glob Smooth(isHovered ? 100 : (hasScrolled ? 20 : 50));
-                    </voodo:Property>
-                </voodo:Object.Binding>
 
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
@@ -127,29 +103,8 @@
                 VerticalAlignment="Bottom"
                 BorderBrush="Orange"
                 BorderThickness="0,5,0,0"
+                voodo:Object.Binding="{voodo:Property Path=Pane.voodo}"
                 Background="LightGray">
-
-                <voodo:Object.Binding>
-                    <voodo:Property>
-                        <![CDATA[
-                        global double alpha = 1;
-                        this.IsOpen ^= root.m_paneButton.PointerReleased;
-                        this.IsOpen ^= root.m_dimmer.Tapped;
-                        $alpha = Smooth(this.IsOpen ? 0 : 1);
-                        this.Translation = new(0, (float) Lerp(0, this.Height, alpha), 0);
-                        double cardTop = this.TransformToVisual(root.m_root).TransformPoint(new(0,0)).Y;
-                        double buttonTop = root.m_paneButtonContainer.TransformToVisual(root.m_root).TransformPoint(new(0,0)).Y;
-                        double originalButtonTop = buttonTop - root.m_paneButtonContainer.Translation.Y;
-                        bool over = cardTop < originalButtonTop;
-                        root.m_paneButton.VerticalAlignment = over ? VerticalAlignment.Top : VerticalAlignment.Bottom;
-                        double topCorner = Lerp(0, 30, Quintic.Out(alpha));
-                        double bottomCorner = Lerp(30, 0, Quintic.In(alpha));
-                        root.m_paneButton.CornerRadius = new(topCorner, topCorner, bottomCorner, bottomCorner);
-                        double buttonTranslation = Math.Min(0, cardTop - originalButtonTop);
-                        root.m_paneButtonContainer.Translation = new(0, (float) buttonTranslation, 0);
-                        ]]>
-                    </voodo:Property>
-                </voodo:Object.Binding>
 
                 <tb:Pane.RowDefinitions>
                     <RowDefinition Height="70"/>
@@ -205,30 +160,9 @@
                 Width="60"
                 Height="60"
                 HorizontalAlignment="Left"
+                voodo:Object.Binding="{voodo:Property Path=FrameButton.voodo}"
                 Background="BlueViolet"
                 CornerRadius="10">
-
-                <voodo:Object.Binding>
-                    <voodo:Property>
-                        global double focus = 0;
-                        global double swype = 0;
-                        if (this.PointerEntered)
-                        {
-                        $focus = Spring(1);
-                        $swype = Smooth(1);
-                        }
-                        if (this.PointerExited)
-                        {
-                        $focus = Smooth(0);
-                        $swype = Smooth(0);
-                        }
-                        this.Width = Lerp(60, 300, focus);
-                        this.Height = Lerp(60, 400, focus);
-                        this.CornerRadius = new(Lerp(30, 10, focus));
-                        root.m_frameButtonIcon.Translation = new((float) Lerp(0, -60, swype), 0, 0);
-                        root.m_frameButtonTextBox.Margin = new((float) Lerp(60, 0, swype), 0, 0, 0);
-                    </voodo:Property>
-                </voodo:Object.Binding>
 
                 <Grid>
 
@@ -375,20 +309,9 @@
                 Width="60"
                 Height="60"
                 HorizontalAlignment="Left"
-                Background="BlueViolet"
+                Background="BlueViolet"                
+                voodo:Object.Binding="{voodo:Property Path=SnakeButton.voodo}"
                 CornerRadius="10">
-
-                <voodo:Object.Binding>
-                    <voodo:Property>
-                        global double focus = 0;
-                        if (this.PointerEntered)
-                        $focus = Spring(1);
-                        if (this.PointerExited)
-                        $focus = Smooth(0);
-                        this.Width = Lerp(60, root.m_snakeButtonContent.Width, focus);
-                        this.CornerRadius = new(Lerp(30, 10, focus));
-                    </voodo:Property>
-                </voodo:Object.Binding>
 
                 <Grid
                     x:Name="m_snakeButtonContent"
@@ -450,22 +373,9 @@
                 Height="80"
                 HorizontalAlignment="Center"
                 VerticalAlignment="Top"
-                Background="Orange"
+                Background="Orange"                
+                voodo:Object.Binding="{voodo:Property Path=PaneButton.voodo}"
                 CornerRadius="30">
-
-                <voodo:Object.Binding>
-                    <voodo:Property>
-                        <![CDATA[
-                        global bool isHovered, isPressed;
-                        isHovered |= this.PointerEntered;
-                        isHovered &= !this.PointerExited;
-                        isPressed |= this.PointerPressed;
-                        isPressed &= isHovered && !(this.PointerReleased || this.PointerCanceled || this.PointerCaptureLost);
-                        double size = glob Smooth( isPressed ? 75 : (isHovered ? 85 : 80), 20) init 80.0;
-                        this.Height = size;
-                        ]]>
-                    </voodo:Property>
-                </voodo:Object.Binding>
 
                 <SymbolIcon Symbol="Up" />
 

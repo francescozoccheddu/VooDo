@@ -1,0 +1,15 @@
+﻿global double alpha = 1;
+this.IsOpen ^= root.m_paneButton.PointerReleased;
+this.IsOpen ^= root.m_dimmer.Tapped;
+$alpha = Smooth(this.IsOpen ? 0 : 1);
+this.Translation = new(0, (float) Lerp(0, this.Height, alpha), 0);
+double cardTop = this.TransformToVisual(root.m_root).TransformPoint(new(0,0)).Y;
+double buttonTop = root.m_paneButtonContainer.TransformToVisual(root.m_root).TransformPoint(new(0,0)).Y;
+double originalButtonTop = buttonTop - root.m_paneButtonContainer.Translation.Y;
+bool over = cardTop < originalButtonTop;
+root.m_paneButton.VerticalAlignment = over ? VerticalAlignment.Top : VerticalAlignment.Bottom;
+double topCorner = Lerp(0, 30, Quintic.Out(alpha));
+double bottomCorner = Lerp(30, 0, Quintic.In(alpha));
+root.m_paneButton.CornerRadius = new(topCorner, topCorner, bottomCorner, bottomCorner);
+double buttonTranslation = Math.Min(0, cardTop - originalButtonTop);
+root.m_paneButtonContainer.Translation = new(0, (float) buttonTranslation, 0);

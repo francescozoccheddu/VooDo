@@ -1,9 +1,5 @@
-﻿global double y = 0;
-if (this.m_header.PointerEntered) 
-{
-	$y = Spring(100);
-}
-if (this.m_header.PointerExited) 
-{
-	$y = Smooth(0);
-}
+﻿global double snakeButtonX, frameButtonX;
+$snakeButtonX = (!this.m_pane.IsOpen) ? Spring(0) : Smooth(-100);
+this.m_snakeButton.Translation = new((float) snakeButtonX, 0, 0);
+$frameButtonX = (snakeButtonX > -50) ? Spring(0) : Smooth(-100);
+this.m_frameButton.Translation = new((float) frameButtonX, 0, 0);
