@@ -1,4 +1,0 @@
-﻿VooDo.ConsoleTestbench.EventHolder eventHolder = null;
-var x = eventHolder.Event1;
-var y = eventHolder.Event2;
-var z = eventHolder.Event1;
