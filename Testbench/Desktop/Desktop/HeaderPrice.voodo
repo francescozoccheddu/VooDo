@@ -1,0 +1,3 @@
+﻿double price = glob Smooth(root.m_status.SelectedItem.Price);
+root.m_headerPriceInt.Text = Math.Floor(price).ToString();
+root.m_headerPriceFract.Text = (((int) Math.Round(price * 100)) % 100).ToString("D2");

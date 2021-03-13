@@ -13,6 +13,24 @@
 
         <Grid.Resources>
 
+            <Style TargetType="tb:CustomGridView">
+                <Setter Property="ItemsPanel">
+                    <Setter.Value>
+                        <ItemsPanelTemplate>
+                            <VariableSizedWrapGrid
+                                HorizontalAlignment="Center"
+                                MaximumRowsOrColumns="10"
+                                Orientation="Horizontal"
+                                Margin="120,30,120,30"
+                                />
+                        </ItemsPanelTemplate>
+                    </Setter.Value>
+                </Setter>
+                <Setter Property="SelectionMode" Value="None"/>
+                <Setter Property="IsTabStop" Value="False"/>
+                <Setter Property="IsFocusEngagementEnabled" Value="False"/>
+            </Style>
+
             <DataTemplate
                 x:Name="m_itemTemplate"
                 x:DataType="tb:Item"
@@ -30,7 +48,7 @@
                     >
 
                     <Grid.RenderTransform>
-                        <ScaleTransform CenterX="75" CenterY="100"/>
+                        <ScaleTransform CenterX="75" CenterY="100" ScaleX="1" ScaleY="1"/>
                     </Grid.RenderTransform>
 
                     <Grid.Background>
@@ -71,10 +89,13 @@
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
             <Grid
                 x:Name="m_header"
                 Grid.Row="0"
-                Padding="20,0,20,0"
                 voodo:Object.Binding="{voodo:Property Path=Header.voodo}"
                 Background="{StaticResource m_bgAccent}"
                 >
@@ -87,36 +108,46 @@
                 <TextBlock
                     x:Name="m_headerTitle"
                     Grid.Column="0"
+                    Padding="30,0,30,0"
                     VerticalAlignment="Center"
                     Text="{x:Bind m_status.SelectedItem.Title, Mode=OneWay}"
                     Foreground="{StaticResource m_fgAccentH}"
+                    FontWeight="SemiBold"
                     />
 
-                <TextBlock
+                <StackPanel
                     x:Name="m_headerPrice"
                     Grid.Column="1"
+                    Padding="30,0,30,0"
                     VerticalAlignment="Center"
-                    Foreground="{StaticResource m_fgAccentL}"
+                    voodo:Object.Binding="{voodo:Property Path=HeaderPrice.voodo}"
+                    Orientation="Horizontal"
+                    Spacing="3"
                     >
-                    <TextBlock.Text>
-                        <voodo:Property>
-                            (glob Smooth(root.m_status.SelectedItem.Price)).ToString(&quot;F2&quot;)
-                        </voodo:Property>
-                    </TextBlock.Text>
-                </TextBlock>
+
+                    <TextBlock
+                        x:Name="m_headerPriceInt"
+                        VerticalAlignment="Top"
+                        Foreground="{StaticResource m_fgAccentH}"
+                        FontWeight="Black"
+                        />
+
+                    <TextBlock
+                        x:Name="m_headerPriceFract"
+                        Margin="0,3,0,0"
+                        VerticalAlignment="Top"
+                        Foreground="{StaticResource m_fgAccentL}"
+                        FontWeight="SemiBold"
+                        />
+
+                </StackPanel>
 
             </Grid>
 
             <tb:CustomGridView
                 x:Name="m_gridView"
                 Grid.Row="1"
-                Padding="100,20,100,20"
-                HorizontalAlignment="Stretch"
-                HorizontalContentAlignment="Center"
                 ItemTemplate="{StaticResource m_itemTemplate}"
-                SelectionMode="None"
-                IsTabStop="False"
-                IsFocusEngagementEnabled="False"
                 />
 
             <Rectangle
@@ -141,36 +172,33 @@
                 Background="{StaticResource m_bgE2}"
                 >
 
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
                 <tb:CustomGridView
                     x:Name="m_paneGridView"
                     Grid.Row="1"
-                    Padding="100,20,100,20"
-                    HorizontalAlignment="Stretch"
-                    HorizontalContentAlignment="Center"
                     ItemTemplate="{StaticResource m_itemTemplate}"
-                    SelectionMode="None"
-                    IsTabStop="False"
-                    IsFocusEngagementEnabled="False"
                     />
-
 
             </Grid>
 
         </Grid>
 
         <StackPanel
-            Margin="0,0,0,20"
+            Margin="0,0,0,30"
             HorizontalAlignment="Left"
             VerticalAlignment="Bottom"
             Orientation="Vertical"
-            Spacing="10"
+            Spacing="15"
             >
 
             <Border
                 x:Name="m_frameButton"
                 Width="60"
                 Height="60"
-                Margin="20,0,0,0"
+                Margin="30,0,0,0"
                 HorizontalAlignment="Left"
                 voodo:Object.Binding="{voodo:Property Path=FrameButton.voodo}"
                 Background="{StaticResource m_bgAltAccent}"
@@ -193,6 +221,7 @@
                             <RowDefinition Height="*"/>
                             <RowDefinition Height="40"/>
                         </Grid.RowDefinitions>
+
 
                         <Border
                             x:Name="m_frameButtonTextBox"
@@ -360,7 +389,7 @@
                 x:Name="m_snakeButton"
                 Width="60"
                 Height="60"
-                Margin="20,0,0,0"
+                Margin="30,0,0,0"
                 HorizontalAlignment="Left"
                 voodo:Object.Binding="{voodo:Property Path=SnakeButton.voodo}"
                 Background="{StaticResource m_bgAltAccent}"
@@ -425,7 +454,7 @@
             x:Name="m_paneButtonContainer"
             Width="60"
             Height="85"
-            Margin="0,0,30,0"
+            Margin="0,0,35,0"
             HorizontalAlignment="Right"
             VerticalAlignment="Bottom"
             >
