@@ -18,10 +18,10 @@
                     <Setter.Value>
                         <ItemsPanelTemplate>
                             <VariableSizedWrapGrid
+                                Margin="120,30,120,30"
                                 HorizontalAlignment="Center"
                                 MaximumRowsOrColumns="10"
                                 Orientation="Horizontal"
-                                Margin="120,30,120,30"
                                 />
                         </ItemsPanelTemplate>
                     </Setter.Value>
@@ -280,7 +280,8 @@
                                         FontSize="12"
                                         FontWeight="Bold"
                                         Text="Redrick Schuhart"
-                                        Foreground="{StaticResource m_fgAltAccentL}"
+                                        Opacity="0.7"
+                                        Foreground="{StaticResource m_fgAltAccentH}"
                                         />
                                     <TextBlock
                                         Text="Who'll be the third?"
@@ -304,7 +305,8 @@
                                         HorizontalAlignment="Right"
                                         FontSize="12"
                                         FontWeight="Bold"
-                                        Foreground="{StaticResource m_fgAltAccentL}"
+                                        Opacity="0.7"
+                                        Foreground="{StaticResource m_fgAltAccentH}"
                                         Text="You"
                                         />
                                     <TextBlock
@@ -334,7 +336,8 @@
                                         <TextBlock
                                             FontSize="12"
                                             FontWeight="Bold"
-                                            Foreground="{StaticResource m_fgAltAccentL}"
+                                            Opacity="0.7"
+                                            Foreground="{StaticResource m_fgAltAccentH}"
                                             Text="Redrick Schuhart"
                                             />
                                         <TextBlock
@@ -419,24 +422,32 @@
                         <ColumnDefinition Width="60"/>
                     </Grid.ColumnDefinitions>
 
-                    <SymbolIcon
-                        Grid.Column="0"
-                        Symbol="Attach"
-                        />
+                    <FontIcon
+                        x:Name="m_snakeButtonIcon"
+                        Width="60"
+                        Height="60"
+                        Glyph="&#xE76C;"
+                        >
+
+                        <FontIcon.RenderTransform>
+                            <RotateTransform CenterX="30" CenterY="30" Angle="0"/>
+                        </FontIcon.RenderTransform>
+
+                    </FontIcon>
                     <SymbolIcon
                         Grid.Column="1"
                         voodo:Object.Binding="{voodo:Property Path=SnakeButtonItem.voodo}"
-                        Symbol="Camera"
+                        Symbol="Attach"
                         />
                     <SymbolIcon
                         Grid.Column="2"
                         voodo:Object.Binding="{voodo:Property Path=SnakeButtonItem.voodo}"
-                        Symbol="Folder"
+                        Symbol="Contact2"
                         />
                     <SymbolIcon
                         Grid.Column="3"
                         voodo:Object.Binding="{voodo:Property Path=SnakeButtonItem.voodo}"
-                        Symbol="AddFriend"
+                        Symbol="Camera"
                         />
                     <SymbolIcon
                         Grid.Column="4"
@@ -470,7 +481,18 @@
                 CornerRadius="30"
                 >
 
-                <SymbolIcon Symbol="Up"/>
+                <SymbolIcon
+                    x:Name="m_paneButtonIcon"
+                    Width="60"
+                    Height="60"
+                    Symbol="Up"
+                    >
+
+                    <SymbolIcon.RenderTransform>
+                        <RotateTransform CenterX="30" CenterY="30" Angle="0"/>
+                    </SymbolIcon.RenderTransform>
+
+                </SymbolIcon>
 
             </Border>
 

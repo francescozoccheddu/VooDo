@@ -13,3 +13,4 @@ double bottomCorner = Lerp(30, 0, Quintic.In(alpha));
 root.m_paneButton.CornerRadius = new(topCorner, topCorner, bottomCorner, bottomCorner);
 double buttonTranslation = Math.Min(0, cardTop - originalButtonTop);
 root.m_paneButtonContainer.Translation = new(0, (float) buttonTranslation, 0);
+((RotateTransform)root.m_paneButtonIcon.RenderTransform).Angle = Lerp(-180, 0, alpha);

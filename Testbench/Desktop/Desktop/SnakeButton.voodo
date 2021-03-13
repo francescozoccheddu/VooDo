@@ -11,3 +11,4 @@ if (this.PointerExited)
 }
 this.Width = Lerp(60, root.m_snakeButtonContent.Width, focus);
 this.CornerRadius = new(Lerp(30, 10, focus));
+((RotateTransform)root.m_snakeButtonIcon.RenderTransform).Angle = Lerp(0, -90, focus);
