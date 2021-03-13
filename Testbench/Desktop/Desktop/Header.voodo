@@ -2,15 +2,13 @@
 isHeaderExpanded |= this.PointerEntered;
 isHeaderExpanded &= !this.PointerExited;
 bool hasScrolled = root.m_gridView.ScrollViewer.VerticalOffset >= 20;
-double alpha = glob Smooth(isHeaderExpanded ? 1 : (hasScrolled ? 0 : 0.5));
-this.Height = TriLerp(16, 46, 76, alpha);
-double padding = TriLerp(40, 40, 50, alpha);
-Thickness paddingDir = new(padding, 0, padding, 0);
+double alpha = glob Smooth(isHeaderExpanded ? 1 : ((hasScrolled && !root.m_status.IsPaneOpen) ? 0 : 0.5));
+root.m_status.IsHeaderExpanded = isHeaderExpanded;
+// Container
+this.Height = TriLerp(12, 46, 76, alpha);
+// Content
 root.m_headerTitle.FontSize = TriLerp(11, 20, 30, alpha);
 root.m_headerPriceInt.FontSize = TriLerp(11, 22, 38, alpha);
 root.m_headerPriceFract.FontSize = TriLerp(11, 15, 26, alpha);
 root.m_headerTitle.Opacity = TriLerp(0, 0.9, 1, alpha);
 root.m_headerPrice.Opacity = TriLerp(0, 0.9, 1, alpha);
-root.m_headerTitle.Padding = paddingDir;
-root.m_headerPrice.Padding = paddingDir;
-root.m_status.IsHeaderExpanded = isHeaderExpanded;

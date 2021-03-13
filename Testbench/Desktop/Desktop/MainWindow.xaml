@@ -93,11 +93,31 @@
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
+            <tb:CustomGridView
+                x:Name="m_gridView"
+                Grid.Row="1"
+                ItemTemplate="{StaticResource m_itemTemplate}"
+                />
+
+            <Rectangle
+                x:Name="m_dimmer"
+                Grid.RowSpan="2"
+                HorizontalAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                Fill="Black"
+                IsHitTestVisible="{x:Bind m_status.IsSomethingFocused, Mode=OneWay}"
+                IsTapEnabled="true"
+                Opacity="{voodo:Property Code=glob Smooth(root.m_status.IsSomethingFocused ? 0.5 : 0)}"
+                />
+
             <Grid
                 x:Name="m_header"
                 Grid.Row="0"
+                Margin="30,0,30,0"
+                Padding="30,0,30,0"
                 voodo:Object.Binding="{voodo:Property Path=Header.voodo}"
                 Background="{StaticResource m_bgAccent}"
+                CornerRadius="0,0,12,12"
                 >
 
                 <Grid.ColumnDefinitions>
@@ -108,7 +128,6 @@
                 <TextBlock
                     x:Name="m_headerTitle"
                     Grid.Column="0"
-                    Padding="30,0,30,0"
                     VerticalAlignment="Center"
                     Text="{x:Bind m_status.SelectedItem.Title, Mode=OneWay}"
                     Foreground="{StaticResource m_fgAccent}"
@@ -118,7 +137,6 @@
                 <StackPanel
                     x:Name="m_headerPrice"
                     Grid.Column="1"
-                    Padding="30,0,30,0"
                     VerticalAlignment="Center"
                     voodo:Object.Binding="{voodo:Property Path=HeaderPrice.voodo}"
                     Orientation="Horizontal"
@@ -143,23 +161,6 @@
                 </StackPanel>
 
             </Grid>
-
-            <tb:CustomGridView
-                x:Name="m_gridView"
-                Grid.Row="1"
-                ItemTemplate="{StaticResource m_itemTemplate}"
-                />
-
-            <Rectangle
-                x:Name="m_dimmer"
-                Grid.Row="1"
-                HorizontalAlignment="Stretch"
-                VerticalAlignment="Stretch"
-                Fill="Black"
-                IsHitTestVisible="{x:Bind m_status.IsSomethingFocused, Mode=OneWay}"
-                IsTapEnabled="true"
-                Opacity="{voodo:Property Code=glob Smooth(root.m_status.IsSomethingFocused ? 0.5 : 0)}"
-                />
 
             <Grid
                 x:Name="m_pane"
@@ -254,7 +255,7 @@
                                 Width="80"
                                 Height="20"
                                 voodo:Object.Binding="{voodo:Property Path=FrameButtonItem.voodo}"
-                                Background="{StaticResource m_fgAccentM}"
+                                Background="{StaticResource m_fgAccentL}"
                                 CornerRadius="10"
                                 >
 

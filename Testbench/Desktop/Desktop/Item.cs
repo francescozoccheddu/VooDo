@@ -9,7 +9,7 @@ namespace VooDo.Testbench.Desktop
 
         private static readonly string[] s_shapes = { "icosahedron", "pyramid", "torus", "cylinder", "cone", "cube", "sphere" };
         private static readonly int[] s_basePrices = { 29, 12, 22, 8, 10, 3, 5 };
-        private static readonly string[] s_colors = { "Scarlet", "Pumpkin", "Lemon", "Chartreuse", "Malachite", "Pastel green", "Aqua", "Sky", "Neon", "Lavender", "Rose" };
+        private static readonly string[] s_colors = { "Scarlet", "Pumpkin", "Lemon", "Chartreuse", "Malachite", "Turquoise", "Aqua", "Sky", "Cornflower", "Lavender", "Froly" };
         private static readonly float[] s_fractPrices = { .0f, .5f, .75f, .69f, .89f, .9f, .99f };
         private static readonly Random s_random = new Random();
         private const string c_imagePath = "Images/Items";
