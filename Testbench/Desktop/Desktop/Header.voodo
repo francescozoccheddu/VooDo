@@ -10,5 +10,4 @@ this.Height = TriLerp(12, 46, 76, alpha);
 root.m_headerTitle.FontSize = TriLerp(11, 20, 30, alpha);
 root.m_headerPriceInt.FontSize = TriLerp(11, 22, 38, alpha);
 root.m_headerPriceFract.FontSize = TriLerp(11, 15, 26, alpha);
-root.m_headerTitle.Opacity = TriLerp(0, 0.9, 1, alpha);
-root.m_headerPrice.Opacity = TriLerp(0, 0.9, 1, alpha);
+root.m_headerContent.Opacity = TriLerp(0, 0.9, 1, alpha);

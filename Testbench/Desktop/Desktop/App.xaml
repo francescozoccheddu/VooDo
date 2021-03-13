@@ -9,6 +9,7 @@
                 <XamlControlsResources xmlns="using:Microsoft.UI.Xaml.Controls"/>
                 <ResourceDictionary>
                     <Color x:Key="m_bgAccent">#DB0045</Color>
+                    <Color x:Key="m_bgAccentVH">#FF266A</Color>
                     <Color x:Key="m_fgAccent">White</Color>
                     <Color x:Key="m_fgAccentM">#FF4782</Color>
                     <Color x:Key="m_fgAccentL">#FA3874</Color>

@@ -110,57 +110,87 @@
                 Opacity="{voodo:Property Code=glob Smooth(root.m_status.IsSomethingFocused ? 0.5 : 0)}"
                 />
 
-            <Grid
+            <Border
                 x:Name="m_header"
                 Grid.Row="0"
                 Margin="30,0,30,0"
-                Padding="30,0,30,0"
                 voodo:Object.Binding="{voodo:Property Path=Header.voodo}"
                 Background="{StaticResource m_bgAccent}"
                 CornerRadius="0,0,12,12"
                 >
 
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
-
-                <TextBlock
-                    x:Name="m_headerTitle"
-                    Grid.Column="0"
-                    VerticalAlignment="Center"
-                    Text="{x:Bind m_status.SelectedItem.Title, Mode=OneWay}"
-                    Foreground="{StaticResource m_fgAccent}"
-                    FontWeight="SemiBold"
-                    />
-
-                <StackPanel
-                    x:Name="m_headerPrice"
-                    Grid.Column="1"
-                    VerticalAlignment="Center"
-                    voodo:Object.Binding="{voodo:Property Path=HeaderPrice.voodo}"
-                    Orientation="Horizontal"
-                    Spacing="3"
+                <Grid
+                    x:Name="m_headerContent"
+                    Padding="0,0,30,0"
+                    ColumnSpacing="20"
                     >
 
-                    <TextBlock
-                        x:Name="m_headerPriceInt"
-                        VerticalAlignment="Top"
-                        Foreground="{StaticResource m_fgAccent}"
-                        FontWeight="Black"
-                        />
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="150"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Border
+                        Background="{StaticResource m_bgAccentVH}"
+                        >
+
+                        <TextBlock
+                            Grid.Column="0"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            Foreground="{StaticResource m_fgAccent}"
+                            >
+                            <Run
+                                FontWeight="ExtraBlack"
+                                Text="VooDo"
+                                /><!--
+                            --><Run
+                                FontWeight="SemiLight"
+                                Text="Testbench"
+                                />
+
+                        </TextBlock>
+
+                    </Border>
 
                     <TextBlock
-                        x:Name="m_headerPriceFract"
-                        Margin="0,3,0,0"
-                        VerticalAlignment="Top"
+                        x:Name="m_headerTitle"
+                        Grid.Column="1"
+                        VerticalAlignment="Center"
+                        Text="{x:Bind m_status.SelectedItem.Title, Mode=OneWay}"
                         Foreground="{StaticResource m_fgAccent}"
                         FontWeight="SemiBold"
                         />
 
-                </StackPanel>
+                    <StackPanel
+                        x:Name="m_headerPrice"
+                        Grid.Column="2"
+                        VerticalAlignment="Center"
+                        voodo:Object.Binding="{voodo:Property Path=HeaderPrice.voodo}"
+                        Orientation="Horizontal"
+                        Spacing="3"
+                        >
 
-            </Grid>
+                        <TextBlock
+                            x:Name="m_headerPriceInt"
+                            VerticalAlignment="Top"
+                            Foreground="{StaticResource m_fgAccent}"
+                            FontWeight="Black"
+                            />
+
+                        <TextBlock
+                            x:Name="m_headerPriceFract"
+                            Margin="0,3,0,0"
+                            VerticalAlignment="Top"
+                            Foreground="{StaticResource m_fgAccent}"
+                            FontWeight="SemiBold"
+                            />
+
+                    </StackPanel>
+                </Grid>
+
+            </Border>
 
             <Grid
                 x:Name="m_pane"
