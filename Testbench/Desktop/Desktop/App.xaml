@@ -8,21 +8,15 @@
             <ResourceDictionary.MergedDictionaries>
                 <XamlControlsResources xmlns="using:Microsoft.UI.Xaml.Controls"/>
                 <ResourceDictionary>
-                    <Color x:Key="m_bgAccent">Orange</Color>
-                    <Color x:Key="m_fgAccentH">White</Color>
-                    <Color x:Key="m_fgAccentL">White</Color>
-                    <Color x:Key="m_bgAltAccent">Violet</Color>
-                    <Color x:Key="m_bgAltAccentL">Violet</Color>
-                    <Color x:Key="m_bgAltAccentH">White</Color>
-                    <Color x:Key="m_fgAltAccentH">White</Color>
-                    <Color x:Key="m_fgAltAccentL">White</Color>
-                    <Color x:Key="m_bgAltAccentV1">Purple</Color>
-                    <Color x:Key="m_bgAltAccentV2">Purple</Color>
-                    <Color x:Key="m_bgE1">#A0A0A0</Color>
-                    <Color x:Key="m_bgE2">#B0B0B0</Color>
-                    <Color x:Key="m_bgE3">#C0C0C0</Color>
-                    <Color x:Key="m_fgH">#202020</Color>
-                    <Color x:Key="m_fgL">#303030</Color>
+                    <Color x:Key="m_bgAccent">#DB0045</Color>
+                    <Color x:Key="m_fgAccent">White</Color>
+                    <Color x:Key="m_fgAccentM">#FF4782</Color>
+                    <Color x:Key="m_fgAccentL">#FA3874</Color>
+                    <Color x:Key="m_bgAccentV1">#F7617E</Color>
+                    <Color x:Key="m_bgAccentV2">#FF5CAF</Color>
+                    <Color x:Key="m_bg">#D0D0D0</Color>
+                    <Color x:Key="m_fg">#303030</Color>
+                    <Color x:Key="m_fgM">#404040</Color>
                 </ResourceDictionary>
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>

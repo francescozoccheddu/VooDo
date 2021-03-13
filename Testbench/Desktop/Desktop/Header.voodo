@@ -3,7 +3,7 @@ isHeaderExpanded |= this.PointerEntered;
 isHeaderExpanded &= !this.PointerExited;
 bool hasScrolled = root.m_gridView.ScrollViewer.VerticalOffset >= 20;
 double alpha = glob Smooth(isHeaderExpanded ? 1 : (hasScrolled ? 0 : 0.5));
-this.Height = TriLerp(20, 50, 80, alpha);
+this.Height = TriLerp(16, 46, 76, alpha);
 double padding = TriLerp(40, 40, 50, alpha);
 Thickness paddingDir = new(padding, 0, padding, 0);
 root.m_headerTitle.FontSize = TriLerp(11, 20, 30, alpha);
