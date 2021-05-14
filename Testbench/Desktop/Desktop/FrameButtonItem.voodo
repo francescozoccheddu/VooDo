@@ -1,5 +1,9 @@
-﻿double bubbleTop = root.m_frameButton.Height;
+﻿// --- Reveal the item while the container expands ---
+
+// Update isVisible
+double frameTop = root.m_frameButton.Height;
 double myTop = this.TransformToVisual(root.m_frameButton).TransformPoint(new(0, 0)).Y;
-bool visible = myTop > 0;
-double visibility = glob Smooth(visible ? 1 : 0, visible ? 10 : 20);
-this.Opacity = visibility;
+bool isVisible = myTop > 0;
+
+// Animate UI
+this.Opacity = glob Smooth(isVisible ? 1 : 0, isVisible ? 10 : 20);

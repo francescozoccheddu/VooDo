@@ -1,13 +1,19 @@
-﻿global bool isHovered;
-if (this.PointerEntered) 
-{
+﻿// --- Highlight the card on hover ---
+
+// Update isHovered
+global bool isHovered;
+if (this.PointerEntered) {
 	isHovered = true;
-	root.m_status.SelectedItem = (Item) this.DataContext;
+	root.m_status.SelectedItem = (Item) this.DataContext; // For testing purposes only; this should be done in code-behind
 }
 isHovered &= !this.PointerExited;
-double focus = glob Smooth(isHovered ? 1 : 0);
-float scale = (float) Lerp(0.975, 1, focus);
+
+// Compute animation progress
+double progress = glob Smooth(isHovered ? 1 : 0);
+
+// Animate
+float scale = (float) Lerp(0.975, 1, progress);
 ((ScaleTransform)this.RenderTransform).ScaleX = scale;
 ((ScaleTransform)this.RenderTransform).ScaleY = scale;
-this.Opacity = Lerp(0.75, 1, focus);
-this.CornerRadius = new(Lerp(5, 2, focus));
+this.Opacity = Lerp(0.75, 1, progress);
+this.CornerRadius = new(Lerp(5, 2, progress));

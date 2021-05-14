@@ -1,13 +1,20 @@
-﻿bool isHeaderExpanded = root.m_status.IsHeaderExpanded;
+﻿// --- Expand the header on hover and animate its content ---
+
+// Update isHeaderExpanded
+bool isHeaderExpanded = root.m_status.IsHeaderExpanded;
 isHeaderExpanded |= this.PointerEntered;
 isHeaderExpanded &= !this.PointerExited;
 bool hasScrolled = root.m_gridView.ScrollViewer.VerticalOffset >= 20;
-double alpha = glob Smooth(isHeaderExpanded ? 1 : ((hasScrolled && !root.m_status.IsPaneOpen) ? 0 : 0.5));
-root.m_status.IsHeaderExpanded = isHeaderExpanded;
-// Container
-this.Height = TriLerp(12, 46, 76, alpha);
-// Content
-root.m_headerTitle.FontSize = TriLerp(11, 20, 30, alpha);
-root.m_headerPriceInt.FontSize = TriLerp(11, 22, 38, alpha);
-root.m_headerPriceFract.FontSize = TriLerp(11, 15, 26, alpha);
-root.m_headerContent.Opacity = TriLerp(0, 0.9, 1, alpha);
+root.m_status.IsHeaderExpanded = isHeaderExpanded; // For testing purposes only; this should be done in code-behind
+
+// Compute animation progress
+double progress = glob Smooth(isHeaderExpanded ? 1 : ((hasScrolled && !root.m_status.IsPaneOpen) ? 0 : 0.5));
+
+// Update container UI
+this.Height = TriLerp(12, 46, 76, progress);
+
+// Update content UI
+root.m_headerTitle.FontSize = TriLerp(11, 20, 30, progress);
+root.m_headerPriceInt.FontSize = TriLerp(11, 22, 38, progress);
+root.m_headerPriceFract.FontSize = TriLerp(11, 15, 26, progress);
+root.m_headerContent.Opacity = TriLerp(0, 0.9, 1, progress);

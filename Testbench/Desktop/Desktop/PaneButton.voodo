@@ -1,7 +1,12 @@
-﻿global bool isHovered, isPressed;
+﻿// --- Update pane button size on interaction ---
+// For testing purposes only; this should be done in code-behind
+
+// Update interaction state
+global bool isHovered, isPressed;
 isHovered |= this.PointerEntered;
 isHovered &= !this.PointerExited;
 isPressed |= this.PointerPressed;
 isPressed &= isHovered && !(this.PointerReleased || this.PointerCanceled || this.PointerCaptureLost);
-double size = glob Smooth( isPressed ? 75 : (isHovered ? 85 : 80), 20) init 80.0;
-this.Height = size;
+
+// Animate UI
+this.Height = glob Smooth(isPressed ? 75 : (isHovered ? 85 : 80), 20) init 80.0;
