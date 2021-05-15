@@ -4,12 +4,12 @@
 global double progress = 0;
 if (this.PointerEntered)
 {
-	$focus = Spring(1);
+	$progress = Spring(1);
 	root.m_status.IsFrameButtonOpen = true;
 }
 if (this.PointerExited)
 {
-	$focus = Smooth(0);
+	$progress = Smooth(0);
 	root.m_status.IsFrameButtonOpen = false;
 }
 

@@ -6,7 +6,7 @@ root.m_status.IsPaneOpen ^= root.m_dimmer.Tapped;
 
 // Compute animation progress
 global double progress = 1;
-$alpha = Smooth(root.m_status.IsPaneOpen ? 0 : 1);
+$progress = Smooth(root.m_status.IsPaneOpen ? 0 : 1);
 
 // Animate pane UI
 this.Translation = new(0, (float) Lerp(0, this.Height, progress), 0);
