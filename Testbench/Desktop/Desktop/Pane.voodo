@@ -1,16 +1,29 @@
-﻿global double alpha = 1;
+﻿// --- Animate pane and pane button on opening ---
+
+// Update isPaneOpen
 root.m_status.IsPaneOpen ^= root.m_paneButton.PointerReleased;
 root.m_status.IsPaneOpen ^= root.m_dimmer.Tapped;
+
+// Compute animation progress
+global double progress = 1;
 $alpha = Smooth(root.m_status.IsPaneOpen ? 0 : 1);
-this.Translation = new(0, (float) Lerp(0, this.Height, alpha), 0);
+
+// Animate pane UI
+this.Translation = new(0, (float) Lerp(0, this.Height, progress), 0);
+
+// Animate pane button anchor
 double cardTop = this.TransformToVisual(root.m_root).TransformPoint(new(0,0)).Y;
 double buttonTop = root.m_paneButtonContainer.TransformToVisual(root.m_root).TransformPoint(new(0,0)).Y;
 double originalButtonTop = buttonTop - root.m_paneButtonContainer.Translation.Y;
 bool over = cardTop < originalButtonTop;
 root.m_paneButton.VerticalAlignment = over ? VerticalAlignment.Top : VerticalAlignment.Bottom;
-double topCorner = Lerp(0, 30, Quintic.Out(alpha));
-double bottomCorner = Lerp(30, 0, Quintic.In(alpha));
+
+// Animate pane button shape
+double topCorner = Lerp(0, 30, Quintic.Out(progress));
+double bottomCorner = Lerp(30, 0, Quintic.In(progress));
 root.m_paneButton.CornerRadius = new(topCorner, topCorner, bottomCorner, bottomCorner);
+
+// Animate pane button transform
 double buttonTranslation = Math.Min(0, cardTop - originalButtonTop);
 root.m_paneButtonContainer.Translation = new(0, (float) buttonTranslation, 0);
-((RotateTransform)root.m_paneButtonIcon.RenderTransform).Angle = Lerp(-180, 0, alpha);
+((RotateTransform)root.m_paneButtonIcon.RenderTransform).Angle = Lerp(-180, 0, progress);

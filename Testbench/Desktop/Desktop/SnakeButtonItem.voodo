@@ -1,6 +1,13 @@
-﻿double bubbleRight = root.m_snakeButton.Width;
+﻿// --- Reveal the item while the container expands ---
+
+// Update isVisible
+double snakeRight = root.m_snakeButton.Width;
 double myLeft = this.TransformToVisual(root.m_snakeButton).TransformPoint(new(0,0)).X;
-bool visible = bubbleRight > myLeft;
-double visibility = glob Smooth(visible ? 1 : 0, visible ? 10 : 40);
-this.Opacity = visibility;
-this.Translation = new(0, (float) Lerp(20, 0, visibility), 0);
+bool isVisible = snakeRight > myLeft;
+
+// Compute animation progress
+double progress = glob Smooth(isVisible ? 1 : 0, isVisible ? 10 : 40);
+
+// Update UI
+this.Opacity = progress;
+this.Translation = new(0, (float) Lerp(20, 0, progress), 0);

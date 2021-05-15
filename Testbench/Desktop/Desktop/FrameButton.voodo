@@ -1,19 +1,24 @@
-﻿global double focus = 0;
-global double swype = 0;
-if (this.PointerEntered)
-{
-	$focus = Spring(1);
-	$swype = Smooth(1);
+﻿// --- Expand the frame button on hover and animate its content ---
+
+// Update animation progress
+global double progress = 0;
+global double contentProgress = 0;
+if (this.PointerEntered) {
+	$progress = Spring(1);
+	$contentProgress = Smooth(1);
 	root.m_status.IsFrameButtonOpen = true;
 }
-if (this.PointerExited)
-{
-	$focus = Smooth(0);
-	$swype = Smooth(0);
+if (this.PointerExited) {
+	$progress = Smooth(0);
+	$contentProgress = Smooth(0);
 	root.m_status.IsFrameButtonOpen = false;
 }
-this.Width = Lerp(60, 300, focus);
-this.Height = Lerp(60, 400, focus);
-this.CornerRadius = new(Lerp(30, 10, focus));
-root.m_frameButtonIcon.Translation = new((float) Lerp(0, -60, swype), 0, 0);
-root.m_frameButtonTextBox.Margin = new((float) Lerp(60, 0, swype), 0, 0, 0);
+
+// Update container UI
+this.Width = Lerp(60, 300, progress);
+this.Height = Lerp(60, 400, progress);
+this.CornerRadius = new(Lerp(30, 10, progress));
+
+// Update content UI
+root.m_frameButtonIcon.Translation = new((float) Lerp(0, -60, contentProgress), 0, 0);
+root.m_frameButtonTextBox.Margin = new((float) Lerp(60, 0, contentProgress), 0, 0, 0);

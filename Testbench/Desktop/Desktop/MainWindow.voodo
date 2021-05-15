@@ -1,5 +1,11 @@
-﻿global double snakeButtonX, frameButtonX;
+﻿// --- Hide side buttons when pane is open ---
+
+global double snakeButtonX, frameButtonX;
+
+// Animate snake button UI
 $snakeButtonX = (!this.m_status.IsPaneOpen) ? Spring(0) : Smooth(-100);
 this.m_snakeButton.Translation = new((float) snakeButtonX, 0, 0);
+
+// Animate frame button UI
 $frameButtonX = (snakeButtonX > -50) ? Spring(0) : Smooth(-100);
 this.m_frameButton.Translation = new((float) frameButtonX, 0, 0);
